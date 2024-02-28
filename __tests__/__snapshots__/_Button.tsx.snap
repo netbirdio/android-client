@@ -1,0 +1,435 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Button renders correctly with loading 1`] = `
+<Fragment>
+  <Component
+    onPress={[MockFunction]}
+  >
+    <Component
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#f68330",
+          "borderColor": "#f35e32",
+          "borderRadius": 2,
+          "borderWidth": 1,
+          "justifyContent": "center",
+          "padding": 8,
+          "width": "70%",
+        }
+      }
+    >
+      <Component
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "justifyContent": "center",
+            "width": NaN,
+          }
+        }
+      >
+        <Component
+          style={
+            {
+              "color": "#ffffff",
+              "fontSize": 14,
+              "lineHeight": 22,
+            }
+          }
+        >
+          Click me
+        </Component>
+        <Component
+          style={
+            {
+              "height": "100%",
+              "width": 50,
+            }
+          }
+        >
+          <mockConstructor
+            autoPlay={true}
+            loop={true}
+            source={
+              {
+                "assets": [],
+                "ddd": 0,
+                "fr": 29.9700012207031,
+                "h": 24,
+                "ip": 0,
+                "layers": [
+                  {
+                    "ao": 0,
+                    "bm": 0,
+                    "ddd": 0,
+                    "ind": 1,
+                    "ip": 0,
+                    "ks": {
+                      "a": {
+                        "a": 0,
+                        "ix": 1,
+                        "k": [
+                          0,
+                          0,
+                          0,
+                        ],
+                        "l": 2,
+                      },
+                      "o": {
+                        "a": 0,
+                        "ix": 11,
+                        "k": 100,
+                      },
+                      "p": {
+                        "a": 0,
+                        "ix": 2,
+                        "k": [
+                          12,
+                          12,
+                          0,
+                        ],
+                        "l": 2,
+                      },
+                      "r": {
+                        "a": 0,
+                        "ix": 10,
+                        "k": 0,
+                      },
+                      "s": {
+                        "a": 0,
+                        "ix": 6,
+                        "k": [
+                          100,
+                          100,
+                          100,
+                        ],
+                        "l": 2,
+                      },
+                    },
+                    "nm": "Shape Layer 1",
+                    "op": 120.0000048877,
+                    "shapes": [
+                      {
+                        "bm": 0,
+                        "cix": 2,
+                        "hd": false,
+                        "it": [
+                          {
+                            "d": 1,
+                            "hd": false,
+                            "mn": "ADBE Vector Shape - Ellipse",
+                            "nm": "Ellipse Path 1",
+                            "p": {
+                              "a": 0,
+                              "ix": 3,
+                              "k": [
+                                0,
+                                0,
+                              ],
+                            },
+                            "s": {
+                              "a": 0,
+                              "ix": 2,
+                              "k": [
+                                24,
+                                24,
+                              ],
+                            },
+                            "ty": "el",
+                          },
+                          {
+                            "bm": 0,
+                            "c": {
+                              "a": 0,
+                              "ix": 3,
+                              "k": [
+                                1,
+                                1,
+                                1,
+                                1,
+                              ],
+                            },
+                            "hd": false,
+                            "lc": 1,
+                            "lj": 1,
+                            "ml": 4,
+                            "mn": "ADBE Vector Graphic - Stroke",
+                            "nm": "Stroke 1",
+                            "o": {
+                              "a": 0,
+                              "ix": 4,
+                              "k": 100,
+                            },
+                            "ty": "st",
+                            "w": {
+                              "a": 0,
+                              "ix": 5,
+                              "k": 2,
+                            },
+                          },
+                          {
+                            "a": {
+                              "a": 0,
+                              "ix": 1,
+                              "k": [
+                                0,
+                                0,
+                              ],
+                            },
+                            "nm": "Transform",
+                            "o": {
+                              "a": 0,
+                              "ix": 7,
+                              "k": 100,
+                            },
+                            "p": {
+                              "a": 0,
+                              "ix": 2,
+                              "k": [
+                                0,
+                                0,
+                              ],
+                            },
+                            "r": {
+                              "a": 0,
+                              "ix": 6,
+                              "k": 0,
+                            },
+                            "s": {
+                              "a": 0,
+                              "ix": 3,
+                              "k": [
+                                75.141,
+                                75.141,
+                              ],
+                            },
+                            "sa": {
+                              "a": 0,
+                              "ix": 5,
+                              "k": 0,
+                            },
+                            "sk": {
+                              "a": 0,
+                              "ix": 4,
+                              "k": 0,
+                            },
+                            "ty": "tr",
+                          },
+                        ],
+                        "ix": 1,
+                        "mn": "ADBE Vector Group",
+                        "nm": "Ellipse 1",
+                        "np": 2,
+                        "ty": "gr",
+                      },
+                      {
+                        "e": {
+                          "a": 1,
+                          "ix": 2,
+                          "k": [
+                            {
+                              "e": [
+                                100,
+                              ],
+                              "i": {
+                                "x": [
+                                  0.667,
+                                ],
+                                "y": [
+                                  1,
+                                ],
+                              },
+                              "o": {
+                                "x": [
+                                  0.333,
+                                ],
+                                "y": [
+                                  0,
+                                ],
+                              },
+                              "s": [
+                                0,
+                              ],
+                              "t": 0,
+                            },
+                            {
+                              "t": 104.000004236007,
+                            },
+                          ],
+                        },
+                        "hd": false,
+                        "ix": 2,
+                        "m": 1,
+                        "mn": "ADBE Vector Filter - Trim",
+                        "nm": "Trim Paths 1",
+                        "o": {
+                          "a": 1,
+                          "ix": 3,
+                          "k": [
+                            {
+                              "e": [
+                                720,
+                              ],
+                              "i": {
+                                "x": [
+                                  0.833,
+                                ],
+                                "y": [
+                                  0.833,
+                                ],
+                              },
+                              "o": {
+                                "x": [
+                                  0.167,
+                                ],
+                                "y": [
+                                  0.167,
+                                ],
+                              },
+                              "s": [
+                                0,
+                              ],
+                              "t": 0,
+                            },
+                            {
+                              "t": 119.000004846969,
+                            },
+                          ],
+                        },
+                        "s": {
+                          "a": 1,
+                          "ix": 1,
+                          "k": [
+                            {
+                              "e": [
+                                100,
+                              ],
+                              "i": {
+                                "x": [
+                                  0.533,
+                                ],
+                                "y": [
+                                  1,
+                                ],
+                              },
+                              "o": {
+                                "x": [
+                                  0.387,
+                                ],
+                                "y": [
+                                  0,
+                                ],
+                              },
+                              "s": [
+                                0,
+                              ],
+                              "t": 25,
+                            },
+                            {
+                              "t": 118.000004806239,
+                            },
+                          ],
+                        },
+                        "ty": "tm",
+                      },
+                    ],
+                    "sr": 1,
+                    "st": 0,
+                    "ty": 4,
+                  },
+                ],
+                "markers": [],
+                "nm": "loading",
+                "op": 120.0000048877,
+                "v": "5.9.0",
+                "w": 24,
+              }
+            }
+          />
+        </Component>
+      </Component>
+    </Component>
+  </Component>
+</Fragment>
+`;
+
+exports[`Button renders correctly with outline 1`] = `
+<Fragment>
+  <Component
+    onPress={[MockFunction]}
+  >
+    <Component
+      style={
+        {
+          "alignItems": "center",
+          "borderColor": "#f35e32",
+          "borderRadius": 2,
+          "borderWidth": 1,
+          "flexDirection": "row",
+          "justifyContent": "center",
+          "padding": 8,
+        }
+      }
+    >
+      <Component
+        style={
+          {
+            "color": "#F35E32",
+            "fontSize": 14,
+            "lineHeight": 22,
+          }
+        }
+      >
+        Click me
+      </Component>
+    </Component>
+  </Component>
+</Fragment>
+`;
+
+exports[`Button renders correctly without outline and loading 1`] = `
+<Fragment>
+  <Component
+    onPress={[MockFunction]}
+  >
+    <Component
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#f68330",
+          "borderColor": "#f35e32",
+          "borderRadius": 2,
+          "borderWidth": 1,
+          "justifyContent": "center",
+          "padding": 8,
+          "width": "70%",
+        }
+      }
+    >
+      <Component
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "justifyContent": "center",
+            "width": NaN,
+          }
+        }
+      >
+        <Component
+          style={
+            {
+              "color": "#ffffff",
+              "fontSize": 14,
+              "lineHeight": 22,
+            }
+          }
+        >
+          Click me
+        </Component>
+      </Component>
+    </Component>
+  </Component>
+</Fragment>
+`;

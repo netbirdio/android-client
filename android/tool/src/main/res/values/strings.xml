@@ -1,0 +1,5 @@
+<resources>
+    <string name="service_name">NetBird</string>
+    <string name="fg_notification_channel_name">NetBird service</string>
+    <string name="fg_notification_text">Service is running</string>
+</resources>

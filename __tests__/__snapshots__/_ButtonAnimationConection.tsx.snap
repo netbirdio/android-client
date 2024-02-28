@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ButtonAnimationConnection should call toggle connection when TouchableWithoutFeedback is pressed 1`] = `
+<ContextProvider
+  value={
+    {
+      "getServerState": undefined,
+      "noopCheck": "once",
+      "stabilityCheck": "once",
+      "store": {
+        "clearActions": [Function],
+        "dispatch": [Function],
+        "getActions": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+      },
+      "subscription": {
+        "addNestedSub": [Function],
+        "getListeners": [Function],
+        "handleChangeWrapper": [Function],
+        "isSubscribed": [Function],
+        "notifyNestedSubs": [Function],
+        "trySubscribe": [Function],
+        "tryUnsubscribe": [Function],
+      },
+    }
+  }
+>
+  <mockConstructor />
+</ContextProvider>
+`;
+
+exports[`ButtonAnimationConnection should call toggle connection when TouchableWithoutFeedback is pressed 2`] = `null`;
+
+exports[`ButtonAnimationConnection should call toggle connection when button is pressed 1`] = `[MockFunction]`;

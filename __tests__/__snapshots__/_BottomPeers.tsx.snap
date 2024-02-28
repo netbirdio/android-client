@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BottomPeers matches snapshot 1`] = `
+<Component
+  style={
+    {
+      "alignItems": "center",
+      "display": "flex",
+      "overflow": "hidden",
+      "paddingTop": 15,
+      "width": "100%",
+    }
+  }
+>
+  <Component
+    style={
+      [
+        {
+          "borderLeftColor": "#EDEDED",
+          "borderLeftWidth": 3,
+          "borderRightColor": "#EDEDED",
+          "borderRightWidth": 3,
+          "borderStyle": "solid",
+          "bottom": 0,
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 53,
+          "width": "100%",
+          "zIndex": 1,
+        },
+      ]
+    }
+  />
+  <Component
+    style={
+      {
+        "backgroundColor": "#EDEDED",
+        "borderBottomEndRadius": 0,
+        "borderBottomStartRadius": 0,
+        "borderLeftColor": "#EDEDED",
+        "borderTopEndRadius": 35,
+        "borderTopStartRadius": 35,
+        "elevation": 3,
+        "paddingLeft": 3,
+        "paddingRight": 3,
+        "paddingTop": 6,
+        "shadowColor": "#171717",
+        "shadowOffset": {
+          "height": -3,
+          "width": 0,
+        },
+        "shadowOpacity": 0.1,
+        "shadowRadius": 3,
+        "top": 0,
+        "width": "100%",
+      }
+    }
+  >
+    <Component
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#EDEDED",
+          "borderBottomEndRadius": 0,
+          "borderBottomStartRadius": 0,
+          "borderTopEndRadius": 35,
+          "borderTopStartRadius": 35,
+          "paddingBottom": 15,
+        }
+      }
+    >
+      <Component
+        style={
+          {
+            "backgroundColor": "rgba(217, 217, 217, 1)",
+            "borderRadius": 3,
+            "height": 6,
+            "margin": 16,
+            "width": 100,
+          }
+        }
+      />
+      <Component
+        testID="peerCountText"
+      >
+        <Component
+          style={
+            [
+              {
+                "color": "rgba(0, 0, 0, 0.45)",
+                "fontSize": 16,
+                "fontWeight": "500",
+                "lineHeight": 24,
+              },
+              {
+                "fontWeight": "700",
+              },
+            ]
+          }
+        >
+          2
+           of 
+          5
+           
+        </Component>
+        <Component
+          style={
+            [
+              {
+                "color": "rgba(0, 0, 0, 0.45)",
+                "fontSize": 16,
+                "fontWeight": "500",
+                "lineHeight": 24,
+              },
+              {
+                "fontWeight": "500",
+              },
+            ]
+          }
+        >
+          Peers connected
+        </Component>
+      </Component>
+    </Component>
+  </Component>
+</Component>
+`;

@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Peers component should dispatch actions when focused and unfocused 1`] = `[MockFunction]`;
+
+exports[`Peers component should render the ListPeers component 1`] = `null`;

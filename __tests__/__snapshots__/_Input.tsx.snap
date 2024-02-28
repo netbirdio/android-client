@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Input component should render correctly with default props 1`] = `
+<Fragment>
+  <Component
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "white",
+          "borderColor": "rgba(217, 217, 217, 1)",
+          "borderWidth": 1,
+          "flexDirection": "row",
+          "fontSize": 14,
+          "height": 40,
+          "lineHeight": 22,
+          "overFlow": "hidden",
+          "paddingHorizontal": 0,
+          "paddingVertical": 2,
+        },
+        undefined,
+      ]
+    }
+  >
+    <Component
+      editable={true}
+      onChange={[MockFunction]}
+      onChangeText={[MockFunction]}
+      onTextInput={[MockFunction]}
+      placeholder="Enter text"
+      placeholderTextColor="rgba(0,0,0,0.25)"
+      style={
+        [
+          undefined,
+          {
+            "color": "rgba(77, 77, 77, 1)",
+            "flex": 1,
+            "fontFamily": "Roboto",
+            "fontSize": 14,
+            "fontWeight": "500",
+            "height": 40,
+            "lineHeight": 22,
+            "paddingHorizontal": 8,
+            "paddingVertical": 2,
+          },
+        ]
+      }
+      value=""
+    />
+  </Component>
+</Fragment>
+`;

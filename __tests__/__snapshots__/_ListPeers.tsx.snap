@@ -1,0 +1,250 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ListPeers component should render the correct number of peers 1`] = `
+<Fragment>
+  <Component
+    style={
+      {
+        "marginTop": 20,
+        "padding": 24,
+      }
+    }
+  >
+    <Component
+      hitSlop={
+        {
+          "bottom": 20,
+          "left": 20,
+          "right": 20,
+          "top": 20,
+        }
+      }
+      onPress={[Function]}
+      style={
+        {
+          "paddingBottom": 10,
+          "paddingLeft": 10,
+          "paddingRight": 10,
+          "paddingTop": 20,
+          "position": "absolute",
+          "right": 20,
+          "top": -30,
+        }
+      }
+    >
+      <Component
+        source="icon-filter-4x.png"
+        style={
+          {
+            "height": 15,
+            "resizeMode": "contain",
+            "width": 15,
+          }
+        }
+      />
+    </Component>
+    <Component
+      style={
+        {
+          "alignItems": "center",
+          "marginBottom": 32,
+          "width": "100%",
+        }
+      }
+    >
+      <Component>
+        <Component
+          style={
+            {
+              "color": "rgba(0, 0, 0, 0.45)",
+              "fontSize": 16,
+              "fontWeight": "700",
+            }
+          }
+        >
+          1
+           of 
+          2
+           
+        </Component>
+        <Component
+          style={
+            {
+              "color": "rgba(0, 0, 0, 0.45)",
+              "fontSize": 16,
+              "fontWeight": "500",
+            }
+          }
+        >
+          Peers connected
+        </Component>
+      </Component>
+    </Component>
+    <Component
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+        }
+      }
+    >
+      <Component
+        style={
+          {
+            "borderRadius": 22,
+            "flex": 1,
+          }
+        }
+      >
+        <Memo(Input)
+          onChangeText={[Function]}
+          placeHolder="search peers"
+          stylesMask={
+            {
+              "borderRadius": 8,
+            }
+          }
+          value=""
+        />
+        <Component
+          style={
+            {
+              "paddingBottom": 10,
+              "paddingLeft": 10,
+              "paddingRight": 10,
+              "paddingTop": 10,
+              "position": "absolute",
+              "right": 8,
+              "top": 0,
+            }
+          }
+        >
+          <Component
+            source="search-4x.png"
+            style={
+              {
+                "height": 15,
+                "resizeMode": "contain",
+                "width": 15,
+              }
+            }
+          />
+        </Component>
+      </Component>
+      <Component
+        style={
+          {
+            "flex": 0,
+          }
+        }
+      >
+        <Menu
+          anchor={
+            <UNDEFINED
+              hitSlop={
+                {
+                  "bottom": 20,
+                  "left": 10,
+                  "right": 20,
+                  "top": 20,
+                }
+              }
+              onPress={[Function]}
+              style={
+                {
+                  "marginLeft": 25,
+                  "marginRight": 5,
+                }
+              }
+            >
+              <UNDEFINED
+                source="icon-filter-4x.png"
+                style={
+                  {
+                    "height": 18,
+                    "resizeMode": "contain",
+                    "width": 18,
+                  }
+                }
+              />
+            </UNDEFINED>
+          }
+          onRequestClose={[Function]}
+          style={
+            {
+              "marginTop": 30,
+            }
+          }
+          visible={false}
+        >
+          <MenuItem
+            onPress={[Function]}
+            style={
+              {
+                "backgroundColor": "#dddddd",
+              }
+            }
+            textStyle={
+              {
+                "color": "rgba(77, 77, 77, 1)",
+                "fontFamily": "Roboto",
+              }
+            }
+          >
+            All
+          </MenuItem>
+          <MenuDivider />
+          <MenuItem
+            onPress={[Function]}
+            style={
+              {
+                "backgroundColor": "transparent",
+              }
+            }
+            textStyle={
+              {
+                "color": "rgba(77, 77, 77, 1)",
+                "fontFamily": "Roboto",
+              }
+            }
+          >
+            Connected
+          </MenuItem>
+          <MenuItem
+            onPress={[Function]}
+            style={
+              {
+                "backgroundColor": "transparent",
+              }
+            }
+            textStyle={
+              {
+                "color": "rgba(77, 77, 77, 1)",
+                "fontFamily": "Roboto",
+              }
+            }
+          >
+            Disconnected
+          </MenuItem>
+        </Menu>
+      </Component>
+    </Component>
+  </Component>
+  <Component
+    ItemSeparatorComponent={[Function]}
+    data={[]}
+    getItem={[Function]}
+    getItemCount={[Function]}
+    initialNumToRender={5}
+    keyExtractor={[Function]}
+    renderItem={[Function]}
+    style={
+      {
+        "backgroundColor": "#F2F2F2",
+        "flex": 1,
+        "width": "100%",
+      }
+    }
+  />
+</Fragment>
+`;
