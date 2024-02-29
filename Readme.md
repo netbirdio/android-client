@@ -1,5 +1,46 @@
+<br/>
+<div align="center">
+<p align="center">
+  <img width="234" src="https://raw.githubusercontent.com/netbirdio/netbird/main/docs/media/logo-full.png"/>
+</p>
+  <p>
+     <a href="https://github.com/netbirdio/netbird/blob/main/LICENSE">
+       <img height="20" src="https://www.gnu.org/graphics/gplv3-88x31.png" />
+     </a> 
+   <a href="https://www.codacy.com/gh/netbirdio/netbird/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=netbirdio/netbird&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/e3013d046aec44cdb7462c8673b00976"/></a>
+    <br>
+    <a href="https://join.slack.com/t/netbirdio/shared_invite/zt-vrahf41g-ik1v7fV8du6t0RwxSrJ96A">
+        <img src="https://img.shields.io/badge/slack-@netbird-red.svg?logo=slack"/>
+     </a>    
+  </p>
+</div>
+
+
+<p align="center">
+<strong>
+  Start using NetBird at <a href="https://netbird.io/pricing">netbird.io</a>
+  <br/>
+  See <a href="https://netbird.io/docs/">Documentation</a>
+  <br/>
+   Join our <a href="https://join.slack.com/t/netbirdio/shared_invite/zt-vrahf41g-ik1v7fV8du6t0RwxSrJ96A">Slack channel</a>
+  <br/>
+
+</strong>
+</p>
+
+<br>
+
 # NetBird android client
-## Testing
+
+The NetBird android client allows connections from mobile devices running android to private resources in the NetBird network.
+
+## Install
+You can download and install the app from the Google Play Store:
+
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=io.netbird.client)
+
+
+## Building from source
 ### requirements
 We need the following software:
 * Java 1.11. Usually comes with android studio
