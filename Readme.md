@@ -32,6 +32,14 @@
 
 The NetBird Android client allows connections from mobile devices running Android to private resources in the NetBird network.
 
+## Screenshots
+
+<p align="center">
+  <img src="https://github.com/netbirdio/android-client/assets/7756831/31fea824-9604-4e6a-a6ed-78cb526b6066" alt="menu" width="250" style="margin-right: 10px;"/>
+  <img src="https://github.com/netbirdio/android-client/assets/7756831/97b3bf1b-6e70-4f25-b5ab-e62b3337f10d" alt="peer-overview" width="250" style="margin-right: 10px;"/>
+  <img src="https://github.com/netbirdio/android-client/assets/7756831/d3ce7c74-aa1e-4be0-ba0c-4761432171e4" alt="mainscreen" width="250"/>
+</p>
+
 ## Install
 You can download and install the app from the Google Play Store:
 
