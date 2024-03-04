@@ -28,9 +28,17 @@
 
 <br>
 
-# NetBird android client
+# NetBird Android client
 
-The NetBird android client allows connections from mobile devices running android to private resources in the NetBird network.
+The NetBird Android client allows connections from mobile devices running Android to private resources in the NetBird network.
+
+## Screenshots
+
+<p align="center">
+  <img src="https://github.com/netbirdio/android-client/assets/7756831/31fea824-9604-4e6a-a6ed-78cb526b6066" alt="menu" width="250" style="margin-right: 10px;"/>
+  <img src="https://github.com/netbirdio/android-client/assets/7756831/97b3bf1b-6e70-4f25-b5ab-e62b3337f10d" alt="peer-overview" width="250" style="margin-right: 10px;"/>
+  <img src="https://github.com/netbirdio/android-client/assets/7756831/d3ce7c74-aa1e-4be0-ba0c-4761432171e4" alt="mainscreen" width="250"/>
+</p>
 
 ## Install
 You can download and install the app from the Google Play Store:
@@ -39,9 +47,9 @@ You can download and install the app from the Google Play Store:
 
 
 ## Building from source
-### requirements
+### Requirements
 We need the following software:
-* Java 1.11. Usually comes with android studio
+* Java 1.11. Usually comes with Android Studio
 * android studio initialized with jdk and emulator (not covered here, is a req from android-client and react-native-app projects)
 * gradle (https://gradle.org/install/)
 * npm 1.18, yarn and nvm:
@@ -78,7 +86,7 @@ export JAVA_HOME=/Applications/Android Studio.app/Contents/jbr/Contents/Home
 cd ~/projects/react-native-app
 $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.1.7779620"
 ```
-5. Build the gomobile lib and the android client lib:
+5. Build the gomobile lib and the Android client lib:
 ````shell
 cd ~/projects/react-native-app
 bash -x build-android-lib.sh ~/projects/netbird
@@ -92,9 +100,9 @@ yarn add file:./react/netbird-lib
 ```shell
 yarn start
 ```
-8. select `a` to install it on your android phone or emulator
+8. select `a` to install it on your Android phone or emulator
 
-### generate debug bundle
+### Generate debug bundle
 Follow the steps to run locally until the step 5 then run the following steps:
 1. run npx from react native app repo
 ```shell
