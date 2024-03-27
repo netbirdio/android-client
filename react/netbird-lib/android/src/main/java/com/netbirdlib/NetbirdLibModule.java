@@ -28,6 +28,7 @@ import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import io.netbird.client.tool.DeviceName;
+import io.netbird.client.tool.Logcat;
 import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
@@ -471,6 +472,21 @@ public class NetbirdLibModule extends ReactContextBaseJavaModule {
 
     Preferences pref = new Preferences(activity);
     pref.disableTraceLog();
+  }
+
+  @ReactMethod
+  private void shareLog() {
+    Activity activity = getCurrentActivity();
+    if (activity == null) {
+      return;
+    }
+
+    try {
+      Logcat logcat = new Logcat(activity);
+      logcat.dump();
+    } catch (Exception e) {
+      Log.e(NAME, "failed to dump log", e);
+    }
   }
 
   private void sendEvent(ReactContext reactContext,

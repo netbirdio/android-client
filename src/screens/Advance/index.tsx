@@ -13,7 +13,8 @@ import {RootState} from 'typesafe-actions';
 import {
   isTraceLogEnabled,
   enableTraceLog,
-  disableTraceLog
+  disableTraceLog,
+  shareLog
 } from 'react-native-netbird-lib';
 
 type Props = StackScreenProps<RootStackParamList, 'Advance'>;
@@ -155,6 +156,12 @@ const Advance: React.FC<Props> = ({navigation}) => {
           onValueChange={(newValue) => setTraceLog(newValue)}
         />
         <Text style={{ marginLeft: 10 }}>Enable trace log level.</Text>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Button
+            text={'Share logs'}
+            onPress={() => shareLog()}
+          />
       </View>
     </View>
 
