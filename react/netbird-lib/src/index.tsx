@@ -103,6 +103,8 @@ export const enableTraceLog = NetbirdLib.enableTraceLog;
 
 export const disableTraceLog = NetbirdLib.disableTraceLog;
 
+export const shareLog = NetbirdLib.shareLog;
+
 //export const changeServer = NetbirdLib.changeServer;
 export function changeServer(
   server: string,
