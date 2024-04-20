@@ -172,7 +172,7 @@ const ChangeServer: React.FC<Props> = ({navigation}) => {
             <Button
               text={
                 changeServerState.checking || changeServerState.changing
-                  ? 'Verifing...'
+                  ? 'Verifying...'
                   : 'Change'
               }
               loading={changeServerState.checking || changeServerState.changing}
