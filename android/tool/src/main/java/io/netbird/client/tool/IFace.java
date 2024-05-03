@@ -38,6 +38,11 @@ class IFace implements TunAdapter {
         }
     }
 
+    @Override
+    public boolean protectSocket(int fd) {
+        return vpnService.protect(fd);
+    }
+
     private int createTun(String ip, int prefixLength, int mtu, String dns, String[] searchDomains, LinkedList<Route> routes) throws Exception {
         VpnService.Builder builder = vpnService.getBuilder();
         builder.addAddress(ip, prefixLength);
@@ -55,7 +60,6 @@ class IFace implements TunAdapter {
             Log.d(LOGTAG, "add route: "+r.addr+"/"+r.prefixLength);
         }
 
-        disallowApp(builder, "io.netbird.client");
         disallowApp(builder, "com.google.android.projection.gearhead");
         disallowApp(builder, "com.google.android.apps.chromecast.app");
         disallowApp(builder, "com.google.android.apps.messaging");
