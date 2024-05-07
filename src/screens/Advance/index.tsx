@@ -155,7 +155,7 @@ const Advance: React.FC<Props> = ({navigation}) => {
           value={traceLogUse}
           onValueChange={(newValue) => setTraceLog(newValue)}
         />
-        <Text style={{ marginLeft: 10 }}>Enable trace log level.</Text>
+        <Text style={{ marginLeft: 10,color: colors.textDescription }}>Enable trace log level.</Text>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Button

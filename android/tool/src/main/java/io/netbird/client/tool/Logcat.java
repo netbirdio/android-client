@@ -50,7 +50,7 @@ public class Logcat   {
         }
 
         long timestamp = Instant.now().toEpochMilli();
-        return new File(workspace, "netbird-" + timestamp + ".log");
+        return new File(workspace, "netbird-" + timestamp + ".log.txt");
     }
 
     private void eraseWorkspace() {
