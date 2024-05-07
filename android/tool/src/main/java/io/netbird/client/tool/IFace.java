@@ -18,10 +18,10 @@ import io.netbird.client.tool.wg.InetNetwork;
 class IFace implements TunAdapter {
 
     private static final String LOGTAG = "IFace";
-    private final VPNService tunService;
+    private final VPNService vpnService;
 
-    public IFace(VPNService tunService) {
-        this.tunService = tunService;
+    public IFace(VPNService vpnService) {
+        this.vpnService = vpnService;
     }
 
     @Override
@@ -38,9 +38,13 @@ class IFace implements TunAdapter {
         }
     }
 
+    @Override
+    public boolean protectSocket(int fd) {
+        return vpnService.protect(fd);
+    }
 
     private int createTun(String ip, int prefixLength, int mtu, String dns, String[] searchDomains, LinkedList<Route> routes) throws Exception {
-        VpnService.Builder builder = tunService.getBuilder();
+        VpnService.Builder builder = vpnService.getBuilder();
         builder.addAddress(ip, prefixLength);
         builder.allowFamily(OsConstants.AF_INET);
         builder.allowFamily(OsConstants.AF_INET6);
@@ -56,7 +60,7 @@ class IFace implements TunAdapter {
             Log.d(LOGTAG, "add route: "+r.addr+"/"+r.prefixLength);
         }
 
-        disallowApp(builder,  "com.google.android.projection.gearhead");
+        disallowApp(builder, "com.google.android.projection.gearhead");
         disallowApp(builder, "com.google.android.apps.chromecast.app");
         disallowApp(builder, "com.google.android.apps.messaging");
         disallowApp(builder, "com.google.stadia.android");
@@ -65,7 +69,7 @@ class IFace implements TunAdapter {
             builder.setMetered(false);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            tunService.setUnderlyingNetworks(null);
+            vpnService.setUnderlyingNetworks(null);
         }
 
         builder.setBlocking(true);
@@ -86,7 +90,7 @@ class IFace implements TunAdapter {
             return;
         }
 
-        if(new DNSWatch(tunService).isPrivateDnsActive()) {
+        if(new DNSWatch(vpnService).isPrivateDnsActive()) {
             Log.d(LOGTAG, "ignore DNS because private dns is active");
             return;
         }
