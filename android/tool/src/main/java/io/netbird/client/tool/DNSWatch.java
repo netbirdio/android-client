@@ -12,6 +12,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import io.netbird.gomobile.android.DNSList;
@@ -26,7 +27,7 @@ public class DNSWatch {
 
 
     DNSWatch(Context context) {
-        connectivityManager = (ConnectivityManager) context.getSystemService(ConnectivityManager.class);
+        connectivityManager = context.getSystemService(ConnectivityManager.class);
         dnsServers  = readActiveDns();
     }
 
@@ -65,7 +66,10 @@ public class DNSWatch {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             isPrivateDnsActive = props.isPrivateDnsActive();
         }
-        return toDnsList(props.getDnsServers());
+
+        List<InetAddress> list = props.getDnsServers();
+        extendWithFallbackDNS(list);
+        return toDnsList(list);
     }
 
     private void registerNetworkCallback() {
@@ -81,6 +85,7 @@ public class DNSWatch {
 
     private synchronized void onNewDNSList(LinkProperties linkProperties) {
         List<InetAddress> newDNSList = linkProperties.getDnsServers();
+        extendWithFallbackDNS(newDNSList);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             isPrivateDnsActive = linkProperties.isPrivateDnsActive();
@@ -109,6 +114,15 @@ public class DNSWatch {
                 Log.e(LOGTAG, "failed to update dns servers", e);
                 return;
             }
+        }
+    }
+
+    private void extendWithFallbackDNS(List<InetAddress> dnsServers) {
+        if (dnsServers.get(0).isLinkLocalAddress()) {
+            try {
+                InetAddress addr = InetAddress.getByName("1.1.1.1");
+                dnsServers.add(0, addr);
+            } catch (UnknownHostException e) {}
         }
     }
 
