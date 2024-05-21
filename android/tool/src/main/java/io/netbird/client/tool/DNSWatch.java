@@ -89,7 +89,7 @@ public class DNSWatch {
         if(newDNSList.size() != dnsServers.size()) {
             DNSList dnsList = toDnsList(newDNSList);
             try {
-                notifyDnsWatcher(dnsServers);
+                notifyDnsWatcher(dnsList);
                 dnsServers = dnsList;
             } catch (Exception e) {
                Log.e(LOGTAG, "failed to update dns servers", e);
@@ -101,7 +101,7 @@ public class DNSWatch {
             try {
                 if (!newDNSList.get(i).getHostAddress().equals(dnsServers.get(i))) {
                     DNSList dnsList = toDnsList(newDNSList);
-                    notifyDnsWatcher(dnsServers);
+                    notifyDnsWatcher(dnsList);
                     dnsServers = dnsList;
                     return;
                 }
