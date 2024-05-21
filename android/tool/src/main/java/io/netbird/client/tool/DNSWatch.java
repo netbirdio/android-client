@@ -118,6 +118,9 @@ public class DNSWatch {
     }
 
     private void extendWithFallbackDNS(List<InetAddress> dnsServers) {
+        if (dnsServers.isEmpty()) {
+            return;
+        }
         if (dnsServers.get(0).isLinkLocalAddress()) {
             try {
                 InetAddress addr = InetAddress.getByName("1.1.1.1");
