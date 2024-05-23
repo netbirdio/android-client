@@ -100,8 +100,8 @@ android {
         applicationId "io.netbird.client"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 23
-        versionName "0.0.21"
+        versionCode 24
+        versionName "0.0.22"
     }
 
     splits {
