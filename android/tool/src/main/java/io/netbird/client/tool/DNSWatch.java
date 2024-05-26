@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.netbird.gomobile.android.DNSList;
@@ -67,8 +68,7 @@ public class DNSWatch {
             isPrivateDnsActive = props.isPrivateDnsActive();
         }
 
-        List<InetAddress> list = props.getDnsServers();
-        extendWithFallbackDNS(list);
+        List<InetAddress>  list = extendWithFallbackDNS(props.getDnsServers());
         return toDnsList(list);
     }
 
@@ -84,8 +84,8 @@ public class DNSWatch {
     }
 
     private synchronized void onNewDNSList(LinkProperties linkProperties) {
-        List<InetAddress> newDNSList = linkProperties.getDnsServers();
-        extendWithFallbackDNS(newDNSList);
+        List<InetAddress>  newDNSList = extendWithFallbackDNS(linkProperties.getDnsServers());
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             isPrivateDnsActive = linkProperties.isPrivateDnsActive();
@@ -117,16 +117,22 @@ public class DNSWatch {
         }
     }
 
-    private void extendWithFallbackDNS(List<InetAddress> dnsServers) {
+    private List<InetAddress> extendWithFallbackDNS(List<InetAddress> dnsServers) {
+        List<InetAddress> modifiableDnsServers = new ArrayList<>(dnsServers);
+
         if (dnsServers.isEmpty()) {
-            return;
+            return modifiableDnsServers;
         }
-        if (dnsServers.get(0).isLinkLocalAddress()) {
-            try {
-                InetAddress addr = InetAddress.getByName("1.1.1.1");
-                dnsServers.add(0, addr);
-            } catch (UnknownHostException e) {}
+
+        if (!dnsServers.get(0).isLinkLocalAddress()) {
+            return modifiableDnsServers;
         }
+
+        try {
+            InetAddress addr = InetAddress.getByName("1.1.1.1");
+            modifiableDnsServers.add(0, addr);
+        } catch (UnknownHostException e) {}
+        return modifiableDnsServers;
     }
 
     private void notifyDnsWatcher(DNSList dnsServers) throws Exception {
