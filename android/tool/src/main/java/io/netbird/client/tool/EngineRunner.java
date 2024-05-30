@@ -25,11 +25,11 @@ class EngineRunner {
     public EngineRunner(VPNService vpnService) {
         context = vpnService;
         NetworkChangeNotifier notifier = new NetworkChangeNotifier(vpnService);
-
         IFace iFace = new IFace(vpnService);
         goClient = Android.newClient(
                 Preferences.configFile(vpnService),
                 DeviceName.getDeviceName(),
+                BuildConfig.VERSION_NAME,
                 iFace,
                 new IFaceDiscover(),
                 notifier);
