@@ -13,6 +13,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        buildConfigField "int", "VERSION_CODE", project.versionCode
+        buildConfigField "String", "VERSION_NAME", "\"${project.versionName}\""
     }
 
     buildTypes {
