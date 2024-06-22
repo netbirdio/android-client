@@ -11,12 +11,27 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.netbird.client.tool.NetworkChangeNotifier;
 
 public class MainApplication extends Application implements ReactApplication {
     private final NotificationReceiver notificationReceiver = new NotificationReceiver();
+
+    private ArrayList<Class> runningActivities = new ArrayList<>();
+
+    public void addActivityToStack (Class cls) {
+        if (!runningActivities.contains(cls)) runningActivities.add(cls);
+    }
+
+    public void removeActivityFromStack (Class cls) {
+        if (runningActivities.contains(cls)) runningActivities.remove(cls);
+    }
+
+    public boolean isActivityInBackStack (Class cls) {
+        return runningActivities.contains(cls);
+    }
 
     private final ReactNativeHost mReactNativeHost =
             new DefaultReactNativeHost(this) {

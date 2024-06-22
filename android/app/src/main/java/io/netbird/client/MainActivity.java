@@ -60,6 +60,8 @@ public class MainActivity extends ReactActivity {
         SplashScreen.show(this);
         MainApplication application = (MainApplication) getApplication();
 
+        application.addActivityToStack(this.getClass());
+
         sendEventActionSharedPref = getSharedPreferences(SEND_EVENT_ACTION, Context.MODE_PRIVATE);
         sendEventToReactMessageKey = sendEventActionSharedPref.getString(MESSAGE_KEY, "");
 
@@ -74,5 +76,13 @@ public class MainActivity extends ReactActivity {
                 sendEventActionSharedPref.edit().remove(MESSAGE_KEY).apply();
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MainApplication application = (MainApplication) getApplication();
+
+        application.removeActivityFromStack(this.getClass());
     }
 }
