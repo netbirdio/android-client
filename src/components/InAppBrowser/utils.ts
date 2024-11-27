@@ -43,7 +43,7 @@ export const openLink = async (url: string, animated = true) => {
         },
         hasBackButton: true,
         browserPackage: undefined,
-        showInRecents: false,
+        showInRecents: true,
         includeReferrer: false,
       });
     } else {
