@@ -40,7 +40,10 @@ class IFace implements TunAdapter {
 
     @Override
     public boolean protectSocket(int fd) {
-        return vpnService.protect(fd);
+        vpnService.protect(fd);
+        // Ignore the error to allow the app to connect to a Management server before the VPN service
+        // is up and running. This is just a workaround and should be removed in the future.
+        return true;
     }
 
     private int createTun(String ip, int prefixLength, int mtu, String dns, String[] searchDomains, LinkedList<Route> routes) throws Exception {
