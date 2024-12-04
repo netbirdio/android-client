@@ -73,7 +73,7 @@ public class MainApplication extends Application implements ReactApplication {
     private void registerNotificationReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(NetworkChangeNotifier.action);
-        registerReceiver(notificationReceiver, filter, RECEIVER_NOT_EXPORTED);
+        registerReceiver(notificationReceiver, filter, RECEIVER_EXPORTED);
     }
 
     @Override

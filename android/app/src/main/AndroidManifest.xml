@@ -1,10 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <permission
+        android:name="io.netbird.permission.NOTIFICATION"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
 
     <application
         android:name=".MainApplication"
@@ -18,10 +21,8 @@
         <receiver
             android:name=".NotificationReceiver"
             android:enabled="true"
-            android:exported="false">
-        <intent-filter>
-            <action android:name="action.ROUTE_CHANGED" />
-        </intent-filter>
+            android:exported="true"
+            android:permission="io.netbird.permission.NOTIFICATION">
         </receiver>
 
         <activity
