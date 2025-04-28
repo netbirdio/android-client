@@ -1,0 +1,3 @@
+[submodule "netbird"]
+	path = netbird
+	url = https://github.com/netbirdio/netbird.git

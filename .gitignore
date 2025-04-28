@@ -68,14 +68,14 @@ buck-out/
 
 src/utils/graphql/*
 
-android/netbird/*.aar
-android/netbird/*.jar
-android/netbird/build/
-android/tool/*.aar
-android/tool/*.jar
-android/tool/build/
-android/app/src/main/assets/index.android.bundle
-android/app/src/main/res/drawable-*/src_*
-android/app/src/main/res/drawable-*/node_modules_*
+app/*.aar
+app/*.jar
+app/build/
+tool/*.aar
+tool/*.jar
+tool/build/
+app/src/main/assets/index.android.bundle
+app/src/main/res/drawable-*/src_*
+app/src/main/res/drawable-*/node_modules_*
 google-services.json
 lefthook.yml
