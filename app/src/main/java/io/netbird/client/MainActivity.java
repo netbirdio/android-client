@@ -1,10 +1,12 @@
 package io.netbird.client;
 
+import android.content.ComponentName;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.view.View;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.navigation.NavController;
@@ -15,11 +17,41 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
+import io.netbird.client.tool.ServiceStateListener;
+import io.netbird.client.tool.VPNService;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final static String LOGTAG = "MainActivity";
+    private VPNService.MyLocalBinder mBinder;
+
+
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+
+    private final ServiceConnection serviceIPC = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder binder) {
+            Log.d(LOGTAG, "on service connected");
+            mBinder = (VPNService.MyLocalBinder) binder;
+            mBinder.setConnectionStateListener(connectionListener);
+            mBinder.addServiceStateListener(serviceStateListener);
+            tunnelSwitch.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+                        if (!isChecked) {
+                            mBinder.stopEngine();
+                            return;
+                        }
+                        if (mBinder.hasVpnPermission(MainActivity.this)) {
+                            onAllowedVpnPermission();
+                        }
+                    }
+            );
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,4 +88,47 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+
+    ServiceStateListener serviceStateListener = new ServiceStateListener() {
+        public void onStarted() {
+
+        }
+
+        public void onStopped() {
+
+        }
+
+        public void onError(String msg) {
+
+        }
+    };
+    ConnectionListener connectionListener = new ConnectionListener() {
+        @Override
+        public void onAddressChanged(String fqdn, String ip) {
+
+        }
+
+        public void onConnected() {
+
+        }
+
+        public void onConnecting() {
+
+        }
+
+        public void onDisconnected() {
+
+        }
+
+        @Override
+        public void onDisconnecting() {
+
+        }
+
+        @Override
+        public void onPeersListChanged(long numberOfPeers) {
+
+        }
+    };
 }

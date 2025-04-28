@@ -33,6 +33,7 @@ public class Logcat   {
     }
 
     private void share(File file) {
+        /*
         Uri uri = FileProvider.getUriForFile(context, BuildConfig.LIBRARY_PACKAGE_NAME+".fileprovider", file);
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
@@ -41,6 +42,8 @@ public class Logcat   {
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(Intent.createChooser(shareIntent, "Share log with"));
+
+         */
 
     }
 

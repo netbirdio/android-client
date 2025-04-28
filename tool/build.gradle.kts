@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
 }
 
 android {
@@ -17,7 +17,6 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -31,7 +30,7 @@ android {
 }
 
 dependencies {
-
+    implementation(project(":gomobile"))
     implementation(libs.appcompat)
     implementation(libs.material)
     testImplementation(libs.junit)

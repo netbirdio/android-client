@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,6 +30,14 @@ public class HomeFragment extends Fragment {
 
         final TextView textNetworkAddress = binding.textNetworkAddress;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textNetworkAddress::setText);
+
+        final Button buttonConnect = binding.btnConnect;
+        buttonConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         return root;
     }

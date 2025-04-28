@@ -1,6 +1,4 @@
 #!/bin/bash
-# bash build-android-lib.sh ~/projects/netbird
-
 set -e
 
 rn_app_path=$(pwd)
@@ -18,6 +16,6 @@ fi
 
 cd $netbirdPath
 gomobile init
-CGO_ENABLED=0 gomobile bind  -o $rn_app_path/android/netbird/netbird.aar -javapkg=io.netbird.gomobile  -ldflags="-X golang.zx2c4.com/wireguard/ipc.socketDirectory=/data/data/io.netbird.client/cache/wireguard -X github.com/netbirdio/netbird/version.version=$version" $netbirdPath/client/android
+CGO_ENABLED=0 gomobile bind  -o $rn_app_path/gomobile/netbird.aar -javapkg=io.netbird.gomobile  -ldflags="-X golang.zx2c4.com/wireguard/ipc.socketDirectory=/data/data/io.netbird.client/cache/wireguard -X github.com/netbirdio/netbird/version.version=$version" $netbirdPath/client/android
 
 cd -

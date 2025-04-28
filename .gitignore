@@ -71,6 +71,9 @@ src/utils/graphql/*
 app/*.aar
 app/*.jar
 app/build/
+gomobile/build/
+gomobile/*.aar
+gomobile/*.jar
 tool/*.aar
 tool/*.jar
 tool/build/

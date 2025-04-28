@@ -29,7 +29,7 @@ class EngineRunner {
         goClient = Android.newClient(
                 Preferences.configFile(vpnService),
                 DeviceName.getDeviceName(),
-                BuildConfig.VERSION_NAME,
+                Version.getVersionName(vpnService),
                 iFace,
                 new IFaceDiscover(),
                 notifier);
@@ -131,7 +131,7 @@ class EngineRunner {
 
     private void updateLogLevel() {
         Preferences pref = new Preferences(context);
-        if (BuildConfig.DEBUG || pref.isTraceLogEnabled()) {
+        if (Version.isDebuggable(context) || pref.isTraceLogEnabled()) {
             goClient.setTraceLogLevel();
         } else {
             goClient.setInfoLogLevel();

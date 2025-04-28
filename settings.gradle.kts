@@ -21,6 +21,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Netbird"
 include(":app")
+include(":gomobile")
 include(":tool")
 
- 
