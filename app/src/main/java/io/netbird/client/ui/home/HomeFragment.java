@@ -24,8 +24,12 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textHome;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textHostname = binding.textHostname;
+        homeViewModel.getText().observe(getViewLifecycleOwner(), textHostname::setText);
+
+        final TextView textNetworkAddress = binding.textNetworkAddress;
+        homeViewModel.getText().observe(getViewLifecycleOwner(), textNetworkAddress::setText);
+
         return root;
     }
 
