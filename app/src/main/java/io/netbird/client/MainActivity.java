@@ -29,7 +29,6 @@ import io.netbird.client.databinding.ActivityMainBinding;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.gomobile.android.ConnectionListener;
-import io.netbird.gomobile.android.URLOpener;
 
 
 public class MainActivity extends AppCompatActivity implements ServiceAccessor, StateListenerRegistry {
@@ -44,14 +43,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
     private final List<StateListener> serviceStateListeners = new ArrayList<>();
 
+    private CustomTabURLOpener urlOpener;
 
-
-    URLOpener urlOpener = url -> {
-        Log.d(LOGTAG, "URL: " + url);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(android.net.Uri.parse(url));
-        startActivity(intent);
-    };
     private final ServiceConnection serviceIPC = new ServiceConnection() {
 
         @Override
@@ -88,10 +81,23 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
+        urlOpener = new CustomTabURLOpener(this, new CustomTabURLOpener.OnCustomTabResult() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(MainActivity.this, "SSO success", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(MainActivity.this, "SSO failed", Toast.LENGTH_LONG).show();
+            }
+        });
+
         // VPN permission result launcher
         vpnActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
+                    Log.d(LOGTAG, "on activity resutl: "+ result.getResultCode());
                     if((result.getResultCode() != Activity.RESULT_OK)) {
                         Log.w(LOGTAG, "VPN permission denied");
                         Toast.makeText(this, "VPN permission required", Toast.LENGTH_LONG).show();
