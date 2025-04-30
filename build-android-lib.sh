@@ -1,21 +1,20 @@
 #!/bin/bash
+# Script to build NetBird mobile bindings using gomobile
+# Usage: ./script.sh [version]
+# If no version is provided, "development" is used as default
 set -e
 
-rn_app_path=$(pwd)
-netbirdPath=$1
-if [ -z "${1+x}" ]
-then
-    netbirdPath=${GOPATH}/src/github.com/netbirdio/netbird
-fi
+# Set version from the first argument or use "development" as default
+version=${1:-development}
+app_path=$(pwd)
 
-version=$2
-if [ -z "${2+x}" ]
-then
-    version=development
-fi
-
-cd $netbirdPath
+cd netbird
 gomobile init
-CGO_ENABLED=0 gomobile bind  -o $rn_app_path/gomobile/netbird.aar -javapkg=io.netbird.gomobile  -ldflags="-X golang.zx2c4.com/wireguard/ipc.socketDirectory=/data/data/io.netbird.client/cache/wireguard -X github.com/netbirdio/netbird/version.version=$version" $netbirdPath/client/android
 
-cd -
+CGO_ENABLED=0 gomobile bind \
+  -o $app_path/gomobile/netbird.aar \
+  -javapkg=io.netbird.gomobile \
+  -ldflags="-X golang.zx2c4.com/wireguard/ipc.socketDirectory=/data/data/io.netbird.client/cache/wireguard -X github.com/netbirdio/netbird/version.version=$version" \
+  $(pwd)/client/android
+
+cd - > /dev/null
