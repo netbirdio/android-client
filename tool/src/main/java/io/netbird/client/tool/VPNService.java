@@ -24,6 +24,7 @@ public class VPNService extends android.net.VpnService {
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
     static public final int VPN_REQUEST_CODE = 0;
 
+
     private final IBinder myBinder = new MyLocalBinder();
 
     private EngineRunner engineRunner;
@@ -88,16 +89,6 @@ public class VPNService extends android.net.VpnService {
         return new Builder();
     }
 
-    private boolean hasVpnPermission(Activity context) throws NullPointerException {
-        Intent intentPrepare = VpnService.prepare(this);
-        if (intentPrepare != null) {
-            Log.d(LOGTAG, "open vpn permission dialog");
-            context.startActivityForResult(intentPrepare, VPN_REQUEST_CODE);
-            return false;
-        }
-        return true;
-    }
-
     public class MyLocalBinder extends Binder {
         @Override
         protected boolean onTransact(int code, Parcel data, Parcel reply, int flags) {
@@ -108,8 +99,8 @@ public class VPNService extends android.net.VpnService {
             return false;
         }
 
-        public boolean hasVpnPermission(Activity context) throws NullPointerException {
-            return VPNService.this.hasVpnPermission(context);
+        public Intent prepareVpnIntent(Activity context) {
+            return VpnService.prepare(context);
         }
 
         public void runEngine(URLOpener urlOpener) {

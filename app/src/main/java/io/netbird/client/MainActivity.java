@@ -1,5 +1,6 @@
 package io.netbird.client;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,8 @@ import java.util.List;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -37,7 +40,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+
+    private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
     private final List<StateListener> serviceStateListeners = new ArrayList<>();
+
+
 
     URLOpener urlOpener = url -> {
         Log.d(LOGTAG, "URL: " + url);
@@ -81,6 +88,28 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
+        // VPN permission result launcher
+        vpnActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if((result.getResultCode() != Activity.RESULT_OK)) {
+                        Log.w(LOGTAG, "VPN permission denied");
+                        Toast.makeText(this, "VPN permission required", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    Log.d(LOGTAG, "VPN permission granted");
+                    // Always-on VPN check
+                    if (VPNService.isUsingAlwaysOnVPN(this)) {
+                        // todo throw always on message
+                        //https://github.com/netbirdio/android-client/blob/7a02f88025e18ea1548c457b2c76de2bddd598af/react/netbird-lib/android/src/main/java/com/netbirdlib/NetbirdLibModule.java#L130
+                    }
+
+                    if (mBinder != null) {
+                        mBinder.runEngine(urlOpener);
+                    }
+                });
+
     }
 
     @Override
@@ -107,11 +136,20 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     @Override
     public void switchConnection(boolean status) {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
         if (!status) {
             mBinder.stopEngine();
             return;
         }
-        if (mBinder.hasVpnPermission(this)) {
+
+        Intent prepareIntent = mBinder.prepareVpnIntent(this);
+        if (prepareIntent != null) {
+            vpnActivityResultLauncher.launch(prepareIntent);
+        } else {
             mBinder.runEngine(urlOpener);
         }
     }
