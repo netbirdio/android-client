@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.navigation.NavController;
@@ -26,7 +29,7 @@ import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.URLOpener;
 
 
-public class MainActivity extends AppCompatActivity implements ServiceAccessor {
+public class MainActivity extends AppCompatActivity implements ServiceAccessor, StateListenerRegistry {
 
     private final static String LOGTAG = "MainActivity";
     private VPNService.MyLocalBinder mBinder;
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+    private final List<StateListener> serviceStateListeners = new ArrayList<>();
 
     URLOpener urlOpener = url -> {
         Log.d(LOGTAG, "URL: " + url);
@@ -112,6 +116,22 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor {
         }
     }
 
+
+    @Override
+    public void registerServiceStateListener(StateListener listener) {
+        if (serviceStateListeners.contains(listener)) {
+            return;
+        }
+        serviceStateListeners.add(listener);
+    }
+
+    @Override
+    public void unregisterServiceStateListener(StateListener listener) {
+        serviceStateListeners.remove(listener);
+
+    }
+
+
     private void startService() {
         Log.i(LOGTAG, "start VPN service");
         Intent intent = new Intent(this, VPNService.class);
@@ -125,20 +145,33 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor {
     ConnectionListener connectionListener = new ConnectionListener() {
         @Override
         public void onAddressChanged(String fqdn, String ip) {
-
+            for (StateListener listener : serviceStateListeners) {
+                listener.onAddressChanged(fqdn, ip);
+            }
         }
 
         public void onConnected() {
-            Log.d(LOGTAG, "STATE: ConnectionListener connected");
+            for (StateListener listener : serviceStateListeners) {
+                listener.onConnected();
+            }
         }
 
         public void onConnecting() {
+            for (StateListener listener : serviceStateListeners) {
+                listener.onConnecting();
+            }
         }
 
         public void onDisconnecting() {
+            for (StateListener listener : serviceStateListeners) {
+                listener.onDisconnecting();
+            }
         }
 
         public void onDisconnected() {
+            for (StateListener listener : serviceStateListeners) {
+                listener.onDisconnected();
+            }
         }
 
         @Override
@@ -149,10 +182,16 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor {
     ServiceStateListener serviceStateListener = new ServiceStateListener() {
         public void onStarted() {
             Log.d(LOGTAG, "on go service started");
+            for (StateListener listener : serviceStateListeners) {
+                listener.onEngineStarted();
+            }
         }
 
         public void onStopped() {
             Log.d(LOGTAG, "on go service stopped");
+            for (StateListener listener : serviceStateListeners) {
+                listener.onEngineStopped();
+            }
         }
 
         public void onError(String msg) {

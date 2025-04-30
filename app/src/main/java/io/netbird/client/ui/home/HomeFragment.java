@@ -13,12 +13,19 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import io.netbird.client.ServiceAccessor;
+import io.netbird.client.StateListener;
+import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentHomeBinding;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements StateListener {
 
     private FragmentHomeBinding binding;
     private ServiceAccessor serviceAccessor;
+
+    private TextView textHostname;
+    private TextView textNetworkAddress;
+    private TextView textEngineStatus;
+    private TextView textConnStatus;
 
 
     @Override
@@ -31,6 +38,11 @@ public class HomeFragment extends Fragment {
         } else {
             throw new RuntimeException(context.toString() + " must implement ServiceAccessor");
         }
+
+        // Register this fragment as a service state listener
+        if (context instanceof StateListenerRegistry) {
+            ((StateListenerRegistry) context).registerServiceStateListener(this);
+        }
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -41,11 +53,17 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textHostname = binding.textHostname;
+        textHostname = binding.textHostname;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textHostname::setText);
 
-        final TextView textNetworkAddress = binding.textNetworkAddress;
+        textNetworkAddress = binding.textNetworkAddress;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textNetworkAddress::setText);
+
+        textEngineStatus = binding.textEngineStatus;
+        homeViewModel.getText().observe(getViewLifecycleOwner(), textEngineStatus::setText);
+
+        textConnStatus = binding.textConnectionStatus;
+        homeViewModel.getText().observe(getViewLifecycleOwner(), textConnStatus::setText);
 
         final Button buttonConnect = binding.btnConnect;
         buttonConnect.setOnClickListener(v -> {
@@ -61,6 +79,12 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        // Unregister this fragment as a service state listener
+        if (getActivity() instanceof StateListenerRegistry) {
+            ((StateListenerRegistry) getActivity()).unregisterServiceStateListener(this);
+        }
+
+
         serviceAccessor = null;
     }
 
@@ -68,5 +92,67 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onEngineStarted() {
+        if (textEngineStatus != null) {
+            textEngineStatus.post(() -> textEngineStatus.setText("Connected"));
+        }
+    }
+
+    @Override
+    public void onEngineStopped() {
+        if (textEngineStatus != null) {
+            textEngineStatus.post(() -> textEngineStatus.setText("Disconnected"));
+        }
+    }
+
+    @Override
+    public void onAddressChanged(String netAddr, String hostname) {
+        if(textNetworkAddress == null || textHostname == null) {
+            return;
+        }
+
+        textNetworkAddress.post(() -> textNetworkAddress.setText(netAddr));
+        textHostname.post(() -> textHostname.setText(hostname));
+    }
+
+    @Override
+    public void onConnected() {
+        if (textConnStatus == null) {
+            return;
+        }
+        textConnStatus.post(() -> textEngineStatus.setText("Connected"));
+
+    }
+
+    @Override
+    public void onConnecting() {
+        if (textConnStatus == null) {
+            return;
+        }
+        textConnStatus.post(() -> textEngineStatus.setText("Connecting"));
+    }
+
+    @Override
+    public void onDisconnected() {
+        if (textConnStatus == null) {
+            return;
+        }
+        textConnStatus.post(() -> textEngineStatus.setText("Disconnected"));
+    }
+
+    @Override
+    public void onDisconnecting() {
+        if (textConnStatus == null) {
+            return;
+        }
+        textConnStatus.post(() -> textEngineStatus.setText("Disconnecting"));
+    }
+
+    @Override
+    public void onPeersListChanged(long var1) {
+
     }
 }
