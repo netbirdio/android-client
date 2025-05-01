@@ -12,4 +12,9 @@
     <string name="menu_about">About</string>
     <string name="menu_docs">Docs</string>
     <string name="menu_change_server">Change Server</string>
+
+    <string name="about_version">Version:&#160;</string>
+    <string name="about_license"><u>License agreement</u></string>
+    <string name="about_privacy_poliy"><u>Privacy policy</u></string>
+    <string name="about_rights">© 2025 NetBird all rights reserved</string>
 </resources>
