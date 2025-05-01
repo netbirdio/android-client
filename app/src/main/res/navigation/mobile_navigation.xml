@@ -5,14 +5,27 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/nav_home">
 
+
     <fragment
         android:id="@+id/nav_home"
         android:name="io.netbird.client.ui.home.HomeFragment"
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/nav_advanced"
+        android:name="io.netbird.client.ui.advanced.AdvancedFragment"
+        android:label="@string/menu_advanced"
+        tools:layout="@layout/fragment_advanced" />
+
+    <fragment
         android:id="@+id/nav_about"
         android:name="io.netbird.client.ui.about.AboutFragment"
         android:label="@string/menu_about"
         tools:layout="@layout/fragment_about" />
+
+    <fragment
+        android:id="@+id/nav_change_server"
+        android:name="io.netbird.client.ui.server.ChangeServerFragment"
+        android:label="@string/menu_change_server"
+        tools:layout="@layout/fragment_server" />
 </navigation>
