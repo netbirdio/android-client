@@ -90,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             @Override
             public void onFailure(String errorMessage) {
                 Toast.makeText(MainActivity.this, "SSO failed", Toast.LENGTH_LONG).show();
+                if(mBinder == null) {
+                    return;
+                }
+                mBinder.stopEngine();
             }
         });
 
