@@ -5,10 +5,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -31,7 +34,7 @@ import io.netbird.client.tool.VPNService;
 import io.netbird.gomobile.android.ConnectionListener;
 
 
-public class MainActivity extends AppCompatActivity implements ServiceAccessor, StateListenerRegistry {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceAccessor, StateListenerRegistry {
 
     private final static String LOGTAG = "MainActivity";
     private VPNService.MyLocalBinder mBinder;
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+    private NavController navController;
 
     private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
     private final List<StateListener> serviceStateListeners = new ArrayList<>();
@@ -71,15 +75,21 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+
+        // Set the listener for menu item selections
+        navigationView.setNavigationItemSelectedListener(this);
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_advanced, R.id.nav_about)
+                R.id.nav_home, R.id.nav_advanced, R.id.nav_about, R.id.nav_docs)
                 .setOpenableLayout(drawer)
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
+
+        // Remove this line to prevent conflict with your custom navigation listener
+        // NavigationUI.setupWithNavController(navigationView, navController);
 
         urlOpener = new CustomTabURLOpener(this, new CustomTabURLOpener.OnCustomTabResult() {
             @Override
@@ -138,6 +148,19 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (item.getItemId() == R.id.nav_docs) {
+            openDocs();
+            return true;
+        }
+
+        navController.navigate(id);
+        binding.drawerLayout.closeDrawers();
+        return true;
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
@@ -179,6 +202,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     }
 
+    private void openDocs() {
+        String url = "https://docs.netbird.io";  // Replace with the desired URL
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
+    }
 
     private void startService() {
         Log.i(LOGTAG, "start VPN service");
