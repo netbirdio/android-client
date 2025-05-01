@@ -47,5 +47,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation("androidx.browser:browser:1.8.0")  // Added for CustomTabsIntent
+    implementation(libs.browser)  // Added for CustomTabsIntent
 }
