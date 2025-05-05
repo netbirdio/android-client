@@ -65,9 +65,49 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connect"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/peers_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        app:cardElevation="30dp"
+        app:cardUseCompatPadding="false"
+        app:cardBackgroundColor="@color/nb_gray_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:shapeAppearanceOverlay="@style/TopRoundedCorners">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <View
+                android:layout_width="110dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/separator" />
+
+            <TextView
+                android:id="@+id/text_open_panel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:padding="16dp"
+                android:text="0 of 0 Peers connected"
+                android:textAlignment="center"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

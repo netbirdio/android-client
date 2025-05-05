@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.card.MaterialCardView;
+
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.StateListenerRegistry;
@@ -32,7 +34,6 @@ public class HomeFragment extends Fragment implements StateListener {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        // Get reference to the ServiceAccessor interface from the activity
         if (context instanceof ServiceAccessor) {
             serviceAccessor = (ServiceAccessor) context;
         } else {
@@ -72,6 +73,12 @@ public class HomeFragment extends Fragment implements StateListener {
             }
 
             serviceAccessor.switchConnection(true);
+        });
+
+        MaterialCardView openPanelCardView = binding.peersBtn;
+        openPanelCardView.setOnClickListener(v -> {
+            PeersFragment peerFragment = new PeersFragment();
+            peerFragment.show(getParentFragmentManager(), peerFragment.getTag());
         });
         return root;
     }

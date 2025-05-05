@@ -32,6 +32,7 @@ import io.netbird.client.databinding.ActivityMainBinding;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.gomobile.android.ConnectionListener;
+import io.netbird.gomobile.android.PeerInfoArray;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceAccessor, StateListenerRegistry {
@@ -185,6 +186,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             mBinder.runEngine(urlOpener);
         }
+    }
+
+    @Override
+    public PeerInfoArray getPeersList() {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return null;
+        }
+
+        return mBinder.peersInfo();
     }
 
 

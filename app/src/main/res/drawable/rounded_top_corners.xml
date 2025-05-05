@@ -1,0 +1,8 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/nb_gray_light" /> <!-- Your sheet color -->
+    <corners android:topLeftRadius="25dp"
+        android:topRightRadius="25dp"
+        android:bottomLeftRadius="0dp"
+        android:bottomRightRadius="0dp" />
+</shape>

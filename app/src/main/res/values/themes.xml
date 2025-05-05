@@ -29,4 +29,21 @@
     </style>
 
     <style name="Theme.NetBird.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
+    <!-- for peers fragment -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="colorPrimary">@color/nb_yellow</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+
+    <!-- for MaterialCardView, bottom button -->
+    <style name="TopRoundedCorners" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">25dp</item>
+        <item name="cornerSizeTopRight">25dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
 </resources>

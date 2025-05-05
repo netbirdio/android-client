@@ -9,7 +9,11 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="nb_gray">#DEDEDE</color>
-    <color  name="nb_gray_dark">#4E4E4E</color>
+    <color name="nb_gray_light">#F5F5F5</color>
+    <color name="nb_gray_dark">#4E4E4E</color>
+    <color name="nb_gray_bg">#eeeeee</color>
+    <color name="nb_gray_separator">#dadada</color>
+    <color name="nb_gray_border">#ececec</color>
     <color name="nb_yellow">#F58431</color>
     <color name="nb_txt">#4e4e4e</color>
 </resources>
