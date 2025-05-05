@@ -9,6 +9,7 @@
     <fragment
         android:id="@+id/nav_home"
         android:name="io.netbird.client.ui.home.HomeFragment"
+        android:label=""
         tools:layout="@layout/fragment_home" />
 
     <fragment
