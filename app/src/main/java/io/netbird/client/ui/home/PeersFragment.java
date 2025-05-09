@@ -8,10 +8,12 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,6 +33,7 @@ import java.util.List;
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentPeersBinding;
+import io.netbird.gomobile.android.PeerInfo;
 import io.netbird.gomobile.android.PeerInfoArray;
 
 public class PeersFragment extends BottomSheetDialogFragment {
@@ -98,9 +101,8 @@ public class PeersFragment extends BottomSheetDialogFragment {
         });
 
 
-        PeerInfoArray peers = serviceAccessor.getPeersList();
-        /*
-        if (peers != null && peers.size() > 0) {
+        PeerInfoArray peersInfo = serviceAccessor.getPeersList();
+        if (peersInfo != null && peersInfo.size() > 0) {
             binding.textButtonLayout.setVisibility(View.GONE);
             binding.peersList.setVisibility(View.VISIBLE);
         } else {
@@ -108,33 +110,9 @@ public class PeersFragment extends BottomSheetDialogFragment {
             binding.peersList.setVisibility(View.GONE);
         }
 
-         */
-        binding.textButtonLayout.setVisibility(View.GONE);
-        binding.peersList.setVisibility(View.VISIBLE);
-
-        // Create sample data
-        List<Peer> peerList = new ArrayList<>();
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.1", "peer1.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.2", "peer2.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.3", "peer3.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.4", "peer4.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.5", "peer5.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.6", "peer6.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.7", "peer7.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.8", "peer8.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.9", "peer9.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.10", "peer10.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.11", "peer11.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.12", "peer12.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.13", "peer13.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.14", "peer14.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.15", "peer15.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.16", "peer16.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.17", "peer17.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.18", "peer18.local"));
-        peerList.add(new Peer(Status.CONNECTED, "192.168.1.19", "peer19.local"));
-        peerList.add(new Peer(Status.DISCONNECTED, "192.168.1.20", "peer20.local"));
-
+        assert peersInfo != null;
+        List<Peer> peerList = peersInfoToPeersList(peersInfo);
+        updatePeerCount(peersInfo);
         peersListView = binding.peersRecyclerView;
         peersListView.setLayoutManager(new LinearLayoutManager(requireContext()));
         PeersAdapter adapter = new PeersAdapter(peerList);
@@ -189,5 +167,31 @@ public class PeersFragment extends BottomSheetDialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private List<Peer> peersInfoToPeersList(PeerInfoArray peersInfo) {
+        List<Peer> peerList = new ArrayList<>();
+        for (int i = 0; i < peersInfo.size(); i++) {
+            PeerInfo peerInfo = peersInfo.get(i);
+            Status status = Status.fromString(peerInfo.getConnStatus());
+            peerList.add(new Peer(status, peerInfo.getIP(), peerInfo.getFQDN()));
+        }
+        return peerList;
+    }
+
+    private void updatePeerCount(PeerInfoArray peersInfo) {
+        int connected = 0;
+        for (int i = 0; i < peersInfo.size(); i++) {
+            PeerInfo peer = peersInfo.get(i);
+            if(peer.getConnStatus().equalsIgnoreCase(Status.CONNECTED.toString())) {
+                connected++;
+            }
+        }
+
+        TextView textPeersCount = binding.textOpenPanel;
+        String text = getString(R.string.peers_connected, connected, peersInfo.size());
+        textPeersCount.post(() ->
+                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
+        );
     }
 }

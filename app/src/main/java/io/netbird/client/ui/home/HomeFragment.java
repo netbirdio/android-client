@@ -2,6 +2,7 @@ package io.netbird.client.ui.home;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +15,13 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.card.MaterialCardView;
 
+import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentHomeBinding;
+import io.netbird.gomobile.android.PeerInfo;
+import io.netbird.gomobile.android.PeerInfoArray;
 
 public class HomeFragment extends Fragment implements StateListener {
 
@@ -65,6 +69,8 @@ public class HomeFragment extends Fragment implements StateListener {
 
         textConnStatus = binding.textConnectionStatus;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textConnStatus::setText);
+
+        updatePeerCount(0,0);
 
         final Button buttonConnect = binding.btnConnect;
         buttonConnect.setOnClickListener(v -> {
@@ -159,7 +165,23 @@ public class HomeFragment extends Fragment implements StateListener {
     }
 
     @Override
-    public void onPeersListChanged(long var1) {
+    public void onPeersListChanged(long numberOfPeers) {
+        PeerInfoArray peersList = serviceAccessor.getPeersList();
+        int connected = 0;
+        for (int i = 0; i < peersList.size(); i++) {
+            PeerInfo peer = peersList.get(i);
+            if(peer.getConnStatus().equalsIgnoreCase(Status.CONNECTED.toString())) {
+                connected++;
+            }
+        }
+        updatePeerCount(connected, peersList.size());
+    }
 
+    private void updatePeerCount(int connectedPeers, long totalPeers) {
+        TextView textPeersCount = binding.textOpenPanel;
+        String text = getString(R.string.peers_connected, connectedPeers, totalPeers);
+        textPeersCount.post(() ->
+                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
+        );
     }
 }

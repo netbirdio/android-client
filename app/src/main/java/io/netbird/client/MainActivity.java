@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public PeerInfoArray getPeersList() {
         if (mBinder == null) {
             Log.w(LOGTAG, "VPN binder is null");
-            return null;
+            return new PeerInfoArray();
         }
 
         return mBinder.peersInfo();
@@ -210,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void unregisterServiceStateListener(StateListener listener) {
         serviceStateListeners.remove(listener);
-
     }
 
     private void openDocs() {
@@ -263,6 +262,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onPeersListChanged(long numberOfPeers) {
+            for (StateListener listener : serviceStateListeners) {
+                listener.onPeersListChanged(numberOfPeers);
+            }
         }
     };
 

@@ -16,5 +16,20 @@ public enum Status {
             return super.toString();
       }
    }
+
+   public static Status fromString(String status) {
+      if (status == null) {
+         throw new IllegalArgumentException("Status string cannot be null");
+      }
+
+      switch (status.toLowerCase()) {
+         case "connected":
+            return CONNECTED;
+         case "disconnected":
+            return DISCONNECTED;
+         default:
+            throw new IllegalArgumentException("Unknown status: " + status);
+      }
+   }
 }
 

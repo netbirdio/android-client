@@ -32,6 +32,7 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
     public PeersAdapter(List<Peer> peerList) {
         this.peerList = peerList;
         filteredPeerList = new ArrayList<>(peerList);
+        sortPeers();
     }
 
     @NonNull
@@ -67,6 +68,7 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
     private void applyFilters() {
         doFilterByStatus();
         doFilterBySearchQuery();
+        sortPeers();
         notifyDataSetChanged();
     }
 
@@ -98,6 +100,20 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
                 filteredPeerList.remove(peer);
             }
         }
+    }
+
+    private void sortPeers() {
+        filteredPeerList.sort((p1, p2) -> {
+            int statusCompare = Boolean.compare(
+                    p2.getStatus() == Status.CONNECTED,
+                    p1.getStatus() == Status.CONNECTED
+            );
+            if (statusCompare != 0) {
+                return statusCompare;
+            }
+            // Then sort alphabetically by fqdn
+            return p1.getFqdn().compareToIgnoreCase(p2.getFqdn());
+        });
     }
 
     public static class PeerViewHolder extends RecyclerView.ViewHolder {

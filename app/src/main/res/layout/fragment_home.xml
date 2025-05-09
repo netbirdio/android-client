@@ -102,7 +102,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:padding="16dp"
-                android:text="0 of 0 Peers connected"
+                tools:text="0 of 0 Peers connected"
                 android:textAlignment="center"
                 android:textSize="16sp" />
         </LinearLayout>
