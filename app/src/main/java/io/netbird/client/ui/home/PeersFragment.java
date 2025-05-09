@@ -1,5 +1,6 @@
 package io.netbird.client.ui.home;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,8 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,25 +51,6 @@ public class PeersFragment extends BottomSheetDialogFragment {
         }
     }
 
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        Dialog dialog = getDialog();
-        if (dialog instanceof BottomSheetDialog) {
-            FrameLayout bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) {
-                BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
-                behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                behavior.setSkipCollapsed(true);
-                behavior.setPeekHeight(0);
-                bottomSheet.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
-                bottomSheet.requestLayout();
-            }
-        }
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -97,6 +81,7 @@ public class PeersFragment extends BottomSheetDialogFragment {
         return binding.getRoot();
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -111,6 +96,7 @@ public class PeersFragment extends BottomSheetDialogFragment {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             startActivity(intent);
         });
+
 
         PeerInfoArray peers = serviceAccessor.getPeersList();
         /*
@@ -151,8 +137,45 @@ public class PeersFragment extends BottomSheetDialogFragment {
 
         peersListView = binding.peersRecyclerView;
         peersListView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        PeerAdapter adapter = new PeerAdapter(peerList);
+        PeersAdapter adapter = new PeersAdapter(peerList);
         peersListView.setAdapter(adapter);
+
+        binding.searchView.clearFocus();
+        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                adapter.filterBySearchQuery(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filterBySearchQuery(newText);
+                return true;
+            }
+        });
+
+        binding.filterIcon.setOnClickListener(v -> {
+            androidx.appcompat.widget.PopupMenu popup = new PopupMenu(requireContext(), binding.filterIcon);
+            popup.getMenuInflater().inflate(R.menu.peer_filter_menu, popup.getMenu());
+
+            popup.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.all) {
+                    adapter.filterByStatus(PeersAdapter.FilterStatus.ALL);
+                    return true;
+                } else if (itemId == R.id.connected) {
+                    adapter.filterByStatus(PeersAdapter.FilterStatus.CONNECTED);
+                    return true;
+                } else if (itemId == R.id.disconnected) {
+                    adapter.filterByStatus(PeersAdapter.FilterStatus.DISCONNECTED);
+                    return true;
+                }
+
+                return false;
+            });
+            popup.show();
+        });
     }
 
     @Override
