@@ -73,6 +73,11 @@ public class PeersFragment extends BottomSheetDialogFragment {
 
                 // Set the background to transparent
                 bottomSheet.setBackground(new ColorDrawable(Color.TRANSPARENT));
+
+                // Remove gray background (dim)
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().setDimAmount(0f);
+                }
             }
         });
         return dialog;
