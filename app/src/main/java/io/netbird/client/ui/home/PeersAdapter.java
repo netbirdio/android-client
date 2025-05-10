@@ -2,10 +2,15 @@ package io.netbird.client.ui.home;
 
 import static io.netbird.client.ui.home.PeersAdapter.FilterStatus.ALL;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -102,6 +107,31 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
         }
     }
 
+    private static void showPopup(View view, Peer peer) {
+        PopupMenu popup = new PopupMenu(view.getContext(), view);
+        popup.getMenuInflater().inflate(R.menu.peer_clipboard_menu, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(menuItem -> {
+            int id = menuItem.getItemId();
+            if (id == R.id.copy_fqdn) {
+                copyToClipboard(view.getContext(), "FQDN", peer.getFqdn());
+                return true;
+            } else if (id == R.id.copy_ip) {
+                copyToClipboard(view.getContext(), "IP Address", peer.getIp());
+                return true;
+            }
+            return false;
+        });
+
+        popup.show();
+    }
+
+    private static void copyToClipboard(Context context, String label, String text) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(label, text);
+        clipboard.setPrimaryClip(clip);
+    }
+
     private void sortPeers() {
         filteredPeerList.sort((p1, p2) -> {
             int statusCompare = Boolean.compare(
@@ -134,6 +164,12 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
             } else {
                 binding.verticalLine.setBackgroundResource(R.drawable.peer_status_disconnected); // Red for disconnected
             }
+
+            // Long press listener
+            binding.getRoot().setOnLongClickListener(v -> {
+                showPopup(v, peer);
+                return true;
+            });
         }
     }
 }

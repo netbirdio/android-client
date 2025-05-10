@@ -24,4 +24,6 @@
     <string name="peer_filter_all">All</string>
     <string name="peer_filter_connected">Connected</string>
     <string name="peer_filter_disconnected">Disconnected</string>
+    <string name="peers_clipboard_copy_ip">Copy IP</string>
+    <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
 </resources>
