@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,7 @@ public class HomeFragment extends Fragment implements StateListener {
 
     private TextView textHostname;
     private TextView textNetworkAddress;
-    private TextView textEngineStatus;
+
     private TextView textConnStatus;
 
 
@@ -64,15 +65,12 @@ public class HomeFragment extends Fragment implements StateListener {
         textNetworkAddress = binding.textNetworkAddress;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textNetworkAddress::setText);
 
-        textEngineStatus = binding.textEngineStatus;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textEngineStatus::setText);
-
         textConnStatus = binding.textConnectionStatus;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textConnStatus::setText);
 
         updatePeerCount(0,0);
 
-        final Button buttonConnect = binding.btnConnect;
+        final ImageButton buttonConnect = binding.btnConnect;
         buttonConnect.setOnClickListener(v -> {
             if (serviceAccessor == null) {
                 return;
@@ -109,16 +107,11 @@ public class HomeFragment extends Fragment implements StateListener {
 
     @Override
     public void onEngineStarted() {
-        if (textEngineStatus != null) {
-            textEngineStatus.post(() -> textEngineStatus.setText("Connected"));
-        }
     }
 
     @Override
     public void onEngineStopped() {
-        if (textEngineStatus != null) {
-            textEngineStatus.post(() -> textEngineStatus.setText("Disconnected"));
-        }
+
     }
 
     @Override
@@ -136,7 +129,7 @@ public class HomeFragment extends Fragment implements StateListener {
         if (textConnStatus == null) {
             return;
         }
-        textConnStatus.post(() -> textEngineStatus.setText("Connected"));
+        textConnStatus.post(() -> textConnStatus.setText("Connected"));
 
     }
 
@@ -145,7 +138,7 @@ public class HomeFragment extends Fragment implements StateListener {
         if (textConnStatus == null) {
             return;
         }
-        textConnStatus.post(() -> textEngineStatus.setText("Connecting"));
+        textConnStatus.post(() -> textConnStatus.setText("Connecting"));
     }
 
     @Override
@@ -153,7 +146,7 @@ public class HomeFragment extends Fragment implements StateListener {
         if (textConnStatus == null) {
             return;
         }
-        textConnStatus.post(() -> textEngineStatus.setText("Disconnected"));
+        textConnStatus.post(() -> textConnStatus.setText("Disconnected"));
     }
 
     @Override
@@ -161,7 +154,7 @@ public class HomeFragment extends Fragment implements StateListener {
         if (textConnStatus == null) {
             return;
         }
-        textConnStatus.post(() -> textEngineStatus.setText("Disconnecting"));
+        textConnStatus.post(() -> textConnStatus.setText("Disconnecting"));
     }
 
     @Override

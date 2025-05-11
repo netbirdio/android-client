@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="nb_gray">#DEDEDE</color>
+    <color name="nb_bg_mask">#F2F2F2</color>
     <color name="nb_gray_light">#F5F5F5</color>
     <color name="nb_gray_dark">#4E4E4E</color>
     <color name="nb_gray_bg">#eeeeee</color>
