@@ -6,14 +6,13 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.material.card.MaterialCardView;
 
 import io.netbird.client.R;
@@ -32,7 +31,9 @@ public class HomeFragment extends Fragment implements StateListener {
     private TextView textHostname;
     private TextView textNetworkAddress;
 
-    private TextView textConnStatus;
+    private LottieAnimationView buttonConnect;
+    private ButtonAnimation buttonAnimation;
+    private boolean isConnected;
 
 
     @Override
@@ -65,18 +66,30 @@ public class HomeFragment extends Fragment implements StateListener {
         textNetworkAddress = binding.textNetworkAddress;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textNetworkAddress::setText);
 
-        textConnStatus = binding.textConnectionStatus;
+        TextView textConnStatus = binding.textConnectionStatus;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textConnStatus::setText);
 
         updatePeerCount(0,0);
 
-        final ImageButton buttonConnect = binding.btnConnect;
+        buttonConnect = binding.btnConnect;
+        buttonAnimation = new ButtonAnimation(buttonConnect, textConnStatus);
         buttonConnect.setOnClickListener(v -> {
             if (serviceAccessor == null) {
                 return;
             }
 
-            serviceAccessor.switchConnection(true);
+            // Disable button immediately
+            buttonConnect.setEnabled(false);
+
+            if (isConnected) {
+                // We're currently connected, so disconnect
+                buttonAnimation.disconnecting();
+                serviceAccessor.switchConnection(false);
+            } else {
+                // We're currently disconnected, so connect
+                buttonAnimation.connecting();
+                serviceAccessor.switchConnection(true);
+            }
         });
 
         MaterialCardView openPanelCardView = binding.peersBtn;
@@ -95,6 +108,7 @@ public class HomeFragment extends Fragment implements StateListener {
             ((StateListenerRegistry) getActivity()).unregisterServiceStateListener(this);
         }
 
+        // todo teardown animation
 
         serviceAccessor = null;
     }
@@ -126,35 +140,36 @@ public class HomeFragment extends Fragment implements StateListener {
 
     @Override
     public void onConnected() {
-        if (textConnStatus == null) {
-            return;
-        }
-        textConnStatus.post(() -> textConnStatus.setText("Connected"));
+        isConnected = true;
 
+        buttonConnect.post(() -> {
+            buttonAnimation.connected();
+            buttonConnect.setEnabled(true);
+        });
     }
 
     @Override
     public void onConnecting() {
-        if (textConnStatus == null) {
-            return;
-        }
-        textConnStatus.post(() -> textConnStatus.setText("Connecting"));
+        buttonConnect.post(() -> {
+            buttonAnimation.connecting();
+        });
     }
 
     @Override
     public void onDisconnected() {
-        if (textConnStatus == null) {
-            return;
-        }
-        textConnStatus.post(() -> textConnStatus.setText("Disconnected"));
+        isConnected = false;
+        buttonConnect.post(() -> {
+            buttonAnimation.disconnected();
+            buttonConnect.setEnabled(true);
+        });
+        updatePeerCount(0, 0);
     }
 
     @Override
     public void onDisconnecting() {
-        if (textConnStatus == null) {
-            return;
-        }
-        textConnStatus.post(() -> textConnStatus.setText("Disconnecting"));
+        buttonConnect.post(() -> {
+            buttonAnimation.disconnecting();
+        });
     }
 
     @Override
