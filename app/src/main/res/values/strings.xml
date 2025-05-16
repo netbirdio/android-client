@@ -13,6 +13,10 @@
     <string name="menu_docs">Docs</string>
     <string name="menu_change_server">Change Server</string>
 
+    <string name="main_status_disconnected">Disconnected</string>
+    <string name="main_desc_bg_mask">background mask</string>
+    <string name="main_desc_connect">connect-disconnect</string>
+
     <string name="about_version">Version:&#160;</string>
     <string name="about_license"><u>License agreement</u></string>
     <string name="about_privacy_poliy"><u>Privacy policy</u></string>
@@ -26,4 +30,5 @@
     <string name="peer_filter_disconnected">Disconnected</string>
     <string name="peers_clipboard_copy_ip">Copy IP</string>
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
+    <string name="peers_empty">empty</string>
 </resources>
