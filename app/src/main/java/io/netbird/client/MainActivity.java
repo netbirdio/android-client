@@ -89,9 +89,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 
-        // Remove this line to prevent conflict with your custom navigation listener
-        // NavigationUI.setupWithNavController(navigationView, navController);
-
         urlOpener = new CustomTabURLOpener(this, new CustomTabURLOpener.OnCustomTabResult() {
             @Override
             public void onSuccess() {
@@ -270,20 +267,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     ServiceStateListener serviceStateListener = new ServiceStateListener() {
         public void onStarted() {
-            Log.d(LOGTAG, "on go service started");
+            Log.d(LOGTAG, "on engine started");
             for (StateListener listener : serviceStateListeners) {
                 listener.onEngineStarted();
             }
         }
 
         public void onStopped() {
-            Log.d(LOGTAG, "on go service stopped");
+            Log.d(LOGTAG, "on engine stopped");
             for (StateListener listener : serviceStateListeners) {
                 listener.onEngineStopped();
             }
         }
 
         public void onError(String msg) {
+            Log.e(LOGTAG, "on engine error: " + msg);
+            // in case of error the onStopped will be called all the time
             runOnUiThread(() -> {
                 Toast toast = Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG);
                 toast.show();

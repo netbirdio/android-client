@@ -27,6 +27,7 @@ public class HomeFragment extends Fragment implements StateListener {
 
     private FragmentHomeBinding binding;
     private ServiceAccessor serviceAccessor;
+    private StateListenerRegistry stateListenerRegistry;
 
     private TextView textHostname;
     private TextView textNetworkAddress;
@@ -46,10 +47,13 @@ public class HomeFragment extends Fragment implements StateListener {
             throw new RuntimeException(context.toString() + " must implement ServiceAccessor");
         }
 
-        // Register this fragment as a service state listener
-        if (context instanceof StateListenerRegistry) {
-            ((StateListenerRegistry) context).registerServiceStateListener(this);
+        if(context instanceof StateListenerRegistry) {
+            stateListenerRegistry = (StateListenerRegistry) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement StateListenerRegistry");
         }
+        stateListenerRegistry.registerServiceStateListener(this);
+
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -103,11 +107,7 @@ public class HomeFragment extends Fragment implements StateListener {
     @Override
     public void onDetach() {
         super.onDetach();
-        // Unregister this fragment as a service state listener
-        if (getActivity() instanceof StateListenerRegistry) {
-            ((StateListenerRegistry) getActivity()).unregisterServiceStateListener(this);
-        }
-
+        stateListenerRegistry.unregisterServiceStateListener(this);
         // todo teardown animation
 
         serviceAccessor = null;
@@ -125,7 +125,11 @@ public class HomeFragment extends Fragment implements StateListener {
 
     @Override
     public void onEngineStopped() {
-
+        isConnected = false;
+        buttonConnect.post(() -> {
+            buttonAnimation.disconnected();
+            buttonConnect.setEnabled(true);
+        });
     }
 
     @Override
