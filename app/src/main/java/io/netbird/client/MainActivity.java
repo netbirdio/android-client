@@ -47,8 +47,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
     private final List<StateListener> serviceStateListeners = new ArrayList<>();
-
     private CustomTabURLOpener urlOpener;
+
+    private boolean isSSOFinishedWell = false;
 
     private final ServiceConnection serviceIPC = new ServiceConnection() {
 
@@ -89,20 +90,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 
-        urlOpener = new CustomTabURLOpener(this, new CustomTabURLOpener.OnCustomTabResult() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(MainActivity.this, "SSO success", Toast.LENGTH_LONG).show();
+        urlOpener = new CustomTabURLOpener(this, () -> {
+            if(isSSOFinishedWell) {
+                return;
             }
 
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(MainActivity.this, "SSO failed", Toast.LENGTH_LONG).show();
-                if(mBinder == null) {
-                    return;
-                }
-                mBinder.stopEngine();
+            if(mBinder == null) {
+                return;
             }
+
+            mBinder.stopEngine();
         });
 
         // VPN permission result launcher
@@ -234,12 +231,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         public void onConnected() {
+            isSSOFinishedWell = true;
             for (StateListener listener : serviceStateListeners) {
                 listener.onConnected();
             }
         }
 
         public void onConnecting() {
+            isSSOFinishedWell = true;
             for (StateListener listener : serviceStateListeners) {
                 listener.onConnecting();
             }
@@ -252,6 +251,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         public void onDisconnected() {
+            isSSOFinishedWell = false;
             for (StateListener listener : serviceStateListeners) {
                 listener.onDisconnected();
             }
