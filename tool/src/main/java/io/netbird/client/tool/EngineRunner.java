@@ -48,6 +48,7 @@ class EngineRunner {
     private synchronized void runClient(URLOpener urlOpener) {
         Log.d(LOGTAG, "run engine");
         if (engineIsRunning) {
+            Log.e(LOGTAG, "engine already running");
             return;
         }
 

@@ -22,8 +22,6 @@ public class VPNService extends android.net.VpnService {
     private final static String LOGTAG = "service";
     public static final String INTENT_ACTION_START = "io.netbird.client.intent.action.START_SERVICE";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
-    static public final int VPN_REQUEST_CODE = 0;
-
 
     private final IBinder myBinder = new MyLocalBinder();
 
