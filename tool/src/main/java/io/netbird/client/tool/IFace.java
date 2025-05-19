@@ -5,11 +5,14 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.system.OsConstants;
 import android.util.Log;
 
 import java.util.LinkedList;
+import java.util.concurrent.CountDownLatch;
 
 import io.netbird.gomobile.android.TunAdapter;
 import io.netbird.client.tool.wg.BackendException;
@@ -93,12 +96,26 @@ class IFace implements TunAdapter {
             return;
         }
 
-        if(new DNSWatch(vpnService).isPrivateDnsActive()) {
-            Log.d(LOGTAG, "ignore DNS because private dns is active");
-            return;
-        }
+        CountDownLatch latch = new CountDownLatch(1);
 
-        builder.addDnsServer(dns);
+        // ConnectivityManager must to run on the main thread instead of a Go routine
+        new Handler(Looper.getMainLooper()).post(() -> {
+            DNSWatch dnsWatch = new DNSWatch(vpnService);
+
+            if (!dnsWatch.isPrivateDnsActive()) {
+                builder.addDnsServer(dns);
+            } else {
+                Log.d(LOGTAG, "ignore DNS because private dns is active");
+            }
+
+            latch.countDown();
+        });
+
+        try {
+            latch.await(); // Will block the current thread until countDown() is called
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void disallowApp(VpnService.Builder builder, String packageName) {
