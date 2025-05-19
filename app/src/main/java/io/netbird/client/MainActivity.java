@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import com.google.android.material.navigation.NavigationView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -150,9 +152,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         }
 
+        if (id == R.id.nav_change_server) {
+            // Inflate the custom dialog layout
+            final View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_change_server, null);
+
+            final AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .create();
+
+            // Setup button click handlers
+            dialogView.findViewById(R.id.btn_yes).setOnClickListener(v -> {
+                navController.navigate(id);
+                binding.drawerLayout.closeDrawers();
+                alertDialog.dismiss();
+            });
+
+            dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> {
+                binding.drawerLayout.closeDrawers();
+                alertDialog.dismiss();
+            });
+
+            alertDialog.show();
+            return false;
+        }
+
         navController.navigate(id);
         binding.drawerLayout.closeDrawers();
-        return true;
+        return false;
     }
 
     @Override

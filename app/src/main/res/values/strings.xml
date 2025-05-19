@@ -23,7 +23,7 @@
     <string name="about_rights">© 2025 NetBird all rights reserved</string>
 
     <string name="btn_close">Close</string>
-    <string name="peers_no_machines">It looks like there are no machines that you can connect to...</string>
+    <string name="peers_no_machines">It looks like there are no machines that you can connect to…</string>
     <string name="peers_btn_learn_why">Learn why</string>
     <string name="peer_filter_all">All</string>
     <string name="peer_filter_connected">Connected</string>
@@ -31,4 +31,20 @@
     <string name="peers_clipboard_copy_ip">Copy IP</string>
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
     <string name="peers_empty">empty</string>
+
+    <string name="change_server_title_server">Server</string>
+    <string name="change_server_hint">https://example-api.domain.com:443</string>
+    <string name="change_server_btn">Change</string>
+    <string name="change_server_btn_reset">Use NetBird server</string>
+    <string name="change_server_alert_title">Change Server</string>
+    <string name="change_server_alert_yes">Yes</string>
+    <string name="change_server_alert_cancel">Cancel</string>
+    <string name="change_server_alert_desc">Changing server will erase the local config and disconnect this device from the current NetBird account.</string>
+
+    <string name="advanced_title_presharedkey">Add a pre-shared key</string>
+    <string name="advanced_details">You will only communicate with peers that use the same key.</string>
+    <string name="advanced_hint">Add a pre-shared key</string>
+    <string name="advanced_save">Save</string>
+    <string name="advanced_tracelog">Enable trace log level.</string>
+    <string name="advanced_share_logs">Share logs</string>
 </resources>
