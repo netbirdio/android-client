@@ -27,7 +27,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          cmdline-tools-version: 16.0
+          cmdline-tools-version: 12266719
       - name: NDK Cache
         id: ndk-cache
         uses: actions/cache@v3

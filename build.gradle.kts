@@ -13,11 +13,15 @@ if (versionPropsFile.exists()) {
     }
 }
 
+// Check if versionName and versionCode are provided via command line
+val cmdVersionCode = project.findProperty("versionCode")?.toString()?.toIntOrNull()
+val cmdVersionName = project.findProperty("versionName") as String?
+
 // Define the version properties in the extra properties extension
 ext {
     set("compileSdkVersion", 35)
     set("minSdkVersion", 26)
     set("targetSdkVersion", 35)
-    set("appVersionCode", (versionProps["versionCode"] as String).toInt())
-    set("appVersionName", versionProps["versionName"] as String)
+    set("appVersionCode", cmdVersionCode ?: (versionProps["versionCode"] as String).toInt())
+    set("appVersionName", cmdVersionName ?: versionProps["versionName"] as String)
 }
