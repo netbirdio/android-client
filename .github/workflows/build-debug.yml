@@ -12,17 +12,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
+        with:
+          submodules: recursive
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          java-version: "11"
+          java-version: "17"
           distribution: "adopt"
           cache: "gradle"
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '19'
       - name: Install Go
         uses: actions/setup-go@v4
         with:
@@ -30,7 +27,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          cmdline-tools-version: 8512546
+          cmdline-tools-version: 16.0
       - name: NDK Cache
         id: ndk-cache
         uses: actions/cache@v3
@@ -38,32 +35,20 @@ jobs:
           path: /usr/local/lib/android/sdk/ndk
           key: ndk-cache-23.1.7779620
       - name: Setup NDK
-        run: /usr/local/lib/android/sdk/cmdline-tools/7.0/bin/sdkmanager --install "ndk;23.1.7779620"
-      - name: Checkout netbird repository
-        uses: actions/checkout@v3
-        with:
-          repository: netbirdio/netbird
-          ref: main
-          path: netbird
-      - name: install gomobile
+        run: /usr/local/lib/android/sdk/cmdline-tools/16.0/bin/sdkmanager --install "ndk;23.1.7779620"
+      - name: Install gomobile
         run: go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20230531173138-3c911d8e3eda
-      - name: build android nebtird lib
-        run: PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh $GITHUB_WORKSPACE/netbird
+      - name: Build NetBird Go library
+        run: PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh
         env:
           ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/23.1.7779620
-      - name: add react-native lib
-        run: yarn add file:./react/netbird-lib
-      - name: yarn install deps
-        run: yarn install
-      - name: npx reacti-native bundle
-        run: npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
-      - name: create empty local.properties
-        run: touch android/local.properties
-      - name: build debug apk
-        run: cd android && ./gradlew assembleDebug
-      - name: upload non tags for debug purposes
+      - name: Get short Git hash
+        run: echo "SHORT_GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Build debug apk
+        run:  ./gradlew  --no-daemon assembleDebug -PversionName="ci-${SHORT_GIT_SHA}"
+      - name: Upload non tags for debug purposes
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 1
