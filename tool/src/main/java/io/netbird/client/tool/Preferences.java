@@ -26,4 +26,8 @@ public class Preferences {
     public void disableTraceLog() {
         sharedPref.edit().putBoolean(keyTraceLog, false).apply();
     }
+
+    public static String defaultServer() {
+        return "https://api.netbird.io";
+    }
 }

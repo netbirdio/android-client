@@ -1,22 +1,25 @@
 package io.netbird.client.ui.advanced;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import io.netbird.client.databinding.FragmentAdvancedBinding;
+import io.netbird.client.tool.Logcat;
 import io.netbird.client.tool.Preferences;
 
 
 public class AdvancedFragment extends Fragment {
 
     private static final String hiddenKey = "********";
+    private static final String LOGTAG = "AdvancedFragment";
 
     private FragmentAdvancedBinding binding;
 
@@ -25,7 +28,6 @@ public class AdvancedFragment extends Fragment {
 
         binding = FragmentAdvancedBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
 
         if (hasPreSharedKey(inflater.getContext())) {
             binding.presharedKey.setText(hiddenKey);
@@ -51,12 +53,14 @@ public class AdvancedFragment extends Fragment {
 
         // Handle "Share Logs" button click
         binding.buttonShareLogs.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Sharing logs...", Toast.LENGTH_SHORT).show();
+            shareLog();
         });
+
+        Preferences preferences = new Preferences(inflater.getContext());
+        binding.switchTraceLog.setChecked(preferences.isTraceLogEnabled());
 
         // Handle switch toggle
         binding.switchTraceLog.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Preferences preferences = new Preferences(buttonView.getContext());
             if (isChecked) {
                 preferences.enableTraceLog();
             } else {
@@ -99,6 +103,20 @@ public class AdvancedFragment extends Fragment {
             return !preferences.getPreSharedKey().isEmpty();
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    private void shareLog() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
+        try {
+            Logcat logcat = new Logcat(activity);
+            logcat.dump();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "failed to dump log", e);
         }
     }
 }

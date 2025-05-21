@@ -152,30 +152,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         }
 
-        if (id == R.id.nav_change_server) {
-            // Inflate the custom dialog layout
-            final View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_change_server, null);
-
-            final AlertDialog alertDialog = new AlertDialog.Builder(this)
-                    .setView(dialogView)
-                    .create();
-
-            // Setup button click handlers
-            dialogView.findViewById(R.id.btn_yes).setOnClickListener(v -> {
-                navController.navigate(id);
-                binding.drawerLayout.closeDrawers();
-                alertDialog.dismiss();
-            });
-
-            dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> {
-                binding.drawerLayout.closeDrawers();
-                alertDialog.dismiss();
-            });
-
-            alertDialog.show();
-            return false;
-        }
-
         navController.navigate(id);
         binding.drawerLayout.closeDrawers();
         return false;
@@ -206,6 +182,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             mBinder.runEngine(urlOpener);
         }
+    }
+
+    @Override
+    public void stopEngine() {
+        if (mBinder == null) {
+            return;
+        }
+        mBinder.stopEngine();
+
     }
 
     @Override

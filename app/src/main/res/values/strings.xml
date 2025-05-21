@@ -35,11 +35,19 @@
     <string name="change_server_title_server">Server</string>
     <string name="change_server_hint">https://example-api.domain.com:443</string>
     <string name="change_server_btn">Change</string>
+    <string name="change_server_verifying">Verifying…</string>
     <string name="change_server_btn_reset">Use NetBird server</string>
+
     <string name="change_server_alert_title">Change Server</string>
     <string name="change_server_alert_yes">Yes</string>
     <string name="change_server_alert_cancel">Cancel</string>
     <string name="change_server_alert_desc">Changing server will erase the local config and disconnect this device from the current NetBird account.</string>
+
+    <string name="change_server_success_title">Server was changed</string>
+    <string name="change_server_success_desc">Click on the connect button to continue</string>
+    <string name="change_server_success_cloe">Ok</string>
+    <string name="change_server_success_icon">Success icon</string>
+
 
     <string name="advanced_title_presharedkey">Add a pre-shared key</string>
     <string name="advanced_details">You will only communicate with peers that use the same key.</string>
