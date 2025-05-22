@@ -6,4 +6,5 @@ public interface ServiceAccessor {
     // Add methods to interact with your service
     void switchConnection(boolean isConnected);
     PeerInfoArray getPeersList();
+    void stopEngine();
 }
