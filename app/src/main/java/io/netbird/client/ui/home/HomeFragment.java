@@ -38,19 +38,19 @@ public class HomeFragment extends Fragment implements StateListener {
 
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
         if (context instanceof ServiceAccessor) {
             serviceAccessor = (ServiceAccessor) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement ServiceAccessor");
+            throw new RuntimeException(context + " must implement ServiceAccessor");
         }
 
         if(context instanceof StateListenerRegistry) {
             stateListenerRegistry = (StateListenerRegistry) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement StateListenerRegistry");
+            throw new RuntimeException(context + " must implement StateListenerRegistry");
         }
         stateListenerRegistry.registerServiceStateListener(this);
 
@@ -154,9 +154,7 @@ public class HomeFragment extends Fragment implements StateListener {
 
     @Override
     public void onConnecting() {
-        buttonConnect.post(() -> {
-            buttonAnimation.connecting();
-        });
+        buttonConnect.post(() -> buttonAnimation.connecting());
     }
 
     @Override
@@ -171,9 +169,7 @@ public class HomeFragment extends Fragment implements StateListener {
 
     @Override
     public void onDisconnecting() {
-        buttonConnect.post(() -> {
-            buttonAnimation.disconnecting();
-        });
+        buttonConnect.post(() -> buttonAnimation.disconnecting());
     }
 
     @Override

@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.NetBird" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Primary brand color. -->

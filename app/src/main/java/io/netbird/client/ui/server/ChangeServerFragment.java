@@ -43,7 +43,7 @@ public class ChangeServerFragment extends Fragment {
         if (context instanceof ServiceAccessor) {
             serviceAccessor = (ServiceAccessor) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement ServiceAccessor");
+            throw new RuntimeException(context + " must implement ServiceAccessor");
         }
     }
 
@@ -85,9 +85,7 @@ public class ChangeServerFragment extends Fragment {
                 .setView(dialogView)
                 .create();
 
-        dialogView.findViewById(R.id.btn_yes).setOnClickListener(v -> {
-            alertDialog.dismiss();
-        });
+        dialogView.findViewById(R.id.btn_yes).setOnClickListener(v -> alertDialog.dismiss());
 
         dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> {
             alertDialog.dismiss();
@@ -109,9 +107,7 @@ public class ChangeServerFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().popBackStack();
             });
 
-            alertDialog.setOnDismissListener(dialog -> {
-                requireActivity().getSupportFragmentManager().popBackStack();
-            });
+            alertDialog.setOnDismissListener(dialog -> requireActivity().getSupportFragmentManager().popBackStack());
             alertDialog.show();
         });
     }
