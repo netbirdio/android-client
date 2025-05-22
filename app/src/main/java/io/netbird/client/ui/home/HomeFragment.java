@@ -6,6 +6,7 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -96,7 +97,7 @@ public class HomeFragment extends Fragment implements StateListener {
             }
         });
 
-        MaterialCardView openPanelCardView = binding.peersBtn;
+        FrameLayout openPanelCardView = binding.peersBtn;
         openPanelCardView.setOnClickListener(v -> {
             PeersFragment peerFragment = new PeersFragment();
             peerFragment.show(getParentFragmentManager(), peerFragment.getTag());

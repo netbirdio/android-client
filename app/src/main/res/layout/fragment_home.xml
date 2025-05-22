@@ -98,18 +98,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_hostname" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/peers_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        layout_marginBottom="16dp"
-        app:cardElevation="300dp"
-        app:cardUseCompatPadding="false"
-        app:cardBackgroundColor="@color/nb_gray_bg"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:shapeAppearanceOverlay="@style/TopRoundedCorners">
+
+        <FrameLayout
+            android:id="@+id/peers_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shadow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -135,7 +132,7 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/top_guideline"
