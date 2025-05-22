@@ -11,6 +11,7 @@
         android:id="@+id/icon_warning"
         android:layout_width="28dp"
         android:layout_height="28dp"
+        android:contentDescription="@string/desc_exclamation_mark"
         android:src="@drawable/exclamation"
         android:layout_margin="30dp"
         app:layout_constraintTop_toTopOf="parent"

@@ -35,7 +35,7 @@
     <string name="peer_filter_disconnected">Disconnected</string>
     <string name="peers_clipboard_copy_ip">Copy IP</string>
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
-    <string name="peers_empty">empty</string>
+    <string name="peers_desc_filter">Filter</string>
 
     <string name="change_server_title_server">Server</string>
     <string name="change_server_hint">https://example-api.domain.com:443</string>
@@ -61,4 +61,8 @@
     <string name="advanced_tracelog">Enable trace log level.</string>
     <string name="advanced_share_logs">Share logs</string>
 
+
+    <string name="desc_logo">NetBird logo</string>
+    <string name="desc_exclamation_mark">exclamation mark</string>
+    <string name="desc_peers_empty">empty box</string>
 </resources>

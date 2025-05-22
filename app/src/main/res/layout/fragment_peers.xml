@@ -41,7 +41,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/peers_empty"
+            android:contentDescription="@string/desc_peers_empty"
             android:src="@drawable/empty_box"
             android:layout_margin="20dp"
             android:layout_gravity="center_horizontal"/>
@@ -59,6 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/peers_btn_learn_why"
+            android:textAllCaps="false"
             android:layout_marginTop="16dp" />
     </LinearLayout>
 
@@ -81,7 +82,7 @@
             android:padding="16dp"
             android:layout_margin="32dp"
             android:textColor="@color/nb_txt_light"
-            android:text="0 of 0 Peers connected"
+            tools:text="0 of 0 Peers connected"
             android:textAlignment="center"
             android:textSize="16sp"
             app:layout_constraintTop_toTopOf="parent"
@@ -107,7 +108,7 @@
             android:layout_height="40dp"
             android:src="@android:drawable/ic_menu_sort_by_size"
             app:tint="@color/nb_orange"
-            android:contentDescription="Filter"
+            android:contentDescription="@string/peers_desc_filter"
             android:padding="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_margin="8dp"

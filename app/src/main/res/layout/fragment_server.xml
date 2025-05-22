@@ -20,6 +20,7 @@
         android:id="@+id/edit_text_server"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:autofillHints=""
         android:hint="@string/change_server_hint"
         android:textSize="14sp"
         android:inputType="textUri"
@@ -58,6 +59,7 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:contentDescription="@string/fragment_firstinstall_desc_logo"
             android:src="@drawable/ic_netbird_btn"
             android:layout_marginEnd="8dp" />
 
