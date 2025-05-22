@@ -190,6 +190,7 @@ public class HomeFragment extends Fragment implements StateListener {
     }
 
     private void updatePeerCount(int connectedPeers, long totalPeers) {
+        if(binding==null) return;
         TextView textPeersCount = binding.textOpenPanel;
         String text = getString(R.string.peers_connected, connectedPeers, totalPeers);
         textPeersCount.post(() ->

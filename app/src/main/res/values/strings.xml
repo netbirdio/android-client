@@ -17,6 +17,11 @@
     <string name="main_desc_bg_mask">background mask</string>
     <string name="main_desc_connect">connect-disconnect</string>
 
+    <string name="fragment_firstinstall_txt">By default you will connect to NetBird\'s cloud servers. You can access the change_server menu to use another server.</string>
+    <string name="fragment_firstinstall_continue">Continue</string>
+    <string name="fragment_firstinstall_desc_logo">NetBird logo</string>
+
+
     <string name="about_version">Version:&#160;</string>
     <string name="about_license"><u>License agreement</u></string>
     <string name="about_privacy_poliy"><u>Privacy policy</u></string>
@@ -55,4 +60,5 @@
     <string name="advanced_save">Save</string>
     <string name="advanced_tracelog">Enable trace log level.</string>
     <string name="advanced_share_logs">Share logs</string>
+
 </resources>

@@ -28,5 +28,16 @@
         android:id="@+id/nav_change_server"
         android:name="io.netbird.client.ui.server.ChangeServerFragment"
         android:label="@string/menu_change_server"
-        tools:layout="@layout/fragment_server" />
+        tools:layout="@layout/fragment_server">
+        <argument
+            android:name="hideAlert"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/firstInstallFragment"
+        android:name="io.netbird.client.ui.fistinstall.FirstInstallFragment"
+        android:label="FirstInstall"
+        tools:layout="@layout/fragment_firstinstall" />
 </navigation>

@@ -11,7 +11,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ import com.google.android.material.navigation.NavigationView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -33,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import io.netbird.client.databinding.ActivityMainBinding;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
+import io.netbird.client.ui.PreferenceUI;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.PeerInfoArray;
 
@@ -126,6 +125,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         mBinder.runEngine(urlOpener);
                     }
                 });
+
+        if (!PreferenceUI.isFirstLaunch(this)) {
+            PreferenceUI.setFirstLaunchDone(this);
+            showFirstInstallFragment();
+        }
 
     }
 
@@ -300,4 +304,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
         }
     };
+
+    private void showFirstInstallFragment() {
+        if (navController != null) {
+            navController.navigate(R.id.firstInstallFragment);
+        } else {
+            Log.w(LOGTAG, "NavController is null, can't navigate to FirstInstallFragment");
+        }
+       }
 }

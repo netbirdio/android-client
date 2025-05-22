@@ -23,6 +23,8 @@ import io.netbird.gomobile.android.SSOListener;
 
 
 public class ChangeServerFragment extends Fragment {
+
+    public static final String HideAlertBundleArg="hideAlert";
     private FragmentServerBinding binding;
     private ServiceAccessor serviceAccessor;
 
@@ -50,7 +52,15 @@ public class ChangeServerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        showConfirmChangeServerDialog();
+        boolean hideAlert = false;
+        if (getArguments() != null) {
+            hideAlert = getArguments().getBoolean("hideAlert", false);
+        }
+
+        if (!hideAlert) {
+            showConfirmChangeServerDialog();
+        }
+
         binding.btnUseNetbird.setOnClickListener(v -> {
             disableUIElements();
             binding.editTextServer.setText(Preferences.defaultServer());
