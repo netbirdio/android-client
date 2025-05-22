@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            mBinder = null;
         }
     };
 
@@ -138,6 +139,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStart();
         Log.d(LOGTAG, "onStart");
         startService();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(LOGTAG, "onStop");
+        if (mBinder != null) {
+            mBinder.removeConnectionStateListener();
+            mBinder.removeServiceStateListener(serviceStateListener);
+            unbindService(serviceIPC);
+            mBinder = null;
+        }
     }
 
 
