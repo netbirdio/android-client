@@ -12,7 +12,7 @@
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:contentDescription="@string/change_server_success_icon"
-        android:src="@drawable/exclamation"
+        android:src="@drawable/check"
         android:layout_margin="30dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
