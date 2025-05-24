@@ -32,7 +32,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:contentDescription="@string/main_desc_connect"
-            android:src="@drawable/activation_on"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
@@ -42,9 +41,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintVertical_bias="0.07"
             app:layout_constraintWidth_percent="0.79"
-            app:lottie_fileName="button_start_connecting.json"
+            app:lottie_fileName="button_full.json"
             app:lottie_autoPlay="false"
-            app:lottie_loop="true"/>
+            app:lottie_loop="false"/>
 
         <TextView
             android:id="@+id/text_connection_status"

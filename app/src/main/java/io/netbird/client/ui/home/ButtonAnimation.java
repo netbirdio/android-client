@@ -22,61 +22,67 @@ class ButtonAnimation {
 
     private AnimationState currentState = AnimationState.DISCONNECTED;
 
+    // Frame ranges
+    private final int CONNECTED = 142;
+    private final int CONNECTING_START = 78;
+    private final int CONNECTING_END = 120;
+
+    private final int CONNECTING_FADE_OUT_START = 121;
+    private final int CONNECTING_FADE_OUT_END = 142;
+
+    private final int DISCONNECTING_LOOP_FADE_IN_START = 152;
+    private final int DISCONNECTING_LOOP_FADE_IN_END = 214;
+
+    private final int DISCONNECTING_LOOP_START = 215;
+    private final int DISCONNECTING_LOOP_END = 258;
+
+    private final int DISCONNECTING_FADE_OUT_START = 259;
+    private final int DISCONNECTING_FADE_OUT_END = 339;
+
     public ButtonAnimation(LottieAnimationView buttonConnect, TextView textConnStatus) {
-        this.btn = buttonConnect;
+        btn = buttonConnect;
         this.textConnStatus = textConnStatus;
     }
 
     public void connecting() {
-        if (currentState == AnimationState.CONNECTING || currentState == AnimationState.CONNECTING_LOOP) return;
-
-        // avoid incorrect callback from engine
-        if (currentState == AnimationState.DISCONNECTING) {
+        if (currentState == AnimationState.CONNECTING || currentState == AnimationState.CONNECTING_LOOP)
             return;
-        }
+
+        if (currentState == AnimationState.DISCONNECTING)
+            return;
 
         currentState = AnimationState.CONNECTING;
-
         textConnStatus.post(() -> textConnStatus.setText("Connecting"));
 
         btn.removeAllAnimatorListeners();
-        btn.setAnimation("button_start_connecting.json");
-        btn.setRepeatCount(0); // play once
-        btn.addAnimatorListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                    currentState = AnimationState.CONNECTING_LOOP;
-                    btn.setAnimation("button_connecting_loop.json");
-                    btn.setRepeatCount(LottieDrawable.INFINITE);
-                    btn.removeAnimatorListener(this);
-                    btn.playAnimation();
-            }
-        });
+        btn.setMinAndMaxFrame(CONNECTING_START, CONNECTING_END);
+        btn.setRepeatCount(LottieDrawable.INFINITE);
         btn.playAnimation();
     }
 
     public void connected() {
         if (currentState == AnimationState.CONNECTED) return;
 
-
         textConnStatus.post(() -> textConnStatus.setText("Connected"));
 
         btn.removeAllAnimatorListeners();
+
         if (!btn.isAnimating()) {
+            // when we switch the fragment and the animation is not running
             currentState = AnimationState.CONNECTED;
-            btn.setAnimation("button_connected.json");
-            btn.setRepeatCount(LottieDrawable.INFINITE);
-            btn.playAnimation();
+            btn.setRepeatCount(0);
+            btn.setFrame(CONNECTED);
+            btn.pauseAnimation();
         } else {
             // Wait for current animation to end, then start the connected animation
             btn.setRepeatCount(0);
             btn.addAnimatorListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    currentState = AnimationState.CONNECTED;
-                    btn.setAnimation("button_connected.json");
-                    btn.setRepeatCount(LottieDrawable.INFINITE);
                     btn.removeAnimatorListener(this);
+                    currentState = AnimationState.CONNECTED;
+                    btn.setMinAndMaxFrame(CONNECTING_FADE_OUT_START, CONNECTING_FADE_OUT_END);
+                    btn.setRepeatCount(0);
                     btn.playAnimation();
                 }
             });
@@ -84,41 +90,42 @@ class ButtonAnimation {
     }
 
     public void disconnecting() {
-        if (currentState == AnimationState.DISCONNECTING) return;
+        if (currentState == AnimationState.DISCONNECTING)
+            return;
 
         currentState = AnimationState.DISCONNECTING;
-
         textConnStatus.post(() -> textConnStatus.setText("Disconnecting"));
 
         btn.removeAllAnimatorListeners();
-        btn.setRepeatCount(0); // let current animation finish
+        btn.setRepeatCount(0);
+        btn.setMinAndMaxFrame(DISCONNECTING_LOOP_FADE_IN_START, DISCONNECTING_LOOP_FADE_IN_END);
         btn.addAnimatorListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 btn.removeAnimatorListener(this);
-                btn.setAnimation("button_disconnecting.json");
+                btn.setMinAndMaxFrame(DISCONNECTING_LOOP_START, DISCONNECTING_LOOP_END);
                 btn.setRepeatCount(LottieDrawable.INFINITE);
                 btn.playAnimation();
             }
         });
+
+        btn.playAnimation();
     }
 
     public void disconnected() {
-        if (currentState == AnimationState.DISCONNECTED) return;
+        if (currentState == AnimationState.DISCONNECTED)
+            return;
 
-        btn.removeAllAnimatorListeners();
-        btn.setRepeatCount(0); // let current animation finish
+        currentState = AnimationState.DISCONNECTED;
+        textConnStatus.post(() -> textConnStatus.setText("Disconnected"));
+
         btn.addAnimatorListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                currentState = AnimationState.DISCONNECTED;
-                btn.removeAnimatorListener(this);
-                btn.setAnimation("button_start_connecting.json");
+                btn.removeAllAnimatorListeners();
                 btn.setRepeatCount(0);
-                btn.setProgress(0f);
-                btn.pauseAnimation();
-
-                textConnStatus.post(() -> textConnStatus.setText("Disconnected"));
+                btn.setMinAndMaxFrame(DISCONNECTING_FADE_OUT_START, DISCONNECTING_FADE_OUT_END);
+                btn.playAnimation();
             }
         });
     }
