@@ -38,6 +38,13 @@ import io.netbird.gomobile.android.PeerInfoArray;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceAccessor, StateListenerRegistry {
 
+    private enum ConnectionState {
+        UNKNOWN,
+        CONNECTED,
+        CONNECTING,
+        DISCONNECTING,
+        DISCONNECTED
+    }
     private final static String LOGTAG = "MainActivity";
     private VPNService.MyLocalBinder mBinder;
 
@@ -51,6 +58,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CustomTabURLOpener urlOpener;
 
     private boolean isSSOFinishedWell = false;
+
+    // Last known state for UI updates
+    private ConnectionState lastKnownState = ConnectionState.UNKNOWN;
+    private String lastFqdn = null;
+    private String lastIp = null;
+    private long lastPeersCount = 0;
 
     private final ServiceConnection serviceIPC = new ServiceConnection() {
 
@@ -227,6 +240,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
         serviceStateListeners.add(listener);
+
+        if(lastKnownState == ConnectionState.UNKNOWN) {
+            return; // No state to notify yet
+        }
+
+        switch (lastKnownState) {
+            case CONNECTED:
+                listener.onConnected();
+                break;
+            case CONNECTING:
+                listener.onConnecting();
+                break;
+            case DISCONNECTING:
+                listener.onDisconnecting();
+                break;
+            case DISCONNECTED:
+                listener.onDisconnected();
+                break;
+        }
+
+        if (lastFqdn != null && lastIp != null) {
+            listener.onAddressChanged(lastFqdn, lastIp);
+        }
+
+        listener.onPeersListChanged(lastPeersCount);
     }
 
     @Override
@@ -250,15 +288,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bindService(bindIntent, serviceIPC, Context.BIND_ABOVE_CLIENT);
     }
 
+    private void showFirstInstallFragment() {
+        if (navController != null) {
+            navController.navigate(R.id.firstInstallFragment);
+        } else {
+            Log.w(LOGTAG, "NavController is null, can't navigate to FirstInstallFragment");
+        }
+    }
+
     ConnectionListener connectionListener = new ConnectionListener() {
         @Override
-        public void onAddressChanged(String fqdn, String ip) {
+        public synchronized void onAddressChanged(String fqdn, String ip) {
+            lastFqdn = fqdn;
+            lastIp = ip;
+
             for (StateListener listener : serviceStateListeners) {
                 listener.onAddressChanged(fqdn, ip);
             }
         }
 
         public void onConnected() {
+            lastKnownState = ConnectionState.CONNECTED;
+
             isSSOFinishedWell = true;
             for (StateListener listener : serviceStateListeners) {
                 listener.onConnected();
@@ -266,6 +317,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         public void onConnecting() {
+            lastKnownState = ConnectionState.CONNECTING;
+
             isSSOFinishedWell = true;
             for (StateListener listener : serviceStateListeners) {
                 listener.onConnecting();
@@ -273,12 +326,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         public void onDisconnecting() {
+            lastKnownState = ConnectionState.DISCONNECTING;
+
             for (StateListener listener : serviceStateListeners) {
                 listener.onDisconnecting();
             }
         }
 
         public void onDisconnected() {
+            lastKnownState = ConnectionState.DISCONNECTED;
+
             isSSOFinishedWell = false;
             for (StateListener listener : serviceStateListeners) {
                 listener.onDisconnected();
@@ -287,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onPeersListChanged(long numberOfPeers) {
+            lastPeersCount = numberOfPeers;
             for (StateListener listener : serviceStateListeners) {
                 listener.onPeersListChanged(numberOfPeers);
             }
@@ -309,20 +367,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         public void onError(String msg) {
-            Log.e(LOGTAG, "on engine error: " + msg);
             // in case of error the onStopped will be called all the time
+            Log.e(LOGTAG, "on engine error: " + msg);
             runOnUiThread(() -> {
                 Toast toast = Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG);
                 toast.show();
             });
         }
     };
-
-    private void showFirstInstallFragment() {
-        if (navController != null) {
-            navController.navigate(R.id.firstInstallFragment);
-        } else {
-            Log.w(LOGTAG, "NavController is null, can't navigate to FirstInstallFragment");
-        }
-       }
 }

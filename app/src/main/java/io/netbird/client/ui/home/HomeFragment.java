@@ -3,6 +3,7 @@ package io.netbird.client.ui.home;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,42 +38,31 @@ public class HomeFragment extends Fragment implements StateListener {
     private ButtonAnimation buttonAnimation;
     private boolean isConnected;
 
-
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-
         if (context instanceof ServiceAccessor) {
             serviceAccessor = (ServiceAccessor) context;
         } else {
             throw new RuntimeException(context + " must implement ServiceAccessor");
         }
-
         if(context instanceof StateListenerRegistry) {
             stateListenerRegistry = (StateListenerRegistry) context;
         } else {
             throw new RuntimeException(context + " must implement StateListenerRegistry");
         }
-        stateListenerRegistry.registerServiceStateListener(this);
-
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         textHostname = binding.textHostname;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textHostname::setText);
-
         textNetworkAddress = binding.textNetworkAddress;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textNetworkAddress::setText);
-
         TextView textConnStatus = binding.textConnectionStatus;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textConnStatus::setText);
 
         updatePeerCount(0,0);
 
@@ -102,26 +92,28 @@ public class HomeFragment extends Fragment implements StateListener {
             PeersFragment peerFragment = new PeersFragment();
             peerFragment.show(getParentFragmentManager(), peerFragment.getTag());
         });
+
+        stateListenerRegistry.registerServiceStateListener(this);
         return root;
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stateListenerRegistry.unregisterServiceStateListener(this);
+        binding = null;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        stateListenerRegistry.unregisterServiceStateListener(this);
-        // todo teardown animation
-
         serviceAccessor = null;
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
-
-    @Override
     public void onEngineStarted() {
+
     }
 
     @Override
