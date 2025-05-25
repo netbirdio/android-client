@@ -1,10 +1,13 @@
 package io.netbird.client;
 
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -21,6 +24,7 @@ import com.google.android.material.navigation.NavigationView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -90,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         setSupportActionBar(binding.appBarMain.toolbar);
 
+
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
 
@@ -104,6 +109,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            if (destination.getId() == R.id.nav_home) {
+                removeToolbarShadow();
+            } else {
+                resetToolbar();
+            }
+        });
 
         urlOpener = new CustomTabURLOpener(this, () -> {
             if(isSSOFinishedWell) {
@@ -294,6 +307,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             Log.w(LOGTAG, "NavController is null, can't navigate to FirstInstallFragment");
         }
+    }
+
+    private void removeToolbarShadow() {
+        binding.appBarMain.appbar.setStateListAnimator(null);
+        binding.appBarMain.appbar.setElevation(0f);
+        binding.appBarMain.toolbar.setElevation(0);
+        binding.appBarMain.toolbar.setBackground(new ColorDrawable(ContextCompat.getColor(this, R.color.nb_bg_home)));
+    }
+
+    private void resetToolbar() {
+        binding.appBarMain.appbar.setStateListAnimator(AnimatorInflater.loadStateListAnimator(
+                this, com.google.android.material.R.animator.design_appbar_state_list_animator));
+        binding.appBarMain.appbar.setElevation(10f);
+        binding.appBarMain.toolbar.setElevation(0);
+        binding.appBarMain.toolbar.setBackground(new ColorDrawable(Color.parseColor("#FFFFFF")));
     }
 
     ConnectionListener connectionListener = new ConnectionListener() {
