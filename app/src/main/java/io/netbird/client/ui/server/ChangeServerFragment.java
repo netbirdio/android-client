@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.UUID;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -19,6 +21,7 @@ import io.netbird.client.databinding.FragmentServerBinding;
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Auth;
 import io.netbird.client.tool.Preferences;
+import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.SSOListener;
 
 
@@ -30,9 +33,7 @@ public class ChangeServerFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
         binding = FragmentServerBinding.inflate(inflater, container, false);
-
         return binding.getRoot();
     }
 
@@ -69,7 +70,22 @@ public class ChangeServerFragment extends Fragment {
 
         binding.btnChangeServer.setOnClickListener(v->{
             disableUIElements();
-            updateServer(view.getContext(), binding.editTextServer.getText().toString());
+
+            String setupKey = binding.editTextSetupKey.getText().toString().trim();
+
+            if (!setupKey.isEmpty()) {
+                if (isValidSetupKey(setupKey)) {
+                    String serverAddress = binding.editTextServer.getText().toString().trim();
+                    loginWithSetupKey(v.getContext(), serverAddress, setupKey);
+                } else {
+                    binding.editTextSetupKey.setError(v.getContext().getString(R.string.change_server_error_invalid_setup_key));
+                    enableUIElements();
+                }
+            } else {
+                // Setup key is empty; update server instead
+                String serverAddress = binding.editTextServer.getText().toString().trim();
+                updateServer(v.getContext(), serverAddress);
+            }
         });
     }
 
@@ -112,6 +128,34 @@ public class ChangeServerFragment extends Fragment {
         });
     }
 
+    private void loginWithSetupKey(Context context, String mgmServerAddress, String setupKey) {
+        String configFilePath = Preferences.configFile(context);
+        try {
+            Auth auther = Android.newAuth(configFilePath, mgmServerAddress);
+            auther.loginWithSetupKeyAndSaveConfig(new ErrListener() {
+                @Override
+                public void onError(Exception e) {
+                    FragmentActivity activity = getActivity();
+                    if (activity == null) return;
+                    activity.runOnUiThread(() -> binding.editTextServer.setError(e.getMessage()));
+                    enableUIElements();
+                }
+
+                @Override
+                public void onSuccess() {
+                    enableUIElements();
+                    showSuccessDialog(context);
+                    serviceAccessor.stopEngine();
+                }
+            }, setupKey, "devicename");
+        } catch (Exception e) {
+            FragmentActivity activity = getActivity();
+            if (activity == null) return;
+            activity.runOnUiThread(() -> binding.editTextServer.setError(e.getMessage()));
+            enableUIElements();
+        }
+    }
+
     private void updateServer(Context context, String mgmServerAddress) {
         String configFilePath = Preferences.configFile(context);
         try {
@@ -123,7 +167,6 @@ public class ChangeServerFragment extends Fragment {
                     if (activity == null) return;
                     activity.runOnUiThread(() -> binding.editTextServer.setError(e.getMessage()));
                     enableUIElements();
-
                 }
 
                 @Override
@@ -144,6 +187,7 @@ public class ChangeServerFragment extends Fragment {
     private void disableUIElements() {
         if(binding == null) return;
         binding.editTextServer.setEnabled(false);
+        binding.editTextSetupKey.setEnabled(false);
         binding.btnChangeServer.setText(R.string.change_server_verifying);
         binding.btnChangeServer.setEnabled(false);
         binding.btnUseNetbird.setVisibility(View.GONE);
@@ -153,11 +197,19 @@ public class ChangeServerFragment extends Fragment {
         if (activity == null) return;
         activity.runOnUiThread(() -> {
             binding.editTextServer.setEnabled(true);
+            binding.editTextSetupKey.setEnabled(true);
             binding.btnChangeServer.setText(R.string.change_server_btn);
             binding.btnChangeServer.setEnabled(true);
             binding.btnUseNetbird.setVisibility(View.VISIBLE);
         });
+    }
 
-
+    private boolean isValidSetupKey(String setupKey) {
+        try {
+            UUID.fromString(setupKey);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }
