@@ -68,10 +68,10 @@ public class HomeFragment extends Fragment implements StateListener {
 
         buttonConnect = binding.btnConnect;
         if(buttonAnimation == null) {
-            buttonAnimation = new ButtonAnimation(buttonConnect, textConnStatus);
-        } else {
-            buttonAnimation.refresh();
+            buttonAnimation = new ButtonAnimation();
         }
+        buttonAnimation.refresh(buttonConnect, textConnStatus);
+
         buttonConnect.setOnClickListener(v -> {
             if (serviceAccessor == null) {
                 return;
