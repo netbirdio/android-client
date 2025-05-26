@@ -10,12 +10,15 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -339,6 +342,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .create();
+
+        // Set bold-formatted text using Html.fromHtml
+        TextView descriptionText = dialogView.findViewById(R.id.text_description);
+        descriptionText.setText(Html.fromHtml(getString(R.string.dialog_always_on_desc), Html.FROM_HTML_MODE_LEGACY));
 
         dialogView.findViewById(R.id.btn_close).setOnClickListener(v -> alertDialog.dismiss());
 
