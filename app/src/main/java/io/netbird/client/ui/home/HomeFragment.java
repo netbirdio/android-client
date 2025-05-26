@@ -56,8 +56,6 @@ public class HomeFragment extends Fragment implements StateListener {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
-
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
@@ -67,8 +65,13 @@ public class HomeFragment extends Fragment implements StateListener {
 
         updatePeerCount(0,0);
 
+
         buttonConnect = binding.btnConnect;
-        buttonAnimation = new ButtonAnimation(buttonConnect, textConnStatus);
+        if(buttonAnimation == null) {
+            buttonAnimation = new ButtonAnimation(buttonConnect, textConnStatus);
+        } else {
+            buttonAnimation.refresh();
+        }
         buttonConnect.setOnClickListener(v -> {
             if (serviceAccessor == null) {
                 return;
@@ -81,6 +84,7 @@ public class HomeFragment extends Fragment implements StateListener {
                 serviceAccessor.switchConnection(false);
             } else {
                 // We're currently disconnected, so connect
+                buttonAnimation.connecting();
                 serviceAccessor.switchConnection(true);
             }
         });
@@ -99,6 +103,7 @@ public class HomeFragment extends Fragment implements StateListener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        buttonAnimation.destroy();
         stateListenerRegistry.unregisterServiceStateListener(this);
         binding = null;
     }
