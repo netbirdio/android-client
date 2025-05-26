@@ -10,7 +10,9 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -212,7 +214,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if (item.getItemId() == R.id.nav_docs) {
+        if (id == R.id.nav_docs) {
+            item.setCheckable(false);
+            binding.drawerLayout.closeDrawers();
             openDocs();
             return true;
         }
