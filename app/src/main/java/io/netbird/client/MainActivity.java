@@ -1,6 +1,5 @@
 package io.netbird.client;
 
-import android.animation.AnimatorInflater;
 import android.animation.StateListAnimator;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -10,7 +9,6 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Html;
@@ -57,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DISCONNECTING,
         DISCONNECTED
     }
-    private final static String LOGTAG = "MainActivity";
+    private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
 
 
@@ -130,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if(isSSOFinishedWell) {
                 return;
             }
-
             if(mBinder == null) {
                 return;
             }
@@ -142,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         vpnActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    Log.d(LOGTAG, "on activity resutl: "+ result.getResultCode());
                     if((result.getResultCode() != Activity.RESULT_OK)) {
                         Log.w(LOGTAG, "VPN permission denied");
                         Toast.makeText(this, "VPN permission required", Toast.LENGTH_LONG).show();
@@ -182,6 +178,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStop() {
         super.onStop();
         Log.d(LOGTAG, "onStop");
+        if (!urlOpener.isOpened() && mBinder != null) {
+            mBinder.removeConnectionStateListener();
+            mBinder.removeServiceStateListener(serviceStateListener);
+            unbindService(serviceIPC);
+            mBinder = null;
+        }
+    }
+
+    @Override
+    protected  void onDestroy() {
+        super.onDestroy();
+
         if (mBinder != null) {
             mBinder.removeConnectionStateListener();
             mBinder.removeServiceStateListener(serviceStateListener);
@@ -244,7 +252,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
         mBinder.stopEngine();
-
     }
 
     @Override

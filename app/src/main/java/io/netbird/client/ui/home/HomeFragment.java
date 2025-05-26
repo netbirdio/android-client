@@ -74,16 +74,13 @@ public class HomeFragment extends Fragment implements StateListener {
                 return;
             }
 
-            // Disable button immediately
-            buttonConnect.setEnabled(false);
-
             if (isConnected) {
                 // We're currently connected, so disconnect
+                buttonConnect.setEnabled(false);
                 buttonAnimation.disconnecting();
                 serviceAccessor.switchConnection(false);
             } else {
                 // We're currently disconnected, so connect
-                buttonAnimation.connecting();
                 serviceAccessor.switchConnection(true);
             }
         });

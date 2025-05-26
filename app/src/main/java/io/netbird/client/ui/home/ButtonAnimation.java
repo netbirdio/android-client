@@ -12,32 +12,23 @@ class ButtonAnimation {
     private final LottieAnimationView btn;
     private final TextView textConnStatus;
 
+
     private enum AnimationState {
-        DISCONNECTED,
-        CONNECTING,
-        CONNECTING_LOOP,
-        CONNECTED,
-        DISCONNECTING,
+        DISCONNECTED, CONNECTING, CONNECTED, DISCONNECTING
     }
 
     private AnimationState currentState = AnimationState.DISCONNECTED;
 
     // Frame ranges
-    private final int CONNECTED = 142;
-    private final int CONNECTING_START = 78;
-    private final int CONNECTING_END = 120;
+    private static final int CONNECTED_FRAME = 142;
+    private static final int CONNECTING_START = 78, CONNECTING_END = 120;
+    private static final int CONNECTING_FADE_OUT_START = 121, CONNECTING_FADE_OUT_END = 142;
+    private static final int DISCONNECTING_FADE_IN_START = 152, DISCONNECTING_FADE_IN_END = 214;
+    private static final int DISCONNECTING_LOOP_START = 215, DISCONNECTING_LOOP_END = 258;
+    private static final int DISCONNECTING_FADE_OUT_START = 259, DISCONNECTING_FADE_OUT_END = 339;
 
-    private final int CONNECTING_FADE_OUT_START = 121;
-    private final int CONNECTING_FADE_OUT_END = 142;
 
-    private final int DISCONNECTING_LOOP_FADE_IN_START = 152;
-    private final int DISCONNECTING_LOOP_FADE_IN_END = 214;
 
-    private final int DISCONNECTING_LOOP_START = 215;
-    private final int DISCONNECTING_LOOP_END = 258;
-
-    private final int DISCONNECTING_FADE_OUT_START = 259;
-    private final int DISCONNECTING_FADE_OUT_END = 339;
 
     public ButtonAnimation(LottieAnimationView buttonConnect, TextView textConnStatus) {
         btn = buttonConnect;
@@ -45,7 +36,7 @@ class ButtonAnimation {
     }
 
     public void connecting() {
-        if (currentState == AnimationState.CONNECTING || currentState == AnimationState.CONNECTING_LOOP)
+        if (currentState == AnimationState.CONNECTING )
             return;
 
         if (currentState == AnimationState.DISCONNECTING)
@@ -70,8 +61,7 @@ class ButtonAnimation {
         if (!btn.isAnimating()) {
             // when we switch the fragment and the animation is not running
             currentState = AnimationState.CONNECTED;
-            btn.setRepeatCount(0);
-            btn.setFrame(CONNECTED);
+            btn.setFrame(CONNECTED_FRAME);
             btn.pauseAnimation();
         } else {
             // Wait for current animation to end, then start the connected animation
@@ -90,15 +80,14 @@ class ButtonAnimation {
     }
 
     public void disconnecting() {
-        if (currentState == AnimationState.DISCONNECTING)
-            return;
+        if (currentState == AnimationState.DISCONNECTING) return;
 
         currentState = AnimationState.DISCONNECTING;
         textConnStatus.post(() -> textConnStatus.setText("Disconnecting"));
 
         btn.removeAllAnimatorListeners();
         btn.setRepeatCount(0);
-        btn.setMinAndMaxFrame(DISCONNECTING_LOOP_FADE_IN_START, DISCONNECTING_LOOP_FADE_IN_END);
+        btn.setMinAndMaxFrame(DISCONNECTING_FADE_IN_START, DISCONNECTING_FADE_IN_END);
         btn.addAnimatorListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -116,9 +105,18 @@ class ButtonAnimation {
         if (currentState == AnimationState.DISCONNECTED)
             return;
 
-        currentState = AnimationState.DISCONNECTED;
         textConnStatus.post(() -> textConnStatus.setText("Disconnected"));
 
+        btn.removeAllAnimatorListeners();
+        if(currentState == AnimationState.CONNECTING) {
+            currentState = AnimationState.DISCONNECTED;
+            btn.setFrame(DISCONNECTING_FADE_OUT_END);
+            btn.pauseAnimation();
+            return;
+        }
+
+        currentState = AnimationState.DISCONNECTED;
+        btn.setRepeatCount(0);
         btn.addAnimatorListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
