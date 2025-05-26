@@ -65,4 +65,6 @@
     <string name="desc_logo">NetBird logo</string>
     <string name="desc_exclamation_mark">exclamation mark</string>
     <string name="desc_peers_empty">empty box</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[You have a VPN app that has Always On turned on. To enable the NetBird app, you first need to go to your Network & Internet settings -> Advanced -> Check the gear icon for all the apps listed here on this page. Disable Always On for the apps that are not NetBird.]]></string>
 </resources>

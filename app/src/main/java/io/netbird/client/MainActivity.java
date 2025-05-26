@@ -15,6 +15,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import com.google.android.material.navigation.NavigationView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -147,12 +149,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Log.d(LOGTAG, "VPN permission granted");
                     // Always-on VPN check
                     if (VPNService.isUsingAlwaysOnVPN(this)) {
-                        // todo throw always on message
-                        //https://github.com/netbirdio/android-client/blob/7a02f88025e18ea1548c457b2c76de2bddd598af/react/netbird-lib/android/src/main/java/com/netbirdlib/NetbirdLibModule.java#L130
-                    }
-
-                    if (mBinder != null) {
-                        mBinder.runEngine(urlOpener);
+                        showAlwaysOnDialog(() -> {
+                            if (mBinder != null) {
+                                mBinder.runEngine(urlOpener);
+                            }
+                        });
+                    } else {
+                        if (mBinder != null) {
+                            mBinder.runEngine(urlOpener);
+                        }
                     }
                 });
 
@@ -327,6 +332,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         binding.appBarMain.appbar.setElevation(10f);
         binding.appBarMain.toolbar.setElevation(0);
         binding.appBarMain.toolbar.setBackground(new ColorDrawable(Color.parseColor("#FFFFFF")));
+    }
+
+    private void showAlwaysOnDialog(Runnable onDismissAction) {
+        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_always_on, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+
+        dialogView.findViewById(R.id.btn_close).setOnClickListener(v -> alertDialog.dismiss());
+
+        alertDialog.setOnDismissListener(dialog -> {
+            if (onDismissAction != null) {
+                onDismissAction.run();
+            }
+        });
+
+        alertDialog.show();
     }
 
     ConnectionListener connectionListener = new ConnectionListener() {
