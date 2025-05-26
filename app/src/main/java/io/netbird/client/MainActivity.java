@@ -1,6 +1,7 @@
 package io.netbird.client;
 
 import android.animation.AnimatorInflater;
+import android.animation.StateListAnimator;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,6 +42,8 @@ import io.netbird.gomobile.android.PeerInfoArray;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceAccessor, StateListenerRegistry {
+
+    private StateListAnimator stateAnim;
 
     private enum ConnectionState {
         UNKNOWN,
@@ -310,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void removeToolbarShadow() {
+        stateAnim = binding.appBarMain.appbar.getStateListAnimator();
         binding.appBarMain.appbar.setStateListAnimator(null);
         binding.appBarMain.appbar.setElevation(0f);
         binding.appBarMain.toolbar.setElevation(0);
@@ -317,8 +321,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void resetToolbar() {
-        binding.appBarMain.appbar.setStateListAnimator(AnimatorInflater.loadStateListAnimator(
-                this, com.google.android.material.R.animator.design_appbar_state_list_animator));
+        if(stateAnim!=null) {
+            binding.appBarMain.appbar.setStateListAnimator(stateAnim);
+        }
         binding.appBarMain.appbar.setElevation(10f);
         binding.appBarMain.toolbar.setElevation(0);
         binding.appBarMain.toolbar.setBackground(new ColorDrawable(Color.parseColor("#FFFFFF")));
