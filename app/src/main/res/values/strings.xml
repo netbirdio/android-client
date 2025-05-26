@@ -30,6 +30,7 @@
     <string name="btn_close">Close</string>
     <string name="peers_no_machines">It looks like there are no machines that you can connect to…</string>
     <string name="peers_btn_learn_why">Learn why</string>
+    <string name="peers_hint_search_peers">Search peers</string>
     <string name="peer_filter_all">All</string>
     <string name="peer_filter_connected">Connected</string>
     <string name="peer_filter_disconnected">Disconnected</string>

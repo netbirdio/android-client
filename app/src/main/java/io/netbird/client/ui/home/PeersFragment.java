@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
@@ -14,11 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.text.TextWatcher;
+import android.text.Editable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -124,17 +126,29 @@ public class PeersFragment extends BottomSheetDialogFragment {
         peersListView.setAdapter(adapter);
 
         binding.searchView.clearFocus();
-        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        binding.searchView.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                adapter.filterBySearchQuery(query);
-                return true;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                adapter.filterBySearchQuery(newText);
-                return true;
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.filterBySearchQuery(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        binding.searchView.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                // Hide the drawableStart icon when focused
+                binding.searchView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            } else {
+                // Show the drawableStart icon when not focused
+                Drawable icon = ContextCompat.getDrawable(requireContext(), R.drawable.search);
+                binding.searchView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
             }
         });
 
