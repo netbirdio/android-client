@@ -24,8 +24,9 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
 
     public enum FilterStatus {
         ALL,
+        IDLE,
+        CONNECTING,
         CONNECTED,
-        DISCONNECTED
     }
 
     private final List<Peer> peerList;
@@ -78,14 +79,21 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
     }
 
     private void doFilterByStatus() {
-        filteredPeerList.clear();
-        if (filterStatus == FilterStatus.ALL) {
-            filteredPeerList.addAll(peerList);
-            return;
+        Status targetStatus;
+        switch (filterStatus) {
+            case IDLE:
+                targetStatus = Status.IDLE;
+                break;
+            case CONNECTING:
+                targetStatus = Status.CONNECTING;
+                break;
+            case CONNECTED:
+                targetStatus = Status.CONNECTED;
+                break;
+            default:
+                filteredPeerList.addAll(peerList);
+                return;
         }
-
-        Status targetStatus = filterStatus == FilterStatus.CONNECTED ?
-                Status.CONNECTED : Status.DISCONNECTED;
 
         for (Peer peer : peerList) {
             if (peer.getStatus() == targetStatus) {

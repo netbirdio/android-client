@@ -161,11 +161,14 @@ public class PeersFragment extends BottomSheetDialogFragment {
                 if (itemId == R.id.all) {
                     adapter.filterByStatus(PeersAdapter.FilterStatus.ALL);
                     return true;
+                } else if (itemId == R.id.idle) {
+                    adapter.filterByStatus(PeersAdapter.FilterStatus.IDLE);
+                    return true;
+                } else if (itemId == R.id.connecting) {
+                    adapter.filterByStatus(PeersAdapter.FilterStatus.CONNECTING);
+                    return true;
                 } else if (itemId == R.id.connected) {
                     adapter.filterByStatus(PeersAdapter.FilterStatus.CONNECTED);
-                    return true;
-                } else if (itemId == R.id.disconnected) {
-                    adapter.filterByStatus(PeersAdapter.FilterStatus.DISCONNECTED);
                     return true;
                 }
 

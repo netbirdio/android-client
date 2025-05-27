@@ -2,16 +2,19 @@ package io.netbird.client.ui.home;
 
 
 public enum Status {
-   CONNECTED,
-   DISCONNECTED;
+   IDLE,
+   CONNECTING,
+   CONNECTED;
 
    @Override
    public String toString() {
       switch (this) {
+         case IDLE:
+            return "idle";
+         case CONNECTING:
+            return "connecting";
          case CONNECTED:
             return "connected";
-         case DISCONNECTED:
-            return "disconnected";
          default:
             return super.toString();
       }
@@ -23,10 +26,12 @@ public enum Status {
       }
 
       switch (status.toLowerCase()) {
+         case "idle":
+            return IDLE;
+         case "connecting":
+            return CONNECTING;
          case "connected":
             return CONNECTED;
-         case "disconnected":
-            return DISCONNECTED;
          default:
             throw new IllegalArgumentException("Unknown status: " + status);
       }

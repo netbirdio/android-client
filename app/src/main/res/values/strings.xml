@@ -32,8 +32,9 @@
     <string name="peers_btn_learn_why">Learn why</string>
     <string name="peers_hint_search_peers">Search peers</string>
     <string name="peer_filter_all">All</string>
+    <string name="peer_filter_idle">Idle</string>
+    <string name="peer_filter_connecting">Connecting</string>
     <string name="peer_filter_connected">Connected</string>
-    <string name="peer_filter_disconnected">Disconnected</string>
     <string name="peers_clipboard_copy_ip">Copy IP</string>
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
     <string name="peers_desc_filter">Filter</string>
