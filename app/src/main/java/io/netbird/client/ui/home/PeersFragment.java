@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,7 @@ public class PeersFragment extends BottomSheetDialogFragment {
         if (context instanceof ServiceAccessor) {
             serviceAccessor = (ServiceAccessor) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement ServiceAccessor");
+            throw new RuntimeException(context + " must implement ServiceAccessor");
         }
     }
 
@@ -69,12 +70,22 @@ public class PeersFragment extends BottomSheetDialogFragment {
                 BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
                 behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 behavior.setSkipCollapsed(true);
-                behavior.setPeekHeight(0);
-                bottomSheet.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
-                bottomSheet.requestLayout();
+
+                 if(binding != null && binding.peersList.getVisibility() == View.VISIBLE) {
+                     behavior.setPeekHeight(0);
+                     DisplayMetrics displayMetrics = new DisplayMetrics();
+                     requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                     int screenHeight = displayMetrics.heightPixels;
+
+                     ViewGroup.LayoutParams params = bottomSheet.getLayoutParams();
+                     params.height = (int) (screenHeight * 0.91f);
+                     bottomSheet.setLayoutParams(params);
+                 }
 
                 // Set the background to transparent
                 bottomSheet.setBackground(new ColorDrawable(Color.TRANSPARENT));
+                bottomSheet.requestLayout();
+
 
                 // Remove gray background (dim)
                 if (dialog.getWindow() != null) {
