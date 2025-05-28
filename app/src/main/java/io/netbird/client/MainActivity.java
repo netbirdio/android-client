@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
 
-        if (!PreferenceUI.isFirstLaunch(this)) {
+        if (PreferenceUI.isFirstLaunch(this)) {
             PreferenceUI.setFirstLaunchDone(this);
             showFirstInstallFragment();
         }
