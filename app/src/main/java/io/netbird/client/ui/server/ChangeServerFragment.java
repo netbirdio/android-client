@@ -3,6 +3,7 @@ package io.netbird.client.ui.server;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,18 +70,28 @@ public class ChangeServerFragment extends Fragment {
         });
 
         binding.btnChangeServer.setOnClickListener(v->{
+            if (binding.editTextServer.getText().toString().trim().isEmpty()) {
+                return;
+            }
+
             disableUIElements();
 
-            String setupKey = binding.editTextSetupKey.getText().toString().trim();
-
-            if (!setupKey.isEmpty()) {
-                if (isValidSetupKey(setupKey)) {
-                    String serverAddress = binding.editTextServer.getText().toString().trim();
-                    loginWithSetupKey(v.getContext(), serverAddress, setupKey);
-                } else {
+            if (binding.setupKeyGroup.getVisibility() == View.VISIBLE) {
+                String setupKey = binding.editTextSetupKey.getText().toString().trim();
+                if(setupKey.isEmpty()) {
                     binding.editTextSetupKey.setError(v.getContext().getString(R.string.change_server_error_invalid_setup_key));
+                    binding.editTextSetupKey.requestFocus();
                     enableUIElements();
+                    return;
                 }
+                if (!isValidSetupKey(setupKey)) {
+                    binding.editTextSetupKey.setError(v.getContext().getString(R.string.change_server_error_invalid_setup_key));
+                    binding.editTextSetupKey.requestFocus();
+                    enableUIElements();
+                    return;
+                }
+                String serverAddress = binding.editTextServer.getText().toString().trim();
+                loginWithSetupKey(v.getContext(), serverAddress, setupKey);
             } else {
                 // Setup key is empty; update server instead
                 String serverAddress = binding.editTextServer.getText().toString().trim();
@@ -137,7 +148,10 @@ public class ChangeServerFragment extends Fragment {
                 public void onError(Exception e) {
                     FragmentActivity activity = getActivity();
                     if (activity == null) return;
-                    activity.runOnUiThread(() -> binding.editTextServer.setError(e.getMessage()));
+                    activity.runOnUiThread(() -> {
+                        binding.editTextServer.setError(e.getMessage());
+                        binding.editTextServer.requestFocus();
+                    });
                     enableUIElements();
                 }
 
@@ -151,7 +165,10 @@ public class ChangeServerFragment extends Fragment {
         } catch (Exception e) {
             FragmentActivity activity = getActivity();
             if (activity == null) return;
-            activity.runOnUiThread(() -> binding.editTextServer.setError(e.getMessage()));
+            activity.runOnUiThread(() -> {
+                binding.editTextServer.setError(e.getMessage());
+                binding.editTextServer.requestFocus();
+            });
             enableUIElements();
         }
     }
@@ -163,23 +180,45 @@ public class ChangeServerFragment extends Fragment {
             auther.saveConfigIfSSOSupported(new SSOListener() {
                 @Override
                 public void onError(Exception e) {
+                    Log.e("ChangeServerFragment", "Error updating server: " + e.getMessage());
+
                     FragmentActivity activity = getActivity();
                     if (activity == null) return;
-                    activity.runOnUiThread(() -> binding.editTextServer.setError(e.getMessage()));
+
+                    activity.runOnUiThread(() -> {
+                        binding.editTextServer.setError(e.getMessage());
+                        binding.editTextServer.requestFocus();
+                    });
                     enableUIElements();
                 }
 
                 @Override
                 public void onSuccess(boolean sso) {
+                    FragmentActivity activity = getActivity();
+                    if (activity == null) return;
+
+                    Log.i("ChangeServerFragment", "update server result, SSO supported: " + sso);
+                    activity.runOnUiThread(() -> {
+                        if(!sso) {
+                            binding.setupKeyGroup.setVisibility(View.VISIBLE);
+                        } else {
+                            binding.setupKeyGroup.setVisibility(View.GONE);
+                        }
+                    });
+
                     enableUIElements();
                     showSuccessDialog(context);
                     serviceAccessor.stopEngine();
                 }
             });
         } catch (Exception e) {
+            Log.e("ChangeServerFragment", "Exception in updating server: " + e.getMessage());
             FragmentActivity activity = getActivity();
             if (activity == null) return;
-            activity.runOnUiThread(() -> binding.editTextServer.setError(e.getMessage()));
+            activity.runOnUiThread(() -> {
+                binding.editTextServer.setError(e.getMessage());
+                binding.editTextServer.requestFocus();
+            });
             enableUIElements();
         }
     }

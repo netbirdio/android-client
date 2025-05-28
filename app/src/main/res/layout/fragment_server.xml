@@ -32,6 +32,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/setup_key_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="text_setup_key_label,edit_text_setup_key" />
+
     <TextView
         android:id="@+id/text_setup_key_label"
         android:layout_width="0dp"
