@@ -72,6 +72,7 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
     }
 
     private void applyFilters() {
+        filteredPeerList.clear();
         doFilterByStatus();
         doFilterBySearchQuery();
         sortPeers();
