@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -99,9 +100,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         setSupportActionBar(binding.appBarMain.toolbar);
 
+        setVersionText();
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
@@ -370,6 +371,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         alertDialog.show();
+    }
+
+    private void setVersionText() {
+        try {
+            try {
+                String packageName = getPackageName();
+                String versionName = getPackageManager().getPackageInfo(packageName, 0).versionName;
+                binding.navVersion.setText(versionName);
+            } catch (Exception e) {
+                binding.navVersion.setText("");
+            }
+        } catch (Exception e) {
+        }
     }
 
     ConnectionListener connectionListener = new ConnectionListener() {
