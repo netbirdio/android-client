@@ -3,7 +3,6 @@ package io.netbird.client.ui.home;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,16 +12,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.google.android.material.card.MaterialCardView;
 
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentHomeBinding;
+import io.netbird.client.ui.PreferenceUI;
 import io.netbird.gomobile.android.PeerInfo;
 import io.netbird.gomobile.android.PeerInfoArray;
 
@@ -82,6 +80,8 @@ public class HomeFragment extends Fragment implements StateListener {
                 buttonConnect.setEnabled(false);
                 buttonAnimation.disconnecting();
                 serviceAccessor.switchConnection(false);
+                PreferenceUI.routeChangedNotificationInvalidate(requireContext());
+                binding.btnRouteChanged.setVisibility(View.GONE);
             } else {
                 // We're currently disconnected, so connect
                 buttonAnimation.connecting();
@@ -89,6 +89,22 @@ public class HomeFragment extends Fragment implements StateListener {
             }
         });
 
+        // route change notification
+        if(PreferenceUI.routeChangedNotification(requireContext())) {
+            binding.btnRouteChanged.setVisibility(View.VISIBLE);
+        } else {
+            binding.btnRouteChanged.setVisibility(View.GONE);
+        }
+
+        binding.btnRouteChanged.setOnClickListener(v -> {
+            requireActivity().runOnUiThread(() -> {
+                PreferenceUI.routeChangedNotificationInvalidate(requireContext());
+                showRouteChangeNotificationDialog(requireContext());
+                binding.btnRouteChanged.setVisibility(View.GONE);
+            });
+        });
+
+        // peers button
         FrameLayout openPanelCardView = binding.peersBtn;
         openPanelCardView.setOnClickListener(v -> {
             PeersFragment peerFragment = new PeersFragment();
@@ -98,7 +114,6 @@ public class HomeFragment extends Fragment implements StateListener {
         stateListenerRegistry.registerServiceStateListener(this);
         return root;
     }
-
 
     @Override
     public void onDestroyView() {
@@ -136,6 +151,14 @@ public class HomeFragment extends Fragment implements StateListener {
 
         textNetworkAddress.post(() -> textNetworkAddress.setText(netAddr));
         textHostname.post(() -> textHostname.setText(hostname));
+    }
+
+    @Override
+    public void routeChanged() {
+        if(binding == null) {
+            return;
+        }
+        binding.btnRouteChanged.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -188,5 +211,20 @@ public class HomeFragment extends Fragment implements StateListener {
         textPeersCount.post(() ->
                 textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
         );
+    }
+
+    private void showRouteChangeNotificationDialog(Context context) {
+        requireActivity().runOnUiThread(() -> {
+            final View dialogView = getLayoutInflater().inflate(R.layout.dialog_route_changed, null);
+            final AlertDialog alertDialog = new AlertDialog.Builder(context)
+                    .setView(dialogView)
+                    .create();
+
+            dialogView.findViewById(R.id.btn_close).setOnClickListener(v -> {
+                alertDialog.dismiss();
+            });
+
+            alertDialog.show();
+        });
     }
 }

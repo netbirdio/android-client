@@ -16,6 +16,7 @@
     <string name="main_status_disconnected">Disconnected</string>
     <string name="main_desc_bg_mask">background mask</string>
     <string name="main_desc_connect">connect-disconnect</string>
+    <string name="main_desc_new_route_notification">new route notification</string>
 
     <string name="fragment_firstinstall_txt">By default you will connect to NetBird\'s cloud servers. You can access the change_server menu to use another server.</string>
     <string name="fragment_firstinstall_continue">Continue</string>
@@ -73,4 +74,8 @@
     <string name="desc_peers_empty">empty box</string>
 
     <string name="dialog_always_on_desc"><![CDATA[You have a VPN app that has Always On turned on. To enable the NetBird app, you first need to go to your <b>Network & Internet settings</b> → <b>Advanced</b> → Check the <b>gear icon</b> for all the apps listed here on this page. Disable Always On for the apps that are not NetBird.]]></string>
+
+    <string name="dialog_new_route_img_desc">new route exclamation mark</string>
+    <string name="dialog_new_route_desc">Your network administrator changed a configuration that requires restarting the connection.</string>
+
 </resources>

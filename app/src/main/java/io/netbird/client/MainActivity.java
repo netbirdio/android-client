@@ -2,18 +2,17 @@ package io.netbird.client;
 
 import android.animation.StateListAnimator;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -32,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -40,6 +40,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
+import io.netbird.client.tool.NetworkChangeNotifier;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
@@ -181,6 +182,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if(lastKnownState == ConnectionState.DISCONNECTED) {
+            PreferenceUI.routeChangedNotificationInvalidate(this);
+        }
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                serviceMessageReceiver,
+                new IntentFilter(NetworkChangeNotifier.action)
+        );
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceMessageReceiver);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         Log.d(LOGTAG, "onStop");
@@ -189,6 +209,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mBinder.removeServiceStateListener(serviceStateListener);
             unbindService(serviceIPC);
             mBinder = null;
+        }
+
+        if(lastKnownState == ConnectionState.DISCONNECTED) {
+            PreferenceUI.routeChangedNotificationInvalidate(this);
         }
     }
 
@@ -386,6 +410,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private final BroadcastReceiver serviceMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            PreferenceUI.setRouteChangedNotification(context);
+            for(StateListener listener : serviceStateListeners) {
+                listener.routeChanged();
+            }
+        }
+    };
     ConnectionListener connectionListener = new ConnectionListener() {
         @Override
         public synchronized void onAddressChanged(String fqdn, String ip) {

@@ -5,6 +5,8 @@ public interface StateListener {
     void onEngineStopped();
     void onAddressChanged(String var1, String var2);
 
+    void routeChanged();
+
     void onConnected();
 
     void onConnecting();
