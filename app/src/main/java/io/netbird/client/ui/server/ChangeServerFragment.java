@@ -2,6 +2,7 @@ package io.netbird.client.ui.server;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -161,7 +162,7 @@ public class ChangeServerFragment extends Fragment {
                     showSuccessDialog(context);
                     serviceAccessor.stopEngine();
                 }
-            }, setupKey, "devicename");
+            }, setupKey, deviceName());
         } catch (Exception e) {
             FragmentActivity activity = getActivity();
             if (activity == null) return;
@@ -171,6 +172,10 @@ public class ChangeServerFragment extends Fragment {
             });
             enableUIElements();
         }
+    }
+
+    private String deviceName() {
+        return Build.PRODUCT;
     }
 
     private void updateServer(Context context, String mgmServerAddress) {
