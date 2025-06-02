@@ -49,4 +49,9 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation(libs.browser)  // Added for CustomTabsIntent
     implementation(libs.lottie)
+
+    // Firebase Crashlytics
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 }
