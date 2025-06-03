@@ -3,6 +3,16 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            if (project.hasProperty("NETBIRD_UPLOAD_STORE_FILE")) {
+                storeFile = file(project.property("NETBIRD_UPLOAD_STORE_FILE") as String)
+                storePassword = project.property("NETBIRD_UPLOAD_STORE_PASSWORD") as String
+                keyAlias = project.property("NETBIRD_UPLOAD_KEY_ALIAS") as String
+                keyPassword = project.property("NETBIRD_UPLOAD_KEY_PASSWORD") as String
+            }
+        }
+    }
     namespace = "io.netbird.client"
     compileSdk = rootProject.extra["compileSdkVersion"] as Int
 
@@ -17,8 +27,8 @@ android {
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
