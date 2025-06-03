@@ -84,5 +84,5 @@ cd ~/projects/android-client
 2. Run gradlew
 ```shell
 cd ~/projects/android-client/android
-./gradlew bundleDebug  -PappVersionCode=123 -PappVersionName=1.2.3
+./gradlew bundleDebug  -PversionCode=123 -PversionName=1.2.3
 ```
