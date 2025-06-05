@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="io.netbird.client.ui.home.HomeFragment"
+        android:label=""
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_advanced"
+        android:name="io.netbird.client.ui.advanced.AdvancedFragment"
+        android:label="@string/menu_advanced"
+        tools:layout="@layout/fragment_advanced" />
+
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="io.netbird.client.ui.about.AboutFragment"
+        android:label="@string/menu_about"
+        tools:layout="@layout/fragment_about" />
+
+    <fragment
+        android:id="@+id/nav_change_server"
+        android:name="io.netbird.client.ui.server.ChangeServerFragment"
+        android:label="@string/menu_change_server"
+        tools:layout="@layout/fragment_server">
+        <argument
+            android:name="hideAlert"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/firstInstallFragment"
+        android:name="io.netbird.client.ui.fistinstall.FirstInstallFragment"
+        android:label="FirstInstall"
+        tools:layout="@layout/fragment_firstinstall" />
+</navigation>

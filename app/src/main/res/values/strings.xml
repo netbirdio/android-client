@@ -1,0 +1,81 @@
+<resources>
+    <string name="app_name">NetBird</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>of</b> <b>%2$d</b> Peers connected]]></string>
+    <string name="menu_advanced">Advanced</string>
+    <string name="menu_about">About</string>
+    <string name="menu_docs">Docs</string>
+    <string name="menu_change_server">Change Server</string>
+
+    <string name="main_status_disconnected">Disconnected</string>
+    <string name="main_desc_bg_mask">background mask</string>
+    <string name="main_desc_connect">connect-disconnect</string>
+    <string name="main_desc_new_route_notification">new route notification</string>
+
+    <string name="fragment_firstinstall_txt">By default you will connect to NetBird\'s cloud servers. You can access the change_server menu to use another server.</string>
+    <string name="fragment_firstinstall_continue">Continue</string>
+    <string name="fragment_firstinstall_desc_logo">NetBird logo</string>
+
+
+    <string name="about_version">Version:&#160;</string>
+    <string name="about_license"><u>License agreement</u></string>
+    <string name="about_privacy_poliy"><u>Privacy policy</u></string>
+    <string name="about_rights">© 2025 NetBird all rights reserved</string>
+
+    <string name="btn_close">Close</string>
+    <string name="peers_no_machines">It looks like there are no machines that you can connect to…</string>
+    <string name="peers_btn_learn_why">Learn why</string>
+    <string name="peers_hint_search_peers">Search peers</string>
+    <string name="peer_filter_all">All</string>
+    <string name="peer_filter_idle">Idle</string>
+    <string name="peer_filter_connecting">Connecting</string>
+    <string name="peer_filter_connected">Connected</string>
+    <string name="peers_clipboard_copy_ip">Copy IP</string>
+    <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
+    <string name="peers_desc_filter">Filter</string>
+
+    <string name="change_server_title_server">Server</string>
+    <string name="change_server_hint">https://example-api.domain.com:443</string>
+    <string name="change_server_setup_key">Setup key</string>
+    <string name="change_server_setup_key_hint">key</string>
+    <string name="change_server_error_invalid_setup_key">Invalid setup key format</string>
+
+    <string name="change_server_btn">Change</string>
+    <string name="change_server_verifying">Verifying…</string>
+    <string name="change_server_btn_reset">Use NetBird server</string>
+
+    <string name="change_server_alert_title">Change Server</string>
+    <string name="change_server_alert_yes">Yes</string>
+    <string name="change_server_alert_cancel">Cancel</string>
+    <string name="change_server_alert_desc">Changing server will erase the local config and disconnect this device from the current NetBird account.</string>
+
+    <string name="change_server_success_title">Server was changed</string>
+    <string name="change_server_success_desc">Click on the connect button to continue</string>
+    <string name="change_server_success_cloe">Ok</string>
+    <string name="change_server_success_icon">Success icon</string>
+
+
+    <string name="advanced_title_presharedkey">Add a pre-shared key</string>
+    <string name="advanced_details">You will only communicate with peers that use the same key.</string>
+    <string name="advanced_hint">Add a pre-shared key</string>
+    <string name="advanced_save">Save</string>
+    <string name="advanced_tracelog">Enable trace log level.</string>
+    <string name="advanced_share_logs">Share logs</string>
+
+
+    <string name="desc_logo">NetBird logo</string>
+    <string name="desc_exclamation_mark">exclamation mark</string>
+    <string name="desc_peers_empty">empty box</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[You have a VPN app that has Always On turned on. To enable the NetBird app, you first need to go to your <b>Network & Internet settings</b> → <b>Advanced</b> → Check the <b>gear icon</b> for all the apps listed here on this page. Disable Always On for the apps that are not NetBird.]]></string>
+
+    <string name="dialog_new_route_img_desc">new route exclamation mark</string>
+    <string name="dialog_new_route_desc">Your network administrator changed a configuration that requires restarting the connection.</string>
+
+</resources>

@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/all"
+        android:title="@string/peer_filter_all" />
+    <item
+        android:id="@+id/idle"
+        android:title="@string/peer_filter_idle" />
+    <item
+        android:id="@+id/connecting"
+        android:title="@string/peer_filter_connecting" />
+    <item
+        android:id="@+id/connected"
+        android:title="@string/peer_filter_connected" />
+</menu>

@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/copy_fqdn"
+        android:title="@string/peers_clipboard_copy_fqdn" />
+    <item
+        android:id="@+id/copy_ip"
+        android:title="@string/peers_clipboard_copy_ip" />
+</menu>
