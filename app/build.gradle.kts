@@ -1,5 +1,12 @@
+val hasGoogleServicesJson = rootProject.file("app/google-services.json").exists()
+
 plugins {
     alias(libs.plugins.android.application)
+}
+
+if (hasGoogleServicesJson) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 android {
@@ -13,6 +20,7 @@ android {
             }
         }
     }
+
     namespace = "io.netbird.client"
     compileSdk = rootProject.extra["compileSdkVersion"] as Int
 
@@ -35,10 +43,12 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         viewBinding = true
     }
@@ -60,8 +70,9 @@ dependencies {
     implementation(libs.browser)  // Added for CustomTabsIntent
     implementation(libs.lottie)
 
-    // Firebase Crashlytics
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.analytics)
+    if (hasGoogleServicesJson) {
+        implementation(platform(libs.firebase.bom))
+        implementation(libs.firebase.crashlytics)
+        implementation(libs.firebase.analytics)
+    }
 }
