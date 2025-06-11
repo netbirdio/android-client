@@ -14,6 +14,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import io.netbird.gomobile.android.ConnectionListener;
+import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.URLOpener;
 
@@ -112,6 +113,10 @@ public class VPNService extends android.net.VpnService {
 
         public PeerInfoArray peersInfo() {
             return engineRunner.peersInfo();
+        }
+
+        public NetworkArray networks() {
+            return engineRunner.networks();
         }
 
         public void setConnectionStateListener(ConnectionListener listener) {

@@ -107,8 +107,8 @@ public class HomeFragment extends Fragment implements StateListener {
         // peers button
         FrameLayout openPanelCardView = binding.peersBtn;
         openPanelCardView.setOnClickListener(v -> {
-            PeersFragment peerFragment = new PeersFragment();
-            peerFragment.show(getParentFragmentManager(), peerFragment.getTag());
+            BottomDialogFragment fragment = new BottomDialogFragment();
+            fragment.show(getParentFragmentManager(), fragment.getTag());
         });
 
         stateListenerRegistry.registerServiceStateListener(this);
