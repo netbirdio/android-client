@@ -15,24 +15,35 @@
         app:layout_constraintBottom_toBottomOf="@id/peer"
         android:background="@drawable/peer_status_connected"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/name"
+        app:layout_constraintEnd_toStartOf="@id/exit_node"
        />
+
+    <ImageView
+        android:id="@+id/exit_node"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:contentDescription="@string/networks_desc_exit_node"
+        android:src="@drawable/exit"
+        app:layout_constraintStart_toEndOf="@id/vertical_line"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="8dp" />
 
     <TextView
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="home router with a very very long name"
+        tools:text="home long text here because"
         android:textColor="@color/nb_txt_light"
         android:textSize="14sp"
-        android:maxLines="1"
+        android:maxLines="2"
         android:ellipsize="end"
-        app:layout_constraintStart_toEndOf="@id/vertical_line"
+        app:layout_constraintStart_toEndOf="@id/exit_node"
         app:layout_constraintEnd_toStartOf="@id/guideline_half"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="8dp" />
 
     <TextView
         android:id="@+id/address"

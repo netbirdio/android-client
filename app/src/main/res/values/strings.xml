@@ -42,7 +42,8 @@
 
 
     <string name="resources_connected"><![CDATA[<b>%1$d</b> <b>of</b> <b>%2$d</b> Resources connected]]></string>
-    <string name="networks_hing_search_networks">Search resources</string>
+    <string name="networks_hint_search_networks">Search resources</string>
+    <string name="networks_desc_exit_node">exit node</string>
 
     <string name="change_server_title_server">Server</string>
     <string name="change_server_hint">https://example-api.domain.com:443</string>

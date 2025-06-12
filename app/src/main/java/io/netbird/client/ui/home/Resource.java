@@ -29,4 +29,7 @@ public class Resource {
     public Status getStatus() {
        return status;
     }
+    public boolean isExitNode() {
+       return address.equals("0.0.0.0/0");
+    }
 }

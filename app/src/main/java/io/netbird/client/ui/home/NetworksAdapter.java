@@ -97,6 +97,13 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
             } else {
                 binding.verticalLine.setBackgroundResource(R.drawable.peer_status_disconnected); // Red for disconnected
             }
+
+            if(resource.isExitNode()) {
+                binding.exitNode.setVisibility(android.view.View.VISIBLE);
+            } else {
+                binding.exitNode.setVisibility(android.view.View.GONE);
+            }
+
         }
     }
 }
