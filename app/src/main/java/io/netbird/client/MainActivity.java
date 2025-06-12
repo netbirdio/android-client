@@ -185,10 +185,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        if(lastKnownState == ConnectionState.DISCONNECTED) {
-            PreferenceUI.routeChangedNotificationInvalidate(this);
-        }
-
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 serviceMessageReceiver,
                 new IntentFilter(NetworkChangeNotifier.action)
@@ -210,10 +206,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mBinder.removeServiceStateListener(serviceStateListener);
             unbindService(serviceIPC);
             mBinder = null;
-        }
-
-        if(lastKnownState == ConnectionState.DISCONNECTED) {
-            PreferenceUI.routeChangedNotificationInvalidate(this);
         }
     }
 
