@@ -1,11 +1,13 @@
 package io.netbird.client.ui.home;
 
 public class Resource {
+   private final Status status;
    private final String name;
    private final String address;
    private final String peer;
 
-   public Resource(String name, String address, String peer) {
+   public Resource(Status status, String name, String address, String peer) {
+      this.status = status;
       this.name = name;
       this.address = address;
       this.peer = peer;
@@ -22,5 +24,9 @@ public class Resource {
 
     public String getPeer() {
         return peer;
+    }
+
+    public Status getStatus() {
+       return status;
     }
 }

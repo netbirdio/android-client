@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,8 +63,7 @@ public class NetworksFragment extends Fragment {
       ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
 
       NetworkArray networks = serviceAccessor.getNetworks();
-      PeerInfoArray peers = serviceAccessor.getPeersList();
-      updateNetworkCount(peers, networks);
+      updateNetworkCount(networks);
 
       ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, networks.size() > 0);
 
@@ -75,7 +73,8 @@ public class NetworksFragment extends Fragment {
       ArrayList<Resource> resources = new ArrayList<>();
       for( int i = 0; i < networks.size(); i++) {
          Network network = networks.get(i);
-         resources.add(new Resource(network.getName(), network.getNetwork(), network.getPeer()));
+         Status status = Status.fromString(network.getStatus());
+         resources.add(new Resource(status, network.getName(), network.getNetwork(), network.getPeer()));
       }
 
       NetworksAdapter adapter = new NetworksAdapter(resources);
@@ -100,20 +99,25 @@ public class NetworksFragment extends Fragment {
       });
    }
 
-   private void updateNetworkCount(PeerInfoArray peers, NetworkArray networks) {
+   private Status getStatusFromPeers(Network network, PeerInfoArray peers) {
+      String peerName = network.getPeer();
+      for(int j = 0; j < peers.size(); j++) {
+         PeerInfo peerInfo = peers.get(j);
+         if (peerName.equals(peerInfo.getFQDN())) {
+            return Status.fromString(peerInfo.getConnStatus());
+         }
+      }
+      return Status.IDLE;
+   }
+
+   private void updateNetworkCount(NetworkArray networks) {
       TextView textPeersCount = binding.textOpenPanel;
       int connected = 0;
       for(int i = 0; i < networks.size(); i++) {
          Network network = networks.get(i);
-         for(int j = 0; j < peers.size(); j++) {
-            PeerInfo peer = peers.get(j);
-            if (!network.getPeer().equals(peer.getFQDN())) {
-               continue;
-            }
-            Status status = Status.fromString(peer.getConnStatus());
-            if (status.equals(Status.CONNECTED)) {
-               connected++;
-            }
+         Status status = Status.fromString(network.getStatus());
+         if (status.equals(Status.CONNECTED)) {
+            connected++;
          }
       }
 

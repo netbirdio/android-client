@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.netbird.client.R;
 import io.netbird.client.databinding.ListItemResourceBinding;
 
 public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.ResourceViewHolder> {
@@ -90,6 +91,12 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
             binding.address.setText(resource.getAddress());
             binding.name.setText(resource.getName());
             binding.peer.setText(resource.getPeer());
+
+            if (resource.getStatus() == Status.CONNECTED) {
+                binding.verticalLine.setBackgroundResource(R.drawable.peer_status_connected); // Green for connected
+            } else {
+                binding.verticalLine.setBackgroundResource(R.drawable.peer_status_disconnected); // Red for disconnected
+            }
         }
     }
 }
