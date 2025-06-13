@@ -1,20 +1,14 @@
 package io.netbird.client.ui.home;
 
-import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.text.TextWatcher;
 import android.text.Editable;
@@ -23,12 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,61 +30,20 @@ import io.netbird.client.databinding.FragmentPeersBinding;
 import io.netbird.gomobile.android.PeerInfo;
 import io.netbird.gomobile.android.PeerInfoArray;
 
-public class PeersFragment extends BottomSheetDialogFragment {
+public class PeersFragment extends Fragment {
 
     private FragmentPeersBinding binding;
     private ServiceAccessor serviceAccessor;
     private RecyclerView peersListView;
 
-
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-
         if (context instanceof ServiceAccessor) {
             serviceAccessor = (ServiceAccessor) context;
         } else {
             throw new RuntimeException(context + " must implement ServiceAccessor");
         }
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Apply transparent background theme to the dialog
-        BottomSheetDialog dialog = new BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
-
-        dialog.setOnShowListener(dialogInterface -> {
-            FrameLayout bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) {
-                // Set the bottom sheet to be full screen
-                BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
-                behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                behavior.setSkipCollapsed(true);
-
-                 if(binding != null && binding.peersList.getVisibility() == View.VISIBLE) {
-                     behavior.setPeekHeight(0);
-                     DisplayMetrics displayMetrics = new DisplayMetrics();
-                     requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                     int screenHeight = displayMetrics.heightPixels;
-
-                     ViewGroup.LayoutParams params = bottomSheet.getLayoutParams();
-                     params.height = (int) (screenHeight * 0.91f);
-                     bottomSheet.setLayoutParams(params);
-                 }
-
-                // Set the background to transparent
-                bottomSheet.setBackground(new ColorDrawable(Color.TRANSPARENT));
-                bottomSheet.requestLayout();
-
-
-                // Remove gray background (dim)
-                if (dialog.getWindow() != null) {
-                    dialog.getWindow().setDimAmount(0f);
-                }
-            }
-        });
-        return dialog;
     }
 
     @Override
@@ -102,33 +52,15 @@ public class PeersFragment extends BottomSheetDialogFragment {
         return binding.getRoot();
     }
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Set rounded corners background on your sheet content
-        view.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.rounded_top_corners));
-
-        binding.buttonClose.setOnClickListener(v -> dismiss());
-
-        binding.btnLearnWhy.setOnClickListener(v -> {
-            String url = "https://docs.netbird.io/how-to/manage-network-access";
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(intent);
-        });
-
+        ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
 
         PeerInfoArray peersInfo = serviceAccessor.getPeersList();
-        if (peersInfo != null && peersInfo.size() > 0) {
-            binding.textButtonLayout.setVisibility(View.GONE);
-            binding.peersList.setVisibility(View.VISIBLE);
-        } else {
-            binding.textButtonLayout.setVisibility(View.VISIBLE);
-            binding.peersList.setVisibility(View.GONE);
-        }
+        ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.peersList, peersInfo.size() > 0);
 
-        assert peersInfo != null;
         List<Peer> peerList = peersInfoToPeersList(peersInfo);
         updatePeerCount(peersInfo);
         peersListView = binding.peersRecyclerView;
@@ -138,53 +70,40 @@ public class PeersFragment extends BottomSheetDialogFragment {
 
         binding.searchView.clearFocus();
         binding.searchView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 adapter.filterBySearchQuery(s.toString());
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
+            @Override public void afterTextChanged(Editable s) {}
         });
 
         binding.searchView.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
-                // Hide the drawableStart icon when focused
                 binding.searchView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             } else {
-                // Show the drawableStart icon when not focused
                 Drawable icon = ContextCompat.getDrawable(requireContext(), R.drawable.search);
                 binding.searchView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
             }
         });
 
         binding.filterIcon.setOnClickListener(v -> {
-            androidx.appcompat.widget.PopupMenu popup = new PopupMenu(requireContext(), binding.filterIcon);
+            PopupMenu popup = new PopupMenu(requireContext(), binding.filterIcon);
             popup.getMenuInflater().inflate(R.menu.peer_filter_menu, popup.getMenu());
 
             popup.setOnMenuItemClickListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.all) {
                     adapter.filterByStatus(PeersAdapter.FilterStatus.ALL);
-                    return true;
                 } else if (itemId == R.id.idle) {
                     adapter.filterByStatus(PeersAdapter.FilterStatus.IDLE);
-                    return true;
                 } else if (itemId == R.id.connecting) {
                     adapter.filterByStatus(PeersAdapter.FilterStatus.CONNECTING);
-                    return true;
                 } else if (itemId == R.id.connected) {
                     adapter.filterByStatus(PeersAdapter.FilterStatus.CONNECTED);
-                    return true;
                 }
-
-                return false;
+                return true;
             });
+
             popup.show();
         });
     }
@@ -194,7 +113,6 @@ public class PeersFragment extends BottomSheetDialogFragment {
         super.onDetach();
         serviceAccessor = null;
     }
-
 
     @Override
     public void onDestroyView() {
@@ -216,7 +134,7 @@ public class PeersFragment extends BottomSheetDialogFragment {
         int connected = 0;
         for (int i = 0; i < peersInfo.size(); i++) {
             PeerInfo peer = peersInfo.get(i);
-            if(peer.getConnStatus().equalsIgnoreCase(Status.CONNECTED.toString())) {
+            if (peer.getConnStatus().equalsIgnoreCase(Status.CONNECTED.toString())) {
                 connected++;
             }
         }
@@ -228,3 +146,4 @@ public class PeersFragment extends BottomSheetDialogFragment {
         );
     }
 }
+
