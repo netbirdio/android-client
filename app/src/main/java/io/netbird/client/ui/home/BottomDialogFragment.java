@@ -101,11 +101,11 @@ public class BottomDialogFragment extends com.google.android.material.bottomshee
             switch (position) {
                 case 0:
                     tab.setText("Peers");
-                    tab.setIcon(R.drawable.devices);
+                    tab.setIcon(R.drawable.peers);
                     break;
                 case 1:
                     tab.setText("Networks");
-                    tab.setIcon(R.drawable.lan);
+                    tab.setIcon(R.drawable.networks);
                     break;
                 default:
                     tab.setText("Tab " + position);
