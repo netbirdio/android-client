@@ -22,12 +22,16 @@ public class AdvancedFragment extends Fragment {
     private static final String LOGTAG = "AdvancedFragment";
 
     private FragmentAdvancedBinding binding;
+    private io.netbird.gomobile.android.Preferences goPreferences;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentAdvancedBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+        String configFilePath = Preferences.configFile(inflater.getContext());
+        goPreferences = new io.netbird.gomobile.android.Preferences(configFilePath);
 
         if (hasPreSharedKey(inflater.getContext())) {
             binding.presharedKey.setText(hiddenKey);
@@ -68,7 +72,80 @@ public class AdvancedFragment extends Fragment {
             }
         });
 
+        // Initialize engine config switches
+        initializeEngineConfigSwitches();
+
         return root;
+    }
+
+    private void initializeEngineConfigSwitches() {
+        try {
+            // Load current values from config
+            binding.switchDisableClientRoutes.setChecked(goPreferences.getDisableClientRoutes());
+            binding.switchDisableServerRoutes.setChecked(goPreferences.getDisableServerRoutes());
+            binding.switchDisableDns.setChecked(goPreferences.getDisableDNS());
+            binding.switchDisableFirewall.setChecked(goPreferences.getDisableFirewall());
+            binding.switchAllowSsh.setChecked(goPreferences.getServerSSHAllowed());
+            binding.switchBlockInbound.setChecked(goPreferences.getBlockInbound());
+
+            // Set up change listeners
+            binding.switchDisableClientRoutes.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableClientRoutes(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable client routes", e);
+                }
+            });
+
+            binding.switchDisableServerRoutes.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableServerRoutes(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable server routes", e);
+                }
+            });
+
+            binding.switchDisableDns.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableDNS(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable DNS", e);
+                }
+            });
+
+            binding.switchDisableFirewall.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableFirewall(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable firewall", e);
+                }
+            });
+
+            binding.switchAllowSsh.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setServerSSHAllowed(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set server SSH allowed", e);
+                }
+            });
+
+            binding.switchBlockInbound.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setBlockInbound(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set block inbound", e);
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to initialize engine config switches", e);
+        }
     }
 
     @Override

@@ -68,6 +68,19 @@
     <string name="advanced_tracelog">Enable trace log level.</string>
     <string name="advanced_share_logs">Share logs</string>
 
+    <string name="advanced_disable_client_routes">Disable client routes</string>
+    <string name="advanced_disable_client_routes_desc">Prevents this device from processing client routes received from the management service</string>
+    <string name="advanced_disable_server_routes">Disable server routes</string>
+    <string name="advanced_disable_server_routes_desc">Prevents this device from acting as a router for server routes received from the management service</string>
+    <string name="advanced_disable_dns">Disable DNS</string>
+    <string name="advanced_disable_dns_desc">Disables NetBird DNS configuration on this device</string>
+    <string name="advanced_disable_firewall">Disable firewall</string>
+    <string name="advanced_disable_firewall_desc">Disables the NetBird firewall</string>
+    <string name="advanced_allow_ssh">Enable SSH</string>
+    <string name="advanced_allow_ssh_desc">Allows SSH connections to this device</string>
+    <string name="advanced_block_inbound">Block inbound connections</string>
+    <string name="advanced_block_inbound_desc">Blocks all inbound connections to this device and routed networks. This overrides any policies received from the management service</string>
+
 
     <string name="desc_logo">NetBird logo</string>
     <string name="desc_exclamation_mark">exclamation mark</string>
