@@ -67,6 +67,8 @@
     <string name="advanced_save">Save</string>
     <string name="advanced_tracelog">Enable trace log level.</string>
     <string name="advanced_share_logs">Share logs</string>
+    <string name="advanced_rosenpass">Enable Rosenpass</string>
+    <string name="advanced_rosenpass_permissive">Enable Rosenpass permissive mode.</string>
 
 
     <string name="desc_logo">NetBird logo</string>
