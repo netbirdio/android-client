@@ -69,6 +69,7 @@
     <string name="advanced_share_logs">Share logs</string>
     <string name="advanced_rosenpass">Enable Rosenpass</string>
     <string name="advanced_rosenpass_permissive">Enable Rosenpass permissive mode.</string>
+    <string name="advanced_title_network_security">Network &amp; Security</string>
 
     <string name="advanced_disable_client_routes">Disable client routes</string>
     <string name="advanced_disable_client_routes_desc">Prevents this device from processing client routes received from the management service</string>
