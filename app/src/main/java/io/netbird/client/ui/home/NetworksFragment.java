@@ -99,17 +99,6 @@ public class NetworksFragment extends Fragment {
       });
    }
 
-   private Status getStatusFromPeers(Network network, PeerInfoArray peers) {
-      String peerName = network.getPeer();
-      for(int j = 0; j < peers.size(); j++) {
-         PeerInfo peerInfo = peers.get(j);
-         if (peerName.equals(peerInfo.getFQDN())) {
-            return Status.fromString(peerInfo.getConnStatus());
-         }
-      }
-      return Status.IDLE;
-   }
-
    private void updateNetworkCount(NetworkArray networks) {
       TextView textPeersCount = binding.textOpenPanel;
       int connected = 0;
