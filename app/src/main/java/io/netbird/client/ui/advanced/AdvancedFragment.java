@@ -56,11 +56,7 @@ public class AdvancedFragment extends Fragment {
             setPreSharedKey(presharedKey, inflater.getContext());
         });
 
-        // Handle "Share Logs" button click
-        binding.buttonShareLogs.setOnClickListener(v -> {
-            shareLog();
-        });
-
+        // Enable trace logs
         Preferences preferences = new Preferences(inflater.getContext());
         binding.switchTraceLog.setChecked(preferences.isTraceLogEnabled());
 
@@ -71,6 +67,11 @@ public class AdvancedFragment extends Fragment {
             } else {
                 preferences.disableTraceLog();
             }
+        });
+
+        // Handle "Share Logs" button click
+        binding.buttonShareLogs.setOnClickListener(v -> {
+            shareLog();
         });
 
         // Rosenpass settings
@@ -118,7 +119,80 @@ public class AdvancedFragment extends Fragment {
             }
         });
 
+        // Initialize engine config switches (your settings)
+        initializeEngineConfigSwitches();
+
         return root;
+    }
+
+    private void initializeEngineConfigSwitches() {
+        try {
+            // Load current values from config
+            binding.switchDisableClientRoutes.setChecked(goPreferences.getDisableClientRoutes());
+            binding.switchDisableServerRoutes.setChecked(goPreferences.getDisableServerRoutes());
+            binding.switchDisableDns.setChecked(goPreferences.getDisableDNS());
+            binding.switchDisableFirewall.setChecked(goPreferences.getDisableFirewall());
+            binding.switchAllowSsh.setChecked(goPreferences.getServerSSHAllowed());
+            binding.switchBlockInbound.setChecked(goPreferences.getBlockInbound());
+
+            // Set up change listeners
+            binding.switchDisableClientRoutes.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableClientRoutes(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable client routes", e);
+                }
+            });
+
+            binding.switchDisableServerRoutes.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableServerRoutes(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable server routes", e);
+                }
+            });
+
+            binding.switchDisableDns.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableDNS(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable DNS", e);
+                }
+            });
+
+            binding.switchDisableFirewall.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableFirewall(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable firewall", e);
+                }
+            });
+
+            binding.switchAllowSsh.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setServerSSHAllowed(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set server SSH allowed", e);
+                }
+            });
+
+            binding.switchBlockInbound.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setBlockInbound(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set block inbound", e);
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to initialize engine config switches", e);
+        }
     }
 
     @Override
