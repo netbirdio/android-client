@@ -14,6 +14,8 @@ import androidx.core.app.NotificationCompat;
 
 import java.util.Arrays;
 
+import io.netbird.client.ui.PreferenceUI;
+
 public class RouteChangeReceiver extends BroadcastReceiver {
     private final int NOTIFICATION_ID = 1;
 
@@ -21,6 +23,7 @@ public class RouteChangeReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (isAppInBackground(context) && !isNotificationVisible(context)) {
             showNotification(context);
+            PreferenceUI.setRouteChangedNotification(context);
         }
     }
 

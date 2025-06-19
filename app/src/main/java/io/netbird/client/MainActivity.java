@@ -45,6 +45,7 @@ import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
 import io.netbird.gomobile.android.ConnectionListener;
+import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 
 
@@ -184,10 +185,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        if(lastKnownState == ConnectionState.DISCONNECTED) {
-            PreferenceUI.routeChangedNotificationInvalidate(this);
-        }
-
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 serviceMessageReceiver,
                 new IntentFilter(NetworkChangeNotifier.action)
@@ -209,10 +206,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mBinder.removeServiceStateListener(serviceStateListener);
             unbindService(serviceIPC);
             mBinder = null;
-        }
-
-        if(lastKnownState == ConnectionState.DISCONNECTED) {
-            PreferenceUI.routeChangedNotificationInvalidate(this);
         }
     }
 
@@ -294,6 +287,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         return mBinder.peersInfo();
+    }
+
+    @Override
+    public NetworkArray getNetworks() {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return new NetworkArray();
+        }
+
+        return mBinder.networks();
     }
 
 

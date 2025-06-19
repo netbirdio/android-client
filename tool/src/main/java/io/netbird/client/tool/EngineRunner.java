@@ -11,6 +11,7 @@ import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Client;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.DNSList;
+import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.URLOpener;
 
@@ -112,6 +113,15 @@ class EngineRunner {
 
     public PeerInfoArray peersInfo() {
         return goClient.peersList();
+    }
+
+    public NetworkArray networks() {
+        NetworkArray networks = goClient.networks();
+        if (networks == null) {
+            Log.e(LOGTAG, "Failed to retrieve networks, returning empty array");
+            return new NetworkArray();
+        }
+        return networks;
     }
 
     private synchronized void notifyError(Exception e) {

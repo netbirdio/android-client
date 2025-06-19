@@ -3,6 +3,7 @@ package io.netbird.client.ui.home;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,8 +81,7 @@ public class HomeFragment extends Fragment implements StateListener {
                 buttonConnect.setEnabled(false);
                 buttonAnimation.disconnecting();
                 serviceAccessor.switchConnection(false);
-                PreferenceUI.routeChangedNotificationInvalidate(requireContext());
-                binding.btnRouteChanged.setVisibility(View.GONE);
+                invalidateRouteChange();
             } else {
                 // We're currently disconnected, so connect
                 buttonAnimation.connecting();
@@ -98,17 +98,16 @@ public class HomeFragment extends Fragment implements StateListener {
 
         binding.btnRouteChanged.setOnClickListener(v -> {
             requireActivity().runOnUiThread(() -> {
-                PreferenceUI.routeChangedNotificationInvalidate(requireContext());
                 showRouteChangeNotificationDialog(requireContext());
-                binding.btnRouteChanged.setVisibility(View.GONE);
+                invalidateRouteChange();
             });
         });
 
         // peers button
         FrameLayout openPanelCardView = binding.peersBtn;
         openPanelCardView.setOnClickListener(v -> {
-            PeersFragment peerFragment = new PeersFragment();
-            peerFragment.show(getParentFragmentManager(), peerFragment.getTag());
+            BottomDialogFragment fragment = new BottomDialogFragment();
+            fragment.show(getParentFragmentManager(), fragment.getTag());
         });
 
         stateListenerRegistry.registerServiceStateListener(this);
@@ -140,6 +139,7 @@ public class HomeFragment extends Fragment implements StateListener {
         buttonConnect.post(() -> {
             buttonAnimation.disconnected();
             buttonConnect.setEnabled(true);
+            invalidateRouteChange();
         });
     }
 
@@ -182,6 +182,8 @@ public class HomeFragment extends Fragment implements StateListener {
         buttonConnect.post(() -> {
             buttonAnimation.disconnected();
             buttonConnect.setEnabled(true);
+            invalidateRouteChange();
+
         });
         updatePeerCount(0, 0);
     }
@@ -226,5 +228,10 @@ public class HomeFragment extends Fragment implements StateListener {
 
             alertDialog.show();
         });
+    }
+
+    private void invalidateRouteChange() {
+        PreferenceUI.routeChangedNotificationInvalidate(requireContext());
+        binding.btnRouteChanged.setVisibility(View.GONE);
     }
 }
