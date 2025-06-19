@@ -27,10 +27,11 @@
     <string name="about_privacy_poliy"><u>Privacy policy</u></string>
     <string name="about_rights">© 2025 NetBird all rights reserved</string>
 
+    <string name="zero_peers_no_machines">It looks like there are no machines that you can connect to…</string>
+    <string name="zero_peers_btn_learn_why">Learn why</string>
+
     <string name="btn_close">Close</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>of</b> <b>%2$d</b> Peers connected]]></string>
-    <string name="peers_no_machines">It looks like there are no machines that you can connect to…</string>
-    <string name="peers_btn_learn_why">Learn why</string>
     <string name="peers_hint_search_peers">Search peers</string>
     <string name="peer_filter_all">All</string>
     <string name="peer_filter_idle">Idle</string>

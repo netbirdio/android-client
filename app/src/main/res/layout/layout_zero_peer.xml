@@ -19,14 +19,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/nb_txt_light"
-        android:text="@string/peers_no_machines"
+        android:text="@string/zero_peers_no_machines"
         android:layout_gravity="center_horizontal" />
 
     <Button
         android:id="@+id/btn_learn_why"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/peers_btn_learn_why"
+        android:text="@string/zero_peers_btn_learn_why"
         android:textAllCaps="false"
         android:layout_marginTop="16dp" />
 </LinearLayout>
