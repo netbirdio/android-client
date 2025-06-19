@@ -61,6 +61,7 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
 
     private void doFilterBySearchQuery() {
         if (filterQueryString.isEmpty()) {
+            filteredResourcesList.addAll(resourcesList);
             return;
         }
 
