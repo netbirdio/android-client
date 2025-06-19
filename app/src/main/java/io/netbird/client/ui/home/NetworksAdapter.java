@@ -26,7 +26,6 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
     public NetworksAdapter(List<Resource> resourcesList) {
         this.resourcesList = resourcesList;
         filteredResourcesList = new ArrayList<>(resourcesList);
-        Log.i("NetworksAdapter", "Initial resources size: " + resourcesList.size() + " / "+ filteredResourcesList.size());
         sort();
     }
 
