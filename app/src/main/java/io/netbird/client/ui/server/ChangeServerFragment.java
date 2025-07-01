@@ -150,6 +150,7 @@ public class ChangeServerFragment extends Fragment {
                     FragmentActivity activity = getActivity();
                     if (activity == null) return;
                     activity.runOnUiThread(() -> {
+                        if (binding == null) return;
                         binding.editTextServer.setError(e.getMessage());
                         binding.editTextServer.requestFocus();
                     });
@@ -167,6 +168,8 @@ public class ChangeServerFragment extends Fragment {
             FragmentActivity activity = getActivity();
             if (activity == null) return;
             activity.runOnUiThread(() -> {
+                if (binding == null) return;
+
                 binding.editTextServer.setError(e.getMessage());
                 binding.editTextServer.requestFocus();
             });
@@ -191,6 +194,8 @@ public class ChangeServerFragment extends Fragment {
                     if (activity == null) return;
 
                     activity.runOnUiThread(() -> {
+                        if (binding == null) return;
+
                         binding.editTextServer.setError(e.getMessage());
                         binding.editTextServer.requestFocus();
                     });
@@ -204,6 +209,8 @@ public class ChangeServerFragment extends Fragment {
 
                     Log.i("ChangeServerFragment", "update server result, SSO supported: " + sso);
                     activity.runOnUiThread(() -> {
+                        if (binding == null) return;
+
                         if(!sso) {
                             binding.setupKeyGroup.setVisibility(View.VISIBLE);
                         } else {
@@ -221,6 +228,8 @@ public class ChangeServerFragment extends Fragment {
             FragmentActivity activity = getActivity();
             if (activity == null) return;
             activity.runOnUiThread(() -> {
+                if (binding == null) return;
+
                 binding.editTextServer.setError(e.getMessage());
                 binding.editTextServer.requestFocus();
             });
@@ -240,6 +249,8 @@ public class ChangeServerFragment extends Fragment {
         FragmentActivity activity = getActivity();
         if (activity == null) return;
         activity.runOnUiThread(() -> {
+            if (binding == null) return;
+
             binding.editTextServer.setEnabled(true);
             binding.editTextSetupKey.setEnabled(true);
             binding.btnChangeServer.setText(R.string.change_server_btn);
