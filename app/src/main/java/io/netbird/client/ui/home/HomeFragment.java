@@ -98,6 +98,8 @@ public class HomeFragment extends Fragment implements StateListener {
 
         binding.btnRouteChanged.setOnClickListener(v -> {
             requireActivity().runOnUiThread(() -> {
+                if(binding == null) return;
+
                 showRouteChangeNotificationDialog(requireContext());
                 invalidateRouteChange();
             });
@@ -216,18 +218,16 @@ public class HomeFragment extends Fragment implements StateListener {
     }
 
     private void showRouteChangeNotificationDialog(Context context) {
-        requireActivity().runOnUiThread(() -> {
-            final View dialogView = getLayoutInflater().inflate(R.layout.dialog_route_changed, null);
-            final AlertDialog alertDialog = new AlertDialog.Builder(context)
-                    .setView(dialogView)
-                    .create();
+        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_route_changed, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create();
 
-            dialogView.findViewById(R.id.btn_close).setOnClickListener(v -> {
-                alertDialog.dismiss();
-            });
-
-            alertDialog.show();
+        dialogView.findViewById(R.id.btn_close).setOnClickListener(v -> {
+            alertDialog.dismiss();
         });
+
+        alertDialog.show();
     }
 
     private void invalidateRouteChange() {
