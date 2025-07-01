@@ -50,7 +50,11 @@ public class DNSWatch {
         if(this.listener == null) {
             return;
         }
-        connectivityManager.unregisterNetworkCallback(networkCallback);
+        try {
+            connectivityManager.unregisterNetworkCallback(networkCallback);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "failed to unregister network callback", e);
+        }
         this.listener = null;
     }
 
