@@ -2,6 +2,7 @@ package io.netbird.client.tool;
 
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import java.util.HashSet;
@@ -29,6 +30,7 @@ class EngineRunner {
         IFace iFace = new IFace(vpnService);
         goClient = Android.newClient(
                 Preferences.configFile(vpnService),
+                androidSDKVersion(),
                 DeviceName.getDeviceName(),
                 Version.getVersionName(vpnService),
                 iFace,
@@ -147,5 +149,9 @@ class EngineRunner {
         } else {
             goClient.setInfoLogLevel();
         }
+    }
+
+    private int androidSDKVersion() {
+       return Build.VERSION.SDK_INT ;
     }
 }
