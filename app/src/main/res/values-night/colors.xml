@@ -1,130 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Akzentfarben -->
-    <color name="accentColor">#F68330</color>
-    <color name="accentColorDisabled">#545961</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFF</color>
 
-    <!-- Text & Typography -->
-    <color name="textPrimary">#FEFEFE</color>
-    <color name="textSecondary">#7E858F</color>
-    <color name="textAlert">#FEFEFE</color>
-    <color name="textPeerCard">#7E858F</color>
-    <color name="textDisabled">#545961</color>
-    <color name="textLink">#F68330</color>
-    <color name="textFieldPlaceholder">#7E858F</color>
-
-    <!-- Hintergrundfarben -->
-    <color name="bgPrimary">#181A1D</color>
-    <color name="bgSecondary">#1C1E21</color>
-    <color name="bgPage">#181A1D</color>
-    <color name="bgMenu">#1A1C1F</color>
-    <color name="bgNavigationBar">#1C1E21</color>
-    <color name="bgSideDrawer">#1A1C1F</color>
-    <color name="bgPeerCard">#181A1D</color>
-    <color name="bgModal">#1C1E21</color>
-    <color name="bgOverlay">#80000000</color>
-
-    <!-- Eingabefelder & Formulare -->
-    <color name="bgTextField">#32363D</color>
-    <color name="borderTextField">#545961</color>
-    <color name="inputDisabled">#32363D</color>
-    <color name="inputError">#F44336</color>
-
-    <!-- Status & System -->
-    <color name="success">#4CAF50</color>
-    <color name="error">#F44336</color>
-    <color name="warning">#FFC107</color>
-    <color name="info">#2196F3</color>
-
-    <!-- UI-Elemente -->
-    <color name="handleBar">#40000000</color>
-    <color name="divider">#32363D</color>
-    <color name="shadow">#26000000</color>
-    <color name="buttonDisabled">#32363D</color>
-
-    <!-- Navigation & Tabs -->
-    <color name="tabBarActive">#F68330</color>
-    <color name="tabBarInactive">#7E858F</color>
-    <color name="navBarBorder">#32363D</color>
-
-    <!-- Interaktive Elemente -->
-    <color name="buttonPrimary">#F68330</color>
-    <color name="buttonSecondary">#32363D</color>
-    <color name="toggleActive">#F68330</color>
-    <color name="toggleInactive">#545961</color>
-
-    <!-- Overlays & Modals -->
-    <color name="modalBackground">#1C1E21</color>
-    <color name="toastBackground">#32363D</color>
-    <color name="popoverBackground">#1C1E21</color>
-
-    <!-- Weitere Textfarben -->
-    <color name="textError">#F44336</color>
-    <color name="textSuccess">#4CAF50</color>
-    <color name="textWarning">#FFC107</color>
-    <color name="textInfo">#2196F3</color>
-
-    <!-- Zusätzliche Statusfarben -->
-    <color name="statusOnline">#4CAF50</color>
-    <color name="statusOffline">#F44336</color>
-    <color name="statusConnecting">#FFC107</color>
-
-    <!-- Zusätzliche UI-Elemente -->
-    <color name="borderDivider">#32363D</color>
-    <color name="cardShadow">#1A000000</color>
-    <color name="scrollbarThumb">#545961</color>
-    <color name="scrollbarTrack">#32363D</color>
-
-    <!-- Formular-Elemente -->
-    <color name="checkboxBackground">#32363D</color>
-    <color name="checkboxBorder">#545961</color>
-    <color name="radioButtonBorder">#545961</color>
-    <color name="selectBackground">#32363D</color>
-
-    <!-- Hover & Active States -->
-    <color name="buttonPrimaryHover">#FF9449</color>
-    <color name="buttonSecondaryHover">#3E424A</color>
-    <color name="linkHover">#FF9449</color>
-
-    <!-- Liste & Tabellen -->
-    <color name="listItemDivider">#32363D</color>
-    <color name="listItemSelected">#3E424A</color>
-    <color name="tableHeaderBackground">#1C1E21</color>
-
-    <!-- Focus & Selection -->
-    <color name="focusRing">#66F68330</color>
-    <color name="selectionBackground">#33F68330</color>
-    <color name="textSelection">#4DF68330</color>
-
-    <!-- Badges & Indicators -->
-    <color name="badgeBackground">#F44336</color>
-    <color name="badgeText">#FFFFFF</color>
-    <color name="notificationDot">#F68330</color>
-
-    <!-- Animation & Transition -->
-    <color name="shimmerLight">#32363D</color>
-    <color name="shimmerDark">#1C1E21</color>
-    <color name="loadingOverlay">#B3000000</color>
-
-    <!-- Pressed States -->
-    <color name="buttonPrimaryPressed">#E67220</color>
-    <color name="buttonSecondaryPressed">#282C33</color>
-    <color name="listItemPressed">#282C33</color>
-
-    <!-- Alias-Namen für Theme-Kompatibilität (Darkmode) -->
     <color name="nb_bg">#181A1D</color>
-    <color name="nb_bg_home">#1C1E21</color>
+    <color name="nb_bg_home">#1A1C1F</color>
     <color name="nb_bg_mask">#181A1D</color>
     <color name="nb_gray_light">#32363D</color>
-    <color name="nb_gray_dark">#545961</color>
-    <color name="nb_gray_bg">#1A1C1F</color>
+    <color name="nb_gray_dark">#1C1E21</color>
+    <color name="nb_gray_bg">#1C1E21</color>
     <color name="nb_gray_separator">#32363D</color>
-    <color name="nb_gray_border">#32363D</color>
+    <color name="nb_gray_border">#545961</color>
     <color name="nb_orange">#F68330</color>
     <color name="nb_txt">#FEFEFE</color>
     <color name="nb_txt_light">#7E858F</color>
-    <color name="thumb_on_color">#F68330</color>
-    <color name="thumb_off_color">#32363D</color>
-    <color name="track_on_color">#33F68330</color>
-    <color name="track_off_color">#545961</color>
+
+    <color name="thumb_on_color">#F58431</color>
+    <color name="thumb_off_color">#545961</color>
+    <color name="track_on_color">#F6833080</color>
+    <color name="track_off_color">#32363D</color>
 </resources>
