@@ -34,6 +34,9 @@
         android:background="?attr/colorSurface"
         app:tabMode="fixed"
         app:tabGravity="fill"
+        app:tabTextColor="@color/tab_text_color"
+        app:tabSelectedTextColor="@color/nb_orange"
+        app:tabIconTint="@color/tab_icon_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">

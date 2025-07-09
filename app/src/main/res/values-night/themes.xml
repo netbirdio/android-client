@@ -17,6 +17,10 @@
         <item name="android:windowBackground">@color/nb_bg</item>
 
         <item name="android:textColor">@color/nb_txt</item>
+
+
+        <!-- Peer and Network bottom Button background -->
+        <item name="colorSurface">@color/nb_gray_bg</item>
     </style>
 
     <style name="Theme.NetBird.NoActionBar">
@@ -25,8 +29,8 @@
     </style>
 
     <style name="Theme.NetBird.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="colorPrimary">@color/white</item>
-        <item name="android:textColorPrimary">@color/nb_txt</item>
+        <item name="colorPrimary">@color/nb_gray_dark</item>
+        <item name="android:textColorPrimary">@color/nb_orange</item>
     </style>
 
     <style name="Theme.NetBird.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
