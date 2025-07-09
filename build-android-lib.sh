@@ -4,9 +4,34 @@
 # If no version is provided, "development" is used as default
 set -e
 
-# Set version from the first argument or use "development" as default
-version=${1:-development}
 app_path=$(pwd)
+
+
+get_version() {
+  # If user passed a version, use it
+  if [ -n "$1" ]; then
+    echo "$1"
+    return
+  fi
+
+  # No version passed, try to detect a Git tag
+  cd netbird
+  local tag=$(git describe --tags --exact-match 2>/dev/null || true)
+  cd - > /dev/null
+
+  # Use tag if found, otherwise default to "development"
+  if [ -n "$tag" ]; then
+    echo "$tag"
+  else
+    echo "development"
+  fi
+}
+
+# Get version using the function
+version=$(get_version "$1")
+
+echo "Using version: $version"
+
 
 cd netbird
 gomobile init
