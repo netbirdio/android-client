@@ -8,23 +8,41 @@ app_path=$(pwd)
 
 
 get_version() {
-  # If user passed a version, use it
   if [ -n "$1" ]; then
     echo "$1"
     return
   fi
 
-  # No version passed, try to detect a Git tag
   cd netbird
-  local tag=$(git describe --tags --exact-match 2>/dev/null || true)
-  cd - > /dev/null
 
-  # Use tag if found, otherwise default to "development"
+  # Try to get an exact tag
+  local tag=$(git describe --tags --exact-match 2>/dev/null || true)
+
   if [ -n "$tag" ]; then
+    cd - > /dev/null
     echo "$tag"
-  else
-    echo "development"
+    return
   fi
+
+  # Get the last tag
+  local last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+
+  # Parse and increment patch version
+  if [[ $last_tag =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+    local major=${BASH_REMATCH[1]}
+    local minor=${BASH_REMATCH[2]}
+    local patch=${BASH_REMATCH[3]}
+    local new_patch=$((patch + 1))
+    local short_hash=$(git rev-parse --short HEAD)
+    local new_version="v$major.$minor.$new_patch-$short_hash"
+  else
+    # Fallback if tag format is not vX.Y.Z
+    local short_hash=$(git rev-parse --short HEAD)
+    local new_version="development-$short_hash"
+  fi
+
+  cd - > /dev/null
+  echo "$new_version"
 }
 
 # Get version using the function
