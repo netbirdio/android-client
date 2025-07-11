@@ -20,7 +20,7 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         android:orientation="vertical"
-        android:background="?android:attr/colorBackground">
+        android:background="@color/nb_bg">
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/nav_view"
@@ -31,6 +31,7 @@
             app:headerLayout="@layout/nav_header_main"
             app:itemVerticalPadding="25dp"
             app:itemIconTint="@color/nb_orange"
+            app:itemTextColor="@color/nb_txt"
             app:menu="@menu/activity_main_drawer" />
 
         <LinearLayout

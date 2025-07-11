@@ -100,4 +100,9 @@
     <string name="dialog_new_route_img_desc">new route exclamation mark</string>
     <string name="dialog_new_route_desc">Your network administrator changed a configuration that requires restarting the connection.</string>
 
+    <string name="advanced_theme_system">System</string>
+    <string name="advanced_theme_title">Theme Mode</string>
+    <string name="advanced_theme_dark">Dark</string>
+    <string name="advanced_theme_light">Light</string>
+    <string name="advanced_theme_desc">Choose the app appearance mode.</string>
 </resources>

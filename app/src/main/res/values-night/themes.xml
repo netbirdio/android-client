@@ -1,3 +1,4 @@
+<!--suppress AndroidDomInspection -->
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.NetBird" parent="Theme.MaterialComponents.Light.DarkActionBar">
@@ -6,7 +7,7 @@
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">#89F58431</item>
+        <item name="colorSecondary">@color/nb_orange</item>
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/black</item>
 
@@ -20,7 +21,7 @@
 
 
         <!-- Peer and Network bottom Button background -->
-        <item name="colorSurface">@color/white</item>
+        <item name="colorSurface">@color/nb_button_inactive</item>
         <item name="nbTabBackground">@color/nb_gray_bg</item>
     </style>
 
@@ -30,8 +31,8 @@
     </style>
 
     <style name="Theme.NetBird.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="colorPrimary">@color/white</item>
-        <item name="android:textColorPrimary">@color/nb_txt</item>
+        <item name="colorPrimary">@color/nb_gray_dark</item>
+        <item name="android:textColorPrimary">@color/nb_orange</item>
     </style>
 
     <style name="Theme.NetBird.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
@@ -56,5 +57,4 @@
         <item name="thumbTint">@color/switch_thumb_color</item>
         <item name="trackTint">@color/switch_track_color</item>
     </style>
-    <attr name="nbTabBackground" format="color|reference" />
 </resources>

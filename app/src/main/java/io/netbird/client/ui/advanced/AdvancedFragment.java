@@ -2,14 +2,17 @@ package io.netbird.client.ui.advanced;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import io.netbird.client.databinding.FragmentAdvancedBinding;
@@ -121,6 +124,28 @@ public class AdvancedFragment extends Fragment {
 
         // Initialize engine config switches (your settings)
         initializeEngineConfigSwitches();
+
+        // Theme-picker initialisieren
+        SharedPreferences sharedPreferences = inflater.getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
+        int themeMode = sharedPreferences.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        RadioGroup radioGroup = binding.radioGroupTheme;
+        if (themeMode == AppCompatDelegate.MODE_NIGHT_NO) {
+            radioGroup.check(binding.radioThemeLight.getId());
+        } else if (themeMode == AppCompatDelegate.MODE_NIGHT_YES) {
+            radioGroup.check(binding.radioThemeDark.getId());
+        } else {
+            radioGroup.check(binding.radioThemeSystem.getId());
+        }
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            int mode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+            if (checkedId == binding.radioThemeLight.getId()) {
+                mode = AppCompatDelegate.MODE_NIGHT_NO;
+            } else if (checkedId == binding.radioThemeDark.getId()) {
+                mode = AppCompatDelegate.MODE_NIGHT_YES;
+            }
+            sharedPreferences.edit().putInt("theme_mode", mode).apply();
+            AppCompatDelegate.setDefaultNightMode(mode);
+        });
 
         return root;
     }

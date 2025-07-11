@@ -376,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         binding.appBarMain.appbar.setElevation(10f);
         binding.appBarMain.toolbar.setElevation(0);
-        binding.appBarMain.toolbar.setBackground(new ColorDrawable(Color.parseColor("#FFFFFF")));
+        binding.appBarMain.toolbar.setBackground(new ColorDrawable(ContextCompat.getColor(this, R.color.nb_bg)));
     }
 
     private void showAlwaysOnDialog(Runnable onDismissAction) {
