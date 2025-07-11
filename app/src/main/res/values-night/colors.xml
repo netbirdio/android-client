@@ -19,6 +19,7 @@
     <color name="nb_orange">#F68330</color>
     <color name="nb_txt">#FEFEFE</color>
     <color name="nb_txt_light">#7E858F</color>
+    <color name="nb_button_inactive">#545961</color>
 
     <color name="thumb_on_color">#F58431</color>
     <color name="thumb_off_color">#545961</color>

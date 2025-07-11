@@ -31,7 +31,7 @@
         android:id="@+id/peers_tab_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="?attr/nbTabBackground"
         app:tabMode="fixed"
         app:tabGravity="fill"
         app:tabTextColor="@color/tab_text_color"
