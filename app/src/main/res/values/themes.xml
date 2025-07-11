@@ -20,7 +20,7 @@
 
 
         <!-- Peer and Network bottom Button background -->
-        <item name="colorSurface">@color/nb_button_inactive</item>
+        <item name="colorSurface">@color/white</item>
         <item name="nbTabBackground">@color/nb_gray_bg</item>
     </style>
 
