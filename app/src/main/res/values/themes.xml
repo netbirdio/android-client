@@ -51,4 +51,5 @@
         <item name="thumbTint">@color/switch_thumb_color</item>
         <item name="trackTint">@color/switch_track_color</item>
     </style>
+    <attr name="nbTabBackground" format="color|reference" />
 </resources>
