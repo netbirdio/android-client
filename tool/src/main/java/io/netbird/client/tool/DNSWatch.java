@@ -146,7 +146,11 @@ public class DNSWatch {
     private DNSList toDnsList(List<InetAddress> newDNSList) {
         DNSList dnsList = new DNSList();
         for(InetAddress addr : newDNSList) {
-            dnsList.add(addr.getHostAddress());
+            try {
+                dnsList.add(addr.getHostAddress());
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to add DNS address: " + addr.getHostAddress(), e);
+            }
         }
         return dnsList;
     }
