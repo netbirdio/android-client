@@ -1,0 +1,59 @@
+name: build release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    environment: example
+    env:
+      NETBIRD_UPLOAD_KEY_ALIAS: ${{ secrets.NETBIRD_UPLOAD_KEY_ALIAS }}
+      NETBIRD_UPLOAD_KEY_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_KEY_PASSWORD }}
+      NETBIRD_UPLOAD_STORE_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_STORE_PASSWORD }}
+    outputs:
+      apk_path: ${{ steps.build.outputs.apk_path }}
+      bundle_path: ${{ steps.build.outputs.bundle_path }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Get version
+        id: version
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          echo "version_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Write google-services.json
+        run: |
+          echo "${{ secrets.GOOGLE_JSON }}" | base64 -d > app/google-services.json
+
+      - name: Write keystore file
+        run: |
+          echo "${{ secrets.GPLAY_KEYSTORE }}" | base64 -d > gplay.keystore
+          echo "NETBIRD_UPLOAD_STORE_FILE=$GITHUB_WORKSPACE/gplay.keystore" >> $GITHUB_ENV
+
+      - name: Compute version code
+        id: version_code
+        run: |
+          adjusted=$(( ${{ github.run_number }} + 40 ))
+          echo "adjusted=$adjusted" >> $GITHUB_OUTPUT
+
+      - name: Build Android
+        id: build
+        uses: ./.github/actions/build-android
+        with:
+          version_name: ${{ steps.version.outputs.version_name }}
+          version_code: ${{ steps.version_code.outputs.adjusted }}
+          build_type: release
+
+      - name: Upload files to existing release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{ steps.build.outputs.apk_path }}
+            ${{ steps.build.outputs.bundle_path }}
+          tag_name: ${{ github.event.release.tag_name }}
