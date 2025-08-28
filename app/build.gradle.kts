@@ -9,14 +9,27 @@ if (hasGoogleServicesJson) {
     apply(plugin = "com.google.firebase.crashlytics")
 }
 
+fun getPropertyOrEnv(propertyName: String, envName: String = propertyName): String? {
+    return if (project.hasProperty(propertyName)) {
+        project.property(propertyName) as String
+    } else {
+        System.getenv(envName)
+    }
+}
+
 android {
     signingConfigs {
         create("release") {
-            if (project.hasProperty("NETBIRD_UPLOAD_STORE_FILE")) {
-                storeFile = file(project.property("NETBIRD_UPLOAD_STORE_FILE") as String)
-                storePassword = project.property("NETBIRD_UPLOAD_STORE_PASSWORD") as String
-                keyAlias = project.property("NETBIRD_UPLOAD_KEY_ALIAS") as String
-                keyPassword = project.property("NETBIRD_UPLOAD_KEY_PASSWORD") as String
+            val storeFile = getPropertyOrEnv("NETBIRD_UPLOAD_STORE_FILE")
+            val storePassword = getPropertyOrEnv("NETBIRD_UPLOAD_STORE_PASSWORD")
+            val keyAlias = getPropertyOrEnv("NETBIRD_UPLOAD_KEY_ALIAS")
+            val keyPassword = getPropertyOrEnv("NETBIRD_UPLOAD_KEY_PASSWORD")
+
+            if (storeFile != null) {
+                this.storeFile = file(storeFile)
+                this.storePassword = storePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
             }
         }
     }
