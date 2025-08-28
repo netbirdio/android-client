@@ -1,9 +1,6 @@
 name: build debug
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
 
 jobs:
