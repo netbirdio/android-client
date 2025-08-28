@@ -1,54 +1,38 @@
 name: build debug
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
 
 jobs:
-  build:
+  build-debug:
     runs-on: ubuntu-latest
+    outputs:
+      apk_path: ${{ steps.build.outputs.apk_path }}
+      bundle_path: ${{ steps.build.outputs.bundle_path }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: "17"
-          distribution: "adopt"
-          cache: "gradle"
-      - name: Install Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: "1.23.3"
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 12266719
-      - name: NDK Cache
-        id: ndk-cache
-        uses: actions/cache@v3
-        with:
-          path: /usr/local/lib/android/sdk/ndk
-          key: ndk-cache-23.1.7779620
-      - name: Setup NDK
-        run: /usr/local/lib/android/sdk/cmdline-tools/16.0/bin/sdkmanager --install "ndk;23.1.7779620"
-      - name: Install gomobile
-        run: go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20230531173138-3c911d8e3eda
-      - name: Build NetBird Go library
-        run: PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh
-        env:
-          ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/23.1.7779620
+
       - name: Get short Git hash
-        run: echo "SHORT_GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-      - name: Build debug apk
-        run:  ./gradlew  --no-daemon assembleDebug -PversionName="ci-${SHORT_GIT_SHA}"
-      - name: Upload non tags for debug purposes
+        id: version
+        run: |
+          SHORT_GIT_SHA=$(git rev-parse --short HEAD)
+          echo "version_name=ci-${SHORT_GIT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Build Android
+        id: build
+        uses: ./.github/actions/build-android
+        with:
+          version_name: ${{ steps.version.outputs.version_name }}
+          build_type: debug
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 1
+          name: debug-artifacts-${{ steps.version.outputs.version_name }}
+          path: |
+            ${{ steps.build.outputs.apk_path }}
+            ${{ steps.build.outputs.bundle_path }}
+          retention-days: 3

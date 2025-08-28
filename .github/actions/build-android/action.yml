@@ -1,0 +1,86 @@
+name: 'Build Android App'
+description: 'Build Android APK and AAB'
+inputs:
+  version_name:
+    description: 'Version name for the build'
+    required: true
+  version_code:
+    description: 'Version code for the build'
+    required: false
+    default: ''
+  build_type:
+    description: 'Build type: debug or release'
+    required: true
+outputs:
+  apk_path:
+    description: 'Path to the built APK'
+    value: ${{ steps.build-info.outputs.apk_path }}
+  bundle_path:
+    description: 'Path to the built AAB bundle'
+    value: ${{ steps.build-info.outputs.bundle_path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Print inputs
+      shell: bash
+      run: |
+        echo "Version Name: ${{ inputs.version_name }}"
+        echo "Version Code: ${{ inputs.version_code }}"
+        echo "Build Type: ${{ inputs.build_type }}"
+
+    - name: Fetch tags for submodule
+      shell: bash
+      run: |
+        cd netbird
+        git fetch --tags
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: "17"
+        distribution: "adopt"
+        cache: "gradle"
+
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: "1.23.3"
+
+    - name: Setup NDK
+      shell: bash
+      run: ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.1.7779620"
+
+    - name: Set ANDROID_NDK_HOME
+      shell: bash
+      run: echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620" >> $GITHUB_ENV
+
+    - name: Install gomobile
+      shell: bash
+      run: go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20230531173138-3c911d8e3eda
+
+    - name: Build NetBird Go library
+      shell: bash
+      run: PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh
+
+    - name: Build APK and Bundle
+      shell: bash
+      run: |
+        BUILD_TYPE=${{ inputs.build_type == 'release' && 'Release' || 'Debug' }}
+        ./gradlew --no-daemon assemble${BUILD_TYPE} bundle${BUILD_TYPE} -PversionName="${{ inputs.version_name }}" -PversionCode="${{ inputs.version_code }}"
+
+    - name: Rename artifacts
+      shell: bash
+      run: |
+        set -e
+        BUILD_TYPE_FOLDER="${{ inputs.build_type }}"
+        mv app/build/outputs/apk/${BUILD_TYPE_FOLDER}/app-${BUILD_TYPE_FOLDER}.apk app/build/outputs/apk/${BUILD_TYPE_FOLDER}/netbird-${{ inputs.version_name }}.apk
+        mv app/build/outputs/bundle/${BUILD_TYPE_FOLDER}/app-${BUILD_TYPE_FOLDER}.aab app/build/outputs/bundle/${BUILD_TYPE_FOLDER}/netbird-${{ inputs.version_name }}.aab
+
+    - name: Set build info
+      id: build-info
+      shell: bash
+      run: |
+        BUILD_TYPE="${{ inputs.build_type }}"
+        echo "apk_path=app/build/outputs/apk/${BUILD_TYPE}/netbird-${{ inputs.version_name }}.apk" >> $GITHUB_OUTPUT
+        echo "bundle_path=app/build/outputs/bundle/${BUILD_TYPE}/netbird-${{ inputs.version_name }}.aab" >> $GITHUB_OUTPUT
