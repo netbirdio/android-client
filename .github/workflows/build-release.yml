@@ -7,7 +7,7 @@ on:
 jobs:
   build-release:
     runs-on: ubuntu-latest
-    environment: example
+    environment: android-release
     env:
       NETBIRD_UPLOAD_KEY_ALIAS: ${{ secrets.NETBIRD_UPLOAD_KEY_ALIAS }}
       NETBIRD_UPLOAD_KEY_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_KEY_PASSWORD }}
