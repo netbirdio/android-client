@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("io.netbird.client.backend.test", appContext.getPackageName());
+        assertEquals("io.netbird.client.tool.test", appContext.getPackageName());
     }
 }
