@@ -6,6 +6,9 @@ import android.content.SharedPreferences;
 public class Preferences {
 
     private final String keyTraceLog = "tracelog";
+
+    private final String keyForceRelayConnection = "isForceRelayConnectionEnabled";
+
     private final SharedPreferences sharedPref;
 
     public static String configFile(Context context){
@@ -25,6 +28,18 @@ public class Preferences {
 
     public void disableTraceLog() {
         sharedPref.edit().putBoolean(keyTraceLog, false).apply();
+    }
+
+    public boolean isRelayConnectionEnforced() {
+        return sharedPref.getBoolean(keyForceRelayConnection, false);
+    }
+
+    public void enableRelayConnectionEnforcement() {
+        sharedPref.edit().putBoolean(keyForceRelayConnection, true).apply();
+    }
+
+    public void disableRelayConnectionEnforcement() {
+        sharedPref.edit().putBoolean(keyForceRelayConnection, false).apply();
     }
 
     public static String defaultServer() {
