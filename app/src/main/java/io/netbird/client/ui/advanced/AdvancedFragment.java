@@ -15,6 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
+import io.netbird.client.R;
+import io.netbird.client.databinding.ComponentSwitchBinding;
 import io.netbird.client.databinding.FragmentAdvancedBinding;
 import io.netbird.client.tool.Logcat;
 import io.netbird.client.tool.Preferences;
@@ -27,6 +29,20 @@ public class AdvancedFragment extends Fragment {
 
     private FragmentAdvancedBinding binding;
     private io.netbird.gomobile.android.Preferences goPreferences;
+
+    private void configureEnforceRelayConnectionSwitch(@NonNull ComponentSwitchBinding binding, @NonNull Preferences preferences) {
+        binding.switchTitle.setText(R.string.advanced_enforce_relay);
+        binding.switchDescription.setText(R.string.advanced_enforce_relay_desc);
+
+        binding.switchControl.setChecked(preferences.isRelayConnectionEnforced());
+        binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                preferences.enableRelayConnectionEnforcement();
+            } else {
+                preferences.disableRelayConnectionEnforcement();
+            }
+        });
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -121,6 +137,8 @@ public class AdvancedFragment extends Fragment {
                 Toast.makeText(inflater.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
             }
         });
+
+        configureEnforceRelayConnectionSwitch(binding.layoutEnforceRelayConnection, preferences);
 
         // Initialize engine config switches (your settings)
         initializeEngineConfigSwitches();
