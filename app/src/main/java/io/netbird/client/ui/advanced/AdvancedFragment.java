@@ -138,7 +138,7 @@ public class AdvancedFragment extends Fragment {
             }
         });
 
-        configureEnforceRelayConnectionSwitch(binding.layoutEnforceRelayConnection, preferences);
+        configureEnforceRelayConnectionSwitch(binding.layoutForceRelayConnection, preferences);
 
         // Initialize engine config switches (your settings)
         initializeEngineConfigSwitches();
