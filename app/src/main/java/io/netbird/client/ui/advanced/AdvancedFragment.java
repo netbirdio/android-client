@@ -31,15 +31,15 @@ public class AdvancedFragment extends Fragment {
     private io.netbird.gomobile.android.Preferences goPreferences;
 
     private void configureEnforceRelayConnectionSwitch(@NonNull ComponentSwitchBinding binding, @NonNull Preferences preferences) {
-        binding.switchTitle.setText(R.string.advanced_enforce_relay);
-        binding.switchDescription.setText(R.string.advanced_enforce_relay_desc);
+        binding.switchTitle.setText(R.string.advanced_force_relay_conn);
+        binding.switchDescription.setText(R.string.advanced_force_relay_conn_desc);
 
-        binding.switchControl.setChecked(preferences.isRelayConnectionEnforced());
+        binding.switchControl.setChecked(preferences.isConnectionForceRelayed());
         binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                preferences.enableRelayConnectionEnforcement();
+                preferences.enableForcedRelayConnection();
             } else {
-                preferences.disableRelayConnectionEnforcement();
+                preferences.disableForcedRelayConnection();
             }
         });
     }

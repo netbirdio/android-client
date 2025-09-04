@@ -7,7 +7,7 @@ public class EnvVarPackager {
     public static EnvList getEnvironmentVariables(Preferences preferences) {
         var envList = new EnvList();
 
-        envList.put(Android.getEnvKeyNBForceRelay(), String.valueOf(preferences.isRelayConnectionEnforced()));
+        envList.put(Android.getEnvKeyNBForceRelay(), String.valueOf(preferences.isConnectionForceRelayed()));
 
         return envList;
     }

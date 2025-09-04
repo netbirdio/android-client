@@ -7,7 +7,7 @@ public class Preferences {
 
     private final String keyTraceLog = "tracelog";
 
-    private final String keyForceRelayConnection = "isForceRelayConnectionEnabled";
+    private final String keyForceRelayConnection = "isConnectionForceRelayed";
 
     private final SharedPreferences sharedPref;
 
@@ -30,15 +30,15 @@ public class Preferences {
         sharedPref.edit().putBoolean(keyTraceLog, false).apply();
     }
 
-    public boolean isRelayConnectionEnforced() {
+    public boolean isConnectionForceRelayed() {
         return sharedPref.getBoolean(keyForceRelayConnection, false);
     }
 
-    public void enableRelayConnectionEnforcement() {
+    public void enableForcedRelayConnection() {
         sharedPref.edit().putBoolean(keyForceRelayConnection, true).apply();
     }
 
-    public void disableRelayConnectionEnforcement() {
+    public void disableForcedRelayConnection() {
         sharedPref.edit().putBoolean(keyForceRelayConnection, false).apply();
     }
 

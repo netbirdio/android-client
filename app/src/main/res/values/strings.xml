@@ -105,6 +105,6 @@
     <string name="advanced_theme_dark">Dark</string>
     <string name="advanced_theme_light">Light</string>
     <string name="advanced_theme_desc">Choose the app appearance mode.</string>
-    <string name="advanced_enforce_relay">Enforce relay connection</string>
-    <string name="advanced_enforce_relay_desc">Enforces usage of relay when connecting. This will require the VPN service to be restarted.</string>
+    <string name="advanced_force_relay_conn">Force relay connection</string>
+    <string name="advanced_force_relay_conn_desc">Forces usage of relay when connecting to peers</string>
 </resources>

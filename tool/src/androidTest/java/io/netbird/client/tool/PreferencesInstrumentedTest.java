@@ -45,23 +45,23 @@ public class PreferencesInstrumentedTest {
     }
 
     @Test
-    public void shouldReturnFalseWhenRelayConnectionEnforcementIsNotSet() {
-        Assert.assertFalse(preferences.isRelayConnectionEnforced());
+    public void shouldReturnFalseWhenConnectionForceRelayedIsNotSet() {
+        Assert.assertFalse(preferences.isConnectionForceRelayed());
     }
 
     @Test
-    public void shouldReturnTrueAfterEnablingRelayConnectionEnforcement() {
-        preferences.enableRelayConnectionEnforcement();
+    public void shouldReturnTrueAfterEnablingForcedRelayConnection() {
+        preferences.enableForcedRelayConnection();
 
-        Assert.assertTrue(preferences.isRelayConnectionEnforced());
+        Assert.assertTrue(preferences.isConnectionForceRelayed());
     }
 
     @Test
-    public void shouldReturnFalseAfterDisablingRelayConnectionEnforcement() {
-        preferences.enableRelayConnectionEnforcement();
-        preferences.disableRelayConnectionEnforcement();
+    public void shouldReturnFalseAfterDisablingForcedRelayConnection() {
+        preferences.enableForcedRelayConnection();
+        preferences.disableForcedRelayConnection();
 
-        Assert.assertFalse(preferences.isRelayConnectionEnforced());
+        Assert.assertFalse(preferences.isConnectionForceRelayed());
     }
 
     @Test
