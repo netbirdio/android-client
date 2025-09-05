@@ -9,9 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
@@ -30,7 +32,19 @@ public class AdvancedFragment extends Fragment {
     private FragmentAdvancedBinding binding;
     private io.netbird.gomobile.android.Preferences goPreferences;
 
-    private void configureEnforceRelayConnectionSwitch(@NonNull ComponentSwitchBinding binding, @NonNull Preferences preferences) {
+    private void showReconnectionNeededWarningDialog() {
+        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_simple_alert_message, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        ((TextView)dialogView.findViewById(R.id.txt_dialog)).setText(R.string.reconnectionNeededWarningMessage);
+        dialogView.findViewById(R.id.btn_ok_dialog).setOnClickListener(v -> alertDialog.dismiss());
+
+        alertDialog.show();
+    }
+
+    private void configureForceRelayConnectionSwitch(@NonNull ComponentSwitchBinding binding, @NonNull Preferences preferences) {
         binding.switchTitle.setText(R.string.advanced_force_relay_conn);
         binding.switchDescription.setText(R.string.advanced_force_relay_conn_desc);
 
@@ -41,6 +55,8 @@ public class AdvancedFragment extends Fragment {
             } else {
                 preferences.disableForcedRelayConnection();
             }
+
+            showReconnectionNeededWarningDialog();
         });
     }
 
@@ -138,7 +154,7 @@ public class AdvancedFragment extends Fragment {
             }
         });
 
-        configureEnforceRelayConnectionSwitch(binding.layoutForceRelayConnection, preferences);
+        configureForceRelayConnectionSwitch(binding.layoutForceRelayConnection, preferences);
 
         // Initialize engine config switches (your settings)
         initializeEngineConfigSwitches();
