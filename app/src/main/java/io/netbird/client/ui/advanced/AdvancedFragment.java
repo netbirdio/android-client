@@ -34,13 +34,12 @@ public class AdvancedFragment extends Fragment {
 
     private void showReconnectionNeededWarningDialog() {
         final View dialogView = getLayoutInflater().inflate(R.layout.dialog_simple_alert_message, null);
-        final AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
+        final AlertDialog alertDialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
                 .setView(dialogView)
                 .create();
 
         ((TextView)dialogView.findViewById(R.id.txt_dialog)).setText(R.string.reconnectionNeededWarningMessage);
         dialogView.findViewById(R.id.btn_ok_dialog).setOnClickListener(v -> alertDialog.dismiss());
-
         alertDialog.show();
     }
 
