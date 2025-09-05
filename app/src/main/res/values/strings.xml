@@ -107,4 +107,6 @@
     <string name="advanced_theme_desc">Choose the app appearance mode.</string>
     <string name="advanced_force_relay_conn">Force relay connection</string>
     <string name="advanced_force_relay_conn_desc">Forces usage of relay when connecting to peers</string>
+    <string name="exclamation_mark">exclamation mark</string>
+    <string name="reconnectionNeededWarningMessage">This setting will be applied next time you connect your device.</string>
 </resources>
