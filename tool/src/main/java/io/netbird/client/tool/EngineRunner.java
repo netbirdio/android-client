@@ -60,12 +60,15 @@ class EngineRunner {
         engineIsRunning = true;
         Runnable r = () -> {
             DNSWatch dnsWatch = new DNSWatch(context);
+            Preferences preferences = new Preferences(context);
+            var envList = EnvVarPackager.getEnvironmentVariables(preferences);
+
             try {
                 notifyServiceStateListeners(true);
                 if(urlOpener == null) {
-                    goClient.runWithoutLogin(dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed));
+                    goClient.runWithoutLogin(dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
                 } else {
-                    goClient.run(urlOpener, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed));
+                    goClient.run(urlOpener, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
                 }
             } catch (Exception e) {
                 Log.e(LOGTAG, "goClient error", e);
