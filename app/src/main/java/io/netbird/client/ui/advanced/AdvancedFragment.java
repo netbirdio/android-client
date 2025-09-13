@@ -271,20 +271,20 @@ public class AdvancedFragment extends Fragment {
         String base64Pattern = "^[A-Za-z0-9+/=]{32,64}$";
         return key.matches(base64Pattern);
     }
-    
+
     private void setPreSharedKey(String key, Context context) {
         String configFilePath = Preferences.configFile(context);
         io.netbird.gomobile.android.Preferences preferences = new io.netbird.gomobile.android.Preferences(configFilePath);
         try {
             preferences.setPreSharedKey(key);
             preferences.commit();
-            Toast.makeText(context, "Pre-shared key saved successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.advanced_presharedkey_saved_success, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Log.e(LOGTAG, "Failed to save pre-shared key", e);
-            Toast.makeText(context, "Error saving key: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.advanced_presharedkey_save_error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
-    
+
     private boolean hasPreSharedKey(Context context) {
         String configFilePath = Preferences.configFile(context);
         io.netbird.gomobile.android.Preferences preferences = new io.netbird.gomobile.android.Preferences(configFilePath);
