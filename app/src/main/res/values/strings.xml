@@ -71,6 +71,8 @@
     <string name="advanced_details">You will only communicate with peers that use the same key.</string>
     <string name="advanced_hint">Add a pre-shared key</string>
     <string name="advanced_save">Save</string>
+    <string name="advanced_presharedkey_saved_success">Pre-shared key saved successfully</string>
+    <string name="advanced_presharedkey_save_error">Failed to save pre-shared key</string>
     <string name="advanced_tracelog">Enable trace log level.</string>
     <string name="advanced_share_logs">Share logs</string>
     <string name="advanced_rosenpass">Enable Rosenpass</string>
