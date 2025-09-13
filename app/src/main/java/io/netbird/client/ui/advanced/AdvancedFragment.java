@@ -9,12 +9,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
+import io.netbird.client.R;
+import io.netbird.client.databinding.ComponentSwitchBinding;
 import io.netbird.client.databinding.FragmentAdvancedBinding;
 import io.netbird.client.tool.Logcat;
 import io.netbird.client.tool.Preferences;
@@ -27,6 +31,33 @@ public class AdvancedFragment extends Fragment {
 
     private FragmentAdvancedBinding binding;
     private io.netbird.gomobile.android.Preferences goPreferences;
+
+    private void showReconnectionNeededWarningDialog() {
+        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_simple_alert_message, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
+                .setView(dialogView)
+                .create();
+
+        ((TextView)dialogView.findViewById(R.id.txt_dialog)).setText(R.string.reconnectionNeededWarningMessage);
+        dialogView.findViewById(R.id.btn_ok_dialog).setOnClickListener(v -> alertDialog.dismiss());
+        alertDialog.show();
+    }
+
+    private void configureForceRelayConnectionSwitch(@NonNull ComponentSwitchBinding binding, @NonNull Preferences preferences) {
+        binding.switchTitle.setText(R.string.advanced_force_relay_conn);
+        binding.switchDescription.setText(R.string.advanced_force_relay_conn_desc);
+
+        binding.switchControl.setChecked(preferences.isConnectionForceRelayed());
+        binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                preferences.enableForcedRelayConnection();
+            } else {
+                preferences.disableForcedRelayConnection();
+            }
+
+            showReconnectionNeededWarningDialog();
+        });
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -121,6 +152,8 @@ public class AdvancedFragment extends Fragment {
                 Toast.makeText(inflater.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
             }
         });
+
+        configureForceRelayConnectionSwitch(binding.layoutForceRelayConnection, preferences);
 
         // Initialize engine config switches (your settings)
         initializeEngineConfigSwitches();

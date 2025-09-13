@@ -12,9 +12,9 @@ lifecycleLivedataKtx = "2.9.0"
 lifecycleViewmodelKtx = "2.9.0"
 navigationFragment = "2.9.0"
 navigationUi = "2.9.0"
-firebase-bom = "33.14.0"
+firebase-bom = "34.2.0"
 google-services = "4.4.2"
-firebase-crashlytics-plugin = "3.0.3"
+firebase-crashlytics-plugin = "3.0.6"
 
 [libraries]
 browser = { module = "androidx.browser:browser", version.ref = "browser" }
