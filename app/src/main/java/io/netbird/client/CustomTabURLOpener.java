@@ -47,10 +47,12 @@ public class CustomTabURLOpener implements URLOpener {
     public void onLoginSuccess() {
         Log.d(TAG, "onLoginSuccess fired.");
 
-        Intent i  = new Intent(this.context, MainActivity.class);
-        i.setAction(Intent.ACTION_MAIN);
-        i.addCategory(Intent.CATEGORY_LAUNCHER);
-        this.context.startActivity(i);
+        if (isOpened) {
+            Intent i = new Intent(this.context, MainActivity.class);
+            i.setAction(Intent.ACTION_MAIN);
+            i.addCategory(Intent.CATEGORY_LAUNCHER);
+            this.context.startActivity(i);
+        }
     }
 
     @Override
