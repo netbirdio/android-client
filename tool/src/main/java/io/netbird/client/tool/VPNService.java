@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 import io.netbird.gomobile.android.ConnectionListener;
@@ -33,7 +34,17 @@ public class VPNService extends android.net.VpnService {
     public void onCreate() {
         super.onCreate();
         Log.d(LOGTAG, "onCreate");
-        engineRunner = new EngineRunner(this);
+
+        var configurationFilePath = Preferences.configFile(this);
+        var versionName = Version.getVersionName(this);
+        var tunAdapter = new IFace(this);
+        var iFaceDiscover = new IFaceDiscover();
+        var notifier = new NetworkChangeNotifier(this);
+        var preferences = new Preferences(this);
+        var isDebuggable = Version.isDebuggable(this);
+
+        engineRunner = new EngineRunner(configurationFilePath, notifier, tunAdapter, iFaceDiscover, versionName,
+                preferences.isTraceLogEnabled(), isDebuggable);
         fgNotification = new ForegroundNotification(this);
         engineRunner.addServiceStateListener(serviceStateListener);
     }
@@ -45,9 +56,12 @@ public class VPNService extends android.net.VpnService {
             return START_NOT_STICKY;
         }
 
-        if(INTENT_ALWAYS_ON_START.equals(intent.getAction())) {
+        if (INTENT_ALWAYS_ON_START.equals(intent.getAction())) {
             fgNotification.startForeground();
-            engineRunner.runWithoutAuth();
+            engineRunner.runWithoutAuth(
+                    new DNSWatch(this),
+                    new Preferences(this),
+                    Version.isDebuggable(this));
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -59,9 +73,9 @@ public class VPNService extends android.net.VpnService {
     }
 
     @Override
-    public boolean onUnbind (Intent intent) {
+    public boolean onUnbind(Intent intent) {
         Log.d(LOGTAG, "unbind from activity");
-        if(!engineRunner.isRunning()) {
+        if (!engineRunner.isRunning()) {
             stopSelf();
         }
         return false; // false means do not call onRebind
@@ -78,7 +92,7 @@ public class VPNService extends android.net.VpnService {
     @Override
     public void onRevoke() {
         Log.d(LOGTAG, "VPN permission on revoke");
-        if(engineRunner!=null) {
+        if (engineRunner != null) {
             engineRunner.stop();
             stopForeground(true);
         }
@@ -104,7 +118,9 @@ public class VPNService extends android.net.VpnService {
 
         public void runEngine(URLOpener urlOpener) {
             fgNotification.startForeground();
-            engineRunner.run(urlOpener);
+            engineRunner.run(new DNSWatch(VPNService.this),
+                    new Preferences(VPNService.this),
+                    Version.isDebuggable(VPNService.this), urlOpener);
         }
 
         public void stopEngine() {
@@ -135,7 +151,7 @@ public class VPNService extends android.net.VpnService {
             engineRunner.removeServiceStateListener(serviceStateListener);
         }
     }
-    
+
     public static boolean isUsingAlwaysOnVPN(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network[] networks = connectivityManager.getAllNetworks();
