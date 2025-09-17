@@ -1,7 +1,5 @@
 package io.netbird.client.tool;
 
-
-import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
@@ -15,7 +13,6 @@ import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Client;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.DNSList;
-import io.netbird.gomobile.android.EnvList;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.NetworkChangeListener;
 import io.netbird.gomobile.android.PeerInfoArray;
