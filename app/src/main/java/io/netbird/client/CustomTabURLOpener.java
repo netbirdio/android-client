@@ -14,6 +14,7 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import io.netbird.gomobile.android.URLOpener;
 
 public class CustomTabURLOpener implements URLOpener {
+    private static final String TAG = "CustomTabURLOpener";
     private final AppCompatActivity context;
     private final ActivityResultLauncher<Intent> customTabLauncher;
 
@@ -43,6 +44,18 @@ public class CustomTabURLOpener implements URLOpener {
 
 
     @Override
+    public void onLoginSuccess() {
+        Log.d(TAG, "onLoginSuccess fired.");
+
+        if (isOpened) {
+            Intent i = new Intent(this.context, MainActivity.class);
+            i.setAction(Intent.ACTION_MAIN);
+            i.addCategory(Intent.CATEGORY_LAUNCHER);
+            this.context.startActivity(i);
+        }
+    }
+
+    @Override
     public void open(String url) {
         isOpened = true;
         try {
@@ -51,7 +64,7 @@ public class CustomTabURLOpener implements URLOpener {
             intent.setData(Uri.parse(url));
             customTabLauncher.launch(intent);
         } catch (Exception e) {
-            Log.e("CustomTabURLOpener", "Failed to launch CustomTab: " + e.getMessage());
+            Log.e(TAG, "Failed to launch CustomTab: " + e.getMessage());
             if (context instanceof OnCustomTabResult) {
                 ((OnCustomTabResult) context).onClosed();
             }
