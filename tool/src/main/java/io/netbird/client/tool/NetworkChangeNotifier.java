@@ -13,6 +13,8 @@ public class NetworkChangeNotifier implements NetworkChangeListener {
 
     private final Context context;
 
+    private RouteChangeListener routeChangeListener;
+
     NetworkChangeNotifier(Context context) {
         this.context = context;
     }
@@ -23,12 +25,20 @@ public class NetworkChangeNotifier implements NetworkChangeListener {
             routes = routes.replace(",", ";");
         }
 
+        if (this.routeChangeListener != null) {
+            this.routeChangeListener.onRouteChanged(routes);
+        }
+
         sendBroadcast(routes);
     }
 
     @Override
     public void setInterfaceIP(String ip) {
 
+    }
+
+    public void setRouteChangeListener(RouteChangeListener routeChangeListener) {
+        this.routeChangeListener = routeChangeListener;
     }
 
     private void sendBroadcast(String routes) {
