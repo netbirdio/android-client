@@ -1,8 +1,10 @@
 package io.netbird.client.tool;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -13,6 +15,8 @@ import android.os.Parcel;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.NetworkArray;
@@ -24,16 +28,48 @@ public class VPNService extends android.net.VpnService {
     private final static String LOGTAG = "service";
     public static final String INTENT_ACTION_START = "io.netbird.client.intent.action.START_SERVICE";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
-
     private final IBinder myBinder = new MyLocalBinder();
-
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
+    private final BroadcastReceiver networkRouteChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() != null && intent.getAction().equals(NetworkChangeNotifier.action)) {
+                String routes = intent.getStringExtra("routes");
+
+                // Renew TUN file descriptor if routes changed.
+                if (currentTUNParameters != null && currentTUNParameters.didRoutesChange(routes)) {
+                    var iface = new IFace(VPNService.this);
+
+                    try {
+                        int fd = (int)iface.configureInterface(
+                                currentTUNParameters.address,
+                                currentTUNParameters.mtu,
+                                currentTUNParameters.dns,
+                                currentTUNParameters.searchDomainsString,
+                                routes);
+
+                        if (fd != -1) {
+                            VPNService.this.protect(fd);
+                            VPNService.this.engineRunner.renewTUN(fd);
+                        }
+                    } catch (Exception e) {
+                        Log.e(LOGTAG, "failed to recreate tunnel after route changed", e);
+                    }
+                }
+            }
+        }
+    };
+    private TUNParameters currentTUNParameters;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(LOGTAG, "onCreate");
+
+        LocalBroadcastManager
+                .getInstance(this)
+                .registerReceiver(networkRouteChangedReceiver, new IntentFilter(NetworkChangeNotifier.action));
 
         var configurationFilePath = Preferences.configFile(this);
         var versionName = Version.getVersionName(this);
@@ -87,6 +123,7 @@ public class VPNService extends android.net.VpnService {
         Log.d(LOGTAG, "onDestroy");
         engineRunner.stop();
         stopForeground(true);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(networkRouteChangedReceiver);
     }
 
     @Override
@@ -185,4 +222,8 @@ public class VPNService extends android.net.VpnService {
             fgNotification.stopForeground();
         }
     };
+
+    public void setCurrentTUNParameters(TUNParameters currentTUNParameters) {
+        this.currentTUNParameters = currentTUNParameters;
+    }
 }
