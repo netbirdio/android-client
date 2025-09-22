@@ -156,7 +156,7 @@ class EngineRunner {
     }
 
     public void renewTUN(int fd) {
-        Log.d(LOGTAG, "renewing TUN fd");
+        Log.d(LOGTAG, String.format("renewing TUN fd: %d", fd));
         // goClient.sendFd(fd);
     }
 }
