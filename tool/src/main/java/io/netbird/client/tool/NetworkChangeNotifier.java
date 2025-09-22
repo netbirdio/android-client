@@ -19,7 +19,7 @@ public class NetworkChangeNotifier implements NetworkChangeListener {
 
     @Override
     public void onNetworkChanged(String routes) {
-        sendBroadcast();
+        sendBroadcast(routes);
     }
 
     @Override
@@ -27,9 +27,10 @@ public class NetworkChangeNotifier implements NetworkChangeListener {
 
     }
 
-    private void sendBroadcast() {
+    private void sendBroadcast(String routes) {
         Intent intent = new Intent(action);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("routes", routes);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 }
