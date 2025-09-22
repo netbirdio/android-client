@@ -104,33 +104,25 @@ class IFace implements TunAdapter {
             return;
         }
 
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch latch = new CountDownLatch(1);
 
-            // ConnectivityManager must to run on the main thread instead of a Go routine
-            new Handler(Looper.getMainLooper()).post(() -> {
-                addDnsServer(builder, dns);
+        // ConnectivityManager must to run on the main thread instead of a Go routine
+        new Handler(Looper.getMainLooper()).post(() -> {
+            DNSWatch dnsWatch = new DNSWatch(vpnService);
 
-                latch.countDown();
-            });
-
-            try {
-                latch.await(); // Will block the current thread until countDown() is called
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            if (!dnsWatch.isPrivateDnsActive()) {
+                builder.addDnsServer(dns);
+            } else {
+                Log.d(LOGTAG, "ignore DNS because private dns is active");
             }
-        } else {
-            addDnsServer(builder, dns);
-        }
-    }
 
-    private void addDnsServer(VpnService.Builder builder, String dns) {
-        DNSWatch dnsWatch = new DNSWatch(vpnService);
+            latch.countDown();
+        });
 
-        if (!dnsWatch.isPrivateDnsActive()) {
-            builder.addDnsServer(dns);
-        } else {
-            Log.d(LOGTAG, "ignore DNS because private dns is active");
+        try {
+            latch.await(); // Will block the current thread until countDown() is called
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
