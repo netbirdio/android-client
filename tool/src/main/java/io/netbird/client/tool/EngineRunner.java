@@ -58,13 +58,11 @@ class EngineRunner {
 
         engineIsRunning = true;
         Runnable r = () -> {
-//            DNSWatch dnsWatch = new DNSWatch(context);
-//            Preferences preferences = new Preferences(context);
             var envList = EnvVarPackager.getEnvironmentVariables(preferences);
 
             try {
                 notifyServiceStateListeners(true);
-                if(urlOpener == null) {
+                if (urlOpener == null) {
                     goClient.runWithoutLogin(dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
                 } else {
                     goClient.run(urlOpener, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
@@ -86,6 +84,7 @@ class EngineRunner {
     private void changed(DNSList dnsServers) throws Exception {
         goClient.onUpdatedHostDNS(dnsServers);
     }
+
     public synchronized boolean isRunning() {
         return engineIsRunning;
     }
@@ -144,7 +143,7 @@ class EngineRunner {
         }
     }
 
-    private void updateLogLevel(boolean isTraceLogEnabled , boolean isDebuggable) {
+    private void updateLogLevel(boolean isTraceLogEnabled, boolean isDebuggable) {
         if (isDebuggable || isTraceLogEnabled) {
             goClient.setTraceLogLevel();
         } else {
@@ -153,6 +152,11 @@ class EngineRunner {
     }
 
     private int androidSDKVersion() {
-       return Build.VERSION.SDK_INT ;
+        return Build.VERSION.SDK_INT;
+    }
+
+    public void renewTUN(int fd) {
+        Log.d(LOGTAG, "renewing TUN fd");
+        // goClient.sendFd(fd);
     }
 }
