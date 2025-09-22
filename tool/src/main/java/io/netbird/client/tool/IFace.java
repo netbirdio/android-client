@@ -33,12 +33,20 @@ class IFace implements TunAdapter {
         LinkedList<Route> routes = toRoutes(routesString);
 
         InetNetwork addr = InetNetwork.parse(address);
+        long fd = -1;
+
         try {
-            return createTun(addr.getAddress().getHostAddress(), addr.getMask(), (int) mtu, dns, searchDomains, routes);
-        }catch (Exception e) {
+            fd = createTun(addr.getAddress().getHostAddress(), addr.getMask(), (int) mtu, dns, searchDomains, routes);
+        } catch (Exception e) {
             Log.e(LOGTAG, "failed to create tunnel", e);
-            throw e;
         }
+
+        // only set the currently used TUN parameters if createTun didn't throw exceptions
+        if (fd != -1) {
+            this.vpnService.setCurrentTUNParameters(new TUNParameters(address, mtu, dns, searchDomainsString, routesString));
+        }
+
+        return fd;
     }
 
     @Override
