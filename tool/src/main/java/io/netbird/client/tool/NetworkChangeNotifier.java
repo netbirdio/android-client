@@ -19,6 +19,10 @@ public class NetworkChangeNotifier implements NetworkChangeListener {
 
     @Override
     public void onNetworkChanged(String routes) {
+        if (routes != null) {
+            routes = routes.replace(",", ";");
+        }
+
         sendBroadcast(routes);
     }
 
