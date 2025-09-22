@@ -15,7 +15,6 @@ import android.os.Parcel;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import io.netbird.gomobile.android.ConnectionListener;
