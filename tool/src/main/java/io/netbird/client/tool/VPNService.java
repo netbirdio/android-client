@@ -20,6 +20,7 @@ import java.util.Random;
 
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.NetworkArray;
+import io.netbird.gomobile.android.NetworkChangeListener;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.URLOpener;
 
@@ -32,6 +33,7 @@ public class VPNService extends android.net.VpnService {
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
     private TUNParameters currentTUNParameters;
+    private NetworkChangeNotifier notifier;
 
     @Override
     public void onCreate() {
@@ -43,7 +45,7 @@ public class VPNService extends android.net.VpnService {
         var tunAdapter = new IFace(this);
         var iFaceDiscover = new IFaceDiscover();
 
-        var notifier = new NetworkChangeNotifier(this);
+        notifier = new NetworkChangeNotifier(this);
         notifier.setRouteChangeListener((routes -> queueTUNRenewal(routes)));
 
         var preferences = new Preferences(this);
@@ -93,6 +95,10 @@ public class VPNService extends android.net.VpnService {
         Log.d(LOGTAG, "onDestroy");
         engineRunner.stop();
         stopForeground(true);
+
+        if (this.notifier != null) {
+            this.notifier.setRouteChangeListener(null);
+        }
 
         if (tunCreator != null) {
             tunCreator.getHandler().getLooper().quitSafely();
@@ -217,26 +223,23 @@ public class VPNService extends android.net.VpnService {
 
         // Renew TUN file descriptor if routes changed.
         if (currentTUNParameters != null && currentTUNParameters.didRoutesChange(routes)) {
-            int fd = new Random().nextInt();
-            this.engineRunner.renewTUN(fd);
+            var iface = new IFace(VPNService.this);
 
-//            var iface = new IFace(VPNService.this);
-//
-//            try {
-//                int fd = (int)iface.configureInterface(
-//                        currentTUNParameters.address,
-//                        currentTUNParameters.mtu,
-//                        currentTUNParameters.dns,
-//                        currentTUNParameters.searchDomainsString,
-//                        routes);
-//
-//                if (fd != -1) {
-//                    this.protect(fd);
-//                    this.engineRunner.renewTUN(fd);
-//                }
-//            } catch (Exception e) {
-//                Log.e(LOGTAG, "failed to recreate tunnel after route changed", e);
-//            }
+            try {
+                int fd = (int)iface.configureInterface(
+                        currentTUNParameters.address,
+                        currentTUNParameters.mtu,
+                        currentTUNParameters.dns,
+                        currentTUNParameters.searchDomainsString,
+                        routes);
+
+                if (fd != -1) {
+                    this.protect(fd);
+                    this.engineRunner.renewTUN(fd);
+                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to recreate tunnel after route changed", e);
+            }
         }
     }
 
