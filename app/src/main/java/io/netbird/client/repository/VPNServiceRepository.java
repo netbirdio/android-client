@@ -17,14 +17,14 @@ import io.netbird.client.ui.home.Status;
 public class VPNServiceRepository {
     private VPNService.MyLocalBinder binder;
     private final Context context;
-    private VPNServiceBindListener listener;
+    private VPNServiceBindListener serviceBindListener;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             binder = (VPNService.MyLocalBinder)service;
-            if (listener != null) {
-                listener.onBind();
+            if (serviceBindListener != null) {
+                serviceBindListener.onServiceBind();
             }
         }
 
@@ -34,7 +34,7 @@ public class VPNServiceRepository {
                 binder = null;
             }
 
-            listener = null;
+            serviceBindListener = null;
         }
     };
 
@@ -42,8 +42,8 @@ public class VPNServiceRepository {
         this.context = context;
     }
 
-    public void setListener(VPNServiceBindListener listener) {
-        this.listener = listener;
+    public void setServiceBindListener(VPNServiceBindListener listener) {
+        this.serviceBindListener = listener;
     }
 
     public void bindService() {

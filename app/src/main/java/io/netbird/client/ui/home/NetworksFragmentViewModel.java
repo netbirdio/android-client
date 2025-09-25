@@ -21,7 +21,7 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
 
     public NetworksFragmentViewModel(VPNServiceRepository repository) {
         this.repository = repository;
-        this.repository.setListener(this);
+        this.repository.setServiceBindListener(this);
         this.repository.bindService();
     }
 
@@ -52,7 +52,8 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
     );
 
     @Override
-    public void onBind() {
+    public void onServiceBind() {
+        this.repository.addRouteChangeListener(this);
         getResources();
     }
 
