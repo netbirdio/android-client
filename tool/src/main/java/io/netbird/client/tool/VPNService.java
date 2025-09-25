@@ -8,19 +8,14 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.VpnService;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Parcel;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import java.util.Random;
-
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.NetworkArray;
-import io.netbird.gomobile.android.NetworkChangeListener;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.URLOpener;
 
@@ -35,6 +30,8 @@ public class VPNService extends android.net.VpnService {
     private TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
 
+    private RouteChangeListener listener;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -45,8 +42,10 @@ public class VPNService extends android.net.VpnService {
         var tunAdapter = new IFace(this);
         var iFaceDiscover = new IFaceDiscover();
 
+        listener = this::queueTUNRenewal;
+
         notifier = new NetworkChangeNotifier(this);
-        notifier.setRouteChangeListener((routes -> queueTUNRenewal(routes)));
+        notifier.addRouteChangeListener(listener);
 
         var preferences = new Preferences(this);
         var isDebuggable = Version.isDebuggable(this);
@@ -97,7 +96,7 @@ public class VPNService extends android.net.VpnService {
         stopForeground(true);
 
         if (this.notifier != null) {
-            this.notifier.setRouteChangeListener(null);
+            this.notifier.removeRouteChangeListener(listener);
         }
 
         if (tunCreator != null) {
@@ -166,6 +165,18 @@ public class VPNService extends android.net.VpnService {
 
         public void removeServiceStateListener(ServiceStateListener serviceStateListener) {
             engineRunner.removeServiceStateListener(serviceStateListener);
+        }
+
+        public void addRouteChangeListener(RouteChangeListener listener) {
+            if (VPNService.this.notifier != null) {
+                VPNService.this.notifier.addRouteChangeListener(listener);
+            }
+        }
+
+        public void removeRouteChangeListener(RouteChangeListener listener) {
+            if (VPNService.this.notifier != null) {
+                VPNService.this.notifier.removeRouteChangeListener(listener);
+            }
         }
     }
 
