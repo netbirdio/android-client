@@ -52,7 +52,7 @@
         tools:text="172.16.254.0/24"
         android:textColor="@color/nb_txt_light"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/switch_control"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/peer"
         android:layout_marginEnd="16dp" />
@@ -61,19 +61,27 @@
         android:id="@+id/peer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="mypeer.really.long.hostname.example.com"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAlignment="textEnd"
         android:textColor="@color/nb_txt_light"
         android:textSize="14sp"
-        android:maxLines="2"
-        android:ellipsize="end"
-        android:textAlignment="textEnd"
-        app:layout_constraintTop_toBottomOf="@id/address"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/switch_control"
         app:layout_constraintStart_toStartOf="@id/guideline_half"
+        app:layout_constraintTop_toBottomOf="@id/address"
+        tools:text="mypeer.really.long.hostname.example.com" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switch_control"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="16dp"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_half"
