@@ -9,6 +9,7 @@ import android.os.IBinder;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.home.Resource;
 import io.netbird.client.ui.home.Status;
@@ -74,5 +75,17 @@ public class VPNServiceRepository {
         }
 
         return resources;
+    }
+
+    public void addRouteChangeListener(RouteChangeListener listener) {
+        if (binder != null) {
+            binder.addRouteChangeListener(listener);
+        }
+    }
+
+    public void removeRouteChangeListener(RouteChangeListener listener) {
+        if (binder != null) {
+            binder.removeRouteChangeListener(listener);
+        }
     }
 }
