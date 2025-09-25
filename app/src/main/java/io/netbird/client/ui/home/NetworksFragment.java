@@ -33,23 +33,11 @@ import io.netbird.gomobile.android.NetworkArray;
 public class NetworksFragment extends Fragment {
 
    private FragmentNetworksBinding binding;
-   private ServiceAccessor serviceAccessor;
-   private RecyclerView resourcesRecyclerView;
    private NetworksAdapter adapter;
-   private List<Resource> resources = new ArrayList<>();
+   private final List<Resource> resources = new ArrayList<>();
 
    public static NetworksFragment newInstance() {
       return new NetworksFragment();
-   }
-
-   @Override
-   public void onAttach(@NonNull Context context) {
-      super.onAttach(context);
-      if (context instanceof ServiceAccessor) {
-         serviceAccessor = (ServiceAccessor) context;
-      } else {
-         throw new RuntimeException(context + " must implement ServiceAccessor");
-      }
    }
 
    @Nullable
@@ -67,12 +55,11 @@ public class NetworksFragment extends Fragment {
               ViewModelProvider.Factory.from(NetworksFragmentViewModel.initializer))
               .get(NetworksFragmentViewModel.class);
 
-//      ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, !resources.isEmpty());
       ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
 
       adapter = new NetworksAdapter(resources);
 
-      resourcesRecyclerView = binding.networksRecyclerView;
+      RecyclerView resourcesRecyclerView = binding.networksRecyclerView;
       resourcesRecyclerView.setAdapter(adapter);
       resourcesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
@@ -85,18 +72,6 @@ public class NetworksFragment extends Fragment {
          adapter.notifyDataSetChanged();
          adapter.filterBySearchQuery(binding.searchView.getText().toString());
       });
-
-//      NetworkArray networks = serviceAccessor.getNetworks();
-//      updateNetworkCount(networks);
-
-     // ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, networks.size() > 0);
-
-//      ArrayList<Resource> resources = new ArrayList<>();
-//      for( int i = 0; i < networks.size(); i++) {
-//         Network network = networks.get(i);
-//         Status status = Status.fromString(network.getStatus());
-//         resources.add(new Resource(status, network.getName(), network.getNetwork(), network.getPeer()));
-//      }
 
       binding.searchView.clearFocus();
         binding.searchView.addTextChangedListener(new TextWatcher() {
@@ -127,32 +102,7 @@ public class NetworksFragment extends Fragment {
          }
       }
 
-//      for(int i = 0; i < resources.size(); i++) {
-//         Network network = networks.get(i);
-//         Status status = Status.fromString(network.getStatus());
-//         if (status.equals(Status.CONNECTED)) {
-//            connected++;
-//         }
-//      }
-
       String text = getString(R.string.resources_connected, connected, resources.size());
-      textPeersCount.post(() ->
-              textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
-      );
-   }
-
-   private void updateNetworkCount(NetworkArray networks) {
-      TextView textPeersCount = binding.textOpenPanel;
-      int connected = 0;
-      for(int i = 0; i < networks.size(); i++) {
-         Network network = networks.get(i);
-         Status status = Status.fromString(network.getStatus());
-         if (status.equals(Status.CONNECTED)) {
-            connected++;
-         }
-      }
-
-      String text = getString(R.string.resources_connected, connected, networks.size());
       textPeersCount.post(() ->
               textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
       );
