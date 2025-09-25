@@ -59,7 +59,6 @@ public class NetworksFragment extends Fragment {
       return binding.getRoot();
    }
 
-
    @Override
    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
       super.onViewCreated(view, savedInstanceState);
@@ -83,9 +82,8 @@ public class NetworksFragment extends Fragment {
 
          updateResourcesCounter(resources);
          ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, !resources.isEmpty());
-//         Log.d(NetworksFragment.class.getSimpleName(), "observing viewModel. Is it running on UI thread? "
-//                 + Looper.getMainLooper().equals(Looper.myLooper()));
          adapter.notifyDataSetChanged();
+         adapter.filterBySearchQuery(binding.searchView.getText().toString());
       });
 
 //      NetworkArray networks = serviceAccessor.getNetworks();
