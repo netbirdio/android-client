@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import io.netbird.client.MyApplication;
 import io.netbird.client.repository.VPNServiceBindListener;
 import io.netbird.client.repository.VPNServiceRepository;
+import io.netbird.client.tool.RouteChangeListener;
 
-public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBindListener {
+public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBindListener, RouteChangeListener {
     private final VPNServiceRepository repository;
     private final MutableLiveData<NetworksFragmentUiState> uiState =
             new MutableLiveData<>(new NetworksFragmentUiState(new ArrayList<>()));
@@ -27,6 +28,7 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
     @Override
     protected void onCleared() {
         super.onCleared();
+        repository.removeRouteChangeListener(this);
         repository.unbindService();
     }
 
@@ -52,5 +54,13 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
     @Override
     public void onBind() {
         getResources();
+    }
+
+    @Override
+    public void onRouteChanged(String routes) {
+        var resources = repository.getNetworks();
+
+        // This value will be set from a background thread.
+        uiState.postValue(new NetworksFragmentUiState(resources));
     }
 }
