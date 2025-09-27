@@ -26,7 +26,9 @@ class EngineRunner {
     Set<ServiceStateListener> serviceStateListeners = new HashSet<>();
     private final Client goClient;
 
-    public EngineRunner(String configurationFilePath, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter, IFaceDiscover iFaceDiscover, String versionName, boolean isTraceLogEnabled, boolean isDebuggable) {
+    public EngineRunner(String configurationFilePath, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
+                        IFaceDiscover iFaceDiscover, String versionName, boolean isTraceLogEnabled, boolean isDebuggable,
+                        String stateFilePath) {
         goClient = Android.newClient(
                 configurationFilePath,
                 androidSDKVersion(),
@@ -34,7 +36,8 @@ class EngineRunner {
                 versionName,
                 tunAdapter,
                 iFaceDiscover,
-                networkChangeListener);
+                networkChangeListener,
+                stateFilePath);
 
         updateLogLevel(isTraceLogEnabled, isDebuggable);
     }

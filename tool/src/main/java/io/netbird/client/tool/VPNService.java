@@ -38,6 +38,7 @@ public class VPNService extends android.net.VpnService {
         Log.d(LOGTAG, "onCreate");
 
         var configurationFilePath = Preferences.configFile(this);
+        var stateFilePath = Preferences.stateFile(this);
         var versionName = Version.getVersionName(this);
         var tunAdapter = new IFace(this);
         var iFaceDiscover = new IFaceDiscover();
@@ -51,7 +52,7 @@ public class VPNService extends android.net.VpnService {
         var isDebuggable = Version.isDebuggable(this);
 
         engineRunner = new EngineRunner(configurationFilePath, notifier, tunAdapter, iFaceDiscover, versionName,
-                preferences.isTraceLogEnabled(), isDebuggable);
+                preferences.isTraceLogEnabled(), isDebuggable, stateFilePath);
         fgNotification = new ForegroundNotification(this);
         engineRunner.addServiceStateListener(serviceStateListener);
     }
