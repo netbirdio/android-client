@@ -1,6 +1,5 @@
 package io.netbird.client.ui.home;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -15,17 +14,19 @@ import io.netbird.client.R;
 import io.netbird.client.databinding.ListItemResourceBinding;
 
 public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.ResourceViewHolder> {
-
+    public interface RouteSwitchToggleHandler {
+        void handleSwitchToggle(String route, boolean isChecked);
+    }
 
     private final List<Resource> resourcesList;
     private final List<Resource> filteredResourcesList;
-
-
+    private final RouteSwitchToggleHandler switchToggleHandler;
     private String filterQueryString = "";
 
-    public NetworksAdapter(List<Resource> resourcesList) {
+    public NetworksAdapter(List<Resource> resourcesList, RouteSwitchToggleHandler switchToggleHandler) {
         this.resourcesList = resourcesList;
         filteredResourcesList = new ArrayList<>(resourcesList);
+        this.switchToggleHandler = switchToggleHandler;
         sort();
     }
 
@@ -33,8 +34,9 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
     @Override
     public ResourceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Use ViewBinding to inflate the layout
-        ListItemResourceBinding binding = ListItemResourceBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-        return new ResourceViewHolder(binding);
+        ListItemResourceBinding binding = ListItemResourceBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new ResourceViewHolder(binding, switchToggleHandler);
     }
 
     @Override
@@ -81,16 +83,23 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
 
     public static class ResourceViewHolder extends RecyclerView.ViewHolder {
         ListItemResourceBinding binding;
+        RouteSwitchToggleHandler switchToggleHandler;
 
-        public ResourceViewHolder(ListItemResourceBinding binding) {
+        public ResourceViewHolder(ListItemResourceBinding binding, RouteSwitchToggleHandler switchToggleHandler) {
             super(binding.getRoot());
             this.binding = binding;
+            this.switchToggleHandler = switchToggleHandler;
         }
 
         public void bind(Resource resource) {
             binding.address.setText(resource.getAddress());
             binding.name.setText(resource.getName());
             binding.peer.setText(resource.getPeer());
+
+            binding.switchControl.setChecked(resource.isSelected());
+            binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                this.switchToggleHandler.handleSwitchToggle(resource.getName(), isChecked);
+            });
 
             if (resource.getStatus() == Status.CONNECTED) {
                 binding.verticalLine.setBackgroundResource(R.drawable.peer_status_connected); // Green for connected
