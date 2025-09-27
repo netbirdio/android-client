@@ -1,13 +1,10 @@
 package io.netbird.client.ui.home;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,16 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netbird.client.R;
-import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentNetworksBinding;
-import io.netbird.gomobile.android.Network;
-import io.netbird.gomobile.android.NetworkArray;
 
 public class NetworksFragment extends Fragment {
 
    private FragmentNetworksBinding binding;
    private NetworksAdapter adapter;
    private final List<Resource> resources = new ArrayList<>();
+   private NetworksFragmentViewModel model;
 
    public static NetworksFragment newInstance() {
       return new NetworksFragment();
@@ -51,13 +46,13 @@ public class NetworksFragment extends Fragment {
    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
       super.onViewCreated(view, savedInstanceState);
 
-      var model = new ViewModelProvider(this,
+      model = new ViewModelProvider(this,
               ViewModelProvider.Factory.from(NetworksFragmentViewModel.initializer))
               .get(NetworksFragmentViewModel.class);
 
       ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
 
-      adapter = new NetworksAdapter(resources);
+      adapter = new NetworksAdapter(resources, this::routeSwitchToggleHandler);
 
       RecyclerView resourcesRecyclerView = binding.networksRecyclerView;
       resourcesRecyclerView.setAdapter(adapter);
@@ -106,5 +101,13 @@ public class NetworksFragment extends Fragment {
       textPeersCount.post(() ->
               textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
       );
+   }
+
+   private void routeSwitchToggleHandler(String route, boolean isChecked) {
+      if (isChecked) {
+         model.selectRoute(route);
+      } else {
+         model.deselectRoute(route);
+      }
    }
 }

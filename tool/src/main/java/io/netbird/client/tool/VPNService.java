@@ -178,6 +178,14 @@ public class VPNService extends android.net.VpnService {
                 VPNService.this.notifier.removeRouteChangeListener(listener);
             }
         }
+
+        public void selectRoute(String route) {
+            engineRunner.selectRoute(route);
+        }
+
+        public void deselectRoute(String route) {
+            engineRunner.deselectRoute(route);
+        }
     }
 
     public static boolean isUsingAlwaysOnVPN(Context context) {

@@ -64,4 +64,12 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
         // This value will be set from a background thread.
         uiState.postValue(new NetworksFragmentUiState(resources));
     }
+
+    public void selectRoute(String route) {
+        this.repository.selectRoute(route);
+    }
+
+    public void deselectRoute(String route) {
+        this.repository.deselectRoute(route);
+    }
 }

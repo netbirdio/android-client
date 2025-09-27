@@ -71,7 +71,8 @@ public class VPNServiceRepository {
             resources.add(new Resource(Status.fromString(network.getStatus()),
                     network.getName(),
                     network.getNetwork(),
-                    network.getPeer()));
+                    network.getPeer(),
+                    network.getIsSelected()));
         }
 
         return resources;
@@ -86,6 +87,18 @@ public class VPNServiceRepository {
     public void removeRouteChangeListener(RouteChangeListener listener) {
         if (binder != null) {
             binder.removeRouteChangeListener(listener);
+        }
+    }
+
+    public void selectRoute(String route) {
+        if (binder != null) {
+            binder.selectRoute(route);
+        }
+    }
+
+    public void deselectRoute(String route) {
+        if (binder != null) {
+            binder.deselectRoute(route);
         }
     }
 }
