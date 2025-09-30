@@ -12,7 +12,10 @@ import java.util.List;
 import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.home.Resource;
+import io.netbird.client.ui.home.RoutingPeer;
 import io.netbird.client.ui.home.Status;
+import io.netbird.gomobile.android.NetworkDomains;
+import io.netbird.gomobile.android.PeerRoutes;
 
 public class VPNServiceRepository {
     private VPNService.MyLocalBinder binder;
@@ -22,7 +25,7 @@ public class VPNServiceRepository {
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            binder = (VPNService.MyLocalBinder)service;
+            binder = (VPNService.MyLocalBinder) service;
             if (serviceBindListener != null) {
                 serviceBindListener.onServiceBind();
             }
@@ -40,6 +43,34 @@ public class VPNServiceRepository {
 
     public VPNServiceRepository(Context context) {
         this.context = context;
+    }
+
+    private List<String> createPeerRoutesList(PeerRoutes peerRoutes) {
+        List<String> routes = new ArrayList<>();
+
+        try {
+            for (int i = 0; i < peerRoutes.size(); i++) {
+                routes.add(peerRoutes.get(i));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return routes;
+    }
+
+    private List<String> createNetworkDomainsList(NetworkDomains networkDomains) {
+        List<String> domains = new ArrayList<>();
+
+        try {
+            for (int i = 0; i < networkDomains.size(); i++) {
+                domains.add(networkDomains.get(i));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return domains;
     }
 
     public void setServiceBindListener(VPNServiceBindListener listener) {
@@ -68,14 +99,37 @@ public class VPNServiceRepository {
 
         for (int i = 0; i < networks.size(); i++) {
             var network = networks.get(i);
+            var networkDomains = network.getNetworkDomains();
+
             resources.add(new Resource(Status.fromString(network.getStatus()),
                     network.getName(),
                     network.getNetwork(),
                     network.getPeer(),
-                    network.getIsSelected()));
+                    network.getIsSelected(),
+                    createNetworkDomainsList(networkDomains)));
         }
 
         return resources;
+    }
+
+    public List<RoutingPeer> getRoutingPeers() {
+        if (binder == null) {
+            return new ArrayList<>();
+        }
+
+        var peers = new ArrayList<RoutingPeer>();
+        var peersFromEngine = binder.peersInfo();
+
+        for (int i = 0; i < peersFromEngine.size(); i++) {
+            var peerInfo = peersFromEngine.get(i);
+            var peerRoutes = peerInfo.getPeerRoutes();
+
+            peers.add(new RoutingPeer(
+                    Status.fromString(peerInfo.getConnStatus()),
+                    createPeerRoutesList(peerRoutes)));
+        }
+
+        return peers;
     }
 
     public void addRouteChangeListener(RouteChangeListener listener) {

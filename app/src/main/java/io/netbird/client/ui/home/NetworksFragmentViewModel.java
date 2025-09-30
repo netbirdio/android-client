@@ -17,7 +17,7 @@ import io.netbird.client.tool.RouteChangeListener;
 public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBindListener, RouteChangeListener {
     private final VPNServiceRepository repository;
     private final MutableLiveData<NetworksFragmentUiState> uiState =
-            new MutableLiveData<>(new NetworksFragmentUiState(new ArrayList<>()));
+            new MutableLiveData<>(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
 
     public NetworksFragmentViewModel(VPNServiceRepository repository) {
         this.repository = repository;
@@ -38,8 +38,9 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
 
     public void getResources() {
         var resources = repository.getNetworks();
+        var peers = repository.getRoutingPeers();
 
-        uiState.setValue(new NetworksFragmentUiState(resources));
+        uiState.setValue(new NetworksFragmentUiState(resources, peers));
     }
 
     static final ViewModelInitializer<NetworksFragmentViewModel> initializer = new ViewModelInitializer<>(
@@ -60,9 +61,10 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
     @Override
     public void onRouteChanged(String routes) {
         var resources = repository.getNetworks();
+        var peers = repository.getRoutingPeers();
 
         // This value will be set from a background thread.
-        uiState.postValue(new NetworksFragmentUiState(resources));
+        uiState.postValue(new NetworksFragmentUiState(resources, peers));
     }
 
     public void selectRoute(String route) {

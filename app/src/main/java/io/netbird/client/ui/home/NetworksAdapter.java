@@ -3,9 +3,9 @@ package io.netbird.client.ui.home;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +19,14 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
     }
 
     private final List<Resource> resourcesList;
+    private final List<RoutingPeer> peers;
     private final List<Resource> filteredResourcesList;
     private final RouteSwitchToggleHandler switchToggleHandler;
     private String filterQueryString = "";
 
-    public NetworksAdapter(List<Resource> resourcesList, RouteSwitchToggleHandler switchToggleHandler) {
+    public NetworksAdapter(List<Resource> resourcesList, List<RoutingPeer> peers, RouteSwitchToggleHandler switchToggleHandler) {
         this.resourcesList = resourcesList;
+        this.peers = peers;
         filteredResourcesList = new ArrayList<>(resourcesList);
         this.switchToggleHandler = switchToggleHandler;
         sort();
@@ -41,7 +43,7 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
 
     @Override
     public void onBindViewHolder(@NonNull ResourceViewHolder holder, int position) {
-        holder.bind(filteredResourcesList.get(position));
+        holder.bind(filteredResourcesList.get(position), peers);
     }
 
     @Override
@@ -91,7 +93,20 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
             this.switchToggleHandler = switchToggleHandler;
         }
 
-        public void bind(Resource resource) {
+        @DrawableRes
+        private int getConnectionStatusIndicatorDrawable(Resource resource, List<RoutingPeer> peers) {
+            var connectedPeers = peers.stream()
+                    .filter(peer -> peer.getStatus().equals(Status.CONNECTED))
+                    .filter(peer -> peer.getRoutes().contains(resource.getAddress()))
+                    .count();
+
+            if (connectedPeers > 0) return R.drawable.peer_status_connected;
+
+            if (resource.isSelected()) return R.drawable.peer_status_selected;
+            return R.drawable.peer_status_disconnected;
+        }
+
+        public void bind(Resource resource, List<RoutingPeer> peers) {
             binding.address.setText(resource.getAddress());
             binding.name.setText(resource.getName());
             binding.peer.setText(resource.getPeer());
@@ -101,11 +116,7 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
                 this.switchToggleHandler.handleSwitchToggle(resource.getName(), isChecked);
             });
 
-            if (resource.getStatus() == Status.CONNECTED) {
-                binding.verticalLine.setBackgroundResource(R.drawable.peer_status_connected); // Green for connected
-            } else {
-                binding.verticalLine.setBackgroundResource(R.drawable.peer_status_disconnected); // Red for disconnected
-            }
+            binding.verticalLine.setBackgroundResource(getConnectionStatusIndicatorDrawable(resource, peers));
 
             if(resource.isExitNode()) {
                 binding.exitNode.setVisibility(android.view.View.VISIBLE);

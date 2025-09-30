@@ -29,6 +29,7 @@ public class NetworksFragment extends Fragment {
    private FragmentNetworksBinding binding;
    private NetworksAdapter adapter;
    private final List<Resource> resources = new ArrayList<>();
+   private final List<RoutingPeer> peers = new ArrayList<>();
    private NetworksFragmentViewModel model;
 
    public static NetworksFragment newInstance() {
@@ -52,7 +53,7 @@ public class NetworksFragment extends Fragment {
 
       ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
 
-      adapter = new NetworksAdapter(resources, this::routeSwitchToggleHandler);
+      adapter = new NetworksAdapter(resources, peers, this::routeSwitchToggleHandler);
 
       RecyclerView resourcesRecyclerView = binding.networksRecyclerView;
       resourcesRecyclerView.setAdapter(adapter);
@@ -61,6 +62,9 @@ public class NetworksFragment extends Fragment {
       model.getUiState().observe(getViewLifecycleOwner(), uiState -> {
          resources.clear();
          resources.addAll(uiState.getResources());
+
+         peers.clear();
+         peers.addAll(uiState.getPeers());
 
          updateResourcesCounter(resources);
          ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, !resources.isEmpty());
