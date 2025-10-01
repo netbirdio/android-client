@@ -8,9 +8,9 @@ public class Resource {
     private final String address;
     private final String peer;
     private final boolean isSelected;
-    private final List<String> domains;
+    private final List<NetworkDomain> domains;
 
-    public Resource(Status status, String name, String address, String peer, boolean isSelected, List<String> domains) {
+    public Resource(Status status, String name, String address, String peer, boolean isSelected, List<NetworkDomain> domains) {
         this.status = status;
         this.name = name;
         this.address = address;
@@ -43,7 +43,7 @@ public class Resource {
         return isSelected;
     }
 
-    public List<String> getDomains() {
+    public List<NetworkDomain> getDomains() {
         return this.domains;
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 
 import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.VPNService;
+import io.netbird.client.ui.home.NetworkDomain;
 import io.netbird.client.ui.home.Resource;
 import io.netbird.client.ui.home.RoutingPeer;
 import io.netbird.client.ui.home.Status;
@@ -59,12 +60,26 @@ public class VPNServiceRepository {
         return routes;
     }
 
-    private List<String> createNetworkDomainsList(NetworkDomains networkDomains) {
-        List<String> domains = new ArrayList<>();
+    private List<NetworkDomain> createNetworkDomainsList(NetworkDomains networkDomains) {
+        List<NetworkDomain> domains = new ArrayList<>();
+
+        io.netbird.gomobile.android.NetworkDomain goNetworkDomain;
+        NetworkDomain networkDomain;
+        String ipAddress;
 
         try {
             for (int i = 0; i < networkDomains.size(); i++) {
-                domains.add(networkDomains.get(i));
+                goNetworkDomain = networkDomains.get(i);
+                networkDomain = new NetworkDomain(goNetworkDomain.getAddress());
+
+                var resolvedIPs = goNetworkDomain.getResolvedIPs();
+
+                for (int j = 0; j < resolvedIPs.size(); j++) {
+                    ipAddress = resolvedIPs.get(j);
+                    networkDomain.addResolvedIP(ipAddress);
+                }
+
+                domains.add(networkDomain);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
