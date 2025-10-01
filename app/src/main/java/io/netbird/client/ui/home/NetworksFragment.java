@@ -96,7 +96,7 @@ public class NetworksFragment extends Fragment {
       int connected = 0;
 
       for (var resource : resources) {
-         if (resource.getStatus().equals(Status.CONNECTED)) {
+         if (resource.isSelected()) {
             connected++;
          }
       }
