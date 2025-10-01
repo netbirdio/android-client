@@ -16,7 +16,7 @@ import io.netbird.client.databinding.ListItemResourceBinding;
 
 public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.ResourceViewHolder> {
     public interface RouteSwitchToggleHandler {
-        void handleSwitchToggle(String route, boolean isChecked);
+        void handleSwitchToggle(String route, boolean isChecked) throws Exception;
     }
 
     private final List<Resource> resourcesList;
@@ -145,8 +145,19 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
             binding.peer.setText(resource.getPeer());
 
             binding.switchControl.setChecked(resource.isSelected());
+            binding.switchControl.setTag(false);
             binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                this.switchToggleHandler.handleSwitchToggle(resource.getName(), isChecked);
+                try {
+                    boolean tag = (boolean)binding.switchControl.getTag();
+                    if (!tag) {
+                        this.switchToggleHandler.handleSwitchToggle(resource.getName(), isChecked);
+                    }
+                } catch (Exception ignored) {
+                    // This is done so that reversing the toggle action won't retrigger the toggle handler.
+                    binding.switchControl.setTag(true);
+                    binding.switchControl.setChecked(!isChecked);
+                    binding.switchControl.setTag(false);
+                }
             });
 
             binding.verticalLine.setBackgroundResource(getConnectionStatusIndicatorDrawable(resource, peers));

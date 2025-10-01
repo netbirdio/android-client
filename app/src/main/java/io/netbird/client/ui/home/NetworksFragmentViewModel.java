@@ -67,11 +67,11 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
         uiState.postValue(new NetworksFragmentUiState(resources, peers));
     }
 
-    public void selectRoute(String route) {
+    public void selectRoute(String route) throws Exception {
         this.repository.selectRoute(route);
     }
 
-    public void deselectRoute(String route) {
+    public void deselectRoute(String route) throws Exception {
         this.repository.deselectRoute(route);
     }
 }

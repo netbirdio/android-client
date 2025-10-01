@@ -180,11 +180,11 @@ public class VPNService extends android.net.VpnService {
             }
         }
 
-        public void selectRoute(String route) {
+        public void selectRoute(String route) throws Exception {
             engineRunner.selectRoute(route);
         }
 
-        public void deselectRoute(String route) {
+        public void deselectRoute(String route) throws Exception {
             engineRunner.deselectRoute(route);
         }
     }

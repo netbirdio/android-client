@@ -168,23 +168,25 @@ class EngineRunner {
         }
     }
 
-    public void selectRoute(String route) {
+    public void selectRoute(String route) throws Exception {
         Log.d(LOGTAG, String.format("selecting route: %s", route));
         try {
             goClient.selectRoute(route);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             notifyError(e);
+            throw e;
         }
     }
 
-    public void deselectRoute(String route) {
+    public void deselectRoute(String route) throws Exception {
         Log.d(LOGTAG, String.format("deselecting route: %s", route));
         try {
             goClient.deselectRoute(route);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             notifyError(e);
+            throw e;
         }
     }
 }

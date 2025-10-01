@@ -159,13 +159,13 @@ public class VPNServiceRepository {
         }
     }
 
-    public void selectRoute(String route) {
+    public void selectRoute(String route) throws Exception {
         if (binder != null) {
             binder.selectRoute(route);
         }
     }
 
-    public void deselectRoute(String route) {
+    public void deselectRoute(String route) throws Exception {
         if (binder != null) {
             binder.deselectRoute(route);
         }

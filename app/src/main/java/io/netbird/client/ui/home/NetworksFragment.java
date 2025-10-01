@@ -107,7 +107,7 @@ public class NetworksFragment extends Fragment {
       );
    }
 
-   private void routeSwitchToggleHandler(String route, boolean isChecked) {
+   private void routeSwitchToggleHandler(String route, boolean isChecked) throws Exception {
       if (isChecked) {
          model.selectRoute(route);
       } else {
