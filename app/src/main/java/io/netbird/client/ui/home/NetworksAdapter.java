@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.netbird.client.R;
 import io.netbird.client.databinding.ListItemResourceBinding;
@@ -71,7 +72,7 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
 
         ArrayList<Resource> temporaryList = new ArrayList<>(resourcesList);
         for (Resource res : temporaryList) {
-            if (res.getName().toLowerCase().contains(filterQueryString.toLowerCase())){
+            if (res.getName().toLowerCase().contains(filterQueryString.toLowerCase())) {
                 filteredResourcesList.add(res);
             }
         }
@@ -93,14 +94,46 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
             this.switchToggleHandler = switchToggleHandler;
         }
 
+        /**
+         * <p>
+         * Returns a drawable indicating whether a given resource is CONNECTED, SELECTED or DESELECTED.
+         * A resource is considered CONNECTED when, given a list of routing peers, at least one of them
+         * also has a CONNECTED status and contains a route that maps to that given resource's address
+         * </p>
+         * <p>
+         * OR
+         * </p>
+         * <p>
+         * if the resource is mapped to a domain whose any of its resolved IP addresses is contained
+         * in any of the CONNECTED routing peer's routes.
+         * <p>
+         * Barring those conditions, it simply checks if the resource is selected or not.
+         * </p>
+         */
         @DrawableRes
         private int getConnectionStatusIndicatorDrawable(Resource resource, List<RoutingPeer> peers) {
             var connectedPeers = peers.stream()
                     .filter(peer -> peer.getStatus().equals(Status.CONNECTED))
+                    .collect(Collectors.toList());
+
+            var totalPeersWithRouteMatchingResourceAddress = connectedPeers.stream()
                     .filter(peer -> peer.getRoutes().contains(resource.getAddress()))
                     .count();
 
-            if (connectedPeers > 0) return R.drawable.peer_status_connected;
+            if (totalPeersWithRouteMatchingResourceAddress > 0) {
+                return R.drawable.peer_status_connected;
+            }
+
+            var allResolvedIPAddresses = resource.getDomains().stream()
+                    .flatMap(domain -> domain.getResolvedIPs().stream());
+
+            var allConnectedRoutingPeerRoutes = connectedPeers.stream()
+                    .flatMap(peer -> peer.getRoutes().stream())
+                    .collect(Collectors.toList());
+
+            if (allResolvedIPAddresses.anyMatch(allConnectedRoutingPeerRoutes::contains)) {
+                return R.drawable.peer_status_connected;
+            }
 
             if (resource.isSelected()) return R.drawable.peer_status_selected;
             return R.drawable.peer_status_disconnected;
@@ -118,7 +151,7 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
 
             binding.verticalLine.setBackgroundResource(getConnectionStatusIndicatorDrawable(resource, peers));
 
-            if(resource.isExitNode()) {
+            if (resource.isExitNode()) {
                 binding.exitNode.setVisibility(android.view.View.VISIBLE);
             } else {
                 binding.exitNode.setVisibility(android.view.View.GONE);
