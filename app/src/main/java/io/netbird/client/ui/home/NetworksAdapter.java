@@ -144,6 +144,9 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
             binding.name.setText(resource.getName());
             binding.peer.setText(resource.getPeer());
 
+            // Necessary when rebinding because onCheckedChangeListener is already set.
+            binding.switchControl.setTag(true);
+
             binding.switchControl.setChecked(resource.isSelected());
             binding.switchControl.setTag(false);
             binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
