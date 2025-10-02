@@ -1,6 +1,8 @@
-package io.netbird.client.ui.home;
+package io.netbird.client.domain;
 
 import java.util.List;
+
+import io.netbird.client.ui.home.Status;
 
 public class RoutingPeer {
     private final Status status;

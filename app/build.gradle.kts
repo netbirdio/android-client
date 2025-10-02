@@ -82,6 +82,8 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation(libs.browser)  // Added for CustomTabsIntent
     implementation(libs.lottie)
+    implementation(libs.rxandroid)
+    implementation(libs.rxjava)
 
     if (hasGoogleServicesJson) {
         implementation(platform(libs.firebase.bom))

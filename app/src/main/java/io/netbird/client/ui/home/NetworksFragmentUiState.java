@@ -2,6 +2,9 @@ package io.netbird.client.ui.home;
 
 import java.util.List;
 
+import io.netbird.client.domain.Resource;
+import io.netbird.client.domain.RoutingPeer;
+
 public class NetworksFragmentUiState {
     private final List<Resource> resources;
     private final List<RoutingPeer> peers;
@@ -15,6 +18,7 @@ public class NetworksFragmentUiState {
         return resources;
     }
 
-    public List<RoutingPeer> getPeers() { return peers;
+    public List<RoutingPeer> getPeers() {
+        return peers;
     }
 }

@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 import io.netbird.client.R;
 import io.netbird.client.databinding.ListItemResourceBinding;
+import io.netbird.client.domain.Resource;
+import io.netbird.client.domain.RoutingPeer;
 
 public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.ResourceViewHolder> {
     public interface RouteSwitchToggleHandler {
@@ -143,6 +145,9 @@ public class NetworksAdapter extends RecyclerView.Adapter<NetworksAdapter.Resour
             binding.address.setText(resource.getAddress());
             binding.name.setText(resource.getName());
             binding.peer.setText(resource.getPeer());
+
+            // necessary when rebinding the view.
+            binding.switchControl.setTag(true);
 
             binding.switchControl.setChecked(resource.isSelected());
             binding.switchControl.setTag(false);

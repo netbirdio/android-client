@@ -10,25 +10,27 @@ import androidx.lifecycle.viewmodel.ViewModelInitializer;
 import java.util.ArrayList;
 
 import io.netbird.client.MyApplication;
-import io.netbird.client.repository.VPNServiceBindListener;
 import io.netbird.client.repository.VPNServiceRepository;
-import io.netbird.client.tool.RouteChangeListener;
+import io.reactivex.rxjava3.disposables.Disposable;
 
-public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBindListener, RouteChangeListener {
+public class NetworksFragmentViewModel extends ViewModel {
     private final VPNServiceRepository repository;
+    private final Disposable networkResourceGroupDisposable;
     private final MutableLiveData<NetworksFragmentUiState> uiState =
             new MutableLiveData<>(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
 
     public NetworksFragmentViewModel(VPNServiceRepository repository) {
         this.repository = repository;
-        this.repository.setServiceBindListener(this);
         this.repository.bindService();
+        this.networkResourceGroupDisposable = this.repository.observeNetworkResourceGroup()
+                .subscribe(group -> uiState.postValue(
+                        new NetworksFragmentUiState(group.getNetworkResources(), group.getRoutingPeers())));
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
-        repository.removeRouteChangeListener(this);
+        networkResourceGroupDisposable.dispose();
         repository.unbindService();
     }
 
@@ -36,11 +38,8 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
         return uiState;
     }
 
-    public void getResources() {
-        var resources = repository.getNetworks();
-        var peers = repository.getRoutingPeers();
-
-        uiState.setValue(new NetworksFragmentUiState(resources, peers));
+    public void fetchNetworkResourceGroup() {
+        repository.fetchNetworkResourceGroup();
     }
 
     static final ViewModelInitializer<NetworksFragmentViewModel> initializer = new ViewModelInitializer<>(
@@ -51,21 +50,6 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
                 return new NetworksFragmentViewModel(app.getVPNServiceRepository());
             }
     );
-
-    @Override
-    public void onServiceBind() {
-        this.repository.addRouteChangeListener(this);
-        getResources();
-    }
-
-    @Override
-    public void onRouteChanged(String routes) {
-        var resources = repository.getNetworks();
-        var peers = repository.getRoutingPeers();
-
-        // This value will be set from a background thread.
-        uiState.postValue(new NetworksFragmentUiState(resources, peers));
-    }
 
     public void selectRoute(String route) throws Exception {
         this.repository.selectRoute(route);

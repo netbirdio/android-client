@@ -23,6 +23,8 @@ import java.util.List;
 
 import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentNetworksBinding;
+import io.netbird.client.domain.Resource;
+import io.netbird.client.domain.RoutingPeer;
 
 public class NetworksFragment extends Fragment {
 
