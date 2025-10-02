@@ -37,7 +37,6 @@ public class VPNServiceRepository {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             if (binder != null) {
-                binder.removeConnectionStateListener(connectionChangeListener);
                 binder = null;
             }
         }
@@ -135,6 +134,7 @@ public class VPNServiceRepository {
 
     public void unbindService() {
         if (binder != null) {
+            binder.removeConnectionStateListener(connectionChangeListener);
             context.unbindService(serviceConnection);
             binder = null;
         }
