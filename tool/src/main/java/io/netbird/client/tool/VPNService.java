@@ -28,9 +28,9 @@ public class VPNService extends android.net.VpnService {
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
     private TUNParameters currentTUNParameters;
-    private NetworkChangeNotifier notifier;
-
-    private RouteChangeListener listener;
+    private NetworkChangeNotifier networkChangeNotifier;
+    private ConnectionChangeNotifier connectionChangeNotifier;
+    private RouteChangeListener routeChangeListener;
 
     @Override
     public void onCreate() {
@@ -43,18 +43,21 @@ public class VPNService extends android.net.VpnService {
         var tunAdapter = new IFace(this);
         var iFaceDiscover = new IFaceDiscover();
 
-        listener = this::queueTUNRenewal;
+        routeChangeListener = this::queueTUNRenewal;
 
-        notifier = new NetworkChangeNotifier(this);
-        notifier.addRouteChangeListener(listener);
+        networkChangeNotifier = new NetworkChangeNotifier(this);
+        networkChangeNotifier.addRouteChangeListener(routeChangeListener);
 
         var preferences = new Preferences(this);
         var isDebuggable = Version.isDebuggable(this);
 
-        engineRunner = new EngineRunner(configurationFilePath, notifier, tunAdapter, iFaceDiscover, versionName,
+        engineRunner = new EngineRunner(configurationFilePath, networkChangeNotifier, tunAdapter, iFaceDiscover, versionName,
                 preferences.isTraceLogEnabled(), isDebuggable, stateFilePath);
         fgNotification = new ForegroundNotification(this);
         engineRunner.addServiceStateListener(serviceStateListener);
+
+        connectionChangeNotifier = new ConnectionChangeNotifier();
+        engineRunner.setConnectionListener(connectionChangeNotifier);
     }
 
     @Override
@@ -93,11 +96,12 @@ public class VPNService extends android.net.VpnService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(LOGTAG, "onDestroy");
+        engineRunner.removeStatusListener();
         engineRunner.stop();
         stopForeground(true);
 
-        if (this.notifier != null) {
-            this.notifier.removeRouteChangeListener(listener);
+        if (this.networkChangeNotifier != null) {
+            this.networkChangeNotifier.removeRouteChangeListener(routeChangeListener);
         }
 
         if (tunCreator != null) {
@@ -110,6 +114,7 @@ public class VPNService extends android.net.VpnService {
     public void onRevoke() {
         Log.d(LOGTAG, "VPN permission on revoke");
         if (engineRunner != null) {
+            engineRunner.removeStatusListener();
             engineRunner.stop();
             stopForeground(true);
         }
@@ -152,12 +157,12 @@ public class VPNService extends android.net.VpnService {
             return engineRunner.networks();
         }
 
-        public void setConnectionStateListener(ConnectionListener listener) {
-            engineRunner.setConnectionListener(listener);
+        public void setConnectionStateListener(ConnectionChangeListener listener) {
+            connectionChangeNotifier.addConnectionChangeListener(listener);
         }
 
-        public void removeConnectionStateListener() {
-            engineRunner.removeStatusListener();
+        public void removeConnectionStateListener(ConnectionChangeListener listener) {
+            connectionChangeNotifier.removeConnectionChangeListener(listener);
         }
 
         public void addServiceStateListener(ServiceStateListener serviceStateListener) {
@@ -169,14 +174,14 @@ public class VPNService extends android.net.VpnService {
         }
 
         public void addRouteChangeListener(RouteChangeListener listener) {
-            if (VPNService.this.notifier != null) {
-                VPNService.this.notifier.addRouteChangeListener(listener);
+            if (VPNService.this.networkChangeNotifier != null) {
+                VPNService.this.networkChangeNotifier.addRouteChangeListener(listener);
             }
         }
 
         public void removeRouteChangeListener(RouteChangeListener listener) {
-            if (VPNService.this.notifier != null) {
-                VPNService.this.notifier.removeRouteChangeListener(listener);
+            if (VPNService.this.networkChangeNotifier != null) {
+                VPNService.this.networkChangeNotifier.removeRouteChangeListener(listener);
             }
         }
 

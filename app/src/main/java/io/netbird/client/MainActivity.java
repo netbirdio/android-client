@@ -40,6 +40,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
+import io.netbird.client.tool.ConnectionChangeListener;
 import io.netbird.client.tool.NetworkChangeNotifier;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
@@ -202,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStop();
         Log.d(LOGTAG, "onStop");
         if (!urlOpener.isOpened() && mBinder != null) {
-            mBinder.removeConnectionStateListener();
+            mBinder.removeConnectionStateListener(connectionListener);
             mBinder.removeServiceStateListener(serviceStateListener);
             unbindService(serviceIPC);
             mBinder = null;
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onDestroy();
 
         if (mBinder != null) {
-            mBinder.removeConnectionStateListener();
+            mBinder.removeConnectionStateListener(connectionListener);
             mBinder.removeServiceStateListener(serviceStateListener);
             unbindService(serviceIPC);
             mBinder = null;
@@ -422,7 +423,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     };
-    ConnectionListener connectionListener = new ConnectionListener() {
+    ConnectionChangeListener connectionListener = new ConnectionChangeListener() {
         @Override
         public synchronized void onAddressChanged(String fqdn, String ip) {
             lastFqdn = fqdn;
