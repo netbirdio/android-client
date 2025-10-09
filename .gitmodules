@@ -1,3 +1,4 @@
 [submodule "netbird"]
 	path = netbird
-	url = https://github.com/netbirdio/netbird.git
+	url = https://github.com/doromaraujo/netbird.git
+	branch = feature/android-allow-selecting-routes
