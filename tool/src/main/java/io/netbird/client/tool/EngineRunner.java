@@ -29,15 +29,16 @@ class EngineRunner {
     public EngineRunner(String configurationFilePath, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
                         IFaceDiscover iFaceDiscover, String versionName, boolean isTraceLogEnabled, boolean isDebuggable,
                         String stateFilePath) {
+        var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath);
+
         goClient = Android.newClient(
-                configurationFilePath,
+                platformFiles,
                 androidSDKVersion(),
                 DeviceName.getDeviceName(),
                 versionName,
                 tunAdapter,
                 iFaceDiscover,
-                networkChangeListener,
-                stateFilePath);
+                networkChangeListener);
 
         updateLogLevel(isTraceLogEnabled, isDebuggable);
     }
