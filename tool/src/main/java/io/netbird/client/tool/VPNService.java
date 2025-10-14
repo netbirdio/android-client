@@ -13,6 +13,10 @@ import android.os.Parcel;
 import android.util.Log;
 import androidx.annotation.Nullable;
 
+import io.netbird.client.tool.networks.ConcreteNetworkChangeListener;
+import io.netbird.client.tool.networks.NetworkChangeDetector;
+import io.netbird.client.tool.networks.NetworkChangeListener;
+import io.netbird.client.tool.networks.NetworkToggleListener;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
@@ -29,6 +33,18 @@ public class VPNService extends android.net.VpnService {
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
 
+    private NetworkChangeDetector networkChangeDetector;
+    private ConcreteNetworkChangeListener networkChangeListener;
+    private final NetworkToggleListener networkToggleListener = new NetworkToggleListener() {
+        @Override
+        public void onNetworkTypeChanged() {
+            if (engineRunner.isRunning()) {
+                engineRunner.stop();
+                engineRunner.runWithoutAuth();
+            }
+        }
+    };
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -36,6 +52,14 @@ public class VPNService extends android.net.VpnService {
         engineRunner = new EngineRunner(this);
         fgNotification = new ForegroundNotification(this);
         engineRunner.addServiceStateListener(serviceStateListener);
+
+        networkChangeListener = new ConcreteNetworkChangeListener();
+        networkChangeListener.subscribe(this.networkToggleListener);
+
+        networkChangeDetector = new NetworkChangeDetector(
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+        networkChangeDetector.subscribe(networkChangeListener);
+        networkChangeDetector.registerNetworkCallback();
     }
 
     @Override
@@ -73,6 +97,10 @@ public class VPNService extends android.net.VpnService {
         Log.d(LOGTAG, "onDestroy");
         engineRunner.stop();
         stopForeground(true);
+
+        networkChangeListener.unsubscribe();
+        networkChangeDetector.unsubscribe();
+        networkChangeDetector.unregisterNetworkCallback();
     }
 
     @Override
