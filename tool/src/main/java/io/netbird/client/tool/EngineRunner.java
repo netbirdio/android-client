@@ -5,8 +5,8 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Client;
@@ -21,7 +21,7 @@ class EngineRunner {
     private static final String LOGTAG = "EngineRunner";
     private final Context context;
     private boolean engineIsRunning = false;
-    Set<ServiceStateListener> serviceStateListeners = new HashSet<>();
+    Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
     private final Client goClient;
 
     public EngineRunner(VPNService vpnService) {
