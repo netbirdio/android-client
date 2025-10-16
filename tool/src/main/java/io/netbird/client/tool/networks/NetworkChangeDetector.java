@@ -4,23 +4,32 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.Consumer;
 
 public class NetworkChangeDetector {
 
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
-    private NetworkChangeListener listener;
+    private NetworkAvailabilityListener listener;
 
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
         this.connectivityManager = connectivityManager;
         initNetworkCallback();
     }
 
-    private void notifyListener(@Constants.NetworkType int networkType) {
-        if (listener != null) {
-            listener.onNetworkChanged(networkType);
+    private void checkNetworkCapabilities(Network network, Consumer<Integer> operation) {
+        var capabilities = connectivityManager.getNetworkCapabilities(network);
+        if (capabilities == null) return;
+
+        Log.d("NetworkChangeDetector", String.format("Network %s has capabilities: %s", network, capabilities));
+
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+            operation.accept(Constants.NetworkType.WIFI);
+        } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            operation.accept(Constants.NetworkType.MOBILE);
         }
     }
 
@@ -28,15 +37,21 @@ public class NetworkChangeDetector {
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
-                var capabilities = connectivityManager.getNetworkCapabilities(network);
+                if (listener == null) return;
+                checkNetworkCapabilities(network, (networkType) -> listener.onNetworkAvailable(networkType));
+            }
 
-                if (capabilities != null) {
-                    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                        notifyListener(Constants.NetworkType.WIFI);
-                    } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                        notifyListener(Constants.NetworkType.MOBILE);
-                    }
-                }
+            @Override
+            public void onLost(@NonNull Network network) {
+                if (listener == null) return;
+                checkNetworkCapabilities(network, (networkType) -> listener.onNetworkLost(networkType));
+            }
+
+            @Override
+            public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+                super.onCapabilitiesChanged(network, networkCapabilities);
+
+                Log.d("NetworkChangeDetector", String.format("Network %s had their capabilities changed: %s", network, networkCapabilities));
             }
         };
     }
@@ -51,7 +66,7 @@ public class NetworkChangeDetector {
         connectivityManager.unregisterNetworkCallback(networkCallback);
     }
 
-    public void subscribe(NetworkChangeListener listener) {
+    public void subscribe(NetworkAvailabilityListener listener) {
         this.listener = listener;
     }
 

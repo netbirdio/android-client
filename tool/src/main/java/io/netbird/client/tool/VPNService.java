@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 
 import io.netbird.client.tool.networks.ConcreteNetworkChangeListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
-import io.netbird.client.tool.networks.NetworkChangeListener;
 import io.netbird.client.tool.networks.NetworkToggleListener;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.NetworkArray;
@@ -34,7 +33,7 @@ public class VPNService extends android.net.VpnService {
     private ForegroundNotification fgNotification;
 
     private NetworkChangeDetector networkChangeDetector;
-    private ConcreteNetworkChangeListener networkChangeListener;
+    private ConcreteNetworkAvailabilityListener networkChangeListener;
     private final NetworkToggleListener networkToggleListener = new NetworkToggleListener() {
         @Override
         public void onNetworkTypeChanged() {
@@ -53,7 +52,7 @@ public class VPNService extends android.net.VpnService {
         fgNotification = new ForegroundNotification(this);
         engineRunner.addServiceStateListener(serviceStateListener);
 
-        networkChangeListener = new ConcreteNetworkChangeListener();
+        networkChangeListener = new ConcreteNetworkAvailabilityListener();
         networkChangeListener.subscribe(this.networkToggleListener);
 
         networkChangeDetector = new NetworkChangeDetector(
