@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.core.util.Consumer;
 
 public class NetworkChangeDetector {
-
+    private static final String LOGTAG = NetworkChangeDetector.class.getSimpleName();
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
     private NetworkAvailabilityListener listener;
@@ -24,7 +24,7 @@ public class NetworkChangeDetector {
         var capabilities = connectivityManager.getNetworkCapabilities(network);
         if (capabilities == null) return;
 
-        Log.d("NetworkChangeDetector", String.format("Network %s has capabilities: %s", network, capabilities));
+        Log.d(LOGTAG, String.format("Network %s has capabilities: %s", network, capabilities));
 
         if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             operation.accept(Constants.NetworkType.WIFI);
@@ -51,7 +51,7 @@ public class NetworkChangeDetector {
             public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
                 super.onCapabilitiesChanged(network, networkCapabilities);
 
-                Log.d("NetworkChangeDetector", String.format("Network %s had their capabilities changed: %s", network, networkCapabilities));
+                Log.d(LOGTAG, String.format("Network %s had their capabilities changed: %s", network, networkCapabilities));
             }
         };
     }
