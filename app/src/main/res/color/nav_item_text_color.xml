@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Color state list for navigation menu item text -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- When focused (selected with TV remote) - WHITE -->
+    <item android:state_focused="true" android:color="@color/white" />
+    
+    <!-- When checked/selected (current page) - Orange -->
+    <item android:state_checked="true" android:color="@color/nb_orange" />
+    
+    <!-- Default state - Normal text color -->
+    <item android:color="@color/nb_txt" />
+</selector>
+

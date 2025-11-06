@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp">
-
 
     <TextView
         android:id="@+id/text_server_label"
@@ -14,9 +13,9 @@
         android:text="@string/change_server_title_server"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/edit_text_server"
@@ -28,12 +27,14 @@
         android:inputType="textUri"
         android:background="@drawable/edit_text_white"
         android:padding="12dp"
-	android:textColor="@color/nb_txt"
+        android:textColor="@color/nb_txt"
         android:textColorHint="@color/nb_txt_light"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/text_server_label"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/setup_key_group"
@@ -50,10 +51,10 @@
         android:text="@string/change_server_setup_key"
         android:textSize="12sp"
         app:drawableLeftCompat="@drawable/add_24px"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/edit_text_server"
         app:layout_constraintStart_toStartOf="@id/text_server_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <EditText
         android:id="@+id/edit_text_setup_key"
@@ -67,10 +68,10 @@
         android:padding="12dp"
         android:textColor="@color/nb_txt"
         android:textColorHint="@color/nb_txt_light"
+        android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/text_setup_key_label"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
         android:id="@+id/text_setup_key_tooltip"
@@ -82,9 +83,9 @@
         android:padding="12dp"
         android:layout_marginTop="24dp"
         android:animateLayoutChanges="true"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_setup_key"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_text_setup_key">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
@@ -92,9 +93,7 @@
             android:text="@string/change_server_setup_key_warning"
             android:textColor="@color/nb_orange"
             android:justificationMode="inter_word"
-            android:textSize="16sp"
-            />
-
+            android:textSize="16sp" />
     </LinearLayout>
 
     <Button
@@ -104,10 +103,13 @@
         android:text="@string/change_server_btn"
         android:textAllCaps="false"
         android:background="@drawable/btn_bg_orange"
+        android:layout_marginTop="24dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:foreground="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/text_setup_key_tooltip"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
         android:id="@+id/btn_use_netbird"
@@ -118,6 +120,10 @@
         android:background="@drawable/btn_bg_transparent"
         android:padding="12dp"
         android:layout_marginTop="24dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:foreground="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/btn_change_server"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
