@@ -57,6 +57,11 @@ public class AdvancedFragment extends Fragment {
 
             showReconnectionNeededWarningDialog();
         });
+        
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.getRoot().setOnClickListener(v -> {
+            binding.switchControl.toggle();
+        });
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -102,6 +107,11 @@ public class AdvancedFragment extends Fragment {
                 preferences.disableTraceLog();
             }
         });
+        
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.traceLogLayout.setOnClickListener(v -> {
+            binding.switchTraceLog.toggle();
+        });
 
         // Handle "Share Logs" button click
         binding.buttonShareLogs.setOnClickListener(v -> {
@@ -142,6 +152,11 @@ public class AdvancedFragment extends Fragment {
                 Toast.makeText(inflater.getContext(), "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
             }
         });
+        
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.layoutRosenpas.setOnClickListener(v -> {
+            binding.switchRosenpass.toggle();
+        });
 
         binding.switchRosenpassPermissive.setOnCheckedChangeListener((buttonView, isChecked) -> {
             goPreferences.setRosenpassPermissive(isChecked);
@@ -151,6 +166,11 @@ public class AdvancedFragment extends Fragment {
                 Log.e(LOGTAG, "Error committing Rosenpass settings", e);
                 Toast.makeText(inflater.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
             }
+        });
+        
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.layoutRosenpassPermissive.setOnClickListener(v -> {
+            binding.switchRosenpassPermissive.toggle();
         });
 
         configureForceRelayConnectionSwitch(binding.layoutForceRelayConnection, preferences);
@@ -246,6 +266,31 @@ public class AdvancedFragment extends Fragment {
                 } catch (Exception e) {
                     Log.e(LOGTAG, "Failed to set block inbound", e);
                 }
+            });
+            
+            // Make parent layouts clickable to toggle switches (for TV remote)
+            binding.layoutAllowSsh.setOnClickListener(v -> {
+                binding.switchAllowSsh.toggle();
+            });
+            
+            binding.layoutBlockInbound.setOnClickListener(v -> {
+                binding.switchBlockInbound.toggle();
+            });
+            
+            binding.layoutDisableClientRoutes.setOnClickListener(v -> {
+                binding.switchDisableClientRoutes.toggle();
+            });
+            
+            binding.layoutDisableServerRoutes.setOnClickListener(v -> {
+                binding.switchDisableServerRoutes.toggle();
+            });
+            
+            binding.layoutDisableDns.setOnClickListener(v -> {
+                binding.switchDisableDns.toggle();
+            });
+            
+            binding.layoutDisableFirewall.setOnClickListener(v -> {
+                binding.switchDisableFirewall.toggle();
             });
 
         } catch (Exception e) {

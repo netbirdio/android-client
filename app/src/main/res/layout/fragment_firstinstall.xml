@@ -47,6 +47,9 @@
             android:textAllCaps="false"
             android:background="@drawable/btn_bg_orange"
             android:layout_marginTop="24dp"
+            android:focusable="true"
+            android:focusableInTouchMode="false"
+            android:foreground="@drawable/focus_highlight"
             app:layout_constraintTop_toBottomOf="@id/txt_license"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
