@@ -1,5 +1,6 @@
 package io.netbird.client.ui.home;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netbird.client.R;
+import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentNetworksBinding;
 
 public class NetworksFragment extends Fragment {
@@ -31,10 +33,18 @@ public class NetworksFragment extends Fragment {
    private final List<Resource> resources = new ArrayList<>();
    private final List<RoutingPeer> peers = new ArrayList<>();
    private NetworksFragmentViewModel model;
+   private StateListenerRegistry stateListenerRegistry;
 
-   public static NetworksFragment newInstance() {
-      return new NetworksFragment();
-   }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        if (context instanceof StateListenerRegistry) {
+            stateListenerRegistry = (StateListenerRegistry) context;
+        } else {
+            throw new RuntimeException(context + " must implement StateListenerRegistry");
+        }
+    }
 
    @Nullable
    @Override
@@ -50,6 +60,7 @@ public class NetworksFragment extends Fragment {
       model = new ViewModelProvider(this,
               ViewModelProvider.Factory.from(NetworksFragmentViewModel.initializer))
               .get(NetworksFragmentViewModel.class);
+      stateListenerRegistry.registerServiceStateListener(model);
 
       ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
 
@@ -91,7 +102,13 @@ public class NetworksFragment extends Fragment {
       });
    }
 
-   private void updateResourcesCounter(List<Resource> resources) {
+    @Override
+    public void onDestroyView() {
+        stateListenerRegistry.unregisterServiceStateListener(model);
+        super.onDestroyView();
+    }
+
+    private void updateResourcesCounter(List<Resource> resources) {
       TextView textPeersCount = binding.textOpenPanel;
       int connected = 0;
 
