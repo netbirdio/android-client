@@ -108,6 +108,21 @@ class EngineRunner {
         serviceStateListeners.add(serviceStateListener);
     }
 
+    /**
+     * Atomically adds a listener if and only if the engine is currently running.
+     * Does NOT fire immediate callbacks like addServiceStateListener does.
+     *
+     * @return true if listener was registered (engine was running), false otherwise
+     */
+    public synchronized boolean addServiceStateListenerForRestart(ServiceStateListener listener) {
+        if (!engineIsRunning) {
+            return false;  // Engine not running, can't restart
+        }
+        // Add listener without firing immediate callback
+        serviceStateListeners.add(listener);
+        return true;
+    }
+
     public synchronized void removeServiceStateListener(ServiceStateListener serviceStateListener) {
         serviceStateListeners.remove(serviceStateListener);
     }

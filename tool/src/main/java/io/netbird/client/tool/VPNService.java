@@ -33,6 +33,7 @@ public class VPNService extends android.net.VpnService {
 
     private NetworkChangeDetector networkChangeDetector;
     private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
+    private EngineRestarter engineRestarter;
 
     @Override
     public void onCreate() {
@@ -42,8 +43,9 @@ public class VPNService extends android.net.VpnService {
         fgNotification = new ForegroundNotification(this);
         engineRunner.addServiceStateListener(serviceStateListener);
 
+        engineRestarter = new EngineRestarter(engineRunner);
         networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
-        networkAvailabilityListener.subscribe(new EngineRestarter(engineRunner));
+        networkAvailabilityListener.subscribe(engineRestarter);
 
         networkChangeDetector = new NetworkChangeDetector(
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
@@ -90,6 +92,7 @@ public class VPNService extends android.net.VpnService {
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
+        engineRestarter.cleanup();
     }
 
     @Override
