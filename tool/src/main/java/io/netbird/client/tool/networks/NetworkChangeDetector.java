@@ -63,7 +63,11 @@ public class NetworkChangeDetector {
     }
 
     public void unregisterNetworkCallback() {
-        connectivityManager.unregisterNetworkCallback(networkCallback);
+        try {
+            connectivityManager.unregisterNetworkCallback(networkCallback);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "failed to unregister network callback", e);
+        }
     }
 
     public void subscribe(NetworkAvailabilityListener listener) {
