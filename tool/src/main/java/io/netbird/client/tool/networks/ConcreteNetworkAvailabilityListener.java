@@ -1,14 +1,14 @@
 package io.netbird.client.tool.networks;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityListener {
     private final Map<Integer, Boolean> availableNetworkTypes;
     private NetworkToggleListener listener;
 
     public ConcreteNetworkAvailabilityListener() {
-        this.availableNetworkTypes = new HashMap<>();
+        this.availableNetworkTypes = new ConcurrentHashMap<>();
     }
 
     @Override
