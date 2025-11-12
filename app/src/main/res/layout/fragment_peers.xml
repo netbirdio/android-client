@@ -63,6 +63,8 @@
             android:contentDescription="@string/peers_desc_filter"
             android:padding="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:focusable="true"
+            android:clickable="true"
             android:layout_margin="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/search_view"

@@ -59,6 +59,8 @@
         android:text="@string/advanced_save"
         android:textAllCaps="false"
         android:background="@drawable/btn_bg_orange"
+        android:focusable="true"
+        android:clickable="true"
         app:layout_constraintTop_toBottomOf="@id/preshared_key"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -97,7 +99,9 @@
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_trace_log"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:clickable="true" />
     </LinearLayout>
 
     <Button
@@ -107,6 +111,8 @@
         android:text="@string/advanced_share_logs"
         android:textAllCaps="false"
         android:background="@drawable/btn_bg_orange"
+        android:focusable="true"
+        android:clickable="true"
         app:layout_constraintTop_toBottomOf="@id/trace_log_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -144,7 +150,9 @@
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_rosenpass"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:clickable="true" />
     </LinearLayout>
 
     <LinearLayout
@@ -169,7 +177,9 @@
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_rosenpass_permissive"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:clickable="true" />
     </LinearLayout>
 
     <View
@@ -218,7 +228,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_allow_ssh"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:clickable="true" />
 
         </LinearLayout>
 
@@ -259,7 +271,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_block_inbound"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:clickable="true" />
 
         </LinearLayout>
 
@@ -300,7 +314,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_disable_client_routes"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:clickable="true" />
 
         </LinearLayout>
 
@@ -341,7 +357,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_disable_server_routes"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:clickable="true" />
 
         </LinearLayout>
 
@@ -382,7 +400,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_disable_dns"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:clickable="true" />
 
         </LinearLayout>
 
@@ -423,7 +443,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_disable_firewall"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:clickable="true" />
 
         </LinearLayout>
 
@@ -488,7 +510,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/advanced_theme_system"
-                android:textColor="@color/nb_txt_light" />
+                android:textColor="@color/nb_txt_light"
+                android:focusable="true"
+                android:clickable="true" />
 
             <RadioButton
                 android:id="@+id/radio_theme_light"
@@ -496,7 +520,9 @@
                 android:layout_height="wrap_content"
                 android:text="@string/advanced_theme_light"
                 android:layout_marginStart="16dp"
-                android:textColor="@color/nb_txt_light" />
+                android:textColor="@color/nb_txt_light"
+                android:focusable="true"
+                android:clickable="true" />
 
             <RadioButton
                 android:id="@+id/radio_theme_dark"
@@ -504,7 +530,9 @@
                 android:layout_height="wrap_content"
                 android:text="@string/advanced_theme_dark"
                 android:layout_marginStart="16dp"
-                android:textColor="@color/nb_txt_light" />
+                android:textColor="@color/nb_txt_light"
+                android:focusable="true"
+                android:clickable="true" />
         </RadioGroup>
     </LinearLayout>
 

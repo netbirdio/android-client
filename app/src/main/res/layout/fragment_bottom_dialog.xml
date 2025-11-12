@@ -13,6 +13,8 @@
         android:layout_height="16dp"
         android:src="@drawable/ic_close"
         android:contentDescription="@string/btn_close"
+        android:focusable="true"
+        android:clickable="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="23dp" />
