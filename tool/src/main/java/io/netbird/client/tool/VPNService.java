@@ -86,13 +86,14 @@ public class VPNService extends android.net.VpnService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(LOGTAG, "onDestroy");
-        engineRunner.stop();
-        stopForeground(true);
 
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
         engineRestarter.cleanup();
+
+        engineRunner.stop();
+        stopForeground(true);
     }
 
     @Override
