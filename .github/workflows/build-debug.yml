@@ -117,6 +117,8 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_3a
+          disk-size: 4096M
+          heap-size: 512M
           disable-animations: true
           script: ./gradlew connectedDebugAndroidTest --no-daemon
 
