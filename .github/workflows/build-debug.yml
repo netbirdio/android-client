@@ -3,6 +3,9 @@ name: build debug
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build-debug:
     runs-on: ubuntu-latest
