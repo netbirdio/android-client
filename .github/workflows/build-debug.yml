@@ -45,6 +45,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup environment and build Go library
+        uses: ./.github/actions/build-android
+        with:
+          version_name: ci-test
+          build_type: debug
+          skip_apk_build: 'true'
+
       - name: Run unit tests
         run: ./gradlew test --no-daemon
 
@@ -65,6 +72,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Setup environment and build Go library
+        uses: ./.github/actions/build-android
+        with:
+          version_name: ci-test
+          build_type: debug
+          skip_apk_build: 'true'
 
       - name: Enable KVM group perms
         run: |
