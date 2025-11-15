@@ -11,10 +11,6 @@ inputs:
   build_type:
     description: 'Build type: debug or release'
     required: true
-  skip_apk_build:
-    description: 'Skip APK/AAB building (only setup environment and build Go library)'
-    required: false
-    default: 'false'
 outputs:
   apk_path:
     description: 'Path to the built APK'
@@ -22,6 +18,9 @@ outputs:
   bundle_path:
     description: 'Path to the built AAB bundle'
     value: ${{ steps.build-info.outputs.bundle_path }}
+  aar_path:
+    description: 'Path to the built NetBird Go library AAR'
+    value: gomobile/netbird.aar
 
 runs:
   using: 'composite'
@@ -68,14 +67,12 @@ runs:
       run: PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh
 
     - name: Build APK and Bundle
-      if: inputs.skip_apk_build != 'true'
       shell: bash
       run: |
         BUILD_TYPE=${{ inputs.build_type == 'release' && 'Release' || 'Debug' }}
         ./gradlew --no-daemon assemble${BUILD_TYPE} bundle${BUILD_TYPE} -PversionName="${{ inputs.version_name }}" -PversionCode="${{ inputs.version_code }}"
 
     - name: Rename artifacts
-      if: inputs.skip_apk_build != 'true'
       shell: bash
       run: |
         set -e
@@ -84,7 +81,6 @@ runs:
         mv app/build/outputs/bundle/${BUILD_TYPE_FOLDER}/app-${BUILD_TYPE_FOLDER}.aab app/build/outputs/bundle/${BUILD_TYPE_FOLDER}/netbird-${{ inputs.version_name }}.aab
 
     - name: Set build info
-      if: inputs.skip_apk_build != 'true'
       id: build-info
       shell: bash
       run: |

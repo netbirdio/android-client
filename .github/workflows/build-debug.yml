@@ -40,7 +40,15 @@ jobs:
             ${{ steps.build.outputs.bundle_path }}
           retention-days: 3
 
+      - name: Upload AAR artifact for tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: netbird-aar
+          path: ${{ steps.build.outputs.aar_path }}
+          retention-days: 1
+
   unit-tests:
+    needs: build-debug
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -48,12 +56,18 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup environment and build Go library
-        uses: ./.github/actions/build-android
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          version_name: ci-test
-          build_type: debug
-          skip_apk_build: 'true'
+          java-version: "17"
+          distribution: "adopt"
+          cache: "gradle"
+
+      - name: Download AAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: netbird-aar
+          path: gomobile
 
       - name: Run unit tests
         run: ./gradlew test --no-daemon
@@ -69,6 +83,7 @@ jobs:
           retention-days: 3
 
   instrumented-tests:
+    needs: build-debug
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -76,12 +91,18 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup environment and build Go library
-        uses: ./.github/actions/build-android
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          version_name: ci-test
-          build_type: debug
-          skip_apk_build: 'true'
+          java-version: "17"
+          distribution: "adopt"
+          cache: "gradle"
+
+      - name: Download AAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: netbird-aar
+          path: gomobile
 
       - name: Enable KVM group perms
         run: |
