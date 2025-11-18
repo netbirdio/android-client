@@ -3,6 +3,9 @@ name: build debug
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build-debug:
     runs-on: ubuntu-latest
@@ -35,4 +38,96 @@ jobs:
           path: |
             ${{ steps.build.outputs.apk_path }}
             ${{ steps.build.outputs.bundle_path }}
+          retention-days: 3
+
+      - name: Upload AAR artifact for tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: netbird-aar
+          path: ${{ steps.build.outputs.aar_path }}
+          retention-days: 1
+
+  unit-tests:
+    needs: build-debug
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "adopt"
+          cache: "gradle"
+
+      - name: Download AAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: netbird-aar
+          path: gomobile
+
+      - name: Run unit tests
+        run: ./gradlew test --no-daemon
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: |
+            app/build/reports/tests/
+            tool/build/reports/tests/
+          retention-days: 3
+
+  instrumented-tests:
+    needs: build-debug
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "adopt"
+          cache: "gradle"
+
+      - name: Download AAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: netbird-aar
+          path: gomobile
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: pixel_3a
+          disk-size: 4096M
+          heap-size: 512M
+          disable-animations: true
+          script: ./gradlew connectedDebugAndroidTest --no-daemon
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumented-test-results
+          path: |
+            app/build/reports/androidTests/
+            tool/build/reports/androidTests/
           retention-days: 3
