@@ -38,7 +38,6 @@
         android:id="@+id/setup_key_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         app:constraint_referenced_ids="text_setup_key_label,edit_text_setup_key" />
 
     <TextView
