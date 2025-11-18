@@ -63,6 +63,7 @@
         android:inputType="textUri"
         android:background="@drawable/edit_text_white"
         android:padding="12dp"
+        android:textColor="@color/nb_txt"
         android:textColorHint="@color/nb_txt_light"
         app:layout_constraintTop_toBottomOf="@id/text_setup_key_label"
         app:layout_constraintStart_toStartOf="parent"
