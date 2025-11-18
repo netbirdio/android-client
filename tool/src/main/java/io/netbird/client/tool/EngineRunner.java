@@ -5,8 +5,8 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Client;
@@ -21,7 +21,7 @@ class EngineRunner {
     private static final String LOGTAG = "EngineRunner";
     private final Context context;
     private boolean engineIsRunning = false;
-    Set<ServiceStateListener> serviceStateListeners = new HashSet<>();
+    Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
     private final Client goClient;
 
     public EngineRunner(VPNService vpnService) {
@@ -106,6 +106,21 @@ class EngineRunner {
             serviceStateListener.onStopped();
         }
         serviceStateListeners.add(serviceStateListener);
+    }
+
+    /**
+     * Atomically adds a listener if and only if the engine is currently running.
+     * Does NOT fire immediate callbacks like addServiceStateListener does.
+     *
+     * @return true if listener was registered (engine was running), false otherwise
+     */
+    public synchronized boolean addServiceStateListenerForRestart(ServiceStateListener listener) {
+        if (!engineIsRunning) {
+            return false;  // Engine not running, can't restart
+        }
+        // Add listener without firing immediate callback
+        serviceStateListeners.add(listener);
+        return true;
     }
 
     public synchronized void removeServiceStateListener(ServiceStateListener serviceStateListener) {

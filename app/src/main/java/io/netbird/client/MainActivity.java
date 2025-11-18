@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
 
-
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     private NavController navController;
