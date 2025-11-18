@@ -3,6 +3,8 @@ package io.netbird.client.ui.server;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.viewmodel.CreationExtras;
+import androidx.lifecycle.viewmodel.ViewModelInitializer;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -19,13 +21,11 @@ public class ChangeServerFragmentViewModel extends ViewModel {
 
     private final MutableLiveData<ChangeServerFragmentUiState> uiState;
     private final String configFilePath;
-    private final String defaultManagementServerAddress;
     private final String deviceName;
     private final Operation stopEngineCommand;
 
-    public ChangeServerFragmentViewModel(String configFilePath, String defaultManagementServerAddress, String deviceName, Operation stopEngineCommand) {
+    public ChangeServerFragmentViewModel(String configFilePath, String deviceName, Operation stopEngineCommand) {
         this.configFilePath = configFilePath;
-        this.defaultManagementServerAddress = defaultManagementServerAddress;
         this.deviceName = deviceName;
         this.stopEngineCommand = stopEngineCommand;
 
@@ -35,6 +35,21 @@ public class ChangeServerFragmentViewModel extends ViewModel {
                 .build();
         this.uiState = new MutableLiveData<>(state);
     }
+
+    public static final CreationExtras.Key<String> CONFIG_FILE_PATH_KEY = new CreationExtras.Key<>() {};
+    public static final CreationExtras.Key<String> DEVICE_NAME_KEY = new CreationExtras.Key<>() {};
+    public static final CreationExtras.Key<Operation> STOP_ENGINE_COMMAND_KEY = new CreationExtras.Key<>() {};
+
+    static final ViewModelInitializer<ChangeServerFragmentViewModel> initializer = new ViewModelInitializer<>(
+            ChangeServerFragmentViewModel.class,
+            creationExtras -> {
+                String configFilePath = creationExtras.get(CONFIG_FILE_PATH_KEY);
+                String deviceName = creationExtras.get(DEVICE_NAME_KEY);
+                Operation stopEngineOperation = creationExtras.get(STOP_ENGINE_COMMAND_KEY);
+
+                return new ChangeServerFragmentViewModel(configFilePath, deviceName, stopEngineOperation);
+            }
+    );
 
     private boolean isValidSetupKey(String setupKey) {
         try {
