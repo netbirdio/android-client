@@ -37,13 +37,6 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
         return uiState;
     }
 
-    public void getResources() {
-        var resources = repository.getNetworks();
-        var peers = repository.getRoutingPeers();
-
-        uiState.setValue(new NetworksFragmentUiState(resources, peers));
-    }
-
     private void postResources() {
         var resources = repository.getNetworks();
         var peers = repository.getRoutingPeers();
@@ -64,7 +57,7 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
     @Override
     public void onServiceBind() {
         this.repository.addRouteChangeListener(this);
-        getResources();
+        postResources();
     }
 
     @Override
