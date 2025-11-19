@@ -2,6 +2,7 @@ package io.netbird.client.ui.server;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -79,6 +81,12 @@ public class ChangeServerFragment extends Fragment {
         }
     }
 
+    private void setBounds(Drawable drawable) {
+        if (drawable == null) return;
+
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    }
+
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -95,6 +103,23 @@ public class ChangeServerFragment extends Fragment {
                 .get(ChangeServerFragmentViewModel.class);
 
         viewModel.getUiState().observe(getViewLifecycleOwner(), this::mapStateToUi);
+
+        Drawable minusIcon = ContextCompat.getDrawable(requireContext(), R.drawable.remove_24px);
+        Drawable plusIcon = ContextCompat.getDrawable(requireContext(), R.drawable.add_24px);
+        setBounds(minusIcon);
+        setBounds(plusIcon);
+
+        binding.textSetupKeyLabel.setOnClickListener(v -> {
+            if (binding.editTextSetupKey.getVisibility() == View.VISIBLE) {
+                binding.textSetupKeyLabel.setCompoundDrawables(plusIcon, null, null, null);
+
+                binding.editTextSetupKey.setText("");
+                binding.editTextSetupKey.setVisibility(View.GONE);
+            } else {
+                binding.textSetupKeyLabel.setCompoundDrawables(minusIcon, null, null, null);
+                binding.editTextSetupKey.setVisibility(View.VISIBLE);
+            }
+        });
 
         binding.btnChangeServer.setOnClickListener(v -> {
             String managementServerUri = binding.editTextServer.getText().toString().trim();
@@ -287,11 +312,11 @@ public class ChangeServerFragment extends Fragment {
                     activity.runOnUiThread(() -> {
                         if (binding == null) return;
 
-                        if (!sso) {
-                            binding.setupKeyGroup.setVisibility(View.VISIBLE);
-                        } else {
-                            binding.setupKeyGroup.setVisibility(View.GONE);
-                        }
+//                        if (!sso) {
+//                            binding.setupKeyGroup.setVisibility(View.VISIBLE);
+//                        } else {
+//                            binding.setupKeyGroup.setVisibility(View.GONE);
+//                        }
                     });
 
                     enableUIElements();

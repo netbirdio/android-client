@@ -34,11 +34,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />
 
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/setup_key_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:constraint_referenced_ids="text_setup_key_label,edit_text_setup_key" />
+<!--    <androidx.constraintlayout.widget.Group-->
+<!--        android:id="@+id/setup_key_group"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:constraint_referenced_ids="text_setup_key_label,edit_text_setup_key" />-->
 
     <TextView
         android:id="@+id/text_setup_key_label"
@@ -47,6 +47,7 @@
         android:text="@string/change_server_setup_key"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:drawableLeft="@drawable/add_24px"
         app:layout_constraintTop_toBottomOf="@id/edit_text_server"
         app:layout_constraintStart_toStartOf="@id/text_server_label"
         app:layout_constraintEnd_toEndOf="parent"
@@ -64,6 +65,7 @@
         android:padding="12dp"
         android:textColor="@color/nb_txt"
         android:textColorHint="@color/nb_txt_light"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/text_setup_key_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
