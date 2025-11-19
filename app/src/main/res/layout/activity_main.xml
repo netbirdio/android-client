@@ -28,10 +28,12 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@android:color/transparent"
+            android:focusable="true"
+            android:focusableInTouchMode="false"
             app:headerLayout="@layout/nav_header_main"
             app:itemVerticalPadding="25dp"
-            app:itemIconTint="@color/nb_orange"
-            app:itemTextColor="@color/nb_txt"
+            app:itemIconTint="@color/nav_item_icon_color"
+            app:itemTextColor="@color/nav_item_text_color"
             app:menu="@menu/activity_main_drawer" />
 
         <LinearLayout

@@ -15,6 +15,7 @@ navigationUi = "2.9.0"
 firebase-bom = "34.2.0"
 google-services = "4.4.2"
 firebase-crashlytics-plugin = "3.0.6"
+zxing = "4.3.0"
 
 [libraries]
 browser = { module = "androidx.browser:browser", version.ref = "browser" }
@@ -32,6 +33,7 @@ navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+zxing = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

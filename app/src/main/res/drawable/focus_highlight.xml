@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This drawable defines how UI elements look when focused (selected with TV remote) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- When the button is focused (selected with remote), show WHITE border -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="3dp"
+                android:color="@color/white" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    
+    <!-- Default state (not focused) - no border -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>
+

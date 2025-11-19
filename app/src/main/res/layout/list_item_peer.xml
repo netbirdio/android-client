@@ -5,7 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp"
     android:layout_marginBottom="20dp"
-    android:background="@color/nb_gray_bg">
+    android:background="@color/nb_gray_bg"
+    android:focusable="true"
+    android:focusableInTouchMode="false"
+    android:clickable="true"
+    android:foreground="@drawable/focus_highlight">
 
     <View
         android:id="@+id/vertical_line"
