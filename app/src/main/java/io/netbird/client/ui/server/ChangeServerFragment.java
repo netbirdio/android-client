@@ -1,5 +1,8 @@
 package io.netbird.client.ui.server;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -9,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -87,6 +91,49 @@ public class ChangeServerFragment extends Fragment {
         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
     }
 
+    public void expandView(final View view) {
+        // Measure the view to get its target height
+        view.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = view.getMeasuredHeight();
+
+        // Set initial height to 0 and make it visible
+        view.getLayoutParams().height = 0;
+        view.setVisibility(View.VISIBLE);
+
+        ValueAnimator animator = ValueAnimator.ofInt(0, targetHeight);
+        animator.setDuration(1000);
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        animator.addUpdateListener(animation -> {
+            view.getLayoutParams().height = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+
+        animator.start();
+    }
+
+    public void collapseView(final View view) {
+        final int initialHeight = view.getMeasuredHeight();
+
+        ValueAnimator animator = ValueAnimator.ofInt(initialHeight, 0);
+        animator.setDuration(1000);
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        animator.addUpdateListener(animation -> {
+            view.getLayoutParams().height = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setVisibility(View.GONE); // Hide the view after animation
+            }
+        });
+
+        animator.start();
+    }
+
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -110,14 +157,17 @@ public class ChangeServerFragment extends Fragment {
         setBounds(plusIcon);
 
         binding.textSetupKeyLabel.setOnClickListener(v -> {
-            if (binding.editTextSetupKey.getVisibility() == View.VISIBLE) {
+            if (binding.setupKeyGroup.getVisibility() == View.VISIBLE) {
                 binding.textSetupKeyLabel.setCompoundDrawables(plusIcon, null, null, null);
 
                 binding.editTextSetupKey.setText("");
-                binding.editTextSetupKey.setVisibility(View.GONE);
+                binding.editTextSetupKey.setError(null);
+                binding.setupKeyGroup.setVisibility(View.GONE);
+//                collapseView(binding.setupKeyGroup);
             } else {
                 binding.textSetupKeyLabel.setCompoundDrawables(minusIcon, null, null, null);
-                binding.editTextSetupKey.setVisibility(View.VISIBLE);
+                binding.setupKeyGroup.setVisibility(View.VISIBLE);
+//                expandView(binding.setupKeyGroup);
             }
         });
 
