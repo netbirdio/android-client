@@ -1,18 +1,14 @@
 package io.netbird.client.ui.server;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,16 +19,10 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.viewmodel.MutableCreationExtras;
 
-import java.util.UUID;
-
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentServerBinding;
 import io.netbird.client.tool.Preferences;
-import io.netbird.gomobile.android.Android;
-import io.netbird.gomobile.android.Auth;
-import io.netbird.gomobile.android.ErrListener;
-import io.netbird.gomobile.android.SSOListener;
 
 
 public class ChangeServerFragment extends Fragment {
@@ -88,50 +78,11 @@ public class ChangeServerFragment extends Fragment {
     private void setBounds(Drawable drawable) {
         if (drawable == null) return;
 
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-    }
+        var metrics = getResources().getDisplayMetrics();
+        int dpValue = 12;
+        int pixelValue = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpValue, metrics);
 
-    public void expandView(final View view) {
-        // Measure the view to get its target height
-        view.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        final int targetHeight = view.getMeasuredHeight();
-
-        // Set initial height to 0 and make it visible
-        view.getLayoutParams().height = 0;
-        view.setVisibility(View.VISIBLE);
-
-        ValueAnimator animator = ValueAnimator.ofInt(0, targetHeight);
-        animator.setDuration(1000);
-        animator.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        animator.addUpdateListener(animation -> {
-            view.getLayoutParams().height = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-
-        animator.start();
-    }
-
-    public void collapseView(final View view) {
-        final int initialHeight = view.getMeasuredHeight();
-
-        ValueAnimator animator = ValueAnimator.ofInt(initialHeight, 0);
-        animator.setDuration(1000);
-        animator.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        animator.addUpdateListener(animation -> {
-            view.getLayoutParams().height = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                view.setVisibility(View.GONE); // Hide the view after animation
-            }
-        });
-
-        animator.start();
+        drawable.setBounds(0, 0, pixelValue, pixelValue);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -156,6 +107,9 @@ public class ChangeServerFragment extends Fragment {
         setBounds(minusIcon);
         setBounds(plusIcon);
 
+        // This is done to resize the first time the plus icon is shown on the label.
+        binding.textSetupKeyLabel.setCompoundDrawables(plusIcon, null, null, null);
+
         binding.textSetupKeyLabel.setOnClickListener(v -> {
             if (binding.setupKeyGroup.getVisibility() == View.VISIBLE) {
                 binding.textSetupKeyLabel.setCompoundDrawables(plusIcon, null, null, null);
@@ -163,11 +117,9 @@ public class ChangeServerFragment extends Fragment {
                 binding.editTextSetupKey.setText("");
                 binding.editTextSetupKey.setError(null);
                 binding.setupKeyGroup.setVisibility(View.GONE);
-//                collapseView(binding.setupKeyGroup);
             } else {
                 binding.textSetupKeyLabel.setCompoundDrawables(minusIcon, null, null, null);
                 binding.setupKeyGroup.setVisibility(View.VISIBLE);
-//                expandView(binding.setupKeyGroup);
             }
         });
 
@@ -203,53 +155,6 @@ public class ChangeServerFragment extends Fragment {
                 viewModel.loginWithSetupKey(managementServerUri, setupKey);
             }
         });
-
-//        boolean hideAlert = false;
-//        if (getArguments() != null) {
-//            hideAlert = getArguments().getBoolean("hideAlert", false);
-//        }
-//
-//        if (!hideAlert) {
-//            showConfirmChangeServerDialog();
-//        }
-//
-//        binding.btnUseNetbird.setOnClickListener(v -> {
-//            disableUIElements();
-//            binding.editTextServer.setText(Preferences.defaultServer());
-//            updateServer(view.getContext(), Preferences.defaultServer());
-//        });
-//
-//        binding.setupKeyGroup.setVisibility(View.VISIBLE);
-//
-//        binding.btnChangeServer.setOnClickListener(v -> {
-//            if (binding.editTextServer.getText().toString().trim().isEmpty()) {
-//                return;
-//            }
-//
-//            disableUIElements();
-//
-//            if (binding.setupKeyGroup.getVisibility() == View.VISIBLE) {
-//                String setupKey = binding.editTextSetupKey.getText().toString().trim();
-//                if (setupKey.isEmpty()) {
-//                    binding.editTextSetupKey.setError(v.getContext().getString(R.string.change_server_error_invalid_setup_key));
-//                    binding.editTextSetupKey.requestFocus();
-//                    enableUIElements();
-//                    return;
-//                }
-//                if (!isValidSetupKey(setupKey)) {
-//                    binding.editTextSetupKey.setError(v.getContext().getString(R.string.change_server_error_invalid_setup_key));
-//                    binding.editTextSetupKey.requestFocus();
-//                    enableUIElements();
-//                    return;
-//                }
-//                String serverAddress = binding.editTextServer.getText().toString().trim();
-//                loginWithSetupKey(v.getContext(), serverAddress, setupKey);
-//            } else {
-//                // Setup key is empty; update server instead
-//                String serverAddress = binding.editTextServer.getText().toString().trim();
-//                updateServer(v.getContext(), serverAddress);
-//            }
-//        });
     }
 
     @Override
@@ -291,101 +196,8 @@ public class ChangeServerFragment extends Fragment {
         });
     }
 
-    private void loginWithSetupKey(Context context, String mgmServerAddress, String setupKey) {
-        String configFilePath = Preferences.configFile(context);
-        try {
-            Auth auther = Android.newAuth(configFilePath, mgmServerAddress);
-            auther.loginWithSetupKeyAndSaveConfig(new ErrListener() {
-                @Override
-                public void onError(Exception e) {
-                    FragmentActivity activity = getActivity();
-                    if (activity == null) return;
-                    activity.runOnUiThread(() -> {
-                        if (binding == null) return;
-                        binding.editTextServer.setError(e.getMessage());
-                        binding.editTextServer.requestFocus();
-                    });
-                    enableUIElements();
-                }
-
-                @Override
-                public void onSuccess() {
-                    enableUIElements();
-                    showSuccessDialog(context);
-                    serviceAccessor.stopEngine();
-                }
-            }, setupKey, deviceName());
-        } catch (Exception e) {
-            FragmentActivity activity = getActivity();
-            if (activity == null) return;
-            activity.runOnUiThread(() -> {
-                if (binding == null) return;
-
-                binding.editTextServer.setError(e.getMessage());
-                binding.editTextServer.requestFocus();
-            });
-            enableUIElements();
-        }
-    }
-
     private String deviceName() {
         return Build.PRODUCT;
-    }
-
-    private void updateServer(Context context, String mgmServerAddress) {
-        String configFilePath = Preferences.configFile(context);
-        try {
-            Auth auther = Android.newAuth(configFilePath, mgmServerAddress);
-            auther.saveConfigIfSSOSupported(new SSOListener() {
-                @Override
-                public void onError(Exception e) {
-                    Log.e("ChangeServerFragment", "Error updating server: " + e.getMessage());
-
-                    FragmentActivity activity = getActivity();
-                    if (activity == null) return;
-
-                    activity.runOnUiThread(() -> {
-                        if (binding == null) return;
-
-                        binding.editTextServer.setError(e.getMessage());
-                        binding.editTextServer.requestFocus();
-                    });
-                    enableUIElements();
-                }
-
-                @Override
-                public void onSuccess(boolean sso) {
-                    FragmentActivity activity = getActivity();
-                    if (activity == null) return;
-
-                    Log.i("ChangeServerFragment", "update server result, SSO supported: " + sso);
-                    activity.runOnUiThread(() -> {
-                        if (binding == null) return;
-
-//                        if (!sso) {
-//                            binding.setupKeyGroup.setVisibility(View.VISIBLE);
-//                        } else {
-//                            binding.setupKeyGroup.setVisibility(View.GONE);
-//                        }
-                    });
-
-                    enableUIElements();
-                    showSuccessDialog(context);
-                    serviceAccessor.stopEngine();
-                }
-            });
-        } catch (Exception e) {
-            Log.e("ChangeServerFragment", "Exception in updating server: " + e.getMessage());
-            FragmentActivity activity = getActivity();
-            if (activity == null) return;
-            activity.runOnUiThread(() -> {
-                if (binding == null) return;
-
-                binding.editTextServer.setError(e.getMessage());
-                binding.editTextServer.requestFocus();
-            });
-            enableUIElements();
-        }
     }
 
     private void disableUIElements() {
@@ -409,14 +221,5 @@ public class ChangeServerFragment extends Fragment {
             binding.btnChangeServer.setEnabled(true);
             binding.btnUseNetbird.setVisibility(View.VISIBLE);
         });
-    }
-
-    private boolean isValidSetupKey(String setupKey) {
-        try {
-            UUID.fromString(setupKey);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
     }
 }
