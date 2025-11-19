@@ -49,7 +49,7 @@
     <string name="change_server_title_server">Server</string>
     <string name="change_server_hint">https://example-api.domain.com:443</string>
     <string name="change_server_setup_key">Add this device with a setup key</string>
-    <string name="change_server_setup_key_hint">key</string>
+    <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
     <string name="change_server_error_invalid_setup_key">Invalid setup key format</string>
 
     <string name="change_server_btn">Change</string>
@@ -111,4 +111,5 @@
     <string name="advanced_force_relay_conn_desc">Forces usage of relay when connecting to peers</string>
     <string name="exclamation_mark">exclamation mark</string>
     <string name="reconnectionNeededWarningMessage">To apply the setting, you will need to reconnect.</string>
+    <string name="change_server_setup_key_warning">Using setup keys for user devices is not recommended. SSO with MFA provides stronger security, proper user-device association, and periodic re-authentication.</string>
 </resources>
