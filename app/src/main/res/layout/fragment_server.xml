@@ -89,9 +89,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Using setup keys for user devices are not recommended. SSO authentication provides better user control and security with session expiration and device association."
+            android:text="@string/change_server_setup_key_warning"
             android:textColor="@color/nb_orange"
-            android:justificationMode="inter_character"
+            android:justificationMode="inter_word"
             android:textSize="16sp"
             />
 
