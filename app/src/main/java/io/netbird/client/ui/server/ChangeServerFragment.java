@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.viewmodel.CreationExtras;
 import androidx.lifecycle.viewmodel.MutableCreationExtras;
 
 import io.netbird.client.R;
@@ -85,19 +86,26 @@ public class ChangeServerFragment extends Fragment {
         drawable.setBounds(0, 0, pixelValue, pixelValue);
     }
 
+    @NonNull
+    @Override
+    public CreationExtras getDefaultViewModelCreationExtras() {
+        final var defaultExtras = super.getDefaultViewModelCreationExtras();
+
+        final var extras = new MutableCreationExtras(defaultExtras);
+        extras.set(ChangeServerFragmentViewModel.CONFIG_FILE_PATH_KEY, Preferences.configFile(requireContext()));
+        extras.set(ChangeServerFragmentViewModel.DEVICE_NAME_KEY, deviceName());
+        extras.set(ChangeServerFragmentViewModel.STOP_ENGINE_COMMAND_KEY,
+                (ChangeServerFragmentViewModel.Operation) () -> serviceAccessor.stopEngine());
+        return extras;
+    }
+
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        MutableCreationExtras extras = new MutableCreationExtras();
-        extras.set(ChangeServerFragmentViewModel.CONFIG_FILE_PATH_KEY, Preferences.configFile(requireContext()));
-        extras.set(ChangeServerFragmentViewModel.DEVICE_NAME_KEY, deviceName());
-        extras.set(ChangeServerFragmentViewModel.STOP_ENGINE_COMMAND_KEY,
-                (ChangeServerFragmentViewModel.Operation) () -> serviceAccessor.stopEngine());
-
-        viewModel = new ViewModelProvider(getViewModelStore(),
-                ViewModelProvider.Factory.from(ChangeServerFragmentViewModel.initializer), extras)
+        viewModel = new ViewModelProvider(this,
+                ViewModelProvider.Factory.from(ChangeServerFragmentViewModel.initializer))
                 .get(ChangeServerFragmentViewModel.class);
 
         viewModel.getUiState().observe(getViewLifecycleOwner(), this::mapStateToUi);
