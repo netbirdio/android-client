@@ -1,13 +1,13 @@
 package io.netbird.client.ui.server;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.viewmodel.CreationExtras;
 import androidx.lifecycle.viewmodel.ViewModelInitializer;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -68,7 +68,15 @@ public class ChangeServerFragmentViewModel extends ViewModel {
     }
 
     private boolean isUrlInvalid(String url) {
-        return !url.matches("^https://.*");
+        if (!url.matches("^https://.*")) return true;
+
+        try {
+            new URL(url);
+            return false;
+        } catch (MalformedURLException e) {
+            return true;
+        }
+
     }
 
     private Optional<Auth> getAuthenticator(String managementServerAddress) {
