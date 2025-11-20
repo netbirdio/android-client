@@ -1,5 +1,7 @@
 package io.netbird.client.ui.server;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -51,13 +53,22 @@ public class ChangeServerFragmentViewModel extends ViewModel {
             }
     );
 
-    private boolean isValidSetupKey(String setupKey) {
+    private boolean isSetupKeyInvalid(String setupKey) {
+        if (setupKey == null || setupKey.length() != 36) {
+            return true;
+        }
+
         try {
             UUID.fromString(setupKey);
-            return true;
         } catch (IllegalArgumentException e) {
-            return false;
+            return true;
         }
+
+        return false;
+    }
+
+    private boolean isUrlInvalid(String url) {
+        return !url.matches("^https://.*");
     }
 
     private Optional<Auth> getAuthenticator(String managementServerAddress) {
@@ -108,6 +119,15 @@ public class ChangeServerFragmentViewModel extends ViewModel {
     public void changeManagementServerAddress(String managementServerAddress) {
         disableUi();
 
+        if (isUrlInvalid(managementServerAddress)) {
+            emitErrorState(new ChangeServerFragmentUiState.Builder()
+                    .isUrlInvalid(true)
+                    .isUiEnabled(true)
+                    .build());
+
+            return;
+        }
+
         getAuthenticator(managementServerAddress).ifPresent((authenticator) -> authenticator.saveConfigIfSSOSupported(new SSOListener() {
             @Override
             public void onError(Exception e) {
@@ -125,11 +145,16 @@ public class ChangeServerFragmentViewModel extends ViewModel {
     public void loginWithSetupKey(String managementServerAddress, String setupKey) {
         disableUi();
 
-        if (!isValidSetupKey(setupKey)) {
+        boolean isUrlInvalid = isUrlInvalid(managementServerAddress);
+        boolean isSetupKeyInvalid = isSetupKeyInvalid(setupKey);
+
+        if (isUrlInvalid || isSetupKeyInvalid) {
             emitErrorState(new ChangeServerFragmentUiState.Builder()
-                    .isSetupKeyInvalid(true)
+                    .isUrlInvalid(isUrlInvalid)
+                    .isSetupKeyInvalid(isSetupKeyInvalid)
                     .isUiEnabled(true)
                     .build());
+
             return;
         }
 

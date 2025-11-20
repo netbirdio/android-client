@@ -112,4 +112,5 @@
     <string name="exclamation_mark">exclamation mark</string>
     <string name="reconnectionNeededWarningMessage">To apply the setting, you will need to reconnect.</string>
     <string name="change_server_setup_key_warning">Using setup keys for user devices is not recommended. SSO with MFA provides stronger security, proper user-device association, and periodic re-authentication.</string>
+    <string name="change_server_error_invalid_server_url">Invalid URL format</string>
 </resources>

@@ -58,6 +58,9 @@ public class ChangeServerFragment extends Fragment {
         if (uiState.isUiEnabled) {
             enableUIElements();
         } else {
+            // clearing error flags here because UI elements are only
+            // disabled when managed to click the button and there are no errors.
+            clearErrorFlags();
             disableUIElements();
         }
 
@@ -69,6 +72,11 @@ public class ChangeServerFragment extends Fragment {
         if (uiState.isSetupKeyInvalid) {
             binding.editTextSetupKey.setError(requireContext().getString(R.string.change_server_error_invalid_setup_key));
             binding.editTextSetupKey.requestFocus();
+        }
+
+        if (uiState.isUrlInvalid) {
+            binding.editTextServer.setError(requireContext().getString(R.string.change_server_error_invalid_server_url));
+            binding.editTextServer.requestFocus();
         }
 
         if (uiState.isOperationSuccessful) {
@@ -84,6 +92,11 @@ public class ChangeServerFragment extends Fragment {
         int pixelValue = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpValue, metrics);
 
         drawable.setBounds(0, 0, pixelValue, pixelValue);
+    }
+
+    private void clearErrorFlags() {
+        binding.editTextServer.setError(null);
+        binding.editTextSetupKey.setError(null);
     }
 
     @NonNull

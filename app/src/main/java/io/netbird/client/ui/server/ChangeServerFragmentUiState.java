@@ -3,12 +3,14 @@ package io.netbird.client.ui.server;
 public class ChangeServerFragmentUiState {
     public final boolean isUiEnabled;
     public final boolean isSetupKeyInvalid;
+    public final boolean isUrlInvalid;
     public final boolean isOperationSuccessful;
     public final String errorMessage;
     public final boolean shouldDisplayWarningDialog;
 
     public ChangeServerFragmentUiState(Builder builder) {
         this.isSetupKeyInvalid = builder.isSetupKeyInvalid;
+        this.isUrlInvalid = builder.isUrlInvalid;
         this.isUiEnabled = builder.isUiEnabled;
         this.isOperationSuccessful = builder.isOperationSuccessful;
         this.shouldDisplayWarningDialog = builder.shouldDisplayWarningDialog;
@@ -18,6 +20,7 @@ public class ChangeServerFragmentUiState {
     public static class Builder {
         private boolean isUiEnabled = true;
         private boolean isSetupKeyInvalid = false;
+        private boolean isUrlInvalid = false;
         private boolean isOperationSuccessful = false;
         private String errorMessage;
         private boolean shouldDisplayWarningDialog = false;
@@ -29,6 +32,11 @@ public class ChangeServerFragmentUiState {
 
         public Builder isSetupKeyInvalid(boolean isSetupKeyInvalid) {
             this.isSetupKeyInvalid = isSetupKeyInvalid;
+            return this;
+        }
+
+        public Builder isUrlInvalid(boolean isUrlInvalid) {
+            this.isUrlInvalid = isUrlInvalid;
             return this;
         }
 
