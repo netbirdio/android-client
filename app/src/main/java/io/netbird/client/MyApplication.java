@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import io.netbird.client.repository.VPNServiceRepository;
 import io.netbird.client.tool.NetworkChangeNotifier;
 
 public class MyApplication extends Application {
@@ -27,5 +28,9 @@ public class MyApplication extends Application {
                 receiver,
                 new IntentFilter(NetworkChangeNotifier.action)
         );
+    }
+
+    public VPNServiceRepository getVPNServiceRepository() {
+        return new VPNServiceRepository(this);
     }
 }

@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
@@ -25,11 +26,13 @@ public class VPNService extends android.net.VpnService {
     private final static String LOGTAG = "service";
     public static final String INTENT_ACTION_START = "io.netbird.client.intent.action.START_SERVICE";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
-
     private final IBinder myBinder = new MyLocalBinder();
-
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
+    private TUNParameters currentTUNParameters;
+    private NetworkChangeNotifier notifier;
+
+    private RouteChangeListener listener;
 
     private NetworkChangeDetector networkChangeDetector;
     private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
@@ -39,7 +42,23 @@ public class VPNService extends android.net.VpnService {
     public void onCreate() {
         super.onCreate();
         Log.d(LOGTAG, "onCreate");
-        engineRunner = new EngineRunner(this);
+
+        var configurationFilePath = Preferences.configFile(this);
+        var stateFilePath = Preferences.stateFile(this);
+        var versionName = Version.getVersionName(this);
+        var tunAdapter = new IFace(this);
+        var iFaceDiscover = new IFaceDiscover();
+
+        listener = this::queueTUNRenewal;
+
+        notifier = new NetworkChangeNotifier(this);
+        notifier.addRouteChangeListener(listener);
+
+
+        var preferences = new Preferences(this);
+
+        engineRunner = new EngineRunner(this, configurationFilePath, notifier, tunAdapter, iFaceDiscover, versionName,
+                preferences.isTraceLogEnabled(), Version.isDebuggable(this), stateFilePath);
         fgNotification = new ForegroundNotification(this);
         engineRunner.addServiceStateListener(serviceStateListener);
 
@@ -60,7 +79,7 @@ public class VPNService extends android.net.VpnService {
             return START_NOT_STICKY;
         }
 
-        if(INTENT_ALWAYS_ON_START.equals(intent.getAction())) {
+        if (INTENT_ALWAYS_ON_START.equals(intent.getAction())) {
             fgNotification.startForeground();
             engineRunner.runWithoutAuth();
         }
@@ -74,9 +93,9 @@ public class VPNService extends android.net.VpnService {
     }
 
     @Override
-    public boolean onUnbind (Intent intent) {
+    public boolean onUnbind(Intent intent) {
         Log.d(LOGTAG, "unbind from activity");
-        if(!engineRunner.isRunning()) {
+        if (!engineRunner.isRunning()) {
             stopSelf();
         }
         return false; // false means do not call onRebind
@@ -94,12 +113,21 @@ public class VPNService extends android.net.VpnService {
 
         engineRunner.stop();
         stopForeground(true);
+
+        if (this.notifier != null) {
+            this.notifier.removeRouteChangeListener(listener);
+        }
+
+        if (tunCreator != null) {
+            tunCreator.getHandler().getLooper().quitSafely();
+            tunCreator = null;
+        }
     }
 
     @Override
     public void onRevoke() {
         Log.d(LOGTAG, "VPN permission on revoke");
-        if(engineRunner!=null) {
+        if (engineRunner != null) {
             engineRunner.stop();
             stopForeground(true);
         }
@@ -155,8 +183,28 @@ public class VPNService extends android.net.VpnService {
         public void removeServiceStateListener(ServiceStateListener serviceStateListener) {
             engineRunner.removeServiceStateListener(serviceStateListener);
         }
+
+        public void addRouteChangeListener(RouteChangeListener listener) {
+            if (VPNService.this.notifier != null) {
+                VPNService.this.notifier.addRouteChangeListener(listener);
+            }
+        }
+
+        public void removeRouteChangeListener(RouteChangeListener listener) {
+            if (VPNService.this.notifier != null) {
+                VPNService.this.notifier.removeRouteChangeListener(listener);
+            }
+        }
+
+        public void selectRoute(String route) throws Exception {
+            engineRunner.selectRoute(route);
+        }
+
+        public void deselectRoute(String route) throws Exception {
+            engineRunner.deselectRoute(route);
+        }
     }
-    
+
     public static boolean isUsingAlwaysOnVPN(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network[] networks = connectivityManager.getAllNetworks();
@@ -190,4 +238,48 @@ public class VPNService extends android.net.VpnService {
             fgNotification.stopForeground();
         }
     };
+
+    private TUNCreatorLooperThread tunCreator;
+
+    private void queueTUNRenewal(String routes) {
+        if (tunCreator == null) {
+            tunCreator = new TUNCreatorLooperThread(this::recreateTUN);
+            tunCreator.setPriority(Thread.MAX_PRIORITY);
+            tunCreator.start();
+        }
+
+        var message = tunCreator.getHandler().obtainMessage(1, routes);
+        boolean isQueued = tunCreator.getHandler().sendMessage(message);
+
+        Log.d(LOGTAG, String.format("is TUN renewal queued? %b", isQueued));
+    }
+
+    private void recreateTUN(String routes) {
+        if (!engineRunner.isRunning()) return;
+
+        // Renew TUN file descriptor if routes changed.
+        if (currentTUNParameters != null && currentTUNParameters.didRoutesChange(routes)) {
+            var iface = new IFace(VPNService.this);
+
+            try {
+                int fd = (int)iface.configureInterface(
+                        currentTUNParameters.address,
+                        currentTUNParameters.mtu,
+                        currentTUNParameters.dns,
+                        currentTUNParameters.searchDomainsString,
+                        routes);
+
+                if (fd != -1) {
+                    this.protect(fd);
+                    this.engineRunner.renewTUN(fd);
+                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to recreate tunnel after route changed", e);
+            }
+        }
+    }
+
+    public void setCurrentTUNParameters(TUNParameters currentTUNParameters) {
+        this.currentTUNParameters = currentTUNParameters;
+    }
 }

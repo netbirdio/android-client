@@ -15,38 +15,36 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.netbird.client.R;
-import io.netbird.client.ServiceAccessor;
+import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentNetworksBinding;
-import io.netbird.gomobile.android.Network;
-import io.netbird.gomobile.android.NetworkArray;
-import io.netbird.gomobile.android.PeerInfo;
-import io.netbird.gomobile.android.PeerInfoArray;
 
 public class NetworksFragment extends Fragment {
 
    private FragmentNetworksBinding binding;
-   private ServiceAccessor serviceAccessor;
-   private RecyclerView resourcesListView;
+   private NetworksAdapter adapter;
+   private final List<Resource> resources = new ArrayList<>();
+   private final List<RoutingPeer> peers = new ArrayList<>();
+   private NetworksFragmentViewModel model;
+   private StateListenerRegistry stateListenerRegistry;
 
-   public static NetworksFragment newInstance() {
-      return new NetworksFragment();
-   }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
 
-   @Override
-   public void onAttach(@NonNull Context context) {
-      super.onAttach(context);
-      if (context instanceof ServiceAccessor) {
-         serviceAccessor = (ServiceAccessor) context;
-      } else {
-         throw new RuntimeException(context + " must implement ServiceAccessor");
-      }
-   }
+        if (context instanceof StateListenerRegistry) {
+            stateListenerRegistry = (StateListenerRegistry) context;
+        } else {
+            throw new RuntimeException(context + " must implement StateListenerRegistry");
+        }
+    }
 
    @Nullable
    @Override
@@ -55,30 +53,35 @@ public class NetworksFragment extends Fragment {
       return binding.getRoot();
    }
 
-
    @Override
    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
       super.onViewCreated(view, savedInstanceState);
 
+      model = new ViewModelProvider(this,
+              ViewModelProvider.Factory.from(NetworksFragmentViewModel.initializer))
+              .get(NetworksFragmentViewModel.class);
+      stateListenerRegistry.registerServiceStateListener(model);
+
       ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
 
-      NetworkArray networks = serviceAccessor.getNetworks();
-      updateNetworkCount(networks);
+      adapter = new NetworksAdapter(resources, peers, this::routeSwitchToggleHandler);
 
-      ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, networks.size() > 0);
+      RecyclerView resourcesRecyclerView = binding.networksRecyclerView;
+      resourcesRecyclerView.setAdapter(adapter);
+      resourcesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-      resourcesListView = binding.networksRecyclerView;
-      resourcesListView.setLayoutManager(new LinearLayoutManager(requireContext()));
+      model.getUiState().observe(getViewLifecycleOwner(), uiState -> {
+         resources.clear();
+         resources.addAll(uiState.getResources());
 
-      ArrayList<Resource> resources = new ArrayList<>();
-      for( int i = 0; i < networks.size(); i++) {
-         Network network = networks.get(i);
-         Status status = Status.fromString(network.getStatus());
-         resources.add(new Resource(status, network.getName(), network.getNetwork(), network.getPeer()));
-      }
+         peers.clear();
+         peers.addAll(uiState.getPeers());
 
-      NetworksAdapter adapter = new NetworksAdapter(resources);
-      resourcesListView.setAdapter(adapter);
+         updateResourcesCounter(resources);
+         ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, !resources.isEmpty());
+         adapter.notifyDataSetChanged();
+         adapter.filterBySearchQuery(binding.searchView.getText().toString());
+      });
 
       binding.searchView.clearFocus();
         binding.searchView.addTextChangedListener(new TextWatcher() {
@@ -99,20 +102,33 @@ public class NetworksFragment extends Fragment {
       });
    }
 
-   private void updateNetworkCount(NetworkArray networks) {
+    @Override
+    public void onDestroyView() {
+        stateListenerRegistry.unregisterServiceStateListener(model);
+        super.onDestroyView();
+    }
+
+    private void updateResourcesCounter(List<Resource> resources) {
       TextView textPeersCount = binding.textOpenPanel;
       int connected = 0;
-      for(int i = 0; i < networks.size(); i++) {
-         Network network = networks.get(i);
-         Status status = Status.fromString(network.getStatus());
-         if (status.equals(Status.CONNECTED)) {
+
+      for (var resource : resources) {
+         if (resource.isSelected()) {
             connected++;
          }
       }
 
-      String text = getString(R.string.resources_connected, connected, networks.size());
+      String text = getString(R.string.resources_connected, connected, resources.size());
       textPeersCount.post(() ->
               textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
       );
+   }
+
+   private void routeSwitchToggleHandler(String route, boolean isChecked) throws Exception {
+      if (isChecked) {
+         model.selectRoute(route);
+      } else {
+         model.deselectRoute(route);
+      }
    }
 }

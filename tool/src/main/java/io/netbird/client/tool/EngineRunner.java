@@ -1,9 +1,11 @@
 package io.netbird.client.tool;
 
-
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,59 +15,67 @@ import io.netbird.gomobile.android.Client;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.DNSList;
 import io.netbird.gomobile.android.NetworkArray;
+import io.netbird.gomobile.android.NetworkChangeListener;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.TunAdapter;
 import io.netbird.gomobile.android.URLOpener;
 
 class EngineRunner {
 
     private static final String LOGTAG = "EngineRunner";
     private final Context context;
+    private final boolean isDebuggable;
     private boolean engineIsRunning = false;
     Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
     private final Client goClient;
 
-    public EngineRunner(VPNService vpnService) {
-        context = vpnService;
-        NetworkChangeNotifier notifier = new NetworkChangeNotifier(vpnService);
-        IFace iFace = new IFace(vpnService);
+    public EngineRunner(Context context, String configurationFilePath, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
+                        IFaceDiscover iFaceDiscover, String versionName, boolean isTraceLogEnabled, boolean isDebuggable,
+                        String stateFilePath) {
+        this.context = context;
+        this.isDebuggable = isDebuggable;
+        var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath);
+
         goClient = Android.newClient(
-                Preferences.configFile(vpnService),
+                platformFiles,
                 androidSDKVersion(),
                 DeviceName.getDeviceName(),
-                Version.getVersionName(vpnService),
-                iFace,
-                new IFaceDiscover(),
-                notifier);
+                versionName,
+                tunAdapter,
+                iFaceDiscover,
+                networkChangeListener);
 
-        updateLogLevel();
+        updateLogLevel(isTraceLogEnabled, isDebuggable);
     }
 
-    public void run(URLOpener urlOpener) {
+    public void run(@NotNull URLOpener urlOpener) {
         runClient(urlOpener);
     }
 
     public void runWithoutAuth() {
-        runClient(null);
+        runClient( null);
     }
 
-    private synchronized void runClient(URLOpener urlOpener) {
+    private synchronized void runClient(@Nullable URLOpener urlOpener) {
         Log.d(LOGTAG, "run engine");
         if (engineIsRunning) {
             Log.e(LOGTAG, "engine already running");
             return;
         }
 
-        updateLogLevel();
+        // update the log levels based on the up to date user settings
+        Preferences preferences = new Preferences(context);
+        updateLogLevel(preferences.isTraceLogEnabled(), isDebuggable);
 
         engineIsRunning = true;
         Runnable r = () -> {
             DNSWatch dnsWatch = new DNSWatch(context);
-            Preferences preferences = new Preferences(context);
+
             var envList = EnvVarPackager.getEnvironmentVariables(preferences);
 
             try {
                 notifyServiceStateListeners(true);
-                if(urlOpener == null) {
+                if (urlOpener == null) {
                     goClient.runWithoutLogin(dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
                 } else {
                     goClient.run(urlOpener, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
@@ -87,6 +97,7 @@ class EngineRunner {
     private void changed(DNSList dnsServers) throws Exception {
         goClient.onUpdatedHostDNS(dnsServers);
     }
+
     public synchronized boolean isRunning() {
         return engineIsRunning;
     }
@@ -160,9 +171,8 @@ class EngineRunner {
         }
     }
 
-    private void updateLogLevel() {
-        Preferences pref = new Preferences(context);
-        if (Version.isDebuggable(context) || pref.isTraceLogEnabled()) {
+    private void updateLogLevel(boolean isTraceLogEnabled, boolean isDebuggable) {
+        if (isDebuggable || isTraceLogEnabled) {
             goClient.setTraceLogLevel();
         } else {
             goClient.setInfoLogLevel();
@@ -170,6 +180,38 @@ class EngineRunner {
     }
 
     private int androidSDKVersion() {
-       return Build.VERSION.SDK_INT ;
+        return Build.VERSION.SDK_INT;
+    }
+
+    public void renewTUN(int fd) {
+        Log.d(LOGTAG, String.format("renewing TUN fd: %d", fd));
+        try {
+            goClient.renewTun(fd);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "goClient error", e);
+            notifyError(e);
+        }
+    }
+
+    public void selectRoute(String route) throws Exception {
+        Log.d(LOGTAG, String.format("selecting route: %s", route));
+        try {
+            goClient.selectRoute(route);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "goClient error", e);
+            notifyError(e);
+            throw e;
+        }
+    }
+
+    public void deselectRoute(String route) throws Exception {
+        Log.d(LOGTAG, String.format("deselecting route: %s", route));
+        try {
+            goClient.deselectRoute(route);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "goClient error", e);
+            notifyError(e);
+            throw e;
+        }
     }
 }
