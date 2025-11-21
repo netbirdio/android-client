@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp">
 
 
@@ -20,7 +21,7 @@
     <EditText
         android:id="@+id/edit_text_server"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:autofillHints=""
         android:hint="@string/change_server_hint"
         android:textSize="14sp"
@@ -39,15 +40,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="text_setup_key_label,edit_text_setup_key" />
+        tools:visibility="visible"
+        app:constraint_referenced_ids="edit_text_setup_key, text_setup_key_tooltip" />
 
     <TextView
         android:id="@+id/text_setup_key_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/change_server_setup_key"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:textSize="12sp"
+        app:drawableLeftCompat="@drawable/add_24px"
         app:layout_constraintTop_toBottomOf="@id/edit_text_server"
         app:layout_constraintStart_toStartOf="@id/text_server_label"
         app:layout_constraintEnd_toEndOf="parent"
@@ -56,17 +58,44 @@
     <EditText
         android:id="@+id/edit_text_setup_key"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:autofillHints=""
         android:hint="@string/change_server_setup_key_hint"
         android:textSize="14sp"
         android:inputType="textUri"
         android:background="@drawable/edit_text_white"
         android:padding="12dp"
+        android:textColor="@color/nb_txt"
+        android:textColorHint="@color/nb_txt_light"
         app:layout_constraintTop_toBottomOf="@id/text_setup_key_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />
+
+    <LinearLayout
+        android:id="@+id/text_setup_key_tooltip"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/btn_bg_transparent"
+        android:padding="12dp"
+        android:layout_marginTop="24dp"
+        android:animateLayoutChanges="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_setup_key">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/change_server_setup_key_warning"
+            android:textColor="@color/nb_orange"
+            android:justificationMode="inter_word"
+            android:textSize="16sp"
+            />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_change_server"
@@ -75,7 +104,7 @@
         android:text="@string/change_server_btn"
         android:textAllCaps="false"
         android:background="@drawable/btn_bg_orange"
-        app:layout_constraintTop_toBottomOf="@id/edit_text_setup_key"
+        app:layout_constraintTop_toBottomOf="@id/text_setup_key_tooltip"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp" />
