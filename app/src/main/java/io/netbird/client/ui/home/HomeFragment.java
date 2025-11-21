@@ -91,28 +91,11 @@ public class HomeFragment extends Fragment implements StateListener {
                 buttonConnect.setEnabled(false);
                 buttonAnimation.disconnecting();
                 serviceAccessor.switchConnection(false);
-                invalidateRouteChange();
             } else {
                 // We're currently disconnected, so connect
                 buttonAnimation.connecting();
                 serviceAccessor.switchConnection(true);
             }
-        });
-
-        // route change notification
-        if(PreferenceUI.routeChangedNotification(requireContext())) {
-            binding.btnRouteChanged.setVisibility(View.VISIBLE);
-        } else {
-            binding.btnRouteChanged.setVisibility(View.GONE);
-        }
-
-        binding.btnRouteChanged.setOnClickListener(v -> {
-            requireActivity().runOnUiThread(() -> {
-                if(binding == null) return;
-
-                showRouteChangeNotificationDialog(requireContext());
-                invalidateRouteChange();
-            });
         });
 
         // peers button
@@ -151,7 +134,6 @@ public class HomeFragment extends Fragment implements StateListener {
         buttonConnect.post(() -> {
             buttonAnimation.disconnected();
             buttonConnect.setEnabled(true);
-            invalidateRouteChange();
         });
     }
 
@@ -163,11 +145,6 @@ public class HomeFragment extends Fragment implements StateListener {
 
         textNetworkAddress.post(() -> textNetworkAddress.setText(netAddr));
         textHostname.post(() -> textHostname.setText(hostname));
-    }
-
-    @Override
-    public void routeChanged() {
-
     }
 
     @Override
@@ -191,8 +168,6 @@ public class HomeFragment extends Fragment implements StateListener {
         buttonConnect.post(() -> {
             buttonAnimation.disconnected();
             buttonConnect.setEnabled(true);
-            invalidateRouteChange();
-
         });
         updatePeerCount(0, 0);
     }
@@ -222,23 +197,5 @@ public class HomeFragment extends Fragment implements StateListener {
         textPeersCount.post(() ->
                 textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
         );
-    }
-
-    private void showRouteChangeNotificationDialog(Context context) {
-        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_route_changed, null);
-        final AlertDialog alertDialog = new AlertDialog.Builder(context)
-                .setView(dialogView)
-                .create();
-
-        dialogView.findViewById(R.id.btn_close).setOnClickListener(v -> {
-            alertDialog.dismiss();
-        });
-
-        alertDialog.show();
-    }
-
-    private void invalidateRouteChange() {
-        PreferenceUI.routeChangedNotificationInvalidate(requireContext());
-        binding.btnRouteChanged.setVisibility(View.GONE);
     }
 }

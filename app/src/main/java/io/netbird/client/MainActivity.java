@@ -183,16 +183,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                serviceMessageReceiver,
-                new IntentFilter(NetworkChangeNotifier.action)
-        );
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceMessageReceiver);
     }
 
     @Override
@@ -411,15 +406,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private final BroadcastReceiver serviceMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            PreferenceUI.setRouteChangedNotification(context);
-            for(StateListener listener : serviceStateListeners) {
-                listener.routeChanged();
-            }
-        }
-    };
     ConnectionListener connectionListener = new ConnectionListener() {
         @Override
         public synchronized void onAddressChanged(String fqdn, String ip) {

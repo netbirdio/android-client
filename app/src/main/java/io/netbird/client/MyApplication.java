@@ -19,15 +19,6 @@ public class MyApplication extends Application {
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         int themeMode = prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         AppCompatDelegate.setDefaultNightMode(themeMode);
-        registerNetworkReceiver();
-    }
-
-    public void registerNetworkReceiver() {
-        RouteChangeReceiver receiver = new RouteChangeReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                receiver,
-                new IntentFilter(NetworkChangeNotifier.action)
-        );
     }
 
     public VPNServiceRepository getVPNServiceRepository() {

@@ -90,11 +90,6 @@ public class NetworksFragmentViewModel extends ViewModel implements VPNServiceBi
     }
 
     @Override
-    public void routeChanged() {
-
-    }
-
-    @Override
     public void onConnected() {
 
     }
