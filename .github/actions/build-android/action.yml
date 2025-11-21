@@ -18,6 +18,9 @@ outputs:
   bundle_path:
     description: 'Path to the built AAB bundle'
     value: ${{ steps.build-info.outputs.bundle_path }}
+  aar_path:
+    description: 'Path to the built NetBird Go library AAR'
+    value: gomobile/netbird.aar
 
 runs:
   using: 'composite'

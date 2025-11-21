@@ -14,6 +14,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
+import io.netbird.client.tool.networks.NetworkChangeDetector;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
@@ -32,6 +34,10 @@ public class VPNService extends android.net.VpnService {
 
     private RouteChangeListener listener;
 
+    private NetworkChangeDetector networkChangeDetector;
+    private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
+    private EngineRestarter engineRestarter;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -48,13 +54,22 @@ public class VPNService extends android.net.VpnService {
         notifier = new NetworkChangeNotifier(this);
         notifier.addRouteChangeListener(listener);
 
-        var preferences = new Preferences(this);
-        var isDebuggable = Version.isDebuggable(this);
 
-        engineRunner = new EngineRunner(configurationFilePath, notifier, tunAdapter, iFaceDiscover, versionName,
-                preferences.isTraceLogEnabled(), isDebuggable, stateFilePath);
+        var preferences = new Preferences(this);
+
+        engineRunner = new EngineRunner(this, configurationFilePath, notifier, tunAdapter, iFaceDiscover, versionName,
+                preferences.isTraceLogEnabled(), Version.isDebuggable(this), stateFilePath);
         fgNotification = new ForegroundNotification(this);
         engineRunner.addServiceStateListener(serviceStateListener);
+
+        engineRestarter = new EngineRestarter(engineRunner);
+        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        networkAvailabilityListener.subscribe(engineRestarter);
+
+        networkChangeDetector = new NetworkChangeDetector(
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+        networkChangeDetector.subscribe(networkAvailabilityListener);
+        networkChangeDetector.registerNetworkCallback();
     }
 
     @Override
@@ -66,10 +81,7 @@ public class VPNService extends android.net.VpnService {
 
         if (INTENT_ALWAYS_ON_START.equals(intent.getAction())) {
             fgNotification.startForeground();
-            engineRunner.runWithoutAuth(
-                    new DNSWatch(this),
-                    new Preferences(this),
-                    Version.isDebuggable(this));
+            engineRunner.runWithoutAuth();
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -93,6 +105,12 @@ public class VPNService extends android.net.VpnService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(LOGTAG, "onDestroy");
+
+        networkAvailabilityListener.unsubscribe();
+        networkChangeDetector.unsubscribe();
+        networkChangeDetector.unregisterNetworkCallback();
+        engineRestarter.cleanup();
+
         engineRunner.stop();
         stopForeground(true);
 
@@ -135,9 +153,7 @@ public class VPNService extends android.net.VpnService {
 
         public void runEngine(URLOpener urlOpener) {
             fgNotification.startForeground();
-            engineRunner.run(new DNSWatch(VPNService.this),
-                    new Preferences(VPNService.this),
-                    Version.isDebuggable(VPNService.this), urlOpener);
+            engineRunner.run(urlOpener);
         }
 
         public void stopEngine() {

@@ -1,13 +1,14 @@
 package io.netbird.client.tool;
 
+import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Client;
@@ -22,13 +23,17 @@ import io.netbird.gomobile.android.URLOpener;
 class EngineRunner {
 
     private static final String LOGTAG = "EngineRunner";
+    private final Context context;
+    private final boolean isDebuggable;
     private boolean engineIsRunning = false;
-    Set<ServiceStateListener> serviceStateListeners = new HashSet<>();
+    Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
     private final Client goClient;
 
-    public EngineRunner(String configurationFilePath, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
+    public EngineRunner(Context context, String configurationFilePath, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
                         IFaceDiscover iFaceDiscover, String versionName, boolean isTraceLogEnabled, boolean isDebuggable,
                         String stateFilePath) {
+        this.context = context;
+        this.isDebuggable = isDebuggable;
         var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath);
 
         goClient = Android.newClient(
@@ -43,25 +48,29 @@ class EngineRunner {
         updateLogLevel(isTraceLogEnabled, isDebuggable);
     }
 
-    public void run(@NotNull DNSWatch dnsWatch, @NotNull Preferences preferences, boolean isDebuggable, @NotNull URLOpener urlOpener) {
-        runClient(dnsWatch, preferences, isDebuggable, urlOpener);
+    public void run(@NotNull URLOpener urlOpener) {
+        runClient(urlOpener);
     }
 
-    public void runWithoutAuth(@NotNull DNSWatch dnsWatch, @NotNull Preferences preferences, boolean isDebuggable) {
-        runClient(dnsWatch, preferences, isDebuggable, null);
+    public void runWithoutAuth() {
+        runClient( null);
     }
 
-    private synchronized void runClient(@NotNull DNSWatch dnsWatch, @NotNull Preferences preferences, boolean isDebuggable, @Nullable URLOpener urlOpener) {
+    private synchronized void runClient(@Nullable URLOpener urlOpener) {
         Log.d(LOGTAG, "run engine");
         if (engineIsRunning) {
             Log.e(LOGTAG, "engine already running");
             return;
         }
 
+        // update the log levels based on the up to date user settings
+        Preferences preferences = new Preferences(context);
         updateLogLevel(preferences.isTraceLogEnabled(), isDebuggable);
 
         engineIsRunning = true;
         Runnable r = () -> {
+            DNSWatch dnsWatch = new DNSWatch(context);
+
             var envList = EnvVarPackager.getEnvironmentVariables(preferences);
 
             try {
@@ -108,6 +117,21 @@ class EngineRunner {
             serviceStateListener.onStopped();
         }
         serviceStateListeners.add(serviceStateListener);
+    }
+
+    /**
+     * Atomically adds a listener if and only if the engine is currently running.
+     * Does NOT fire immediate callbacks like addServiceStateListener does.
+     *
+     * @return true if listener was registered (engine was running), false otherwise
+     */
+    public synchronized boolean addServiceStateListenerForRestart(ServiceStateListener listener) {
+        if (!engineIsRunning) {
+            return false;  // Engine not running, can't restart
+        }
+        // Add listener without firing immediate callback
+        serviceStateListeners.add(listener);
+        return true;
     }
 
     public synchronized void removeServiceStateListener(ServiceStateListener serviceStateListener) {

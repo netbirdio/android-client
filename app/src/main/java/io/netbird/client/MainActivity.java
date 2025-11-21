@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -62,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
-
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
