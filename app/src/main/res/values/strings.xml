@@ -99,9 +99,6 @@
 
     <string name="dialog_always_on_desc"><![CDATA[You have a VPN app that has Always On turned on. To enable the NetBird app, you first need to go to your <b>Network & Internet settings</b> → <b>Advanced</b> → Check the <b>gear icon</b> for all the apps listed here on this page. Disable Always On for the apps that are not NetBird.]]></string>
 
-    <string name="dialog_new_route_img_desc">new route exclamation mark</string>
-    <string name="dialog_new_route_desc">Your network administrator changed a configuration that requires restarting the connection.</string>
-
     <string name="advanced_theme_system">System</string>
     <string name="advanced_theme_title">Theme Mode</string>
     <string name="advanced_theme_dark">Dark</string>
