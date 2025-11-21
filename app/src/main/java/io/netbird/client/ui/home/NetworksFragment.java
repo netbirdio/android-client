@@ -60,8 +60,21 @@ public class NetworksFragment extends Fragment {
    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
       super.onViewCreated(view, savedInstanceState);
 
-      ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
+      boolean isRunningOnTV = false;
+      if (getArguments() != null) {
+         isRunningOnTV = getArguments().getBoolean("isRunningOnTV", false);
+      }
 
+      // Hide "Learn why" button on TV and make it non-focusable
+      if (isRunningOnTV) {
+         binding.zeroPeerLayout.btnLearnWhy.setVisibility(View.GONE);
+         // Also make search non-focusable on TV when drawer is open
+         binding.searchView.setFocusable(false);
+         binding.searchView.setFocusableInTouchMode(false);
+      } else {
+         ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
+      }
+      
       NetworkArray networks = serviceAccessor.getNetworks();
       updateNetworkCount(networks);
 
