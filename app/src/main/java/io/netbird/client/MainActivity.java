@@ -556,11 +556,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
-    /**
-     * Detects if the app is running on Android TV.
-     * This helps us optimize the UI for remote control navigation.
-     * @return true if running on TV, false otherwise
-     */
+
     private boolean isRunningOnAndroidTV() {
         UiModeManager uiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
         if (uiModeManager != null) {

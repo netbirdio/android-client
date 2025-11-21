@@ -101,6 +101,9 @@ public class HomeFragment extends Fragment implements StateListener {
         // peers button
         FrameLayout openPanelCardView = binding.peersBtn;
         openPanelCardView.setOnClickListener(v -> {
+            // Clear focus from the button to remove highlight
+            v.clearFocus();
+            
             BottomDialogFragment fragment = new BottomDialogFragment();
             fragment.show(getParentFragmentManager(), fragment.getTag());
         });

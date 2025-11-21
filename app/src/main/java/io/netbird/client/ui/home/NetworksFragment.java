@@ -1,6 +1,8 @@
 package io.netbird.client.ui.home;
 
+import android.app.UiModeManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -28,12 +30,12 @@ import io.netbird.client.databinding.FragmentNetworksBinding;
 
 public class NetworksFragment extends Fragment {
 
-   private FragmentNetworksBinding binding;
-   private NetworksAdapter adapter;
-   private final List<Resource> resources = new ArrayList<>();
-   private final List<RoutingPeer> peers = new ArrayList<>();
-   private NetworksFragmentViewModel model;
-   private StateListenerRegistry stateListenerRegistry;
+    private FragmentNetworksBinding binding;
+    private NetworksAdapter adapter;
+    private final List<Resource> resources = new ArrayList<>();
+    private final List<RoutingPeer> peers = new ArrayList<>();
+    private NetworksFragmentViewModel model;
+    private StateListenerRegistry stateListenerRegistry;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -46,61 +48,69 @@ public class NetworksFragment extends Fragment {
         }
     }
 
-   @Nullable
-   @Override
-   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-      binding = FragmentNetworksBinding.inflate(inflater, container, false);
-      return binding.getRoot();
-   }
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentNetworksBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
-   @Override
-   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-      super.onViewCreated(view, savedInstanceState);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-      model = new ViewModelProvider(this,
-              ViewModelProvider.Factory.from(NetworksFragmentViewModel.initializer))
-              .get(NetworksFragmentViewModel.class);
-      stateListenerRegistry.registerServiceStateListener(model);
+        model = new ViewModelProvider(this,
+                ViewModelProvider.Factory.from(NetworksFragmentViewModel.initializer))
+                .get(NetworksFragmentViewModel.class);
+        stateListenerRegistry.registerServiceStateListener(model);
 
-      ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
+        boolean isRunningOnTV = isRunningOnAndroidTV();
 
-      adapter = new NetworksAdapter(resources, peers, this::routeSwitchToggleHandler);
+        if (isRunningOnTV) {
+            binding.zeroPeerLayout.btnLearnWhy.setVisibility(View.GONE);
+            binding.searchView.setFocusable(false);
+            binding.searchView.setFocusableInTouchMode(false);
+        } else {
+            ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
+        }
 
-      RecyclerView resourcesRecyclerView = binding.networksRecyclerView;
-      resourcesRecyclerView.setAdapter(adapter);
-      resourcesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new NetworksAdapter(resources, peers, this::routeSwitchToggleHandler);
 
-      model.getUiState().observe(getViewLifecycleOwner(), uiState -> {
-         resources.clear();
-         resources.addAll(uiState.getResources());
+        RecyclerView resourcesRecyclerView = binding.networksRecyclerView;
+        resourcesRecyclerView.setAdapter(adapter);
+        resourcesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-         peers.clear();
-         peers.addAll(uiState.getPeers());
+        model.getUiState().observe(getViewLifecycleOwner(), uiState -> {
+            resources.clear();
+            resources.addAll(uiState.getResources());
 
-         updateResourcesCounter(resources);
-         ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, !resources.isEmpty());
-         adapter.notifyDataSetChanged();
-         adapter.filterBySearchQuery(binding.searchView.getText().toString());
-      });
+            peers.clear();
+            peers.addAll(uiState.getPeers());
 
-      binding.searchView.clearFocus();
-        binding.searchView.addTextChangedListener(new TextWatcher() {
-           @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-           @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-              adapter.filterBySearchQuery(s.toString());
-           }
-           @Override public void afterTextChanged(Editable s) {}
+            updateResourcesCounter(resources);
+            ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.networksList, !resources.isEmpty());
+            adapter.notifyDataSetChanged();
+            adapter.filterBySearchQuery(binding.searchView.getText().toString());
         });
 
-      binding.searchView.setOnFocusChangeListener((v, hasFocus) -> {
-         if (hasFocus) {
-            binding.searchView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-         } else {
-            Drawable icon = ContextCompat.getDrawable(requireContext(), R.drawable.search);
-            binding.searchView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
-         }
-      });
-   }
+        binding.searchView.clearFocus();
+        binding.searchView.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.filterBySearchQuery(s.toString());
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        binding.searchView.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                binding.searchView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            } else {
+                Drawable icon = ContextCompat.getDrawable(requireContext(), R.drawable.search);
+                binding.searchView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
+            }
+        });
+    }
 
     @Override
     public void onDestroyView() {
@@ -109,26 +119,34 @@ public class NetworksFragment extends Fragment {
     }
 
     private void updateResourcesCounter(List<Resource> resources) {
-      TextView textPeersCount = binding.textOpenPanel;
-      int connected = 0;
+        TextView textPeersCount = binding.textOpenPanel;
+        int connected = 0;
 
-      for (var resource : resources) {
-         if (resource.isSelected()) {
-            connected++;
-         }
-      }
+        for (var resource : resources) {
+            if (resource.isSelected()) {
+                connected++;
+            }
+        }
 
-      String text = getString(R.string.resources_connected, connected, resources.size());
-      textPeersCount.post(() ->
-              textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
-      );
-   }
+        String text = getString(R.string.resources_connected, connected, resources.size());
+        textPeersCount.post(() ->
+                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
+        );
+    }
 
-   private void routeSwitchToggleHandler(String route, boolean isChecked) throws Exception {
-      if (isChecked) {
-         model.selectRoute(route);
-      } else {
-         model.deselectRoute(route);
-      }
-   }
+    private boolean isRunningOnAndroidTV() {
+        UiModeManager uiModeManager = (UiModeManager) requireContext().getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager != null) {
+            return uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+        }
+        return false;
+    }
+
+    private void routeSwitchToggleHandler(String route, boolean isChecked) throws Exception {
+        if (isChecked) {
+            model.selectRoute(route);
+        } else {
+            model.deselectRoute(route);
+        }
+    }
 }
