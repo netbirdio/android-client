@@ -10,6 +10,8 @@ public class PagerAdapter extends FragmentStateAdapter {
 
     private boolean isRunningOnTV;
 
+    private static final String ARG_IS_RUNNING_ON_TV = "isRunningOnTV";
+
     public PagerAdapter(@NonNull Fragment fragment, boolean isRunningOnTV) {
         super(fragment);
         this.isRunningOnTV = isRunningOnTV;
@@ -33,7 +35,7 @@ public class PagerAdapter extends FragmentStateAdapter {
         
         // Pass TV flag to fragments
         Bundle args = new Bundle();
-        args.putBoolean("isRunningOnTV", isRunningOnTV);
+        args.putBoolean(ARG_IS_RUNNING_ON_TV, isRunningOnTV);
         fragment.setArguments(args);
         
         return fragment;

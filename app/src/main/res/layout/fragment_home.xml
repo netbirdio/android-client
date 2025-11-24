@@ -2,15 +2,21 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/nb_bg_home"
+    android:descendantFocusability="afterDescendants"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
     tools:context=".ui.home.HomeFragment">
 
     <Space
         android:id="@+id/spacer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         app:layout_constraintTop_toTopOf="@id/top_guideline"
         app:layout_constraintBottom_toTopOf="@id/barrier_below_bg_mask_container"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,6 +28,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/nb_bg_mask"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         app:layout_constraintTop_toTopOf="@id/spacer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,6 +39,8 @@
         android:id="@+id/barrier_below_bg_mask_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="bg_mask_container" />
 
@@ -38,6 +48,8 @@
         android:id="@+id/bg_mask_container"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         app:layout_constraintTop_toTopOf="@id/top_guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -48,6 +60,8 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:contentDescription="@string/main_desc_bg_mask"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:scaleType="fitCenter"
             android:src="@drawable/bg_bottom"
             app:layout_constraintStart_toStartOf="parent"
@@ -76,6 +90,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:text="@string/main_status_disconnected"
             android:textAlignment="center"
             android:textColor="@color/nb_txt_light"
@@ -107,6 +123,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/nb_bg_mask"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         app:layout_constraintTop_toBottomOf="@id/bg_mask_container"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@id/bg_mask_container"
@@ -117,6 +135,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:textAlignment="center"
         android:textColor="@color/nb_txt_light"
         android:textSize="16sp"
@@ -130,13 +150,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:textAlignment="center"
         android:textColor="@color/nb_txt_light"
         android:textSize="16sp"
+        tools:text="100.127.123.95/16"
         app:layout_constraintTop_toBottomOf="@id/text_hostname"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:text="100.127.123.95/16" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <FrameLayout
         android:id="@+id/peers_btn"
@@ -158,19 +180,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:focusable="false"
+            android:focusableInTouchMode="false">
 
             <View
                 android:layout_width="110dp"
                 android:layout_height="5dp"
                 android:layout_marginTop="18dp"
-                android:background="@drawable/separator" />
+                android:background="@drawable/separator"
+                android:focusable="false"
+                android:focusableInTouchMode="false" />
 
             <TextView
                 android:id="@+id/text_open_panel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:padding="16dp"
                 android:textAlignment="center"
                 android:textColor="@color/nb_txt_light"
@@ -184,6 +212,8 @@
         android:id="@+id/top_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.18019079" />
 

@@ -11,11 +11,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
-    <!-- Declare that this app works on Android TV -->
     <uses-feature
         android:name="android.software.leanback"
         android:required="false" />
-    <!-- Declare touchscreen is not required (TV uses remote control) -->
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
@@ -42,7 +40,6 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <!-- Make app appear in Android TV launcher -->
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>

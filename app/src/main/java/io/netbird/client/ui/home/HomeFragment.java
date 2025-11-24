@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.airbnb.lottie.LottieAnimationView;
 
+import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
@@ -107,6 +108,17 @@ public class HomeFragment extends Fragment implements StateListener {
             BottomDialogFragment fragment = new BottomDialogFragment();
             fragment.show(getParentFragmentManager(), fragment.getTag());
         });
+
+        if (PlatformUtils.isAndroidTV(requireContext())) {
+            binding.btnRouteChanged.setFocusable(false);
+            binding.btnRouteChanged.setFocusableInTouchMode(false);
+            
+            root.postDelayed(() -> {
+                if (buttonConnect != null && buttonConnect.isEnabled()) {
+                    buttonConnect.requestFocus();
+                }
+            }, 200);
+        }
 
         stateListenerRegistry.registerServiceStateListener(this);
         return root;

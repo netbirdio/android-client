@@ -2,16 +2,18 @@ package io.netbird.client.ui.home;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.UiModeManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowMetrics;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -25,6 +27,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 
+import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentBottomDialogBinding;
 
@@ -37,8 +40,7 @@ public class BottomDialogFragment extends com.google.android.material.bottomshee
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Detect if running on Android TV
-        isRunningOnTV = isRunningOnAndroidTV();
+        isRunningOnTV = PlatformUtils.isAndroidTV(requireContext());
         
         // Apply transparent background theme to the dialog
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
@@ -54,13 +56,22 @@ public class BottomDialogFragment extends com.google.android.material.bottomshee
                 behavior.setSkipCollapsed(true);
                 behavior.setPeekHeight(0);
                 
-                // Set height to 91% to avoid covering system navigation bar on mobile
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                int screenHeight = displayMetrics.heightPixels;
-
                 ViewGroup.LayoutParams params = bottomSheet.getLayoutParams();
-                params.height = (int) (screenHeight * 0.91f);
+                
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    WindowMetrics windowMetrics = requireActivity().getWindowManager().getCurrentWindowMetrics();
+                    WindowInsets windowInsets = windowMetrics.getWindowInsets();
+                    Insets insets = windowInsets.getInsetsIgnoringVisibility(
+                        WindowInsets.Type.systemBars()
+                    );
+                    params.height = windowMetrics.getBounds().height() - insets.top;
+                } else {
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                    int screenHeight = displayMetrics.heightPixels;
+                    params.height = (int) (screenHeight * 0.91f);
+                }
+                
                 bottomSheet.setLayoutParams(params);
 
                 // Set the background to transparent
@@ -92,10 +103,16 @@ public class BottomDialogFragment extends com.google.android.material.bottomshee
         // Set rounded corners background on your sheet content
         view.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.rounded_top_corners));
 
-        // Make close button non-focusable on TV (only tabs should be focusable)
+        // Hide close button on TV (users will use the back button to exit)
         if (isRunningOnTV) {
-            binding.buttonClose.setFocusable(false);
-            binding.buttonClose.setFocusableInTouchMode(false);
+            binding.buttonClose.setVisibility(View.GONE);
+            
+            // Make the root view focusable to prevent focus from going to elements behind it
+            view.setFocusable(true);
+            view.setFocusableInTouchMode(false);
+            
+            binding.separator.setFocusable(false);
+            binding.separator.setFocusableInTouchMode(false);
         }
         
         binding.buttonClose.setOnClickListener(v -> dismiss());
@@ -109,7 +126,7 @@ public class BottomDialogFragment extends com.google.android.material.bottomshee
 
         PagerAdapter adapter = new PagerAdapter(this, isRunningOnTV);
         viewPager.setAdapter(adapter);
-
+        
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
@@ -125,18 +142,34 @@ public class BottomDialogFragment extends com.google.android.material.bottomshee
             }
         }).attach();
         
-        // On TV, ensure focus starts on the tabs
         if (isRunningOnTV) {
-            tabLayout.post(() -> tabLayout.requestFocus());
+            viewPager.setFocusable(false);
+            viewPager.setFocusableInTouchMode(false);
+            
+            tabLayout.setFocusable(true);
+            tabLayout.setFocusableInTouchMode(false);
+            
+            tabLayout.postDelayed(() -> {
+                if (!tabLayout.requestFocus()) {
+                    for (int i = 0; i < tabLayout.getTabCount(); i++) {
+                        View tabView = tabLayout.getTabAt(i).view;
+                        if (tabView != null && tabView.requestFocus()) {
+                            break;
+                        }
+                    }
+                }
+            }, 100);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowMetrics windowMetrics = requireActivity().getWindowManager().getCurrentWindowMetrics();
+            WindowInsets windowInsets = windowMetrics.getWindowInsets();
+            Insets insets = windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
+            tabLayout.setPadding(
+                tabLayout.getPaddingLeft(),
+                tabLayout.getPaddingTop(),
+                tabLayout.getPaddingRight(),
+                insets.bottom
+            );
         }
-    }
-
-    private boolean isRunningOnAndroidTV() {
-        UiModeManager uiModeManager = (UiModeManager) requireContext().getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager != null) {
-            return uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
-        }
-        return false;
     }
 
     @Override

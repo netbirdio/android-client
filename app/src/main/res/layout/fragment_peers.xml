@@ -26,6 +26,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:padding="16dp"
             android:textColor="@color/nb_txt_light"
             tools:text="0 of 0 Peers connected"

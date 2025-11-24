@@ -151,9 +151,9 @@ public class VPNService extends android.net.VpnService {
             return VpnService.prepare(context);
         }
 
-        public void runEngine(URLOpener urlOpener) {
+        public void runEngine(URLOpener urlOpener, boolean isAndroidTV) {
             fgNotification.startForeground();
-            engineRunner.run(urlOpener);
+            engineRunner.run(urlOpener, isAndroidTV);
         }
 
         public void stopEngine() {

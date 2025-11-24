@@ -19,7 +19,6 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
-        android:text="Device Code: XXXX-XXXX"
         android:visibility="gone" />
 
     <Button

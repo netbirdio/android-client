@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Color state list for navigation menu item icons -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- When focused (selected with TV remote) - WHITE -->
     <item android:state_focused="true" android:color="@color/white" />
-    
-    <!-- Default state (and checked) - Orange -->
     <item android:color="@color/nb_orange" />
 </selector>
 

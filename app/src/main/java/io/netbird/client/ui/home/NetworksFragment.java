@@ -1,8 +1,6 @@
 package io.netbird.client.ui.home;
 
-import android.app.UiModeManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -24,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentNetworksBinding;
@@ -64,9 +63,7 @@ public class NetworksFragment extends Fragment {
                 .get(NetworksFragmentViewModel.class);
         stateListenerRegistry.registerServiceStateListener(model);
 
-        boolean isRunningOnTV = isRunningOnAndroidTV();
-
-        if (isRunningOnTV) {
+        if (PlatformUtils.isAndroidTV(requireContext())) {
             binding.zeroPeerLayout.btnLearnWhy.setVisibility(View.GONE);
             binding.searchView.setFocusable(false);
             binding.searchView.setFocusableInTouchMode(false);
@@ -132,14 +129,6 @@ public class NetworksFragment extends Fragment {
         textPeersCount.post(() ->
                 textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
         );
-    }
-
-    private boolean isRunningOnAndroidTV() {
-        UiModeManager uiModeManager = (UiModeManager) requireContext().getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager != null) {
-            return uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
-        }
-        return false;
     }
 
     private void routeSwitchToggleHandler(String route, boolean isChecked) throws Exception {

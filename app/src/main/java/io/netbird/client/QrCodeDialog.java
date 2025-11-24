@@ -21,12 +21,19 @@ public class QrCodeDialog extends DialogFragment {
     private static final String ARG_URL = "url";
     private static final String ARG_USER_CODE = "userCode";
 
-    public static QrCodeDialog newInstance(String url, String userCode) {
+    private static OnDialogDismissed dismissCallback;
+
+    public interface OnDialogDismissed {
+        void onDismissed();
+    }
+
+    public static QrCodeDialog newInstance(String url, String userCode, OnDialogDismissed callback) {
         QrCodeDialog fragment = new QrCodeDialog();
         Bundle args = new Bundle();
         args.putString(ARG_URL, url);
         args.putString(ARG_USER_CODE, userCode);
         fragment.setArguments(args);
+        dismissCallback = callback;
         return fragment;
     }
 
@@ -57,12 +64,21 @@ public class QrCodeDialog extends DialogFragment {
 
         // Show user code if it exists. Needs testing on real device, emulator is not getting a Device Code
         if (userCode != null && !userCode.isEmpty()) {
-            userCodeTextView.setText("Device Code: " + userCode);
+            userCodeTextView.setText(getString(R.string.device_code, userCode));
             userCodeTextView.setVisibility(View.VISIBLE);
         } else {
             userCodeTextView.setVisibility(View.GONE);
         }
 
         closeButton.setOnClickListener(v -> dismiss());
+    }
+
+    @Override
+    public void onDismiss(@NonNull android.content.DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (dismissCallback != null) {
+            dismissCallback.onDismissed();
+            dismissCallback = null;
+        }
     }
 }
