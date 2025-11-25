@@ -42,7 +42,6 @@ public class CustomTabURLOpener implements URLOpener {
         return isOpened;
     }
 
-
     @Override
     public void onLoginSuccess() {
         Log.d(TAG, "onLoginSuccess fired.");
@@ -56,7 +55,7 @@ public class CustomTabURLOpener implements URLOpener {
     }
 
     @Override
-    public void open(String url) {
+    public void open(String url, String userCode) {
         isOpened = true;
         try {
             CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();

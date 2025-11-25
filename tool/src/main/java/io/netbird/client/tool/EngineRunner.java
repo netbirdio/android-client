@@ -48,15 +48,15 @@ class EngineRunner {
         updateLogLevel(isTraceLogEnabled, isDebuggable);
     }
 
-    public void run(@NotNull URLOpener urlOpener) {
-        runClient(urlOpener);
+    public void run(@NotNull URLOpener urlOpener, boolean isAndroidTV) {
+        runClient(urlOpener, isAndroidTV);
     }
 
     public void runWithoutAuth() {
-        runClient( null);
+        runClient(null, false);
     }
 
-    private synchronized void runClient(@Nullable URLOpener urlOpener) {
+    private synchronized void runClient(@Nullable URLOpener urlOpener, boolean isAndroidTV) {
         Log.d(LOGTAG, "run engine");
         if (engineIsRunning) {
             Log.e(LOGTAG, "engine already running");
@@ -78,7 +78,7 @@ class EngineRunner {
                 if (urlOpener == null) {
                     goClient.runWithoutLogin(dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
                 } else {
-                    goClient.run(urlOpener, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
+                    goClient.run(urlOpener, isAndroidTV, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
                 }
             } catch (Exception e) {
                 Log.e(LOGTAG, "goClient error", e);

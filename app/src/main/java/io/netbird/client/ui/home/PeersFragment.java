@@ -36,6 +36,8 @@ public class PeersFragment extends Fragment {
     private ServiceAccessor serviceAccessor;
     private RecyclerView peersListView;
 
+    private static final String ARG_IS_RUNNING_ON_TV = "isRunningOnTV";
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -56,7 +58,22 @@ public class PeersFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
+        boolean isRunningOnTV = false;
+        if (getArguments() != null) {
+            isRunningOnTV = getArguments().getBoolean(ARG_IS_RUNNING_ON_TV, false);
+        }
+
+        // Hide "Learn why" button on TV and make it non-focusable
+        if (isRunningOnTV) {
+            binding.zeroPeerLayout.btnLearnWhy.setVisibility(View.GONE);
+            // Also make search and filter non-focusable on TV when drawer is open
+            binding.searchView.setFocusable(false);
+            binding.searchView.setFocusableInTouchMode(false);
+            binding.filterIcon.setFocusable(false);
+            binding.filterIcon.setFocusableInTouchMode(false);
+        } else {
+            ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
+        }
 
         PeerInfoArray peersInfo = serviceAccessor.getPeersList();
         ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.peersList, peersInfo.size() > 0);

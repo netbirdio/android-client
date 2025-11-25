@@ -1,26 +1,44 @@
 package io.netbird.client.ui.home;
 
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 public class PagerAdapter extends FragmentStateAdapter {
 
-    public PagerAdapter(@NonNull Fragment fragment) {
+    private boolean isRunningOnTV;
+
+    private static final String ARG_IS_RUNNING_ON_TV = "isRunningOnTV";
+
+    public PagerAdapter(@NonNull Fragment fragment, boolean isRunningOnTV) {
         super(fragment);
+        this.isRunningOnTV = isRunningOnTV;
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
+        Fragment fragment;
         switch (position) {
             case 0:
-                return new PeersFragment();
+                fragment = new PeersFragment();
+                break;
             case 1:
-                return new NetworksFragment();
+                fragment = new NetworksFragment();
+                break;
             default:
-                return new Fragment();
+                fragment = new PeersFragment();
+                break;
         }
+        
+        // Pass TV flag to fragments
+        Bundle args = new Bundle();
+        args.putBoolean(ARG_IS_RUNNING_ON_TV, isRunningOnTV);
+        fragment.setArguments(args);
+        
+        return fragment;
     }
 
     @Override

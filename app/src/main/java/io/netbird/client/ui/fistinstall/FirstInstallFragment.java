@@ -20,6 +20,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
+import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentFirstinstallBinding;
 import io.netbird.client.ui.server.ChangeServerFragment;
@@ -81,6 +82,10 @@ public class FirstInstallFragment extends Fragment {
         binding.txtLicense.setText(spannable);
         binding.txtLicense.setMovementMethod(LinkMovementMethod.getInstance());
         binding.txtLicense.setHighlightColor(Color.TRANSPARENT);
+
+        if (PlatformUtils.isAndroidTV(requireContext())) {
+            binding.btnContinue.postDelayed(() -> binding.btnContinue.requestFocus(), 200);
+        }
     }
 
     private void hideAppBar() {

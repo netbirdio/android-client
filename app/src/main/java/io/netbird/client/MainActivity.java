@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Html;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -46,6 +48,7 @@ import io.netbird.client.ui.PreferenceUI;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.URLOpener;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceAccessor, StateListenerRegistry {
@@ -68,9 +71,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
     private final List<StateListener> serviceStateListeners = new ArrayList<>();
-    private CustomTabURLOpener urlOpener;
+    private URLOpener urlOpener;
+    private QrCodeDialog qrCodeDialog;
 
     private boolean isSSOFinishedWell = false;
+    private boolean isRunningOnTV = false;
 
     // Last known state for UI updates
     private ConnectionState lastKnownState = ConnectionState.UNKNOWN;
@@ -102,6 +107,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(binding.getRoot());
         setSupportActionBar(binding.appBarMain.toolbar);
 
+        isRunningOnTV = PlatformUtils.isAndroidTV(this);
+        if (isRunningOnTV) {
+            Log.i(LOGTAG, "Running on Android TV - optimizing for D-pad navigation");
+        }
+
         setVersionText();
 
         DrawerLayout drawer = binding.drawerLayout;
@@ -109,6 +119,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Set the listener for menu item selections
         navigationView.setNavigationItemSelectedListener(this);
+        
+        // On TV, request focus when drawer opens so D-pad navigation works
+        if (isRunningOnTV) {
+            drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+                @Override
+                public void onDrawerOpened(View drawerView) {
+                    // Request focus on the drawer when it opens
+                    navigationView.postDelayed(() -> {
+                        navigationView.setFocusable(true);
+                        navigationView.setFocusableInTouchMode(false);
+                        
+                        if (!navigationView.requestFocus()) {
+                            Log.d(LOGTAG, "NavigationView couldn't get focus, trying menu items");
+                        }
+                        
+                        // Try to find and focus the first visible menu item
+                        View menuView = navigationView.getChildAt(0);
+                        if (menuView != null) {
+                            View firstFocusable = menuView.findFocus();
+                            if (firstFocusable == null) {
+                                menuView.requestFocus();
+                            }
+                        }
+                    }, 100); // Delay to let drawer animation finish
+                }
+                
+                @Override
+                public void onDrawerClosed(View drawerView) {
+                    // Return focus to main content when drawer closed
+                    View mainContent = findViewById(R.id.nav_host_fragment_content_main);
+                    if (mainContent != null) {
+                        mainContent.requestFocus();
+                    }
+                }
+            });
+        }
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -127,16 +173,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        urlOpener = new CustomTabURLOpener(this, () -> {
-            if(isSSOFinishedWell) {
-                return;
-            }
-            if(mBinder == null) {
-                return;
-            }
+        if (!isRunningOnTV) {
+            urlOpener = new CustomTabURLOpener(this, () -> {
+                if (isSSOFinishedWell) {
+                    return;
+                }
+                if (mBinder == null) {
+                    return;
+                }
 
-            mBinder.stopEngine();
-        });
+                mBinder.stopEngine();
+            });
+        } else {
+            urlOpener = new URLOpener() {
+                @Override
+                public void open(String url, String userCode) {
+                    qrCodeDialog = QrCodeDialog.newInstance(url, userCode, () -> {
+                        if (isSSOFinishedWell) {
+                            return;
+                        }
+                        if (mBinder == null) {
+                            return;
+                        }
+                        mBinder.stopEngine();
+                    });
+                    qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+                }
+
+                @Override
+                public void onLoginSuccess() {
+                    Log.d(LOGTAG, "onLoginSuccess fired for TV.");
+                    if (qrCodeDialog != null && qrCodeDialog.isVisible()) {
+                        qrCodeDialog.dismiss();
+                        qrCodeDialog = null;
+                    }
+                }
+            };
+        }
 
         // VPN permission result launcher
         vpnActivityResultLauncher = registerForActivityResult(
@@ -156,12 +229,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (VPNService.isUsingAlwaysOnVPN(this)) {
                         showAlwaysOnDialog(() -> {
                             if (mBinder != null) {
-                                mBinder.runEngine(urlOpener);
+                                mBinder.runEngine(urlOpener, isRunningOnTV);
                             }
                         });
                     } else {
                         if (mBinder != null) {
-                            mBinder.runEngine(urlOpener);
+                            mBinder.runEngine(urlOpener, isRunningOnTV);
                         }
                     }
                 });
@@ -194,7 +267,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStop() {
         super.onStop();
         Log.d(LOGTAG, "onStop");
-        if (!urlOpener.isOpened() && mBinder != null) {
+        if (urlOpener instanceof CustomTabURLOpener && ((CustomTabURLOpener) urlOpener).isOpened()) {
+            return; // Keep service alive for SSO custom tab
+        }
+
+        if (mBinder != null) {
             mBinder.removeConnectionStateListener();
             mBinder.removeServiceStateListener(serviceStateListener);
             unbindService(serviceIPC);
@@ -260,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (prepareIntent != null) {
             vpnActivityResultLauncher.launch(prepareIntent);
         } else {
-            mBinder.runEngine(urlOpener);
+            mBinder.runEngine(urlOpener, isRunningOnTV);
         }
     }
 
@@ -485,4 +562,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
         }
     };
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (!isRunningOnTV) {
+            return super.onKeyDown(keyCode, event);
+        }
+        else {
+            Log.d(LOGTAG, "Key pressed: " + keyCode + " (" + KeyEvent.keyCodeToString(keyCode) + "), repeat: " + event.getRepeatCount());
+
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                boolean isOnHomeScreen = navController != null && 
+                    navController.getCurrentDestination() != null &&
+                    navController.getCurrentDestination().getId() == R.id.nav_home;
+
+                if (event.getRepeatCount() == 0 && isOnHomeScreen && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    Toast.makeText(this, R.string.tv_menu_hint, Toast.LENGTH_SHORT).show();
+                }
+
+                // drawer is not selectable on Android 16+, so we open via a long press of the left d-pad button instead
+                if (event.getRepeatCount() > 0 && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    Log.d(LOGTAG, "Long press LEFT detected - opening drawer");
+                    binding.drawerLayout.openDrawer(GravityCompat.START);
+                    binding.navView.requestFocus();
+                    return true;
+                }
+            }
+
+            if (keyCode == KeyEvent.KEYCODE_BACK && binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                Log.d(LOGTAG, "Closing drawer with BACK");
+                binding.drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
 }

@@ -47,6 +47,8 @@
         android:padding="16dp"
 	android:textColor="@color/nb_txt"
         android:textColorHint="@color/nb_txt_light"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         app:layout_constraintTop_toBottomOf="@id/text_server_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,6 +61,9 @@
         android:text="@string/advanced_save"
         android:textAllCaps="false"
         android:background="@drawable/btn_bg_orange"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:foreground="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/preshared_key"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -81,6 +86,11 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginTop="24dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/separator"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -97,7 +107,8 @@
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_trace_log"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:focusable="false" />
     </LinearLayout>
 
     <Button
@@ -107,6 +118,9 @@
         android:text="@string/advanced_share_logs"
         android:textAllCaps="false"
         android:background="@drawable/btn_bg_orange"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:foreground="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/trace_log_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -129,6 +143,11 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginTop="24dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/separator_rosenpass"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -144,7 +163,8 @@
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_rosenpass"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:focusable="false" />
     </LinearLayout>
 
     <LinearLayout
@@ -154,6 +174,11 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_rosenpas"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -169,7 +194,8 @@
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_rosenpass_permissive"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:focusable="false" />
     </LinearLayout>
 
     <View
@@ -199,6 +225,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/title_network_security"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -218,7 +249,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_allow_ssh"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="false" />
 
         </LinearLayout>
 
@@ -240,6 +273,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_allow_ssh"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -259,7 +297,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_block_inbound"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="false" />
 
         </LinearLayout>
 
@@ -281,6 +321,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_block_inbound"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -300,7 +345,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_disable_client_routes"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="false" />
 
         </LinearLayout>
 
@@ -322,6 +369,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_disable_client_routes"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -341,7 +393,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_disable_server_routes"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="false" />
 
         </LinearLayout>
 
@@ -363,6 +417,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_disable_server_routes"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -382,7 +441,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_disable_dns"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="false" />
 
         </LinearLayout>
 
@@ -404,6 +465,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_disable_dns"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -423,7 +489,9 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_disable_firewall"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="false" />
 
         </LinearLayout>
 
@@ -488,7 +556,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/advanced_theme_system"
-                android:textColor="@color/nb_txt_light" />
+                android:textColor="@color/nb_txt_light"
+                android:padding="12dp"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:background="@drawable/focus_highlight" />
 
             <RadioButton
                 android:id="@+id/radio_theme_light"
@@ -496,7 +568,11 @@
                 android:layout_height="wrap_content"
                 android:text="@string/advanced_theme_light"
                 android:layout_marginStart="16dp"
-                android:textColor="@color/nb_txt_light" />
+                android:textColor="@color/nb_txt_light"
+                android:padding="12dp"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:background="@drawable/focus_highlight" />
 
             <RadioButton
                 android:id="@+id/radio_theme_dark"
@@ -504,7 +580,11 @@
                 android:layout_height="wrap_content"
                 android:text="@string/advanced_theme_dark"
                 android:layout_marginStart="16dp"
-                android:textColor="@color/nb_txt_light" />
+                android:textColor="@color/nb_txt_light"
+                android:padding="12dp"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:background="@drawable/focus_highlight" />
         </RadioGroup>
     </LinearLayout>
 
