@@ -36,6 +36,8 @@ public class PeersFragment extends Fragment {
     private ServiceAccessor serviceAccessor;
     private RecyclerView peersListView;
 
+    private static final String ARG_IS_RUNNING_ON_TV = "isRunningOnTV";
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -58,7 +60,7 @@ public class PeersFragment extends Fragment {
 
         boolean isRunningOnTV = false;
         if (getArguments() != null) {
-            isRunningOnTV = getArguments().getBoolean("isRunningOnTV", false);
+            isRunningOnTV = getArguments().getBoolean(ARG_IS_RUNNING_ON_TV, false);
         }
 
         // Hide "Learn why" button on TV and make it non-focusable
