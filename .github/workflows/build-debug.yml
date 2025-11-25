@@ -2,6 +2,9 @@ name: build debug
 
 on:
   pull_request:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
