@@ -45,8 +45,8 @@ public class PreferencesInstrumentedTest {
     }
 
     @Test
-    public void shouldReturnFalseWhenConnectionForceRelayedIsNotSet() {
-        Assert.assertFalse(preferences.isConnectionForceRelayed());
+    public void shouldReturnTrueWhenConnectionForceRelayedIsNotSet() {
+        Assert.assertTrue(preferences.isConnectionForceRelayed());
     }
 
     @Test

@@ -34,7 +34,7 @@ public class Preferences {
     }
 
     public boolean isConnectionForceRelayed() {
-        return sharedPref.getBoolean(keyForceRelayConnection, false);
+        return sharedPref.getBoolean(keyForceRelayConnection, true);
     }
 
     public void enableForcedRelayConnection() {
