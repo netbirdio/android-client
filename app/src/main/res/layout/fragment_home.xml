@@ -100,22 +100,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <ImageButton
-            android:id="@+id/btn_route_changed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/focus_highlight_button"
-            android:contentDescription="@string/main_desc_new_route_notification"
-            android:focusable="true"
-            android:focusableInTouchMode="false"
-            android:padding="8dp"
-            android:src="@drawable/ic_menu_about"
-            app:tint="@color/nb_orange"
-            app:layout_constraintStart_toEndOf="@id/text_connection_status"
-            app:layout_constraintTop_toTopOf="@id/text_connection_status"
-            app:layout_constraintBottom_toBottomOf="@id/text_connection_status" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View

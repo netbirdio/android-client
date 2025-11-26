@@ -110,9 +110,6 @@ public class HomeFragment extends Fragment implements StateListener {
         });
 
         if (PlatformUtils.isAndroidTV(requireContext())) {
-            binding.btnRouteChanged.setFocusable(false);
-            binding.btnRouteChanged.setFocusableInTouchMode(false);
-            
             root.postDelayed(() -> {
                 if (buttonConnect != null && buttonConnect.isEnabled()) {
                     buttonConnect.requestFocus();

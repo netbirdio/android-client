@@ -15,7 +15,6 @@
     <string name="main_status_disconnected">Disconnected</string>
     <string name="main_desc_bg_mask">background mask</string>
     <string name="main_desc_connect">connect-disconnect</string>
-    <string name="main_desc_new_route_notification">new route notification</string>
 
     <string name="fragment_firstinstall_txt">By default you will connect to NetBird\'s cloud servers. You can access the change_server menu to use another server.</string>
     <string name="fragment_firstinstall_continue">Continue</string>
