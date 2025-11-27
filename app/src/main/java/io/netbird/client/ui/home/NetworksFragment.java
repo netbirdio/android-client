@@ -24,6 +24,7 @@ import java.util.List;
 
 import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
+import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentNetworksBinding;
 
@@ -35,6 +36,7 @@ public class NetworksFragment extends Fragment {
     private final List<RoutingPeer> peers = new ArrayList<>();
     private NetworksFragmentViewModel model;
     private StateListenerRegistry stateListenerRegistry;
+    private ServiceAccessor serviceAccessor;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -44,6 +46,12 @@ public class NetworksFragment extends Fragment {
             stateListenerRegistry = (StateListenerRegistry) context;
         } else {
             throw new RuntimeException(context + " must implement StateListenerRegistry");
+        }
+
+        if (context instanceof ServiceAccessor) {
+            serviceAccessor = (ServiceAccessor) context;
+        } else {
+            throw new RuntimeException(context + " must implement ServiceAccessor");
         }
     }
 
@@ -58,8 +66,7 @@ public class NetworksFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        model = new ViewModelProvider(this,
-                ViewModelProvider.Factory.from(NetworksFragmentViewModel.initializer))
+        model = new ViewModelProvider(this, NetworksFragmentViewModel.getFactory(serviceAccessor))
                 .get(NetworksFragmentViewModel.class);
         stateListenerRegistry.registerServiceStateListener(model);
 

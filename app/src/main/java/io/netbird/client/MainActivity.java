@@ -2,11 +2,9 @@ package io.netbird.client;
 
 import android.animation.StateListAnimator;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -32,7 +30,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -41,7 +38,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
-import io.netbird.client.tool.NetworkChangeNotifier;
+import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
@@ -367,6 +364,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         return mBinder.networks();
+    }
+
+    @Override
+    public void selectRoute(String route) throws Exception {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.selectRoute(route);
+    }
+
+    @Override
+    public void deselectRoute(String route) throws Exception {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.deselectRoute(route);
+    }
+
+    @Override
+    public void addRouteChangeListener(RouteChangeListener listener) {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.addRouteChangeListener(listener);
+    }
+
+    @Override
+    public void removeRouteChangeListener(RouteChangeListener listener) {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.removeRouteChangeListener(listener);
     }
 
 
