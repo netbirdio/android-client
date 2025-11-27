@@ -84,6 +84,7 @@ public class FirstInstallFragment extends Fragment {
         binding.txtLicense.setHighlightColor(Color.TRANSPARENT);
 
         if (PlatformUtils.isAndroidTV(requireContext())) {
+            binding.txtAndroidtvBeta.setVisibility(View.VISIBLE);
             binding.btnContinue.postDelayed(() -> binding.btnContinue.requestFocus(), 200);
         }
     }

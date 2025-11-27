@@ -19,6 +19,7 @@
     <string name="fragment_firstinstall_txt">By default you will connect to NetBird\'s cloud servers. You can access the change_server menu to use another server.</string>
     <string name="fragment_firstinstall_continue">Continue</string>
     <string name="fragment_firstinstall_desc_logo">NetBird logo</string>
+    <string name="fragment_firstinstall_androidtv_beta">Android TV support is currently in beta. Some features may not work as expected.</string>
 
 
     <string name="about_version">Version:&#160;</string>
