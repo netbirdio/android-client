@@ -22,6 +22,7 @@ import io.netbird.client.databinding.ComponentSwitchBinding;
 import io.netbird.client.databinding.FragmentAdvancedBinding;
 import io.netbird.client.tool.Logcat;
 import io.netbird.client.tool.Preferences;
+import io.netbird.client.tool.ProfileManagerWrapper;
 
 
 public class AdvancedFragment extends Fragment {
@@ -67,7 +68,14 @@ public class AdvancedFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        String configFilePath = Preferences.configFile(inflater.getContext());
+        // Get config path from ProfileManager instead of constructing it
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(inflater.getContext());
+        String configFilePath;
+        try {
+            configFilePath = profileManager.getActiveConfigPath();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get config path: " + e.getMessage(), e);
+        }
         goPreferences = new io.netbird.gomobile.android.Preferences(configFilePath);
 
         binding = FragmentAdvancedBinding.inflate(inflater, container, false);
@@ -318,7 +326,14 @@ public class AdvancedFragment extends Fragment {
     }
 
     private void setPreSharedKey(String key, Context context) {
-        String configFilePath = Preferences.configFile(context);
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(context);
+        String configFilePath;
+        try {
+            configFilePath = profileManager.getActiveConfigPath();
+        } catch (Exception e) {
+            Toast.makeText(context, "Failed to get config path: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            return;
+        }
         io.netbird.gomobile.android.Preferences preferences = new io.netbird.gomobile.android.Preferences(configFilePath);
         try {
             preferences.setPreSharedKey(key);
@@ -331,7 +346,14 @@ public class AdvancedFragment extends Fragment {
     }
 
     private boolean hasPreSharedKey(Context context) {
-        String configFilePath = Preferences.configFile(context);
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(context);
+        String configFilePath;
+        try {
+            configFilePath = profileManager.getActiveConfigPath();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to get config path", e);
+            return false;
+        }
         io.netbird.gomobile.android.Preferences preferences = new io.netbird.gomobile.android.Preferences(configFilePath);
         try {
             return !preferences.getPreSharedKey().isEmpty();

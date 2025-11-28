@@ -25,6 +25,7 @@ import io.netbird.gomobile.android.URLOpener;
 public class VPNService extends android.net.VpnService {
     private final static String LOGTAG = "service";
     public static final String INTENT_ACTION_START = "io.netbird.client.intent.action.START_SERVICE";
+    public static final String ACTION_STOP_ENGINE = "io.netbird.client.intent.action.STOP_ENGINE";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
     private final IBinder myBinder = new MyLocalBinder();
     private EngineRunner engineRunner;
@@ -37,14 +38,13 @@ public class VPNService extends android.net.VpnService {
     private NetworkChangeDetector networkChangeDetector;
     private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
     private EngineRestarter engineRestarter;
+    private android.content.BroadcastReceiver stopEngineReceiver;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(LOGTAG, "onCreate");
 
-        var configurationFilePath = Preferences.configFile(this);
-        var stateFilePath = Preferences.stateFile(this);
         var versionName = Version.getVersionName(this);
         var tunAdapter = new IFace(this);
         var iFaceDiscover = new IFaceDiscover();
@@ -54,22 +54,49 @@ public class VPNService extends android.net.VpnService {
         notifier = new NetworkChangeNotifier(this);
         notifier.addRouteChangeListener(listener);
 
+        Preferences preferences = new Preferences(this);
 
-        var preferences = new Preferences(this);
+        // Create profile manager for managing profiles
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
 
-        engineRunner = new EngineRunner(this, configurationFilePath, notifier, tunAdapter, iFaceDiscover, versionName,
-                preferences.isTraceLogEnabled(), Version.isDebuggable(this), stateFilePath);
+        // Create foreground notification before initializing engine
         fgNotification = new ForegroundNotification(this);
+
+        // Create network availability listener before initializing engine
+        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+
+
+        engineRunner = new EngineRunner(this, notifier, tunAdapter, iFaceDiscover, versionName,
+                preferences.isTraceLogEnabled(), Version.isDebuggable(this), profileManager);
         engineRunner.addServiceStateListener(serviceStateListener);
 
         engineRestarter = new EngineRestarter(engineRunner);
-        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
         networkAvailabilityListener.subscribe(engineRestarter);
 
         networkChangeDetector = new NetworkChangeDetector(
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
         networkChangeDetector.subscribe(networkAvailabilityListener);
         networkChangeDetector.registerNetworkCallback();
+
+        // Register broadcast receiver for stopping engine (e.g., during profile switch)
+        stopEngineReceiver = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (ACTION_STOP_ENGINE.equals(intent.getAction())) {
+                    Log.d(LOGTAG, "Received stop engine broadcast");
+                    if (engineRunner != null) {
+                        engineRunner.stop();
+                    }
+                }
+            }
+        };
+        android.content.IntentFilter filter = new android.content.IntentFilter(ACTION_STOP_ENGINE);
+        androidx.core.content.ContextCompat.registerReceiver(
+                this,
+                stopEngineReceiver,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+        );
     }
 
     @Override
@@ -105,6 +132,15 @@ public class VPNService extends android.net.VpnService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(LOGTAG, "onDestroy");
+
+        // Unregister broadcast receiver
+        if (stopEngineReceiver != null) {
+            try {
+                unregisterReceiver(stopEngineReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.w(LOGTAG, "Receiver not registered", e);
+            }
+        }
 
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
