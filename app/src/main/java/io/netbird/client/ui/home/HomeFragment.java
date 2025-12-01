@@ -126,6 +126,8 @@ public class HomeFragment extends Fragment implements StateListener {
         super.onDestroyView();
         buttonAnimation.destroy();
         stateListenerRegistry.unregisterServiceStateListener(this);
+        FrameLayout openPanelCardView = binding.peersBtn;
+        openPanelCardView.setOnClickListener(null);
         binding = null;
     }
 
