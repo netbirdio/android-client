@@ -13,7 +13,7 @@ public class NetworkChangeDetector {
     private static final String LOGTAG = NetworkChangeDetector.class.getSimpleName();
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
-    private NetworkAvailabilityListener listener;
+    private volatile NetworkAvailabilityListener listener;
 
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
         this.connectivityManager = connectivityManager;
@@ -37,14 +37,16 @@ public class NetworkChangeDetector {
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
-                if (listener == null) return;
-                checkNetworkCapabilities(network, (networkType) -> listener.onNetworkAvailable(networkType));
+                NetworkAvailabilityListener localListener = listener;
+                if (localListener == null) return;
+                checkNetworkCapabilities(network, localListener::onNetworkAvailable);
             }
 
             @Override
             public void onLost(@NonNull Network network) {
-                if (listener == null) return;
-                checkNetworkCapabilities(network, (networkType) -> listener.onNetworkLost(networkType));
+                NetworkAvailabilityListener localListener = listener;
+                if (localListener == null) return;
+                checkNetworkCapabilities(network, localListener::onNetworkLost);
             }
 
             @Override
