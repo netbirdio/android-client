@@ -68,7 +68,7 @@ public class ChangeServerFragmentViewModel extends ViewModel {
     }
 
     private boolean isUrlInvalid(String url) {
-        if (!url.matches("^https://.*")) return true;
+        if (!url.matches("^https?://.*")) return true;
 
         try {
             new URL(url);
