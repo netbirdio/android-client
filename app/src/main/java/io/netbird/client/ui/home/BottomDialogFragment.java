@@ -45,6 +45,11 @@ public class BottomDialogFragment extends com.google.android.material.bottomshee
         // Apply transparent background theme to the dialog
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
         dialog.setOnShowListener(dialogInterface -> {
+            // Check if the fragment is still attached to avoid IllegalStateException
+            if (getActivity() == null || !isAdded()) {
+                return;
+            }
+
             FrameLayout bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
             if (bottomSheet != null) {
                 // Set the bottom sheet to be full screen
