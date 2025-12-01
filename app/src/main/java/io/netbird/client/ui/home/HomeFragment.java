@@ -11,7 +11,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -22,7 +21,6 @@ import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentHomeBinding;
-import io.netbird.client.ui.PreferenceUI;
 import io.netbird.gomobile.android.PeerInfo;
 import io.netbird.gomobile.android.PeerInfoArray;
 
