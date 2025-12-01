@@ -55,33 +55,9 @@ public class CustomTabURLOpener implements URLOpener {
     public void open(String url, String userCode) {
         isOpened = true;
         try {
-            // Force Google account picker by setting prompt=select_account
-            // This allows users to choose which Google account to use
-            String modifiedUrl = url;
-
-            // Check if this is an OAuth URL (login.netbird.io, accounts.google.com, or has oauth/authorize)
-            if (url.contains("/authorize") || url.contains("oauth") || url.contains("accounts.google.com")) {
-                Uri uri = Uri.parse(url);
-                Uri.Builder builder = uri.buildUpon().clearQuery();
-
-                // Copy all existing parameters except 'prompt'
-                for (String paramName : uri.getQueryParameterNames()) {
-                    if (!paramName.equals("prompt")) {
-                        for (String value : uri.getQueryParameters(paramName)) {
-                            builder.appendQueryParameter(paramName, value);
-                        }
-                    }
-                }
-
-                // Add prompt=select_account to force account picker
-                builder.appendQueryParameter("prompt", "select_account");
-                modifiedUrl = builder.build().toString();
-                Log.i(TAG, "Replaced prompt parameter with select_account. Modified URL: " + modifiedUrl);
-            }
-
             CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
             Intent intent = customTabsIntent.intent;
-            intent.setData(Uri.parse(modifiedUrl));
+            intent.setData(Uri.parse(url));
             customTabLauncher.launch(intent);
         } catch (Exception e) {
             Log.e(TAG, "Failed to launch CustomTab: " + e.getMessage());
