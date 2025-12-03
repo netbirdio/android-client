@@ -1,5 +1,6 @@
 package io.netbird.client;
 
+import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 
@@ -10,4 +11,10 @@ public interface ServiceAccessor {
 
     NetworkArray getNetworks();
     void stopEngine();
+
+    void selectRoute(String route) throws Exception;
+    void deselectRoute(String route) throws Exception;
+
+    void addRouteChangeListener(RouteChangeListener listener);
+    void removeRouteChangeListener(RouteChangeListener listener);
 }
