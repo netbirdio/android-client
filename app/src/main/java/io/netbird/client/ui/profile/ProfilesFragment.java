@@ -1,0 +1,221 @@
+package io.netbird.client.ui.profile;
+
+import android.app.AlertDialog;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.netbird.client.R;
+import io.netbird.client.tool.Profile;
+import io.netbird.client.tool.ProfileManagerWrapper;
+
+public class ProfilesFragment extends Fragment {
+    private static final String TAG = "ProfilesFragment";
+
+    private RecyclerView recyclerView;
+    private ProfilesAdapter adapter;
+    private ProfileManagerWrapper profileManager;
+    private List<Profile> profiles = new ArrayList<>();
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_profiles, container, false);
+
+        // Initialize profile manager
+        profileManager = new ProfileManagerWrapper(requireContext());
+
+        recyclerView = view.findViewById(R.id.recycler_profiles);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        adapter = new ProfilesAdapter(profiles, new ProfilesAdapter.ProfileActionListener() {
+            @Override
+            public void onSwitchProfile(Profile profile) {
+                showSwitchDialog(profile);
+            }
+
+            @Override
+            public void onLogoutProfile(Profile profile) {
+                showLogoutDialog(profile);
+            }
+
+            @Override
+            public void onRemoveProfile(Profile profile) {
+                showRemoveDialog(profile);
+            }
+        });
+        recyclerView.setAdapter(adapter);
+
+        FloatingActionButton btnAdd = view.findViewById(R.id.btn_add_profile);
+        btnAdd.setOnClickListener(v -> showAddDialog());
+
+        loadProfiles();
+
+        return view;
+    }
+
+    private void loadProfiles() {
+        profiles.clear();
+        List<Profile> loadedProfiles = profileManager.listProfiles();
+        profiles.addAll(loadedProfiles);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void showAddDialog() {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_simple_alert_message, null);
+        EditText input = new EditText(requireContext());
+        input.setHint(R.string.profiles_dialog_add_hint);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.profiles_dialog_add_title)
+                .setMessage(R.string.profiles_dialog_add_message)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, (d, which) -> {
+                    String profileName = input.getText().toString().trim();
+                    if (profileName.isEmpty()) {
+                        Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    addProfile(profileName);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+
+        dialog.show();
+    }
+
+    private void showSwitchDialog(Profile profile) {
+        String message = getString(R.string.profiles_dialog_switch_message, profile.getName());
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.profiles_dialog_switch_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, (d, which) -> switchProfile(profile))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void showLogoutDialog(Profile profile) {
+        String message = getString(R.string.profiles_dialog_logout_message, profile.getName());
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.profiles_dialog_logout_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, (d, which) -> logoutProfile(profile))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void showRemoveDialog(Profile profile) {
+        String message = getString(R.string.profiles_dialog_remove_message, profile.getName());
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.profiles_dialog_remove_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, (d, which) -> removeProfile(profile))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void addProfile(String profileName) {
+        try {
+            profileManager.addProfile(profileName);
+            Toast.makeText(requireContext(),
+                    getString(R.string.profiles_success_added, profileName),
+                    Toast.LENGTH_SHORT).show();
+            loadProfiles();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to add profile", e);
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains("already exists")) {
+                Toast.makeText(requireContext(),
+                        getString(R.string.profiles_error_already_exists, profileName),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(requireContext(),
+                        "Failed to add profile: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void switchProfile(Profile profile) {
+        try {
+            // Switch profile (VPN service will be stopped automatically in ProfileManagerWrapper)
+            profileManager.switchProfile(profile.getName());
+
+            Toast.makeText(requireContext(),
+                    getString(R.string.profiles_success_switched, profile.getName()),
+                    Toast.LENGTH_SHORT).show();
+
+            loadProfiles();
+
+            // Navigate back to home
+            requireActivity().onBackPressed();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to switch profile", e);
+            Toast.makeText(requireContext(),
+                    "Failed to switch profile: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void logoutProfile(Profile profile) {
+        try {
+            // Logout from profile (VPN service will be stopped automatically if it's the active profile)
+            profileManager.logoutProfile(profile.getName());
+
+            Toast.makeText(requireContext(),
+                    getString(R.string.profiles_success_logged_out, profile.getName()),
+                    Toast.LENGTH_SHORT).show();
+
+            loadProfiles();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to logout from profile", e);
+            Toast.makeText(requireContext(),
+                    "Failed to logout: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void removeProfile(Profile profile) {
+        try {
+            if (profile.getName().equals("default")) {
+                Toast.makeText(requireContext(),
+                        R.string.profiles_error_cannot_remove_default,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (profile.isActive()) {
+                Toast.makeText(requireContext(),
+                        R.string.profiles_error_cannot_remove_active,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            profileManager.removeProfile(profile.getName());
+            Toast.makeText(requireContext(),
+                    getString(R.string.profiles_success_removed, profile.getName()),
+                    Toast.LENGTH_SHORT).show();
+            loadProfiles();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to remove profile", e);
+            Toast.makeText(requireContext(),
+                    "Failed to remove profile: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+}

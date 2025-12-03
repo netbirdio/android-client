@@ -2,11 +2,9 @@ package io.netbird.client;
 
 import android.animation.StateListAnimator;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -32,7 +30,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -41,7 +38,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
-import io.netbird.client.tool.NetworkChangeNotifier;
+import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
@@ -119,6 +116,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Set the listener for menu item selections
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Update profile menu item with active profile name
+        updateProfileMenuItem(navigationView);
         
         // On TV, request focus when drawer opens so D-pad navigation works
         if (isRunningOnTV) {
@@ -168,6 +168,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             if (destination.getId() == R.id.nav_home) {
                 removeToolbarShadow();
+                // Update profile menu item when returning to home (e.g., after profile switch)
+                if (binding != null && binding.navView != null) {
+                    updateProfileMenuItem(binding.navView);
+                }
             } else {
                 resetToolbar();
             }
@@ -256,6 +260,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+        // Update profile menu item when returning to MainActivity
+        if (binding != null && binding.navView != null) {
+            updateProfileMenuItem(binding.navView);
+        }
     }
 
     @Override
@@ -367,6 +375,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         return mBinder.networks();
+    }
+
+    @Override
+    public void selectRoute(String route) throws Exception {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.selectRoute(route);
+    }
+
+    @Override
+    public void deselectRoute(String route) throws Exception {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.deselectRoute(route);
+    }
+
+    @Override
+    public void addRouteChangeListener(RouteChangeListener listener) {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.addRouteChangeListener(listener);
+    }
+
+    @Override
+    public void removeRouteChangeListener(RouteChangeListener listener) {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.removeRouteChangeListener(listener);
     }
 
 
@@ -563,6 +611,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
+    private void updateProfileMenuItem(NavigationView navigationView) {
+        try {
+            // Get active profile from ProfileManager instead of reading file
+            io.netbird.client.tool.ProfileManagerWrapper profileManager =
+                new io.netbird.client.tool.ProfileManagerWrapper(this);
+            String activeProfile = profileManager.getActiveProfile();
+            Menu menu = navigationView.getMenu();
+            MenuItem profileItem = menu.findItem(R.id.nav_profiles);
+            if (profileItem != null && activeProfile != null) {
+                profileItem.setTitle(activeProfile);
+            }
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to update profile menu item", e);
+        }
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (!isRunningOnTV) {
@@ -572,7 +636,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.d(LOGTAG, "Key pressed: " + keyCode + " (" + KeyEvent.keyCodeToString(keyCode) + "), repeat: " + event.getRepeatCount());
 
             if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                boolean isOnHomeScreen = navController != null && 
+                boolean isOnHomeScreen = navController != null &&
                     navController.getCurrentDestination() != null &&
                     navController.getCurrentDestination().getId() == R.id.nav_home;
 

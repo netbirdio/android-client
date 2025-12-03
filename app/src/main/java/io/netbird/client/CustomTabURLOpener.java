@@ -28,12 +28,9 @@ public class CustomTabURLOpener implements URLOpener {
         this.context = activity;
 
         this.customTabLauncher = activity.registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult o) {
-                        isOpened = false;
-                        resultCallback.onClosed();
-                    }
+                new ActivityResultContracts.StartActivityForResult(), o -> {
+                    isOpened = false;
+                    resultCallback.onClosed();
                 }
         );
     }

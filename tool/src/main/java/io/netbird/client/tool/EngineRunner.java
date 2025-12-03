@@ -25,19 +25,19 @@ class EngineRunner {
     private static final String LOGTAG = "EngineRunner";
     private final Context context;
     private final boolean isDebuggable;
+    private final ProfileManagerWrapper profileManager;
     private boolean engineIsRunning = false;
     Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
     private final Client goClient;
 
-    public EngineRunner(Context context, String configurationFilePath, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
+    public EngineRunner(Context context, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
                         IFaceDiscover iFaceDiscover, String versionName, boolean isTraceLogEnabled, boolean isDebuggable,
-                        String stateFilePath) {
+                        ProfileManagerWrapper profileManager) {
         this.context = context;
         this.isDebuggable = isDebuggable;
-        var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath);
+        this.profileManager = profileManager;
 
         goClient = Android.newClient(
-                platformFiles,
                 androidSDKVersion(),
                 DeviceName.getDeviceName(),
                 versionName,
@@ -73,12 +73,33 @@ class EngineRunner {
 
             var envList = EnvVarPackager.getEnvironmentVariables(preferences);
 
+            // Initialize engine with current active profile
+            // Get paths from Go ProfileManager instead of constructing them in Java
+            String configurationFilePath;
+            String stateFilePath;
+            try {
+                configurationFilePath = profileManager.getActiveConfigPath();
+                stateFilePath = profileManager.getActiveStateFilePath();
+                String activeProfile = profileManager.getActiveProfile();
+                Log.d(LOGTAG, "Initializing engine with profile: " + activeProfile);
+                Log.d(LOGTAG, "Config path: " + configurationFilePath);
+                Log.d(LOGTAG, "State path: " + stateFilePath);
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Failed to get profile paths from ProfileManager", e);
+                throw new RuntimeException("Failed to get profile paths: " + e.getMessage(), e);
+            }
+
+            // Create fresh PlatformFiles with current config/state paths
+            // This allows profile switching without recreating the entire Client
+            var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath);
+            Log.d(LOGTAG, "Running engine with config: " + configurationFilePath + ", state: " + stateFilePath);
+
             try {
                 notifyServiceStateListeners(true);
                 if (urlOpener == null) {
-                    goClient.runWithoutLogin(dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
+                    goClient.runWithoutLogin(platformFiles, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
                 } else {
-                    goClient.run(urlOpener, isAndroidTV, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
+                    goClient.run(platformFiles, urlOpener, isAndroidTV, dnsWatch.dnsServers(), () -> dnsWatch.setDNSChangeListener(this::changed), envList);
                 }
             } catch (Exception e) {
                 Log.e(LOGTAG, "goClient error", e);

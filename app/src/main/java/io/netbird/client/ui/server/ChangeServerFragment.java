@@ -27,6 +27,7 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentServerBinding;
 import io.netbird.client.tool.Preferences;
+import io.netbird.client.tool.ProfileManagerWrapper;
 
 
 public class ChangeServerFragment extends Fragment {
@@ -107,8 +108,17 @@ public class ChangeServerFragment extends Fragment {
     public CreationExtras getDefaultViewModelCreationExtras() {
         final var defaultExtras = super.getDefaultViewModelCreationExtras();
 
+        // Get config path from ProfileManager instead of constructing it
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(requireContext());
+        String configFilePath;
+        try {
+            configFilePath = profileManager.getActiveConfigPath();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get config path: " + e.getMessage(), e);
+        }
+
         final var extras = new MutableCreationExtras(defaultExtras);
-        extras.set(ChangeServerFragmentViewModel.CONFIG_FILE_PATH_KEY, Preferences.configFile(requireContext()));
+        extras.set(ChangeServerFragmentViewModel.CONFIG_FILE_PATH_KEY, configFilePath);
         extras.set(ChangeServerFragmentViewModel.DEVICE_NAME_KEY, deviceName());
         extras.set(ChangeServerFragmentViewModel.STOP_ENGINE_COMMAND_KEY,
                 (ChangeServerFragmentViewModel.Operation) () -> serviceAccessor.stopEngine());

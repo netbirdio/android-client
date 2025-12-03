@@ -11,13 +11,6 @@ public class Preferences {
 
     private final SharedPreferences sharedPref;
 
-    public static String configFile(Context context){
-       return context.getFilesDir().getPath() + "/netbird.cfg";
-    }
-    public static String stateFile(Context context) {
-        return context.getFilesDir().getPath() + "/state.json";
-    }
-
     public Preferences(Context context) {
        sharedPref = context.getSharedPreferences("netbird", Context.MODE_PRIVATE);
     }
