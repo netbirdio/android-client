@@ -78,25 +78,55 @@ public class ProfilesFragment extends Fragment {
 
     private void showAddDialog() {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_simple_alert_message, null);
-        EditText input = new EditText(requireContext());
+        final EditText input = new EditText(requireContext());
         input.setHint(R.string.profiles_dialog_add_hint);
 
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+        final AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.profiles_dialog_add_title)
                 .setMessage(R.string.profiles_dialog_add_message)
                 .setView(input)
-                .setPositiveButton(android.R.string.ok, (d, which) -> {
-                    String profileName = input.getText().toString().trim();
-                    if (profileName.isEmpty()) {
-                        Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    addProfile(profileName);
-                })
+                .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
 
         dialog.show();
+
+        // Set click listener after show() to prevent auto-dismiss on validation failure
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String profileName = input.getText().toString().trim();
+            if (profileName.isEmpty()) {
+                Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Validate profile name based on go client sanitization rules
+            String sanitizedName = sanitizeProfileName(profileName);
+            if (sanitizedName.isEmpty()) {
+                Toast.makeText(requireContext(),
+                        "Profile name must contain at least one letter, digit, underscore or hyphen",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            addProfile(profileName);
+            dialog.dismiss();
+        });
+    }
+
+    /**
+     * Sanitizes profile name using the same rules as the go client.
+     * Only keeps letters, digits, underscores, and hyphens.
+     * This matches the sanitization in netbird/client/internal/profilemanager/profilemanager.go
+     */
+    private String sanitizeProfileName(String name) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '-') {
+                result.append(c);
+            }
+        }
+        return result.toString();
     }
 
     private void showSwitchDialog(Profile profile) {
