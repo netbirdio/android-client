@@ -229,7 +229,7 @@ public class ProfilesFragment extends Fragment {
             loadProfiles();
 
             // Navigate back to home
-            requireActivity().onBackPressed();
+            requireActivity().getOnBackPressedDispatcher().onBackPressed();
         } catch (Exception e) {
             Log.e(TAG, "Failed to switch profile", e);
             Toast.makeText(requireContext(),
