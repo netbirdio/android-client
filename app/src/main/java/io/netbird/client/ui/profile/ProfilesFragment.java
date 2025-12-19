@@ -1,5 +1,6 @@
 package io.netbird.client.ui.profile;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -26,11 +29,10 @@ import io.netbird.client.tool.ProfileManagerWrapper;
 
 public class ProfilesFragment extends Fragment {
     private static final String TAG = "ProfilesFragment";
-
     private RecyclerView recyclerView;
     private ProfilesAdapter adapter;
     private ProfileManagerWrapper profileManager;
-    private List<Profile> profiles = new ArrayList<>();
+    private final List<Profile> profiles = new ArrayList<>();
 
     @Nullable
     @Override
@@ -76,23 +78,27 @@ public class ProfilesFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
+    @SuppressLint("InflateParams")
     private void showAddDialog() {
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_simple_alert_message, null);
-        final EditText input = new EditText(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_simple_edit_text, null);
+
+        TextView txtTitle = dialogView.findViewById(R.id.text_title_dialog);
+        TextView txtLabel = dialogView.findViewById(R.id.text_label_dialog);
+        EditText input = dialogView.findViewById(R.id.edit_text_dialog);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel_dialog);
+        MaterialButton btnOk = dialogView.findViewById(R.id.btn_ok_dialog);
+
+        txtTitle.setText(R.string.profiles_dialog_add_title);
+        txtLabel.setText(R.string.profiles_dialog_add_message);
         input.setHint(R.string.profiles_dialog_add_hint);
 
-        final AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.profiles_dialog_add_title)
-                .setMessage(R.string.profiles_dialog_add_message)
-                .setView(input)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, null)
+        final AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
+                .setView(dialogView)
                 .create();
 
-        dialog.show();
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
 
-        // Set click listener after show() to prevent auto-dismiss on validation failure
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+        btnOk.setOnClickListener(v -> {
             String profileName = input.getText().toString().trim();
             if (profileName.isEmpty()) {
                 Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
@@ -111,6 +117,8 @@ public class ProfilesFragment extends Fragment {
             addProfile(profileName);
             dialog.dismiss();
         });
+
+        dialog.show();
     }
 
     /**
