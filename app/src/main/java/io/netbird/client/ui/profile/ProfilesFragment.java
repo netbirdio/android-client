@@ -1,5 +1,8 @@
 package io.netbird.client.ui.profile;
 
+import static android.view.View.GONE;
+
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,11 +30,10 @@ import io.netbird.client.tool.ProfileManagerWrapper;
 
 public class ProfilesFragment extends Fragment {
     private static final String TAG = "ProfilesFragment";
-
     private RecyclerView recyclerView;
     private ProfilesAdapter adapter;
     private ProfileManagerWrapper profileManager;
-    private List<Profile> profiles = new ArrayList<>();
+    private final List<Profile> profiles = new ArrayList<>();
 
     @Nullable
     @Override
@@ -76,41 +79,68 @@ public class ProfilesFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    private void showAddDialog() {
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_simple_alert_message, null);
-        final EditText input = new EditText(requireContext());
-        input.setHint(R.string.profiles_dialog_add_hint);
+    interface DialogCallback {
+        // Return true to dismiss dialog.
+        boolean onConfirm(@Nullable String inputText);
+    }
 
-        final AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.profiles_dialog_add_title)
-                .setMessage(R.string.profiles_dialog_add_message)
-                .setView(input)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, null)
+    @SuppressLint("InflateParams")
+    private AlertDialog createDialog(String title, String message, @Nullable String inputHint, DialogCallback callback) {
+        boolean hasInput = inputHint != null;
+
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_simple_edit_text, null);
+
+        TextView txtTitle = dialogView.findViewById(R.id.text_title_dialog);
+        txtTitle.setText(title);
+
+        TextView txtMessage = dialogView.findViewById(R.id.text_label_dialog);
+        txtMessage.setText(message);
+
+        EditText input = dialogView.findViewById(R.id.edit_text_dialog);
+        if (hasInput) {
+            input.setHint(inputHint);
+        } else {
+            input.setVisibility(GONE);
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
+                .setView(dialogView)
                 .create();
 
-        dialog.show();
-
-        // Set click listener after show() to prevent auto-dismiss on validation failure
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String profileName = input.getText().toString().trim();
-            if (profileName.isEmpty()) {
-                Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
-                return;
+        dialogView.findViewById(R.id.btn_cancel_dialog).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btn_ok_dialog).setOnClickListener(v -> {
+            String inputText = hasInput ? input.getText().toString().trim() : null;
+            if (callback.onConfirm(inputText)) {
+                dialog.dismiss();
             }
-
-            // Validate profile name based on go client sanitization rules
-            String sanitizedName = sanitizeProfileName(profileName);
-            if (sanitizedName.isEmpty()) {
-                Toast.makeText(requireContext(),
-                        "Profile name must contain at least one letter, digit, underscore or hyphen",
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            addProfile(profileName);
-            dialog.dismiss();
         });
+
+        return dialog;
+    }
+
+    private void showAddDialog() {
+        createDialog(
+                getString(R.string.profiles_dialog_add_title),
+                getString(R.string.profiles_dialog_add_message),
+                getString(R.string.profiles_dialog_add_hint),
+                profileName -> {
+                    if (profileName == null || profileName.isEmpty()) {
+                        Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+
+                    // Validate profile name based on go client sanitization rules
+                    String sanitizedName = sanitizeProfileName(profileName);
+                    if (sanitizedName.isEmpty()) {
+                        Toast.makeText(requireContext(),
+                                "Profile name must contain at least one letter, digit, underscore or hyphen",
+                                Toast.LENGTH_LONG).show();
+                        return false;
+                    }
+
+                    addProfile(profileName);
+                    return true;
+                }).show();
     }
 
     /**
@@ -130,33 +160,39 @@ public class ProfilesFragment extends Fragment {
     }
 
     private void showSwitchDialog(Profile profile) {
-        String message = getString(R.string.profiles_dialog_switch_message, profile.getName());
-        new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.profiles_dialog_switch_title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, (d, which) -> switchProfile(profile))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        createDialog(
+                getString(R.string.profiles_dialog_switch_title),
+                getString(R.string.profiles_dialog_switch_message, profile.getName()),
+                null,
+                ignored -> {
+                    switchProfile(profile);
+                    return true;
+                }
+        ).show();
     }
 
     private void showLogoutDialog(Profile profile) {
-        String message = getString(R.string.profiles_dialog_logout_message, profile.getName());
-        new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.profiles_dialog_logout_title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, (d, which) -> logoutProfile(profile))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        createDialog(
+                getString(R.string.profiles_dialog_logout_title),
+                getString(R.string.profiles_dialog_logout_message, profile.getName()),
+                null,
+                ignored -> {
+                    logoutProfile(profile);
+                    return true;
+                }
+        ).show();
     }
 
     private void showRemoveDialog(Profile profile) {
-        String message = getString(R.string.profiles_dialog_remove_message, profile.getName());
-        new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.profiles_dialog_remove_title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, (d, which) -> removeProfile(profile))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        createDialog(
+                getString(R.string.profiles_dialog_remove_title),
+                getString(R.string.profiles_dialog_remove_message, profile.getName()),
+                null,
+                ignored -> {
+                    removeProfile(profile);
+                    return true;
+                }
+        ).show();
     }
 
     private void addProfile(String profileName) {
@@ -193,7 +229,7 @@ public class ProfilesFragment extends Fragment {
             loadProfiles();
 
             // Navigate back to home
-            requireActivity().onBackPressed();
+            requireActivity().getOnBackPressedDispatcher().onBackPressed();
         } catch (Exception e) {
             Log.e(TAG, "Failed to switch profile", e);
             Toast.makeText(requireContext(),
