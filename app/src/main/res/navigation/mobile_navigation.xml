@@ -25,6 +25,12 @@
         tools:layout="@layout/fragment_about" />
 
     <fragment
+        android:id="@+id/nav_profiles"
+        android:name="io.netbird.client.ui.profile.ProfilesFragment"
+        android:label="@string/menu_profiles"
+        tools:layout="@layout/fragment_profiles" />
+
+    <fragment
         android:id="@+id/nav_change_server"
         android:name="io.netbird.client.ui.server.ChangeServerFragment"
         android:label="@string/menu_change_server"

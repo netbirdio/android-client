@@ -11,6 +11,7 @@
     <string name="menu_about">About</string>
     <string name="menu_docs">Docs</string>
     <string name="menu_change_server">Change Server</string>
+    <string name="menu_profiles">Profiles</string>
 
     <string name="main_status_disconnected">Disconnected</string>
     <string name="main_desc_bg_mask">background mask</string>
@@ -112,4 +113,32 @@
     <string name="change_server_error_invalid_server_url">Invalid URL format</string>
     <string name="device_code">Device Code: %s</string>
     <string name="tv_menu_hint">Hold left directional button to open the menu</string>
+
+    <!-- Profile strings -->
+    <string name="profile_default">Profile: default</string>
+    <string name="profile_tap_to_manage">Tap to manage profiles</string>
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_active">Active</string>
+    <string name="profiles_add">Add Profile</string>
+    <string name="profiles_switch">Switch</string>
+    <string name="profiles_logout">Logout</string>
+    <string name="profiles_remove">Remove</string>
+    <string name="profiles_dialog_add_title">New Profile</string>
+    <string name="profiles_dialog_add_message">Enter a name for the new profile:</string>
+    <string name="profiles_dialog_add_hint">Profile name</string>
+    <string name="profiles_dialog_switch_title">Switch Profile</string>
+    <string name="profiles_dialog_switch_message">Switch to profile \'%s\'?\n\nThis will disconnect the current connection.</string>
+    <string name="profiles_dialog_logout_title">Logout from Profile</string>
+    <string name="profiles_dialog_logout_message">Logout from profile \'%s\'?\n\nYou will need to re-authenticate to use this profile again.</string>
+    <string name="profiles_dialog_remove_title">Remove Profile</string>
+    <string name="profiles_dialog_remove_message">Are you sure you want to remove profile \'%s\'?\n\nThis action cannot be undone.</string>
+    <string name="profiles_error_empty_name">Profile name cannot be empty</string>
+    <string name="profiles_error_invalid_name">Profile name can only contain letters, numbers, hyphens, and underscores</string>
+    <string name="profiles_error_already_exists">Profile \'%s\' already exists</string>
+    <string name="profiles_error_cannot_remove_active">Cannot remove the active profile. Switch to another profile first.</string>
+    <string name="profiles_error_cannot_remove_default">Cannot remove the default profile</string>
+    <string name="profiles_success_added">Profile \'%s\' created successfully</string>
+    <string name="profiles_success_switched">Switched to profile \'%s\'</string>
+    <string name="profiles_success_logged_out">Logged out from profile \'%s\'</string>
+    <string name="profiles_success_removed">Profile \'%s\' removed successfully</string>
 </resources>
