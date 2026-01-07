@@ -27,8 +27,6 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentPeersBinding;
-import io.netbird.gomobile.android.PeerInfo;
-import io.netbird.gomobile.android.PeerInfoArray;
 
 public class PeersFragment extends Fragment {
 
@@ -157,16 +155,6 @@ public class PeersFragment extends Fragment {
         super.onDestroyView();
     }
 
-    private List<Peer> peersInfoToPeersList(PeerInfoArray peersInfo) {
-        List<Peer> peerList = new ArrayList<>();
-        for (int i = 0; i < peersInfo.size(); i++) {
-            PeerInfo peerInfo = peersInfo.get(i);
-            Status status = Status.fromString(peerInfo.getConnStatus());
-            peerList.add(new Peer(status, peerInfo.getIP(), peerInfo.getFQDN()));
-        }
-        return peerList;
-    }
-
     private void updatePeersCounter(List<Peer> peers) {
         TextView textPeersCount = binding.textOpenPanel;
 
@@ -179,22 +167,6 @@ public class PeersFragment extends Fragment {
         }
 
         String text = getString(R.string.peers_connected, connected, peers.size());
-        textPeersCount.post(() ->
-                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
-        );
-    }
-
-    private void updatePeerCount(PeerInfoArray peersInfo) {
-        int connected = 0;
-        for (int i = 0; i < peersInfo.size(); i++) {
-            PeerInfo peer = peersInfo.get(i);
-            if (peer.getConnStatus().equalsIgnoreCase(Status.CONNECTED.toString())) {
-                connected++;
-            }
-        }
-
-        TextView textPeersCount = binding.textOpenPanel;
-        String text = getString(R.string.peers_connected, connected, peersInfo.size());
         textPeersCount.post(() ->
                 textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
         );
