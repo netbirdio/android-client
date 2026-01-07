@@ -1,23 +1,22 @@
 package io.netbird.client.ui.home;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.text.TextWatcher;
-import android.text.Editable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,6 +25,7 @@ import java.util.List;
 
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
+import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentPeersBinding;
 import io.netbird.gomobile.android.PeerInfo;
 import io.netbird.gomobile.android.PeerInfoArray;
@@ -34,8 +34,9 @@ public class PeersFragment extends Fragment {
 
     private FragmentPeersBinding binding;
     private ServiceAccessor serviceAccessor;
-    private RecyclerView peersListView;
-
+    private StateListenerRegistry stateListenerRegistry;
+    private PeersFragmentViewModel model;
+    private final List<Peer> peers = new ArrayList<>();
     private static final String ARG_IS_RUNNING_ON_TV = "isRunningOnTV";
 
     @Override
@@ -45,6 +46,12 @@ public class PeersFragment extends Fragment {
             serviceAccessor = (ServiceAccessor) context;
         } else {
             throw new RuntimeException(context + " must implement ServiceAccessor");
+        }
+
+        if (context instanceof StateListenerRegistry) {
+            stateListenerRegistry = (StateListenerRegistry) context;
+        } else {
+            throw new RuntimeException(context + " must implement StateListenerRegistry");
         }
     }
 
@@ -57,6 +64,10 @@ public class PeersFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        model = new ViewModelProvider(this, PeersFragmentViewModel.getFactory(serviceAccessor))
+                .get(PeersFragmentViewModel.class);
+        stateListenerRegistry.registerServiceStateListener(model.getStateListener());
 
         boolean isRunningOnTV = false;
         if (getArguments() != null) {
@@ -75,15 +86,22 @@ public class PeersFragment extends Fragment {
             ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
         }
 
-        PeerInfoArray peersInfo = serviceAccessor.getPeersList();
-        ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.peersList, peersInfo.size() > 0);
+        PeersAdapter adapter = new PeersAdapter(peers);
 
-        List<Peer> peerList = peersInfoToPeersList(peersInfo);
-        updatePeerCount(peersInfo);
-        peersListView = binding.peersRecyclerView;
-        peersListView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        PeersAdapter adapter = new PeersAdapter(peerList);
-        peersListView.setAdapter(adapter);
+        RecyclerView peersRecyclerView = binding.peersRecyclerView;
+        peersRecyclerView.setAdapter(adapter);
+        peersRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        model.getUiState().observe(getViewLifecycleOwner(), uiState -> {
+            peers.clear();
+            peers.addAll(uiState.getPeers());
+
+            updatePeersCounter(peers);
+
+            ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.peersList, !peers.isEmpty());
+            adapter.notifyDataSetChanged();
+            adapter.filterBySearchQuery(binding.searchView.getText().toString());
+        });
 
         binding.searchView.clearFocus();
         binding.searchView.addTextChangedListener(new TextWatcher() {
@@ -128,13 +146,15 @@ public class PeersFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        serviceAccessor = null;
     }
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         binding = null;
+        stateListenerRegistry.unregisterServiceStateListener(model.getStateListener());
+        stateListenerRegistry = null;
+        serviceAccessor = null;
+        super.onDestroyView();
     }
 
     private List<Peer> peersInfoToPeersList(PeerInfoArray peersInfo) {
@@ -145,6 +165,23 @@ public class PeersFragment extends Fragment {
             peerList.add(new Peer(status, peerInfo.getIP(), peerInfo.getFQDN()));
         }
         return peerList;
+    }
+
+    private void updatePeersCounter(List<Peer> peers) {
+        TextView textPeersCount = binding.textOpenPanel;
+
+        int connected = 0;
+
+        for (var peer : peers) {
+            if (peer.getStatus() == Status.CONNECTED) {
+                connected++;
+            }
+        }
+
+        String text = getString(R.string.peers_connected, connected, peers.size());
+        textPeersCount.post(() ->
+                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
+        );
     }
 
     private void updatePeerCount(PeerInfoArray peersInfo) {
