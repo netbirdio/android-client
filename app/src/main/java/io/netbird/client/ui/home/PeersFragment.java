@@ -151,12 +151,10 @@ public class PeersFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        binding = null;
-
         if (model != null) {
             stateListenerRegistry.unregisterServiceStateListener(model.getStateListener());
         }
-
+        binding = null;
         super.onDestroyView();
     }
 
