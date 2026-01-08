@@ -143,6 +143,9 @@ public class PeersFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        stateListenerRegistry = null;
+        serviceAccessor = null;
+
         super.onDetach();
     }
 
@@ -154,8 +157,6 @@ public class PeersFragment extends Fragment {
             stateListenerRegistry.unregisterServiceStateListener(model.getStateListener());
         }
 
-        stateListenerRegistry = null;
-        serviceAccessor = null;
         super.onDestroyView();
     }
 
