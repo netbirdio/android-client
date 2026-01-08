@@ -1,6 +1,8 @@
 package io.netbird.client.ui.home;
 
 
+import java.util.Locale;
+
 public enum Status {
    IDLE,
    CONNECTING,
@@ -25,7 +27,7 @@ public enum Status {
          throw new IllegalArgumentException("Status string cannot be null");
       }
 
-      switch (status.toLowerCase()) {
+      switch (status.toLowerCase(Locale.ROOT)) {
          case "idle":
             return IDLE;
          case "connecting":
