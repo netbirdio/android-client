@@ -33,7 +33,7 @@ public enum Status {
          case "connected":
             return CONNECTED;
          default:
-            throw new IllegalArgumentException("Unknown status: " + status);
+            throw new IllegalArgumentException("Unknown status: " + status.toLowerCase());
       }
    }
 }
