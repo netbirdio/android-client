@@ -319,9 +319,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Use NavigationUI which handles launchSingleTop and saveState/restoreState
         // This prevents fragment recreation and preserves state when alternating between destinations
-        NavigationUI.onNavDestinationSelected(item, navController);
+        boolean isHandled = NavigationUI.onNavDestinationSelected(item, navController);
         binding.drawerLayout.closeDrawers();
-        return false;
+        return isHandled;
     }
 
     @Override
