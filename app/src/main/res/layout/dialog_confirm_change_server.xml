@@ -5,6 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:paddingStart="@dimen/dialog_horizontal_margin"
+    android:paddingEnd="@dimen/dialog_horizontal_margin"
+    android:clipToPadding="false"
     android:background="@android:color/transparent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
