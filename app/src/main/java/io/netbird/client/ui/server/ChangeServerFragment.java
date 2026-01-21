@@ -237,6 +237,15 @@ public class ChangeServerFragment extends Fragment {
             requireActivity().getSupportFragmentManager().popBackStack();
         });
 
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            int maxWidthPx = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, 500, getResources().getDisplayMetrics());
+            int screenWidth = getResources().getDisplayMetrics().widthPixels;
+            int width = Math.min(maxWidthPx, screenWidth);
+            alertDialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
         alertDialog.show();
     }
 
