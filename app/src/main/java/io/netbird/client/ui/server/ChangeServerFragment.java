@@ -226,7 +226,7 @@ public class ChangeServerFragment extends Fragment {
 
     private void showConfirmChangeServerDialog() {
         final View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_change_server, null);
-        final AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
+        final AlertDialog alertDialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
                 .setView(dialogView)
                 .create();
 
@@ -237,22 +237,21 @@ public class ChangeServerFragment extends Fragment {
             requireActivity().getSupportFragmentManager().popBackStack();
         });
 
+        alertDialog.show();
+
         if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             int maxWidthPx = (int) TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP, 500, getResources().getDisplayMetrics());
             int screenWidth = getResources().getDisplayMetrics().widthPixels;
             int width = Math.min(maxWidthPx, screenWidth);
             alertDialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
-
-        alertDialog.show();
     }
 
     private void showSuccessDialog(Context context) {
         requireActivity().runOnUiThread(() -> {
             final View dialogView = getLayoutInflater().inflate(R.layout.dialog_change_server_success, null);
-            final AlertDialog alertDialog = new AlertDialog.Builder(context)
+            final AlertDialog alertDialog = new AlertDialog.Builder(context, R.style.AlertDialogTheme)
                     .setView(dialogView)
                     .create();
 
@@ -263,6 +262,14 @@ public class ChangeServerFragment extends Fragment {
 
             alertDialog.setOnDismissListener(dialog -> requireActivity().getSupportFragmentManager().popBackStack());
             alertDialog.show();
+
+            if (alertDialog.getWindow() != null) {
+                int maxWidthPx = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 500, getResources().getDisplayMetrics());
+                int screenWidth = getResources().getDisplayMetrics().widthPixels;
+                int width = Math.min(maxWidthPx, screenWidth);
+                alertDialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
         });
     }
 
