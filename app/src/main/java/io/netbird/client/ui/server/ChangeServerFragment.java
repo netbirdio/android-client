@@ -238,14 +238,6 @@ public class ChangeServerFragment extends Fragment {
         });
 
         alertDialog.show();
-
-        if (alertDialog.getWindow() != null) {
-            int maxWidthPx = (int) TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP, 500, getResources().getDisplayMetrics());
-            int screenWidth = getResources().getDisplayMetrics().widthPixels;
-            int width = Math.min(maxWidthPx, screenWidth);
-            alertDialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
     }
 
     private void showSuccessDialog(Context context) {
@@ -262,14 +254,6 @@ public class ChangeServerFragment extends Fragment {
 
             alertDialog.setOnDismissListener(dialog -> requireActivity().getSupportFragmentManager().popBackStack());
             alertDialog.show();
-
-            if (alertDialog.getWindow() != null) {
-                int maxWidthPx = (int) TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP, 500, getResources().getDisplayMetrics());
-                int screenWidth = getResources().getDisplayMetrics().widthPixels;
-                int width = Math.min(maxWidthPx, screenWidth);
-                alertDialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
-            }
         });
     }
 
