@@ -9,7 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxWidth="500dp"
+        android:maxWidth="@dimen/fragment_max_width"
         android:layout_gravity="center_horizontal"
         android:padding="16dp">
 

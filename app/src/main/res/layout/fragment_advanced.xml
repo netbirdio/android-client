@@ -11,7 +11,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:maxWidth="500dp"
+    android:maxWidth="@dimen/fragment_max_width"
     android:layout_gravity="center_horizontal"
     android:padding="40dp">
 
@@ -83,7 +83,7 @@
 
     <LinearLayout
         android:id="@+id/trace_log_layout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
@@ -94,6 +94,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/separator"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
@@ -140,7 +141,7 @@
 
     <LinearLayout
         android:id="@+id/layout_rosenpas"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
@@ -151,6 +152,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/separator_rosenpass"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
@@ -171,7 +173,7 @@
 
     <LinearLayout
         android:id="@+id/layout_rosenpass_permissive"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
@@ -182,6 +184,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_rosenpas"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
@@ -223,7 +226,7 @@
 
     <LinearLayout
         android:id="@+id/layout_allow_ssh"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
@@ -233,6 +236,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/title_network_security"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
@@ -271,7 +275,7 @@
 
     <LinearLayout
         android:id="@+id/layout_block_inbound"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
@@ -281,6 +285,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_allow_ssh"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
@@ -319,7 +324,7 @@
 
     <LinearLayout
         android:id="@+id/layout_disable_client_routes"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
@@ -329,6 +334,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_block_inbound"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
@@ -367,7 +373,7 @@
 
     <LinearLayout
         android:id="@+id/layout_disable_server_routes"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
@@ -377,6 +383,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_disable_client_routes"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
@@ -415,7 +422,7 @@
 
     <LinearLayout
         android:id="@+id/layout_disable_dns"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
@@ -425,6 +432,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_disable_server_routes"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
@@ -463,7 +471,7 @@
 
     <LinearLayout
         android:id="@+id/layout_disable_firewall"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
@@ -473,6 +481,7 @@
         android:clickable="true"
         android:background="@drawable/focus_highlight"
         app:layout_constraintTop_toBottomOf="@id/layout_disable_dns"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
@@ -512,20 +521,22 @@
     <include
         android:id="@+id/layout_force_relay_connection"
         layout="@layout/component_switch"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layout_disable_firewall" />
 
     <LinearLayout
         android:id="@+id/layout_theme"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/layout_force_relay_connection"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
