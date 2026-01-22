@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingStart="@dimen/dialog_horizontal_margin"
-    android:paddingEnd="@dimen/dialog_horizontal_margin">
+    android:paddingEnd="@dimen/dialog_horizontal_margin"
+    android:gravity="center_horizontal">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_rounded_nb_bg"
-        android:maxWidth="560dp"
+        android:maxWidth="@dimen/dialog_max_width"
         android:minWidth="280dp"
         android:padding="24dp">
 
@@ -51,4 +52,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</FrameLayout>
+</LinearLayout>

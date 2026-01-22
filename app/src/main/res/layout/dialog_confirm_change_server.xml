@@ -10,11 +10,17 @@
     android:clipToPadding="false"
     android:background="@android:color/transparent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:padding="24dp"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_rounded_white">
+        android:gravity="center_horizontal">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:padding="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxWidth="@dimen/dialog_max_width"
+            android:background="@drawable/bg_rounded_white">
 
         <ImageView
             android:id="@+id/icon_warning"
@@ -83,6 +89,8 @@
             android:focusableInTouchMode="false"
             android:foreground="@drawable/focus_highlight" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
 
 </ScrollView>

@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingStart="@dimen/dialog_horizontal_margin"
-    android:paddingEnd="@dimen/dialog_horizontal_margin">
+    android:paddingEnd="@dimen/dialog_horizontal_margin"
+    android:gravity="center_horizontal">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:padding="24dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxWidth="@dimen/dialog_max_width"
         android:background="@drawable/bg_rounded_white">
 
         <ImageView
@@ -63,4 +65,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</FrameLayout>
+</LinearLayout>
