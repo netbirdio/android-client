@@ -2,6 +2,7 @@ package io.netbird.client;
 
 import android.app.UiModeManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 
 public final class PlatformUtils {
@@ -15,6 +16,16 @@ public final class PlatformUtils {
             return uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
         }
         return false;
+    }
+
+    public static boolean isChromeOS(Context context) {
+        PackageManager pm = context.getPackageManager();
+        return pm.hasSystemFeature("org.chromium.arc")
+                || pm.hasSystemFeature("org.chromium.arc.device_management");
+    }
+
+    public static boolean requiresDeviceCodeFlow(Context context) {
+        return isAndroidTV(context) || isChromeOS(context);
     }
 }
 

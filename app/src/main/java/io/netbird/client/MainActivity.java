@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private boolean isSSOFinishedWell = false;
     private boolean isRunningOnTV = false;
+    private boolean useDeviceCodeFlow = false;
 
     // Last known state for UI updates
     private ConnectionState lastKnownState = ConnectionState.UNKNOWN;
@@ -105,8 +106,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(binding.appBarMain.toolbar);
 
         isRunningOnTV = PlatformUtils.isAndroidTV(this);
+        useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
         if (isRunningOnTV) {
             Log.i(LOGTAG, "Running on Android TV - optimizing for D-pad navigation");
+        }
+        if (useDeviceCodeFlow && !isRunningOnTV) {
+            Log.i(LOGTAG, "Running on ChromeOS - using device code flow for authentication");
         }
 
         setVersionText();
@@ -177,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        if (!isRunningOnTV) {
+        if (!useDeviceCodeFlow) {
             urlOpener = new CustomTabURLOpener(this, () -> {
                 if (isSSOFinishedWell) {
                     return;
@@ -202,11 +207,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         mBinder.stopEngine();
                     });
                     qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+
+                    if (!isRunningOnTV) {
+                        try {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            startActivity(browserIntent);
+                        } catch (Exception e) {
+                            Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
+                        }
+                    }
                 }
 
                 @Override
                 public void onLoginSuccess() {
-                    Log.d(LOGTAG, "onLoginSuccess fired for TV.");
+                    Log.d(LOGTAG, "onLoginSuccess fired for device code flow.");
                     if (qrCodeDialog != null && qrCodeDialog.isVisible()) {
                         qrCodeDialog.dismiss();
                         qrCodeDialog = null;
@@ -233,12 +247,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (VPNService.isUsingAlwaysOnVPN(this)) {
                         showAlwaysOnDialog(() -> {
                             if (mBinder != null) {
-                                mBinder.runEngine(urlOpener, isRunningOnTV);
+                                mBinder.runEngine(urlOpener, useDeviceCodeFlow);
                             }
                         });
                     } else {
                         if (mBinder != null) {
-                            mBinder.runEngine(urlOpener, isRunningOnTV);
+                            mBinder.runEngine(urlOpener, useDeviceCodeFlow);
                         }
                     }
                 });
@@ -345,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (prepareIntent != null) {
             vpnActivityResultLauncher.launch(prepareIntent);
         } else {
-            mBinder.runEngine(urlOpener, isRunningOnTV);
+            mBinder.runEngine(urlOpener, useDeviceCodeFlow);
         }
     }
 
