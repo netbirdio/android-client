@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This drawable is specifically for buttons - adds a background fill when focused -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- When the button is focused (selected with remote) -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <!-- Semi-transparent white background -->
+            <solid android:color="#33FFFFFF" />
+            <stroke
+                android:width="3dp"
+                android:color="@color/white" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    
+    <!-- Default state (not focused) -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>
+

@@ -9,6 +9,7 @@
     <color name="white">#FFFFFF</color>
 
     <color name="nb_bg">#181A1D</color>
+    <color name="nb_bg_peers">#181A1D</color>
     <color name="nb_bg_home">#1c1e21</color>
     <color name="nb_bg_mask">#181A1D</color>
     <color name="nb_gray_light">#32363D</color>

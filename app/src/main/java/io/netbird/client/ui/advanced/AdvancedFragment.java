@@ -9,15 +9,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
+import io.netbird.client.R;
+import io.netbird.client.databinding.ComponentSwitchBinding;
 import io.netbird.client.databinding.FragmentAdvancedBinding;
 import io.netbird.client.tool.Logcat;
 import io.netbird.client.tool.Preferences;
+import io.netbird.client.tool.ProfileManagerWrapper;
 
 
 public class AdvancedFragment extends Fragment {
@@ -28,10 +33,49 @@ public class AdvancedFragment extends Fragment {
     private FragmentAdvancedBinding binding;
     private io.netbird.gomobile.android.Preferences goPreferences;
 
+    private void showReconnectionNeededWarningDialog() {
+        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_simple_alert_message, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
+                .setView(dialogView)
+                .create();
+
+        ((TextView)dialogView.findViewById(R.id.txt_dialog)).setText(R.string.reconnectionNeededWarningMessage);
+        dialogView.findViewById(R.id.btn_ok_dialog).setOnClickListener(v -> alertDialog.dismiss());
+        alertDialog.show();
+    }
+
+    private void configureForceRelayConnectionSwitch(@NonNull ComponentSwitchBinding binding, @NonNull Preferences preferences) {
+        binding.switchTitle.setText(R.string.advanced_force_relay_conn);
+        binding.switchDescription.setText(R.string.advanced_force_relay_conn_desc);
+
+        binding.switchControl.setChecked(preferences.isConnectionForceRelayed());
+        binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                preferences.enableForcedRelayConnection();
+            } else {
+                preferences.disableForcedRelayConnection();
+            }
+
+            showReconnectionNeededWarningDialog();
+        });
+        
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.getRoot().setOnClickListener(v -> {
+            binding.switchControl.toggle();
+        });
+    }
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        String configFilePath = Preferences.configFile(inflater.getContext());
+        // Get config path from ProfileManager instead of constructing it
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(inflater.getContext());
+        String configFilePath;
+        try {
+            configFilePath = profileManager.getActiveConfigPath();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get config path: " + e.getMessage(), e);
+        }
         goPreferences = new io.netbird.gomobile.android.Preferences(configFilePath);
 
         binding = FragmentAdvancedBinding.inflate(inflater, container, false);
@@ -70,6 +114,11 @@ public class AdvancedFragment extends Fragment {
             } else {
                 preferences.disableTraceLog();
             }
+        });
+        
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.traceLogLayout.setOnClickListener(v -> {
+            binding.switchTraceLog.toggle();
         });
 
         // Handle "Share Logs" button click
@@ -111,6 +160,11 @@ public class AdvancedFragment extends Fragment {
                 Toast.makeText(inflater.getContext(), "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
             }
         });
+        
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.layoutRosenpas.setOnClickListener(v -> {
+            binding.switchRosenpass.toggle();
+        });
 
         binding.switchRosenpassPermissive.setOnCheckedChangeListener((buttonView, isChecked) -> {
             goPreferences.setRosenpassPermissive(isChecked);
@@ -121,6 +175,13 @@ public class AdvancedFragment extends Fragment {
                 Toast.makeText(inflater.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
             }
         });
+        
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.layoutRosenpassPermissive.setOnClickListener(v -> {
+            binding.switchRosenpassPermissive.toggle();
+        });
+
+        configureForceRelayConnectionSwitch(binding.layoutForceRelayConnection, preferences);
 
         // Initialize engine config switches (your settings)
         initializeEngineConfigSwitches();
@@ -214,6 +275,31 @@ public class AdvancedFragment extends Fragment {
                     Log.e(LOGTAG, "Failed to set block inbound", e);
                 }
             });
+            
+            // Make parent layouts clickable to toggle switches (for TV remote)
+            binding.layoutAllowSsh.setOnClickListener(v -> {
+                binding.switchAllowSsh.toggle();
+            });
+            
+            binding.layoutBlockInbound.setOnClickListener(v -> {
+                binding.switchBlockInbound.toggle();
+            });
+            
+            binding.layoutDisableClientRoutes.setOnClickListener(v -> {
+                binding.switchDisableClientRoutes.toggle();
+            });
+            
+            binding.layoutDisableServerRoutes.setOnClickListener(v -> {
+                binding.switchDisableServerRoutes.toggle();
+            });
+            
+            binding.layoutDisableDns.setOnClickListener(v -> {
+                binding.switchDisableDns.toggle();
+            });
+            
+            binding.layoutDisableFirewall.setOnClickListener(v -> {
+                binding.switchDisableFirewall.toggle();
+            });
 
         } catch (Exception e) {
             Log.e(LOGTAG, "Failed to initialize engine config switches", e);
@@ -240,13 +326,34 @@ public class AdvancedFragment extends Fragment {
     }
 
     private void setPreSharedKey(String key, Context context) {
-        String configFilePath = Preferences.configFile(context);
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(context);
+        String configFilePath;
+        try {
+            configFilePath = profileManager.getActiveConfigPath();
+        } catch (Exception e) {
+            Toast.makeText(context, "Failed to get config path: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            return;
+        }
         io.netbird.gomobile.android.Preferences preferences = new io.netbird.gomobile.android.Preferences(configFilePath);
-        preferences.setPreSharedKey(key);
+        try {
+            preferences.setPreSharedKey(key);
+            preferences.commit();
+            Toast.makeText(context, R.string.advanced_presharedkey_saved_success, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to save pre-shared key", e);
+            Toast.makeText(context, R.string.advanced_presharedkey_save_error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private boolean hasPreSharedKey(Context context) {
-        String configFilePath = Preferences.configFile(context);
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(context);
+        String configFilePath;
+        try {
+            configFilePath = profileManager.getActiveConfigPath();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to get config path", e);
+            return false;
+        }
         io.netbird.gomobile.android.Preferences preferences = new io.netbird.gomobile.android.Preferences(configFilePath);
         try {
             return !preferences.getPreSharedKey().isEmpty();

@@ -2,500 +2,608 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scr_vw_advanced"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
     tools:context=".ui.advanced.AdvancedFragment">
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="40dp">
-
-    <TextView
-        android:id="@+id/title_pre_shared_key"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/advanced_title_presharedkey"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <TextView
-        android:id="@+id/text_server_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/advanced_details"
-        android:textColor="@color/nb_txt_light"
-        app:layout_constraintTop_toBottomOf="@id/title_pre_shared_key"
-        app:layout_constraintStart_toStartOf="parent"
-        android:textSize="15sp"
-        android:layout_marginTop="16dp" />
-
-    <EditText
-        android:id="@+id/preshared_key"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autofillHints=""
-        android:hint="@string/advanced_hint"
-        android:textSize="14sp"
-        android:inputType="textUri"
-        android:background="@drawable/edit_text_white"
-        android:padding="12dp"
-	android:textColor="@color/nb_txt"
-        android:textColorHint="@color/nb_txt_light"
-        app:layout_constraintTop_toBottomOf="@id/text_server_label"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
-
-    <Button
-        android:id="@+id/btn_save"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/advanced_save"
-        android:textAllCaps="false"
-        android:background="@drawable/btn_bg_orange"
-        app:layout_constraintTop_toBottomOf="@id/preshared_key"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp" />
-
-    <View
-        android:id="@+id/separator"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="@drawable/separator"
-        app:layout_constraintTop_toBottomOf="@id/btn_save"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
-
     <LinearLayout
-        android:id="@+id/trace_log_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/separator"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:gravity="center_horizontal">
 
-        <TextView
-            android:id="@+id/switchLabel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/advanced_tracelog"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="15sp"
-            />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_trace_log"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/button_share_logs"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/advanced_share_logs"
-        android:textAllCaps="false"
-        android:background="@drawable/btn_bg_orange"
-        app:layout_constraintTop_toBottomOf="@id/trace_log_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <View
-        android:id="@+id/separator_rosenpass"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="@drawable/separator"
-        app:layout_constraintTop_toBottomOf="@id/button_share_logs"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
-
-    <LinearLayout
-        android:id="@+id/layout_rosenpas"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/separator_rosenpass"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/advanced_rosenpass"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="15sp"
-            />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_rosenpass"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_rosenpass_permissive"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/layout_rosenpas"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/advanced_rosenpass_permissive"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="15sp"
-            />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_rosenpass_permissive"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <View
-        android:id="@+id/separator_network"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="@drawable/separator"
-        app:layout_constraintTop_toBottomOf="@id/layout_rosenpass_permissive"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
-
-    <TextView
-        android:id="@+id/title_network_security"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/advanced_title_network_security"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@id/separator_network"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <LinearLayout
-        android:id="@+id/layout_allow_ssh"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/title_network_security"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:maxWidth="@dimen/fragment_max_width"
+            android:padding="40dp">
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/advanced_allow_ssh"
-                android:textColor="@color/nb_txt_light" />
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_allow_ssh"
+                android:id="@+id/title_pre_shared_key"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/advanced_allow_ssh_desc"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="12sp"
-            android:layout_marginTop="2dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="48dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_block_inbound"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/layout_allow_ssh"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/advanced_title_presharedkey"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:id="@+id/text_server_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/advanced_details"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/title_pre_shared_key" />
+
+            <EditText
+                android:id="@+id/preshared_key"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/advanced_block_inbound"
-                android:textColor="@color/nb_txt_light" />
+                android:layout_marginTop="8dp"
+                android:autofillHints=""
+                android:background="@drawable/edit_text_white"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/advanced_hint"
+                android:inputType="textUri"
+                android:padding="16dp"
+                android:textColor="@color/nb_txt"
+                android:textColorHint="@color/nb_txt_light"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_server_label" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_block_inbound"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/btn_bg_orange"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:foreground="@drawable/focus_highlight"
+                android:text="@string/advanced_save"
+                android:textAllCaps="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/preshared_key" />
 
-        </LinearLayout>
+            <View
+                android:id="@+id/separator"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/separator"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btn_save" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/advanced_block_inbound_desc"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="12sp"
-            android:layout_marginTop="2dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="48dp" />
+            <LinearLayout
+                android:id="@+id/trace_log_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/separator">
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/switchLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/advanced_tracelog"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="15sp" />
 
-    <LinearLayout
-        android:id="@+id/layout_disable_client_routes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/layout_block_inbound"
-        app:layout_constraintEnd_toEndOf="parent">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_trace_log"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="false" />
+            </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            <Button
+                android:id="@+id/button_share_logs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/btn_bg_orange"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:foreground="@drawable/focus_highlight"
+                android:text="@string/advanced_share_logs"
+                android:textAllCaps="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/trace_log_layout" />
+
+            <View
+                android:id="@+id/separator_rosenpass"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/separator"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/button_share_logs" />
+
+            <LinearLayout
+                android:id="@+id/layout_rosenpas"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/separator_rosenpass">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/advanced_rosenpass"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="15sp" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_rosenpass"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_rosenpass_permissive"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_rosenpas">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/advanced_rosenpass_permissive"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="15sp" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_rosenpass_permissive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="false" />
+            </LinearLayout>
+
+            <View
+                android:id="@+id/separator_network"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/separator"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_rosenpass_permissive" />
 
             <TextView
+                android:id="@+id/title_network_security"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/advanced_title_network_security"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/separator_network" />
+
+            <LinearLayout
+                android:id="@+id/layout_allow_ssh"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/advanced_disable_client_routes"
-                android:textColor="@color/nb_txt_light" />
+                android:layout_marginTop="16dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:orientation="vertical"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/title_network_security">
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_disable_client_routes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/advanced_allow_ssh"
+                        android:textColor="@color/nb_txt_light" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/advanced_disable_client_routes_desc"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="12sp"
-            android:layout_marginTop="2dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="48dp" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_allow_ssh"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
 
-    </LinearLayout>
+                </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_disable_server_routes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/layout_disable_client_routes"
-        app:layout_constraintEnd_toEndOf="parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="48dp"
+                    android:text="@string/advanced_allow_ssh_desc"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="12sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            </LinearLayout>
 
-            <TextView
+            <LinearLayout
+                android:id="@+id/layout_block_inbound"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/advanced_disable_server_routes"
-                android:textColor="@color/nb_txt_light" />
+                android:layout_marginTop="16dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:orientation="vertical"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_allow_ssh">
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_disable_server_routes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/advanced_block_inbound"
+                        android:textColor="@color/nb_txt_light" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/advanced_disable_server_routes_desc"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="12sp"
-            android:layout_marginTop="2dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="48dp" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_block_inbound"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
 
-    </LinearLayout>
+                </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_disable_dns"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/layout_disable_server_routes"
-        app:layout_constraintEnd_toEndOf="parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="48dp"
+                    android:text="@string/advanced_block_inbound_desc"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="12sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            </LinearLayout>
 
-            <TextView
+            <LinearLayout
+                android:id="@+id/layout_disable_client_routes"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/advanced_disable_dns"
-                android:textColor="@color/nb_txt_light" />
+                android:layout_marginTop="16dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:orientation="vertical"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_block_inbound">
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_disable_dns"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/advanced_disable_client_routes"
+                        android:textColor="@color/nb_txt_light" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/advanced_disable_dns_desc"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="12sp"
-            android:layout_marginTop="2dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="48dp" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_disable_client_routes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
 
-    </LinearLayout>
+                </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_disable_firewall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/layout_disable_dns"
-        app:layout_constraintEnd_toEndOf="parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="48dp"
+                    android:text="@string/advanced_disable_client_routes_desc"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="12sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            </LinearLayout>
 
-            <TextView
+            <LinearLayout
+                android:id="@+id/layout_disable_server_routes"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/advanced_disable_firewall"
-                android:textColor="@color/nb_txt_light" />
+                android:layout_marginTop="16dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:orientation="vertical"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_disable_client_routes">
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_disable_firewall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/advanced_disable_server_routes"
+                        android:textColor="@color/nb_txt_light" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/advanced_disable_firewall_desc"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="12sp"
-            android:layout_marginTop="2dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="48dp" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_disable_server_routes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="48dp"
+                    android:text="@string/advanced_disable_server_routes_desc"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_disable_dns"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:orientation="vertical"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_disable_server_routes">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/advanced_disable_dns"
+                        android:textColor="@color/nb_txt_light" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_disable_dns"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="48dp"
+                    android:text="@string/advanced_disable_dns_desc"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_disable_firewall"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/focus_highlight"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:orientation="vertical"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_disable_dns">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/advanced_disable_firewall"
+                        android:textColor="@color/nb_txt_light" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_disable_firewall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="48dp"
+                    android:text="@string/advanced_disable_firewall_desc"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <include
+                android:id="@+id/layout_force_relay_connection"
+                layout="@layout/component_switch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_disable_firewall" />
+
+            <LinearLayout
+                android:id="@+id/layout_theme"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_force_relay_connection">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/advanced_theme_title"
+                    android:textColor="@color/nb_txt"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/advanced_theme_desc"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="14sp" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroup_theme"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radio_theme_system"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/focus_highlight"
+                        android:focusable="true"
+                        android:focusableInTouchMode="false"
+                        android:padding="12dp"
+                        android:text="@string/advanced_theme_system"
+                        android:textColor="@color/nb_txt_light" />
+
+                    <RadioButton
+                        android:id="@+id/radio_theme_light"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:background="@drawable/focus_highlight"
+                        android:focusable="true"
+                        android:focusableInTouchMode="false"
+                        android:padding="12dp"
+                        android:text="@string/advanced_theme_light"
+                        android:textColor="@color/nb_txt_light" />
+
+                    <RadioButton
+                        android:id="@+id/radio_theme_dark"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:background="@drawable/focus_highlight"
+                        android:focusable="true"
+                        android:focusableInTouchMode="false"
+                        android:padding="12dp"
+                        android:text="@string/advanced_theme_dark"
+                        android:textColor="@color/nb_txt_light" />
+                </RadioGroup>
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_theme"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/layout_disable_firewall"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/advanced_theme_title"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:textColor="@color/nb_txt"
-            android:layout_marginTop="16dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/advanced_theme_desc"
-            android:textSize="14sp"
-            android:textColor="@color/nb_txt_light"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
-
-        <RadioGroup
-            android:id="@+id/radioGroup_theme"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
-
-            <RadioButton
-                android:id="@+id/radio_theme_system"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/advanced_theme_system"
-                android:textColor="@color/nb_txt_light" />
-
-            <RadioButton
-                android:id="@+id/radio_theme_light"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/advanced_theme_light"
-                android:layout_marginStart="16dp"
-                android:textColor="@color/nb_txt_light" />
-
-            <RadioButton
-                android:id="@+id/radio_theme_dark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/advanced_theme_dark"
-                android:layout_marginStart="16dp"
-                android:textColor="@color/nb_txt_light" />
-        </RadioGroup>
-    </LinearLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

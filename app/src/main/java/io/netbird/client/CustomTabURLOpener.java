@@ -14,6 +14,7 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import io.netbird.gomobile.android.URLOpener;
 
 public class CustomTabURLOpener implements URLOpener {
+    private static final String TAG = "CustomTabURLOpener";
     private final AppCompatActivity context;
     private final ActivityResultLauncher<Intent> customTabLauncher;
 
@@ -27,12 +28,9 @@ public class CustomTabURLOpener implements URLOpener {
         this.context = activity;
 
         this.customTabLauncher = activity.registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult o) {
-                        isOpened = false;
-                        resultCallback.onClosed();
-                    }
+                new ActivityResultContracts.StartActivityForResult(), o -> {
+                    isOpened = false;
+                    resultCallback.onClosed();
                 }
         );
     }
@@ -41,9 +39,20 @@ public class CustomTabURLOpener implements URLOpener {
         return isOpened;
     }
 
+    @Override
+    public void onLoginSuccess() {
+        Log.d(TAG, "onLoginSuccess fired.");
+
+        if (isOpened) {
+            Intent i = new Intent(this.context, MainActivity.class);
+            i.setAction(Intent.ACTION_MAIN);
+            i.addCategory(Intent.CATEGORY_LAUNCHER);
+            this.context.startActivity(i);
+        }
+    }
 
     @Override
-    public void open(String url) {
+    public void open(String url, String userCode) {
         isOpened = true;
         try {
             CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
@@ -51,7 +60,7 @@ public class CustomTabURLOpener implements URLOpener {
             intent.setData(Uri.parse(url));
             customTabLauncher.launch(intent);
         } catch (Exception e) {
-            Log.e("CustomTabURLOpener", "Failed to launch CustomTab: " + e.getMessage());
+            Log.e(TAG, "Failed to launch CustomTab: " + e.getMessage());
             if (context instanceof OnCustomTabResult) {
                 ((OnCustomTabResult) context).onClosed();
             }

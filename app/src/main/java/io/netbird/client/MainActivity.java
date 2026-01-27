@@ -2,19 +2,17 @@ package io.netbird.client;
 
 import android.animation.StateListAnimator;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Html;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -40,13 +38,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
-import io.netbird.client.tool.NetworkChangeNotifier;
+import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.URLOpener;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceAccessor, StateListenerRegistry {
@@ -63,16 +62,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
 
-
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     private NavController navController;
 
     private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
     private final List<StateListener> serviceStateListeners = new ArrayList<>();
-    private CustomTabURLOpener urlOpener;
+    private URLOpener urlOpener;
+    private QrCodeDialog qrCodeDialog;
 
     private boolean isSSOFinishedWell = false;
+    private boolean isRunningOnTV = false;
+    private boolean useDeviceCodeFlow = false;
 
     // Last known state for UI updates
     private ConnectionState lastKnownState = ConnectionState.UNKNOWN;
@@ -104,6 +105,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(binding.getRoot());
         setSupportActionBar(binding.appBarMain.toolbar);
 
+        isRunningOnTV = PlatformUtils.isAndroidTV(this);
+        useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
+        if (isRunningOnTV) {
+            Log.i(LOGTAG, "Running on Android TV - optimizing for D-pad navigation");
+        }
+        if (useDeviceCodeFlow && !isRunningOnTV) {
+            Log.i(LOGTAG, "Running on ChromeOS - using device code flow for authentication");
+        }
+
         setVersionText();
 
         DrawerLayout drawer = binding.drawerLayout;
@@ -111,6 +121,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Set the listener for menu item selections
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Update profile menu item with active profile name
+        updateProfileMenuItem(navigationView);
+        
+        // On TV, request focus when drawer opens so D-pad navigation works
+        if (isRunningOnTV) {
+            drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+                @Override
+                public void onDrawerOpened(View drawerView) {
+                    // Request focus on the drawer when it opens
+                    navigationView.postDelayed(() -> {
+                        navigationView.setFocusable(true);
+                        navigationView.setFocusableInTouchMode(false);
+                        
+                        if (!navigationView.requestFocus()) {
+                            Log.d(LOGTAG, "NavigationView couldn't get focus, trying menu items");
+                        }
+                        
+                        // Try to find and focus the first visible menu item
+                        View menuView = navigationView.getChildAt(0);
+                        if (menuView != null) {
+                            View firstFocusable = menuView.findFocus();
+                            if (firstFocusable == null) {
+                                menuView.requestFocus();
+                            }
+                        }
+                    }, 100); // Delay to let drawer animation finish
+                }
+                
+                @Override
+                public void onDrawerClosed(View drawerView) {
+                    // Return focus to main content when drawer closed
+                    View mainContent = findViewById(R.id.nav_host_fragment_content_main);
+                    if (mainContent != null) {
+                        mainContent.requestFocus();
+                    }
+                }
+            });
+        }
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -124,21 +173,61 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             if (destination.getId() == R.id.nav_home) {
                 removeToolbarShadow();
+                // Update profile menu item when returning to home (e.g., after profile switch)
+                if (binding != null && binding.navView != null) {
+                    updateProfileMenuItem(binding.navView);
+                }
             } else {
                 resetToolbar();
             }
         });
 
-        urlOpener = new CustomTabURLOpener(this, () -> {
-            if(isSSOFinishedWell) {
-                return;
-            }
-            if(mBinder == null) {
-                return;
-            }
+        if (!useDeviceCodeFlow) {
+            urlOpener = new CustomTabURLOpener(this, () -> {
+                if (isSSOFinishedWell) {
+                    return;
+                }
+                if (mBinder == null) {
+                    return;
+                }
 
-            mBinder.stopEngine();
-        });
+                mBinder.stopEngine();
+            });
+        } else {
+            urlOpener = new URLOpener() {
+                @Override
+                public void open(String url, String userCode) {
+                    qrCodeDialog = QrCodeDialog.newInstance(url, userCode, () -> {
+                        if (isSSOFinishedWell) {
+                            return;
+                        }
+                        if (mBinder == null) {
+                            return;
+                        }
+                        mBinder.stopEngine();
+                    });
+                    qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+
+                    if (!isRunningOnTV) {
+                        try {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            startActivity(browserIntent);
+                        } catch (Exception e) {
+                            Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
+                        }
+                    }
+                }
+
+                @Override
+                public void onLoginSuccess() {
+                    Log.d(LOGTAG, "onLoginSuccess fired for device code flow.");
+                    if (qrCodeDialog != null && qrCodeDialog.isVisible()) {
+                        qrCodeDialog.dismiss();
+                        qrCodeDialog = null;
+                    }
+                }
+            };
+        }
 
         // VPN permission result launcher
         vpnActivityResultLauncher = registerForActivityResult(
@@ -158,12 +247,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (VPNService.isUsingAlwaysOnVPN(this)) {
                         showAlwaysOnDialog(() -> {
                             if (mBinder != null) {
-                                mBinder.runEngine(urlOpener);
+                                mBinder.runEngine(urlOpener, useDeviceCodeFlow);
                             }
                         });
                     } else {
                         if (mBinder != null) {
-                            mBinder.runEngine(urlOpener);
+                            mBinder.runEngine(urlOpener, useDeviceCodeFlow);
                         }
                     }
                 });
@@ -185,23 +274,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                serviceMessageReceiver,
-                new IntentFilter(NetworkChangeNotifier.action)
-        );
+        // Update profile menu item when returning to MainActivity
+        if (binding != null && binding.navView != null) {
+            updateProfileMenuItem(binding.navView);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceMessageReceiver);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.d(LOGTAG, "onStop");
-        if (!urlOpener.isOpened() && mBinder != null) {
+        if (urlOpener instanceof CustomTabURLOpener && ((CustomTabURLOpener) urlOpener).isOpened()) {
+            return; // Keep service alive for SSO custom tab
+        }
+
+        if (mBinder != null) {
             mBinder.removeConnectionStateListener();
             mBinder.removeServiceStateListener(serviceStateListener);
             unbindService(serviceIPC);
@@ -239,9 +331,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         }
 
-        navController.navigate(id);
+        // Use NavigationUI which handles launchSingleTop and saveState/restoreState
+        // This prevents fragment recreation and preserves state when alternating between destinations
+        boolean isHandled = NavigationUI.onNavDestinationSelected(item, navController);
         binding.drawerLayout.closeDrawers();
-        return false;
+        return isHandled;
     }
 
     @Override
@@ -267,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (prepareIntent != null) {
             vpnActivityResultLauncher.launch(prepareIntent);
         } else {
-            mBinder.runEngine(urlOpener);
+            mBinder.runEngine(urlOpener, useDeviceCodeFlow);
         }
     }
 
@@ -297,6 +391,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         return mBinder.networks();
+    }
+
+    @Override
+    public void selectRoute(String route) throws Exception {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.selectRoute(route);
+    }
+
+    @Override
+    public void deselectRoute(String route) throws Exception {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.deselectRoute(route);
+    }
+
+    @Override
+    public void addRouteChangeListener(RouteChangeListener listener) {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.addRouteChangeListener(listener);
+    }
+
+    @Override
+    public void removeRouteChangeListener(RouteChangeListener listener) {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return;
+        }
+
+        mBinder.removeRouteChangeListener(listener);
     }
 
 
@@ -413,15 +547,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private final BroadcastReceiver serviceMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            PreferenceUI.setRouteChangedNotification(context);
-            for(StateListener listener : serviceStateListeners) {
-                listener.routeChanged();
-            }
-        }
-    };
     ConnectionListener connectionListener = new ConnectionListener() {
         @Override
         public synchronized void onAddressChanged(String fqdn, String ip) {
@@ -501,4 +626,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
         }
     };
+
+    private void updateProfileMenuItem(NavigationView navigationView) {
+        try {
+            // Get active profile from ProfileManager instead of reading file
+            io.netbird.client.tool.ProfileManagerWrapper profileManager =
+                new io.netbird.client.tool.ProfileManagerWrapper(this);
+            String activeProfile = profileManager.getActiveProfile();
+            Menu menu = navigationView.getMenu();
+            MenuItem profileItem = menu.findItem(R.id.nav_profiles);
+            if (profileItem != null && activeProfile != null) {
+                profileItem.setTitle(activeProfile);
+            }
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to update profile menu item", e);
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (!isRunningOnTV) {
+            return super.onKeyDown(keyCode, event);
+        }
+        else {
+            Log.d(LOGTAG, "Key pressed: " + keyCode + " (" + KeyEvent.keyCodeToString(keyCode) + "), repeat: " + event.getRepeatCount());
+
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                boolean isOnHomeScreen = navController != null &&
+                    navController.getCurrentDestination() != null &&
+                    navController.getCurrentDestination().getId() == R.id.nav_home;
+
+                if (event.getRepeatCount() == 0 && isOnHomeScreen && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    Toast.makeText(this, R.string.tv_menu_hint, Toast.LENGTH_SHORT).show();
+                }
+
+                // drawer is not selectable on Android 16+, so we open via a long press of the left d-pad button instead
+                if (event.getRepeatCount() > 0 && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    Log.d(LOGTAG, "Long press LEFT detected - opening drawer");
+                    binding.drawerLayout.openDrawer(GravityCompat.START);
+                    binding.navView.requestFocus();
+                    return true;
+                }
+            }
+
+            if (keyCode == KeyEvent.KEYCODE_BACK && binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                Log.d(LOGTAG, "Closing drawer with BACK");
+                binding.drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
 }

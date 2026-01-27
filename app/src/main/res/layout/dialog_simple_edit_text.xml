@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_rounded_nb_bg"
+    android:maxWidth="560dp"
+    android:minWidth="280dp"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/text_title_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text=""
+        tools:text="Title title title" />
+
+    <TextView
+        android:id="@+id/text_label_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_title_dialog"
+        android:text=""
+        tools:text="Label label label label" />
+
+    <EditText
+        android:id="@+id/edit_text_dialog"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edit_text_white"
+        android:padding="12dp"
+        android:textColor="@color/nb_txt"
+        android:textColorHint="@color/nb_txt_light"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:foreground="@drawable/focus_highlight"
+        android:autofillHints=""
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_label_dialog"
+        tools:text="input input input input input input input input input input input"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_cancel_dialog"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:text="@android:string/cancel"
+        android:textColor="@color/nb_orange"
+        app:layout_constraintEnd_toStartOf="@id/btn_ok_dialog"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_dialog"
+        tools:text="@android:string/cancel" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_ok_dialog"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:text="@android:string/ok"
+        android:textColor="@color/nb_orange"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_dialog"
+        tools:text="@android:string/ok" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
