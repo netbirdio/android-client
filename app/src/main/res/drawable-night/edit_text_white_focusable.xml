@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- When focused, show dark background with 3dp white border (focus highlight) -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/nb_gray_light" />
+            <stroke
+                android:width="3dp"
+                android:color="@color/white" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+    <!-- Default state: dark background with 1dp gray border -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/nb_gray_light" />
+            <stroke
+                android:width="1dp"
+                android:color="#464a52" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+</selector>
