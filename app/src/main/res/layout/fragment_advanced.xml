@@ -50,6 +50,7 @@
                 android:background="@drawable/edit_text_white_focusable"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:focusedByDefault="false"
                 android:hint="@string/advanced_hint"
                 android:inputType="textUri"
                 android:padding="16dp"
