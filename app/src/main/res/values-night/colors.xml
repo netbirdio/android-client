@@ -26,4 +26,6 @@
     <color name="thumb_off_color">#545961</color>
     <color name="track_on_color">#F6833080</color>
     <color name="track_off_color">#32363D</color>
+    <color name="profile_background">#181A1D</color>
+    <color name="profile_card_background">#32363D</color>
 </resources>
