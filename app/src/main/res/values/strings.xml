@@ -141,4 +141,6 @@
     <string name="profiles_success_switched">Switched to profile \'%s\'</string>
     <string name="profiles_success_logged_out">Logged out from profile \'%s\'</string>
     <string name="profiles_success_removed">Profile \'%s\' removed successfully</string>
+    <string name="advanced_enable_lazy_conn">Enable lazy connection</string>
+    <string name="advanced_enable_lazy_conn_desc">Enables lazy connection for this peer</string>
 </resources>

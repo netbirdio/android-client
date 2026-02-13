@@ -8,6 +8,8 @@ public class Preferences {
     private final String keyTraceLog = "tracelog";
 
     private final String keyForceRelayConnection = "isConnectionForceRelayed";
+    private final String keyLazyConnectionEnabled = "isLazyConnectionEnabled";
+    private final String keyInactivityThreshold = "inactivityThreshold";
 
     private final SharedPreferences sharedPref;
 
@@ -36,6 +38,25 @@ public class Preferences {
 
     public void disableForcedRelayConnection() {
         sharedPref.edit().putBoolean(keyForceRelayConnection, false).apply();
+    }
+
+    public boolean isLazyConnectionEnabled() {
+        return sharedPref.getBoolean(keyLazyConnectionEnabled, true);
+    }
+
+    public void enableLazyConnection() {
+        sharedPref.edit().putBoolean(keyLazyConnectionEnabled, true).apply();
+    }
+
+    public void disableLazyConnection() {
+        sharedPref.edit().putBoolean(keyLazyConnectionEnabled, false).apply();
+    }
+
+    // This value represents for how long, in minutes, it will take for a lazy connection to be considered inactive so
+    // it won't attempt reconnection anymore. Currently, the user cannot change this so it's hardcoded to five minutes
+    // (its default value in the SDK is 15 minutes, and accepts a minimum of 1 minute).
+    public int getInactivityThreshold() {
+        return sharedPref.getInt(keyInactivityThreshold, 5);
     }
 
     public static String defaultServer() {
