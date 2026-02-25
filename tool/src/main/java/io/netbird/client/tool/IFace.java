@@ -15,10 +15,13 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.system.OsConstants;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import io.netbird.gomobile.android.TunAdapter;
@@ -108,33 +111,51 @@ class IFace implements TunAdapter {
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private void excludeLocalRoutes(VpnService.Builder builder) {
+        Log.i(LOGTAG, "excludeLocalRoutes: checking local routes for exclusion (API 33+)");
+
         ConnectivityManager cm = vpnService.getSystemService(ConnectivityManager.class);
         if (cm == null) {
+            Log.w(LOGTAG, "excludeLocalRoutes: ConnectivityManager is null, skipping");
             return;
         }
 
         Network activeNetwork = cm.getActiveNetwork();
         if (activeNetwork == null) {
+            Log.w(LOGTAG, "excludeLocalRoutes: no active network found, skipping");
             return;
         }
 
         LinkProperties lp = cm.getLinkProperties(activeNetwork);
         if (lp == null) {
+            Log.w(LOGTAG, "excludeLocalRoutes: no link properties for active network, skipping");
             return;
         }
 
+        Log.i(LOGTAG, "excludeLocalRoutes: active network interface=" + lp.getInterfaceName() + " routes=" + lp.getRoutes().size());
+
+        List<String> excluded = new ArrayList<>();
         for (RouteInfo routeInfo : lp.getRoutes()) {
             IpPrefix dest = routeInfo.getDestination();
             if (dest.getPrefixLength() == 0) {
+                Log.d(LOGTAG, "excludeLocalRoutes: skipping default route " + dest);
                 continue;
             }
 
             try {
                 builder.excludeRoute(dest);
-                Log.d(LOGTAG, "exclude route: " + dest);
+                excluded.add(dest.toString());
+                Log.i(LOGTAG, "excludeLocalRoutes: excluded " + dest + " (iface=" + routeInfo.getInterface() + ")");
             } catch (Exception e) {
-                Log.d(LOGTAG, "failed to exclude route: " + dest + " - " + e.getMessage());
+                Log.e(LOGTAG, "excludeLocalRoutes: failed to exclude " + dest + ": " + e.getMessage());
             }
+        }
+
+        Log.i(LOGTAG, "excludeLocalRoutes: total excluded=" + excluded.size() + " routes=" + excluded);
+        if (!excluded.isEmpty()) {
+            String msg = "Excluding " + excluded.size() + " local routes: " + String.join(", ", excluded);
+            new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(vpnService, msg, Toast.LENGTH_LONG).show()
+            );
         }
     }
 
