@@ -3,6 +3,11 @@ package io.netbird.client.tool;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.IpPrefix;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.RouteInfo;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Handler;
@@ -10,6 +15,8 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.system.OsConstants;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
@@ -74,6 +81,10 @@ class IFace implements TunAdapter {
             Log.d(LOGTAG, "add route: "+r.addr+"/"+r.prefixLength);
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            excludeLocalRoutes(builder);
+        }
+
         disallowApp(builder, "com.google.android.projection.gearhead");
         disallowApp(builder, "com.google.android.apps.chromecast.app");
         disallowApp(builder, "com.google.android.apps.messaging");
@@ -92,6 +103,38 @@ class IFace implements TunAdapter {
                 throw new BackendException(BackendException.Reason.TUN_CREATION_ERROR);
             }
             return tun.detachFd();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    private void excludeLocalRoutes(VpnService.Builder builder) {
+        ConnectivityManager cm = vpnService.getSystemService(ConnectivityManager.class);
+        if (cm == null) {
+            return;
+        }
+
+        Network activeNetwork = cm.getActiveNetwork();
+        if (activeNetwork == null) {
+            return;
+        }
+
+        LinkProperties lp = cm.getLinkProperties(activeNetwork);
+        if (lp == null) {
+            return;
+        }
+
+        for (RouteInfo routeInfo : lp.getRoutes()) {
+            IpPrefix dest = routeInfo.getDestination();
+            if (dest.getPrefixLength() == 0) {
+                continue;
+            }
+
+            try {
+                builder.excludeRoute(dest);
+                Log.d(LOGTAG, "exclude route: " + dest);
+            } catch (Exception e) {
+                Log.d(LOGTAG, "failed to exclude route: " + dest + " - " + e.getMessage());
+            }
         }
     }
 
