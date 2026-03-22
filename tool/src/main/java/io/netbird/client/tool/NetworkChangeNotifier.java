@@ -39,7 +39,10 @@ public class NetworkChangeNotifier implements NetworkChangeListener {
 
     @Override
     public void setInterfaceIP(String ip) {
+    }
 
+    @Override
+    public void setInterfaceIPv6(String ip) {
     }
 
     public void addRouteChangeListener(RouteChangeListener routeChangeListener) {
