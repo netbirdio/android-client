@@ -531,6 +531,17 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/layout_disable_firewall" />
 
+            <include
+                android:id="@+id/layout_enable_lazy_connection"
+                layout="@layout/component_switch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_force_relay_connection" />
+
             <LinearLayout
                 android:id="@+id/layout_theme"
                 android:layout_width="0dp"
@@ -539,7 +550,7 @@
                 android:orientation="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/layout_force_relay_connection">
+                app:layout_constraintTop_toBottomOf="@id/layout_enable_lazy_connection">
 
                 <TextView
                     android:layout_width="wrap_content"

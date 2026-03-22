@@ -65,6 +65,27 @@ public class AdvancedFragment extends Fragment {
         });
     }
 
+    private void configureEnableLazyConnectionSwitch(@NonNull ComponentSwitchBinding binding, @NonNull Preferences preferences) {
+        binding.switchTitle.setText(R.string.advanced_enable_lazy_conn);
+        binding.switchDescription.setText(R.string.advanced_enable_lazy_conn_desc);
+
+        binding.switchControl.setChecked(preferences.isLazyConnectionEnabled());
+        binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                preferences.enableLazyConnection();
+            } else {
+                preferences.disableLazyConnection();
+            }
+
+            showReconnectionNeededWarningDialog();
+        });
+
+        // Make parent layout clickable to toggle switch (for TV remote)
+        binding.getRoot().setOnClickListener(v -> {
+            binding.switchControl.toggle();
+        });
+    }
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -182,6 +203,7 @@ public class AdvancedFragment extends Fragment {
         });
 
         configureForceRelayConnectionSwitch(binding.layoutForceRelayConnection, preferences);
+        configureEnableLazyConnectionSwitch(binding.layoutEnableLazyConnection, preferences);
 
         // Initialize engine config switches (your settings)
         initializeEngineConfigSwitches();
