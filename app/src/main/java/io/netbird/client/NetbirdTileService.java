@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.VpnService;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
@@ -22,6 +24,7 @@ public class NetbirdTileService extends TileService {
     private boolean isBound = false;
     private boolean isBinding = false;
     private boolean pendingClick = false;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -50,17 +53,17 @@ public class NetbirdTileService extends TileService {
     private final ServiceStateListener serviceStateListener = new ServiceStateListener() {
         @Override
         public void onStarted() {
-            updateTile();
+            mainHandler.post(NetbirdTileService.this::updateTile);
         }
 
         @Override
         public void onStopped() {
-            updateTile();
+            mainHandler.post(NetbirdTileService.this::updateTile);
         }
 
         @Override
         public void onError(String msg) {
-            updateTile();
+            mainHandler.post(NetbirdTileService.this::updateTile);
         }
     };
 
