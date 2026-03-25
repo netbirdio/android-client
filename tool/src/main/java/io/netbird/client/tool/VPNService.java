@@ -110,6 +110,9 @@ public class VPNService extends android.net.VpnService {
             fgNotification.startForeground();
             engineRunner.runWithoutAuth();
         }
+        if (INTENT_ACTION_START.equals(intent.getAction())) {
+            fgNotification.startForeground();
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 

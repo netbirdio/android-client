@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.VpnService;
+import android.os.Build;
 import android.os.IBinder;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
@@ -85,11 +86,15 @@ public class NetbirdTileService extends TileService {
         if (VpnService.prepare(this) != null) {
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    this, 0, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-            );
-            startActivityAndCollapse(pendingIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                PendingIntent pendingIntent = PendingIntent.getActivity(
+                        this, 0, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
+                startActivityAndCollapse(pendingIntent);
+            } else {
+                startActivityAndCollapse(intent);
+            }
             return;
         }
 
@@ -140,7 +145,7 @@ public class NetbirdTileService extends TileService {
     private void startAndRunVpnService() {
         Intent intent = new Intent(this, VPNService.class);
         intent.setAction(VPNService.INTENT_ACTION_START);
-        startService(intent);
+        startForegroundService(intent);
         bindToVpnService();
     }
 
