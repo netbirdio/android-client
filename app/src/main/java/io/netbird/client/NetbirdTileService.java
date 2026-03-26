@@ -109,6 +109,7 @@ public class NetbirdTileService extends TileService {
             if (mBinder.isRunning()) {
                 mBinder.stopEngine();
             } else {
+                startVpnService();
                 mBinder.runEngine(null, false);
             }
         } else if (!isBinding) {
@@ -150,6 +151,12 @@ public class NetbirdTileService extends TileService {
         intent.setAction(VPNService.INTENT_ACTION_START);
         startForegroundService(intent);
         bindToVpnService();
+    }
+
+    private void startVpnService() {
+        Intent intent = new Intent(this, VPNService.class);
+        intent.setAction(VPNService.INTENT_ACTION_START);
+        startForegroundService(intent);
     }
 
     private boolean isVpnRunning() {
