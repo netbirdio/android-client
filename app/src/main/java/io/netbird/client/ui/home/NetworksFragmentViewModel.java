@@ -118,7 +118,7 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
             var peerRoutes = peerInfo.getPeerRoutes();
 
             peers.add(new RoutingPeer(
-                    Status.fromString(peerInfo.getConnStatus()),
+                    Status.fromLong(peerInfo.getConnStatus()),
                     createPeerRoutesList(peerRoutes)));
         }
 

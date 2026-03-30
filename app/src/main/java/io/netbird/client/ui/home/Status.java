@@ -1,6 +1,8 @@
 package io.netbird.client.ui.home;
 
 
+import io.netbird.gomobile.android.Android;
+
 import java.util.Locale;
 
 public enum Status {
@@ -20,6 +22,17 @@ public enum Status {
          default:
             return super.toString();
       }
+   }
+
+   public static Status fromLong(long status) {
+      if (status == Android.ConnStatusIdle) {
+         return IDLE;
+      } else if (status == Android.ConnStatusConnecting) {
+         return CONNECTING;
+      } else if (status == Android.ConnStatusConnected) {
+         return CONNECTED;
+      }
+      throw new IllegalArgumentException("Unknown status: " + status);
    }
 
    public static Status fromString(String status) {

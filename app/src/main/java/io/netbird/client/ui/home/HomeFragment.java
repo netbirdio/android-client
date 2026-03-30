@@ -195,7 +195,7 @@ public class HomeFragment extends Fragment implements StateListener {
         int connected = 0;
         for (int i = 0; i < peersList.size(); i++) {
             PeerInfo peer = peersList.get(i);
-            if(peer.getConnStatus().equalsIgnoreCase(Status.CONNECTED.toString())) {
+            if(Status.fromLong(peer.getConnStatus()) == Status.CONNECTED) {
                 connected++;
             }
         }
