@@ -6,6 +6,7 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="quick_settings_tile_label">NetBird</string>
 
     <string name="menu_advanced">Advanced</string>
     <string name="menu_about">About</string>
