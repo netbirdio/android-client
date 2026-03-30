@@ -307,6 +307,7 @@ public class VPNService extends android.net.VpnService {
             try {
                 int fd = (int)iface.configureInterface(
                         currentTUNParameters.address,
+                        currentTUNParameters.addressV6,
                         currentTUNParameters.mtu,
                         currentTUNParameters.dns,
                         currentTUNParameters.searchDomainsString,
