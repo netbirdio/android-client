@@ -8,7 +8,8 @@ import java.util.Locale;
 public enum Status {
    IDLE,
    CONNECTING,
-   CONNECTED;
+   CONNECTED,
+   UNKNOWN;
 
    @Override
    public String toString() {
@@ -32,7 +33,7 @@ public enum Status {
       } else if (status == Android.ConnStatusConnected) {
          return CONNECTED;
       }
-      throw new IllegalArgumentException("Unknown status: " + status);
+      return UNKNOWN;
    }
 
    public static Status fromString(String status) {
