@@ -14,10 +14,20 @@ public class NetworkChangeDetector {
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
     private volatile NetworkAvailabilityListener listener;
+    private volatile Runnable networkChangedCallback;
 
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
         this.connectivityManager = connectivityManager;
         initNetworkCallback();
+    }
+
+    /**
+     * Set a callback that fires on every network availability/loss event,
+     * regardless of type. Used to notify the Go layer about underlying
+     * network changes for posture check re-evaluation.
+     */
+    public void setNetworkChangedCallback(Runnable callback) {
+        this.networkChangedCallback = callback;
     }
 
     private void checkNetworkCapabilities(Network network, Consumer<Integer> operation) {
@@ -37,16 +47,24 @@ public class NetworkChangeDetector {
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
+                Log.d(LOGTAG, "onAvailable: " + network);
                 NetworkAvailabilityListener localListener = listener;
-                if (localListener == null) return;
-                checkNetworkCapabilities(network, localListener::onNetworkAvailable);
+                if (localListener != null) {
+                    checkNetworkCapabilities(network, localListener::onNetworkAvailable);
+                }
+                Runnable cb = networkChangedCallback;
+                if (cb != null) cb.run();
             }
 
             @Override
             public void onLost(@NonNull Network network) {
+                Log.d(LOGTAG, "onLost: " + network);
                 NetworkAvailabilityListener localListener = listener;
-                if (localListener == null) return;
-                checkNetworkCapabilities(network, localListener::onNetworkLost);
+                if (localListener != null) {
+                    checkNetworkCapabilities(network, localListener::onNetworkLost);
+                }
+                Runnable cb = networkChangedCallback;
+                if (cb != null) cb.run();
             }
 
             @Override
