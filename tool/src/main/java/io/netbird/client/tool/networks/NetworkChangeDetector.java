@@ -15,6 +15,7 @@ public class NetworkChangeDetector {
     private ConnectivityManager.NetworkCallback networkCallback;
     private volatile NetworkAvailabilityListener listener;
     private volatile Runnable networkChangedCallback;
+    private volatile boolean initialCallbackReceived;
 
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
         this.connectivityManager = connectivityManager;
@@ -47,6 +48,14 @@ public class NetworkChangeDetector {
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
+                // Skip the very first onAvailable after registerNetworkCallback().
+                // Android fires this immediately for each already-connected network —
+                // it is an initial state report, not an actual network change.
+                if (!initialCallbackReceived) {
+                    initialCallbackReceived = true;
+                    Log.d(LOGTAG, "ignoring initial onAvailable (not a real network change)");
+                    return;
+                }
                 Log.d(LOGTAG, "onAvailable: " + network);
                 NetworkAvailabilityListener localListener = listener;
                 if (localListener != null) {
@@ -77,6 +86,7 @@ public class NetworkChangeDetector {
     }
 
     public void registerNetworkCallback() {
+        initialCallbackReceived = false;
         NetworkRequest.Builder builder = new NetworkRequest.Builder();
         builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         connectivityManager.registerNetworkCallback(builder.build(), networkCallback);
