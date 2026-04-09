@@ -45,7 +45,6 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
     private List<Peer> getPeers(PeerInfoArray peersInfo) {
         List<Peer> peers = new ArrayList<>();
         PeerInfo peerInfo;
-        String connStatus;
         Status status;
 
         for (int i = 0; i < peersInfo.size(); i++) {
@@ -55,12 +54,7 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
                 continue;
             }
 
-            connStatus = peerInfo.getConnStatus();
-            if (connStatus == null) {
-                continue;
-            }
-
-            status = Status.fromString(connStatus);
+            status = Status.fromLong(peerInfo.getConnStatus());
             peers.add(new Peer(status, peerInfo.getIP(), peerInfo.getIPv6(), peerInfo.getFQDN()));
         }
         return peers;
