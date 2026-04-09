@@ -120,6 +120,9 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
         PopupMenu popup = new PopupMenu(view.getContext(), view);
         popup.getMenuInflater().inflate(R.menu.peer_clipboard_menu, popup.getMenu());
 
+        boolean hasIpv6 = peer.getIpv6() != null && !peer.getIpv6().isEmpty();
+        popup.getMenu().findItem(R.id.copy_ipv6).setVisible(hasIpv6);
+
         popup.setOnMenuItemClickListener(menuItem -> {
             int id = menuItem.getItemId();
             if (id == R.id.copy_fqdn) {
@@ -127,6 +130,9 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
                 return true;
             } else if (id == R.id.copy_ip) {
                 copyToClipboard(view.getContext(), "IP Address", peer.getIp());
+                return true;
+            } else if (id == R.id.copy_ipv6) {
+                copyToClipboard(view.getContext(), "IPv6 Address", peer.getIpv6());
                 return true;
             }
             return false;
@@ -165,7 +171,11 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
 
         public void bind(Peer peer) {
             binding.status.setText(peer.getStatus().toString());
-            binding.ip.setText(peer.getIp());
+            String ipDisplay = peer.getIp();
+            if (peer.getIpv6() != null && !peer.getIpv6().isEmpty()) {
+                ipDisplay = ipDisplay + "\n" + peer.getIpv6();
+            }
+            binding.ip.setText(ipDisplay);
             binding.fqdn.setText(peer.getFqdn());
 
             if (peer.getStatus() == Status.CONNECTED) {
