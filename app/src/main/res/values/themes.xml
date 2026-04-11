@@ -61,4 +61,14 @@
     <style name="AlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
+
+    <!-- Day-mode definition for Theme.NetBird.Card (mirrors values-night) -->
+    <style name="Theme.NetBird.Card" parent="ThemeOverlay.MaterialComponents.Light" />
+
+    <!-- Reusable TextAppearance for profile name to avoid repeating attributes in layouts -->
+    <style name="TextAppearance.NetBird.ProfileName" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/nb_txt</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>
