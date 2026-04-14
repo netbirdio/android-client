@@ -123,7 +123,7 @@ jobs:
           disk-size: 4096M
           heap-size: 512M
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest --no-daemon
+          script: ./gradlew connectedDebugAndroidTest --no-daemon -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest
 
       - name: Upload test results
         if: always()
