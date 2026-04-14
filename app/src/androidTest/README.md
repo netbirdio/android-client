@@ -99,7 +99,7 @@ Falls back to `iptables` rules if the console is not reachable.
 | 1 | Network disconnect | Full network cut | Network connect |
 | 2 | Long outage (30s) | Network cut → 30s wait | Network connect |
 | 3 | Network flapping (3x) | 3x: disconnect 1.5s → connect 1.5s | Network connect |
-| 4 | Extreme latency (5s delay) | 10s network delay | Delay 0 |
+| 4 | Extreme latency (10s delay) | 10s network delay | Delay 0 |
 | 5 | GPRS speed throttle | Speed → GSM | Speed → full |
 | 6 | Disconnect then slow reconnect | Disconnect → 5s → connect at GSM → 5s | Speed → full |
 | 7 | Flap then long disconnect (20s) | Disconnect → connect → disconnect → 20s | Network connect |

@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -189,6 +190,13 @@ public class NetworkConnectivityStressTest {
             } catch (Exception e) {
                 failCount++;
                 log(String.format("  ERROR during cycle %d: %s", cycle, e.getMessage()));
+            } finally {
+                try {
+                    disruption.restore.run();
+                } catch (Exception restoreEx) {
+                    log(String.format("  WARNING: restore failed after cycle %d: %s",
+                            cycle, restoreEx.getMessage()));
+                }
             }
 
             // Brief pause between cycles
@@ -315,7 +323,7 @@ public class NetworkConnectivityStressTest {
                         this::emuNetworkConnect),
 
                 // Scenario 4: Extreme latency (simulates very poor connection)
-                new DisruptionType("EMU: Extreme latency (5s delay)",
+                new DisruptionType("EMU: Extreme latency (10s delay)",
                         () -> emuNetworkDelay("10000"),
                         () -> emuNetworkDelay("0")),
 
@@ -498,20 +506,19 @@ public class NetworkConnectivityStressTest {
         }
     }
 
-    private String readUntilOK(BufferedReader reader) {
+    private String readUntilOK(BufferedReader reader) throws IOException {
         StringBuilder sb = new StringBuilder();
-        try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
-                if (line.startsWith("OK") || line.contains("OK")) {
-                    break;
-                }
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+            if (line.contains("KO")) {
+                throw new IOException("Emulator console error: " + sb);
             }
-        } catch (Exception e) {
-            // timeout or read error, return what we have
+            if (line.contains("OK")) {
+                return sb.toString();
+            }
         }
-        return sb.toString();
+        throw new IOException("Emulator console EOF without OK: " + sb);
     }
 
     // --- Emulator detection ------------------------------------------------------
