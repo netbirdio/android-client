@@ -214,6 +214,14 @@ class EngineRunner {
         }
     }
 
+    public String debugBundle(boolean anonymize) throws Exception {
+        String configPath = profileManager.getActiveConfigPath();
+        String statePath = profileManager.getActiveStateFilePath();
+        String cacheDir = context.getCacheDir().getAbsolutePath();
+        var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
+        return goClient.debugBundle(platformFiles, anonymize);
+    }
+
     public void selectRoute(String route) throws Exception {
         Log.d(LOGTAG, String.format("selecting route: %s", route));
         try {
