@@ -72,6 +72,7 @@ public class TroubleshootFragment extends Fragment {
             try {
                 String key = ((ServiceAccessor) activity).debugBundle(anonymize);
                 activity.runOnUiThread(() -> {
+                    if (binding == null || !isAdded()) return;
                     binding.buttonDebugBundle.setEnabled(true);
                     ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData clip = ClipData.newPlainText("Debug bundle key", key);
@@ -81,6 +82,7 @@ public class TroubleshootFragment extends Fragment {
             } catch (Exception e) {
                 Log.e(LOGTAG, "failed to create debug bundle", e);
                 activity.runOnUiThread(() -> {
+                    if (binding == null || !isAdded()) return;
                     binding.buttonDebugBundle.setEnabled(true);
                     Toast.makeText(activity, "Failed to create debug bundle: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
