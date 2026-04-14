@@ -111,7 +111,7 @@ Falls back to `iptables` rules if the console is not reachable.
 
 The test prints a summary at the end:
 
-```
+```text
 === Results: 18/20 passed, 2 failed ===
 ```
 

@@ -461,14 +461,14 @@ public class NetworkConnectivityStressTest {
      * inside the emulator (host loopback mapped address).
      */
     private void sendEmulatorConsoleCommand(String command) {
-        try {
+        try (
             // From inside the emulator, 10.0.2.2 is the host loopback
             Socket socket = new Socket("10.0.2.2", EMULATOR_CONSOLE_PORT);
-            socket.setSoTimeout(5000);
-
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
-            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)
+        ) {
+            socket.setSoTimeout(5000);
 
             // Read the initial banner
             readUntilOK(reader);
@@ -485,7 +485,6 @@ public class NetworkConnectivityStressTest {
             log("  EMU console: " + command + " -> " + response.trim());
 
             writer.println("quit");
-            socket.close();
         } catch (Exception e) {
             log("  EMU console command failed: " + command + " - " + e.getMessage());
             // Fallback: try via shell for basic disconnect/connect
