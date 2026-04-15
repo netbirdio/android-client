@@ -48,7 +48,7 @@
         <service
             android:name=".NetbirdTileService"
             android:exported="true"
-            android:icon="@drawable/ic_netbird_btn"
+            android:icon="@drawable/ic_netbird_tile"
             android:label="@string/quick_settings_tile_label"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
