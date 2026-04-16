@@ -51,6 +51,10 @@ public class NetworkChangeDetector {
                 // Skip the very first onAvailable after registerNetworkCallback().
                 // Android fires this immediately for each already-connected network —
                 // it is an initial state report, not an actual network change.
+                // Note: if both WiFi and cellular are connected at registration time,
+                // Android fires onAvailable for each, but we only skip the first one.
+                // The second fires a spurious notification, which is acceptable because
+                // the EngineRestarter debounces rapid network change callbacks anyway.
                 if (!initialCallbackReceived) {
                     initialCallbackReceived = true;
                     Log.d(LOGTAG, "ignoring initial onAvailable (not a real network change)");
