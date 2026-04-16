@@ -172,7 +172,7 @@ class EngineRunner {
         try {
             goClient.onUnderlyingNetworkChanged();
         } catch (Exception e) {
-            Log.d(LOGTAG, "notifyNetworkChanged: " + e.getMessage());
+            Log.e(LOGTAG, "notifyNetworkChanged: " + e.getMessage());
         }
     }
 
