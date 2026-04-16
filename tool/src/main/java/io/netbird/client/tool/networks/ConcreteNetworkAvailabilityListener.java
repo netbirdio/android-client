@@ -29,11 +29,11 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
 
     @Override
     public void onNetworkLost(@Constants.NetworkType int networkType) {
-        availableNetworkTypes.remove(networkType);
+        boolean wasPresent = availableNetworkTypes.remove(networkType) != null;
 
-        // Notify when a network is lost and another type is still available.
-        // This covers WiFi lost with Mobile still active.
-        if (!availableNetworkTypes.isEmpty()) {
+        // Notify when a tracked network is lost and another type is still available.
+        // Guards against duplicate/out-of-order onLost callbacks.
+        if (wasPresent && !availableNetworkTypes.isEmpty()) {
             notifyListener();
         }
     }
