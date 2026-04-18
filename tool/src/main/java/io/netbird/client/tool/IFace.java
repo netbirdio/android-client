@@ -77,6 +77,10 @@ class IFace implements TunAdapter {
             Log.d(LOGTAG,"add search domain: "+ sd);
         }
 
+        if (addrV6 == null && hasIPv4DefaultRoute(routes)) {
+            routes.add(new Route("::/0"));
+        }
+
         for (Route r : routes) {
             builder.addRoute(r.addr, r.prefixLength);
             Log.d(LOGTAG, "add route: "+r.addr+"/"+r.prefixLength);
@@ -155,6 +159,17 @@ class IFace implements TunAdapter {
             return new String[0];
         }
         return searchDomains.split(";");
+    }
+
+    // Blackhole IPv6 when the tunnel has an IPv4 default route but no IPv6
+    // address on the interface, to prevent IPv6 leaks around the tunnel.
+    private boolean hasIPv4DefaultRoute(LinkedList<Route> routes) {
+        for (Route r : routes) {
+            if ("0.0.0.0".equals(r.addr) && r.prefixLength == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private LinkedList<Route> toRoutes(String routesString) {
