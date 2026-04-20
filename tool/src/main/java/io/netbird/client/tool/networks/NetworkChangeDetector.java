@@ -13,11 +13,13 @@ public class NetworkChangeDetector {
     private static final String LOGTAG = NetworkChangeDetector.class.getSimpleName();
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
+    private ConnectivityManager.NetworkCallback defaultNetworkCallback;
     private volatile NetworkAvailabilityListener listener;
 
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
         this.connectivityManager = connectivityManager;
         initNetworkCallback();
+        initDefaultNetworkCallback();
     }
 
     private void checkNetworkCapabilities(Network network, Consumer<Integer> operation) {
@@ -58,10 +60,37 @@ public class NetworkChangeDetector {
         };
     }
 
+    private void initDefaultNetworkCallback() {
+        defaultNetworkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                Log.d(LOGTAG, "default network became " + network + ", binding process to it");
+                try {
+                    if (!connectivityManager.bindProcessToNetwork(network)) {
+                        Log.w(LOGTAG, "bindProcessToNetwork returned false for " + network);
+                    }
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "bindProcessToNetwork failed", e);
+                }
+            }
+
+            @Override
+            public void onLost(@NonNull Network network) {
+                Log.d(LOGTAG, "default network " + network + " lost, clearing process binding");
+                try {
+                    connectivityManager.bindProcessToNetwork(null);
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "bindProcessToNetwork(null) failed", e);
+                }
+            }
+        };
+    }
+
     public void registerNetworkCallback() {
         NetworkRequest.Builder builder = new NetworkRequest.Builder();
         builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         connectivityManager.registerNetworkCallback(builder.build(), networkCallback);
+        connectivityManager.registerDefaultNetworkCallback(defaultNetworkCallback);
     }
 
     public void unregisterNetworkCallback() {
@@ -69,6 +98,16 @@ public class NetworkChangeDetector {
             connectivityManager.unregisterNetworkCallback(networkCallback);
         } catch (Exception e) {
             Log.e(LOGTAG, "failed to unregister network callback", e);
+        }
+        try {
+            connectivityManager.unregisterNetworkCallback(defaultNetworkCallback);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "failed to unregister default network callback", e);
+        }
+        try {
+            connectivityManager.bindProcessToNetwork(null);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "bindProcessToNetwork(null) on unregister failed", e);
         }
     }
 

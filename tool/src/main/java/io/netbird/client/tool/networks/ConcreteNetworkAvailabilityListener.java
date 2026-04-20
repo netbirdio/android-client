@@ -4,8 +4,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityListener {
+    // Grace window after subscribing a listener during which Android's initial
+    // onAvailable burst is treated as state seeding, not as a transition.
+    private static final long INITIAL_BURST_GRACE_MS = 3000;
+
     private final Map<Integer, Boolean> availableNetworkTypes;
     private NetworkToggleListener listener;
+    private volatile long listenerSubscribedAt = 0;
 
     public ConcreteNetworkAvailabilityListener() {
         this.availableNetworkTypes = new ConcurrentHashMap<>();
@@ -38,16 +43,27 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
     }
 
     private void notifyListener() {
-        if (listener != null) {
-            listener.onNetworkTypeChanged();
+        NetworkToggleListener l = listener;
+        if (l == null) {
+            return;
         }
+        // Skip Android's initial onAvailable burst that fires right after the
+        // NetworkCallback is registered; that is the current state, not a
+        // transition, and must not trigger an engine restart.
+        long subscribedAt = listenerSubscribedAt;
+        if (subscribedAt != 0 && System.currentTimeMillis() - subscribedAt < INITIAL_BURST_GRACE_MS) {
+            return;
+        }
+        l.onNetworkTypeChanged();
     }
 
     public void subscribe(NetworkToggleListener listener) {
         this.listener = listener;
+        this.listenerSubscribedAt = System.currentTimeMillis();
     }
 
     public void unsubscribe() {
         this.listener = null;
+        this.listenerSubscribedAt = 0;
     }
 }
