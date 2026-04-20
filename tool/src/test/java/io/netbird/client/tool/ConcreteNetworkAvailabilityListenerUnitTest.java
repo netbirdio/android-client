@@ -29,7 +29,7 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
             this.listener.onNetworkLost(Constants.NetworkType.MOBILE);
         }
     }
-    
+
     private static class MockNetworkToggleListener implements NetworkToggleListener {
         private int totalTimesNetworkTypeChanged = 0;
 
@@ -47,7 +47,7 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
     public void shouldNotifyListenerNetworkUpgraded() {
         // Assemble:
         var networkToggleListener = new MockNetworkToggleListener();
-        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
         networkAvailabilityListener.subscribe(networkToggleListener);
 
         var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
@@ -64,7 +64,7 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
     public void shouldNotifyListenerNetworkDowngraded() {
         // Assemble:
         var networkToggleListener = new MockNetworkToggleListener();
-        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
         networkAvailabilityListener.subscribe(networkToggleListener);
 
         var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
@@ -82,7 +82,7 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
     public void shouldNotNotifyListenerNetworkDidNotUpgrade() {
         // Assemble:
         var networkToggleListener = new MockNetworkToggleListener();
-        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
         networkAvailabilityListener.subscribe(networkToggleListener);
 
         var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
@@ -103,7 +103,7 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
     public void shouldNotNotifyListenerNoNetworksAvailable() {
         // Assemble:
         var networkToggleListener = new MockNetworkToggleListener();
-        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
         networkAvailabilityListener.subscribe(networkToggleListener);
 
         var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
@@ -113,6 +113,25 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
 
         networkToggleListener.resetCounter();
 
+        networkChangeDetector.deactivateWifi();
+
+        // Assert:
+        assertEquals(0, networkToggleListener.totalTimesNetworkTypeChanged);
+    }
+
+    @Test
+    public void shouldNotNotifyListenerWhenEngineNotRunning() {
+        // Assemble: engine never running, so initial onAvailable burst from
+        // Android must not trigger a restart.
+        var networkToggleListener = new MockNetworkToggleListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> false);
+        networkAvailabilityListener.subscribe(networkToggleListener);
+
+        var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
+
+        // Act:
+        networkChangeDetector.activateMobile();
+        networkChangeDetector.activateWifi();
         networkChangeDetector.deactivateWifi();
 
         // Assert:

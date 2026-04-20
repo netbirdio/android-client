@@ -62,13 +62,14 @@ public class VPNService extends android.net.VpnService {
         // Create foreground notification before initializing engine
         fgNotification = new ForegroundNotification(this);
 
-        // Create network availability listener before initializing engine
-        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
-
-
         engineRunner = new EngineRunner(this, notifier, tunAdapter, iFaceDiscover, versionName,
                 preferences.isTraceLogEnabled(), Version.isDebuggable(this), profileManager);
         engineRunner.addServiceStateListener(serviceStateListener);
+
+        // Create network availability listener after the engine runner so we
+        // can gate notifications on the engine actually being up; this avoids
+        // acting on Android's initial onAvailable burst during cold start.
+        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(engineRunner::isRunning);
 
         engineRestarter = new EngineRestarter(engineRunner);
         networkAvailabilityListener.subscribe(engineRestarter);

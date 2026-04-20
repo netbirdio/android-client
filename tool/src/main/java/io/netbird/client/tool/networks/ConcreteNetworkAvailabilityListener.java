@@ -2,18 +2,24 @@ package io.netbird.client.tool.networks;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BooleanSupplier;
 
 public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityListener {
-    // Grace window after subscribing a listener during which Android's initial
-    // onAvailable burst is treated as state seeding, not as a transition.
-    private static final long INITIAL_BURST_GRACE_MS = 3000;
-
     private final Map<Integer, Boolean> availableNetworkTypes;
+    private final BooleanSupplier shouldNotify;
     private NetworkToggleListener listener;
-    private volatile long listenerSubscribedAt = 0;
 
     public ConcreteNetworkAvailabilityListener() {
+        this(() -> true);
+    }
+
+    // shouldNotify is consulted before each listener notification. Pass
+    // engineRunner::isRunning to swallow the initial onAvailable burst that
+    // fires right after registerNetworkCallback; until the engine is actually
+    // running there is nothing to restart.
+    public ConcreteNetworkAvailabilityListener(BooleanSupplier shouldNotify) {
         this.availableNetworkTypes = new ConcurrentHashMap<>();
+        this.shouldNotify = shouldNotify;
     }
 
     @Override
@@ -47,11 +53,7 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
         if (l == null) {
             return;
         }
-        // Skip Android's initial onAvailable burst that fires right after the
-        // NetworkCallback is registered; that is the current state, not a
-        // transition, and must not trigger an engine restart.
-        long subscribedAt = listenerSubscribedAt;
-        if (subscribedAt != 0 && System.currentTimeMillis() - subscribedAt < INITIAL_BURST_GRACE_MS) {
+        if (!shouldNotify.getAsBoolean()) {
             return;
         }
         l.onNetworkTypeChanged();
@@ -59,11 +61,9 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
 
     public void subscribe(NetworkToggleListener listener) {
         this.listener = listener;
-        this.listenerSubscribedAt = System.currentTimeMillis();
     }
 
     public void unsubscribe() {
         this.listener = null;
-        this.listenerSubscribedAt = 0;
     }
 }
