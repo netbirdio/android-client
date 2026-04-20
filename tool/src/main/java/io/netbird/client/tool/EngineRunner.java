@@ -92,7 +92,7 @@ class EngineRunner {
 
             // Create fresh PlatformFiles with current config/state paths
             // This allows profile switching without recreating the entire Client
-            var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath);
+            var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath, context.getCacheDir().getAbsolutePath());
             Log.d(LOGTAG, "Running engine with config: " + configurationFilePath + ", state: " + stateFilePath);
 
             try {
@@ -218,6 +218,19 @@ class EngineRunner {
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             notifyError(e);
+        }
+    }
+
+    public String debugBundle(boolean anonymize) throws Exception {
+        String configPath = profileManager.getActiveConfigPath();
+        String statePath = profileManager.getActiveStateFilePath();
+        String cacheDir = context.getCacheDir().getAbsolutePath();
+        var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
+        try {
+            return goClient.debugBundle(platformFiles, anonymize);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "goClient error", e);
+            throw e;
         }
     }
 

@@ -240,6 +240,10 @@ public class VPNService extends android.net.VpnService {
             }
         }
 
+        public String debugBundle(boolean anonymize) throws Exception {
+            return engineRunner.debugBundle(anonymize);
+        }
+
         public void selectRoute(String route) throws Exception {
             engineRunner.selectRoute(route);
         }
