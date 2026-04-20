@@ -29,6 +29,7 @@ class EngineRunner {
     private boolean engineIsRunning = false;
     Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
     private final Client goClient;
+    private ConnectionListener connectionListener;
 
     public EngineRunner(Context context, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
                         IFaceDiscover iFaceDiscover, String versionName, boolean isTraceLogEnabled, boolean isDebuggable,
@@ -124,11 +125,17 @@ class EngineRunner {
     }
 
     public synchronized void setConnectionListener(ConnectionListener listener) {
+        this.connectionListener = listener;
         goClient.setConnectionListener(listener);
     }
 
     public synchronized void removeStatusListener() {
+        this.connectionListener = null;
         goClient.removeConnectionListener();
+    }
+
+    synchronized ConnectionListener getConnectionListener() {
+        return connectionListener;
     }
 
     public synchronized void addServiceStateListener(ServiceStateListener serviceStateListener) {

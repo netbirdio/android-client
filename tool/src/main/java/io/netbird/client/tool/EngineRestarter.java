@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import io.netbird.client.tool.networks.NetworkToggleListener;
+import io.netbird.gomobile.android.ConnectionListener;
 
 /**
  * <p>EngineRestarter restarts the Go engine.</p>
@@ -52,6 +53,7 @@ class EngineRestarter implements NetworkToggleListener {
             if (isRestartInProgress) {
                 Log.e(LOGTAG, "engine restart timeout - forcing flag reset");
                 isRestartInProgress = false;
+                notifyDisconnected();
             }
         };
 
@@ -72,6 +74,7 @@ class EngineRestarter implements NetworkToggleListener {
             @Override
             public void onStopped() {
                 Log.d(LOGTAG, "engine is stopped, restarting...");
+                notifyConnecting();
                 engineRunner.runWithoutAuth();
             }
 
@@ -81,6 +84,7 @@ class EngineRestarter implements NetworkToggleListener {
                 isRestartInProgress = false; // Resetting flag on error as well
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
+                notifyDisconnected();
             }
         };
         currentListener = serviceStateListener;
@@ -94,7 +98,32 @@ class EngineRestarter implements NetworkToggleListener {
         }
 
         Log.d(LOGTAG, "engine is running, stopping due to network change");
+        notifyConnecting();
         engineRunner.stop();
+    }
+
+    private void notifyConnecting() {
+        ConnectionListener listener = engineRunner.getConnectionListener();
+        if (listener == null) {
+            return;
+        }
+        try {
+            listener.onConnecting();
+        } catch (Exception e) {
+            Log.w(LOGTAG, "onConnecting notification failed: " + e.getMessage());
+        }
+    }
+
+    private void notifyDisconnected() {
+        ConnectionListener listener = engineRunner.getConnectionListener();
+        if (listener == null) {
+            return;
+        }
+        try {
+            listener.onDisconnected();
+        } catch (Exception e) {
+            Log.w(LOGTAG, "onDisconnected notification failed: " + e.getMessage());
+        }
     }
 
     @Override
