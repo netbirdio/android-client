@@ -1,6 +1,5 @@
 package io.netbird.client.ui.advanced;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,7 +19,6 @@ import androidx.fragment.app.Fragment;
 import io.netbird.client.R;
 import io.netbird.client.databinding.ComponentSwitchBinding;
 import io.netbird.client.databinding.FragmentAdvancedBinding;
-import io.netbird.client.tool.Logcat;
 import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.ProfileManagerWrapper;
 
@@ -103,28 +101,7 @@ public class AdvancedFragment extends Fragment {
             setPreSharedKey(presharedKey, inflater.getContext());
         });
 
-        // Enable trace logs
         Preferences preferences = new Preferences(inflater.getContext());
-        binding.switchTraceLog.setChecked(preferences.isTraceLogEnabled());
-
-        // Handle trace log switch toggle
-        binding.switchTraceLog.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                preferences.enableTraceLog();
-            } else {
-                preferences.disableTraceLog();
-            }
-        });
-        
-        // Make parent layout clickable to toggle switch (for TV remote)
-        binding.traceLogLayout.setOnClickListener(v -> {
-            binding.switchTraceLog.toggle();
-        });
-
-        // Handle "Share Logs" button click
-        binding.buttonShareLogs.setOnClickListener(v -> {
-            shareLog();
-        });
 
         // Rosenpass settings
         try {
@@ -362,17 +339,4 @@ public class AdvancedFragment extends Fragment {
         }
     }
 
-    private void shareLog() {
-        Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-
-        try {
-            Logcat logcat = new Logcat(activity);
-            logcat.dump();
-        } catch (Exception e) {
-            Log.e(LOGTAG, "failed to dump log", e);
-        }
-    }
 }

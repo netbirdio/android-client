@@ -13,6 +13,7 @@
     <string name="menu_docs">Docs</string>
     <string name="menu_change_server">Change Server</string>
     <string name="menu_profiles">Profiles</string>
+    <string name="menu_troubleshoot">Troubleshoot</string>
 
     <string name="main_status_disconnected">Disconnected</string>
     <string name="main_desc_bg_mask">background mask</string>
@@ -77,6 +78,8 @@
     <string name="advanced_presharedkey_save_error">Failed to save pre-shared key</string>
     <string name="advanced_tracelog">Enable trace log level.</string>
     <string name="advanced_share_logs">Share logs</string>
+    <string name="troubleshoot_debug_bundle">Upload debug bundle</string>
+    <string name="troubleshoot_anonymize">Anonymize sensitive data</string>
     <string name="advanced_rosenpass">Enable Rosenpass</string>
     <string name="advanced_rosenpass_permissive">Enable Rosenpass permissive mode.</string>
     <string name="advanced_title_network_security">Network &amp; Security</string>
