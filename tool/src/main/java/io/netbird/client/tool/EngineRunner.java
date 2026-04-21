@@ -91,7 +91,8 @@ class EngineRunner {
 
             // Create fresh PlatformFiles with current config/state paths
             // This allows profile switching without recreating the entire Client
-            var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath);
+            String cacheDir = context.getCacheDir().getAbsolutePath();
+            var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath, cacheDir);
             Log.d(LOGTAG, "Running engine with config: " + configurationFilePath + ", state: " + stateFilePath);
 
             try {
