@@ -118,7 +118,7 @@ class EngineRunner {
                                 io.netbird.gomobile.android.Auth auth =
                                         io.netbird.gomobile.android.Android.newAuth(
                                                 configurationFilePath,
-                                                mdmConfig.getSetupKey());
+                                                mdmConfig.getManagementURL());
                                 if (auth != null) {
                                     auth.loginWithSetupKeySync(
                                             mdmConfig.getSetupKey(),
