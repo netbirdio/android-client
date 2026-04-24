@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android Enterprise Managed Configurations (App Restrictions) schema.
+  This defines the configuration keys that MDM/EMM solutions can push to the app.
+  Follows the AppConfig standard (appconfig.org) for key naming conventions.
+
+  Supported MDM platforms: Microsoft Intune, VMware Workspace ONE, Google Admin Console,
+  MobileIron, and any Android Enterprise-compatible EMM.
+-->
+<restrictions xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <restriction
+        android:key="managementUrl"
+        android:title="Management URL"
+        android:description="NetBird management server URL (e.g., https://api.netbird.io:443)"
+        android:restrictionType="string"
+        android:defaultValue="" />
+
+    <restriction
+        android:key="setupKey"
+        android:title="Setup Key"
+        android:description="Setup key for automatic device registration. Used once during initial enrollment."
+        android:restrictionType="string"
+        android:defaultValue="" />
+
+    <restriction
+        android:key="adminUrl"
+        android:title="Admin URL"
+        android:description="NetBird admin dashboard URL (e.g., https://app.netbird.io:443)"
+        android:restrictionType="string"
+        android:defaultValue="" />
+
+    <restriction
+        android:key="preSharedKey"
+        android:title="Pre-Shared Key"
+        android:description="WireGuard pre-shared key for additional encryption layer"
+        android:restrictionType="string"
+        android:defaultValue="" />
+
+    <restriction
+        android:key="rosenpassEnabled"
+        android:title="Enable Rosenpass"
+        android:description="Enable Rosenpass post-quantum encryption"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="rosenpassPermissive"
+        android:title="Rosenpass Permissive Mode"
+        android:description="Allow connections to peers that do not support Rosenpass"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="disableAutoConnect"
+        android:title="Disable Auto-Connect"
+        android:description="Prevent the VPN from automatically connecting on app launch"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+</restrictions>

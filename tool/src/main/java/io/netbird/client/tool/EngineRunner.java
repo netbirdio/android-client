@@ -94,6 +94,35 @@ class EngineRunner {
             var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath, context.getCacheDir().getAbsolutePath());
             Log.d(LOGTAG, "Running engine with config: " + configurationFilePath + ", state: " + stateFilePath);
 
+            // Apply MDM managed configuration before starting the engine.
+            // MDM values override user-set preferences on every launch.
+            try {
+                io.netbird.gomobile.android.ManagedConfig mdmConfig = ManagedConfigReader.read(context);
+                if (mdmConfig != null && mdmConfig.hasConfig()) {
+                    mdmConfig.apply(configurationFilePath);
+                    Log.i(LOGTAG, "MDM managed configuration applied");
+
+                    // If MDM provides a setup key and the engine needs login,
+                    // perform silent registration with the setup key
+                    if (mdmConfig.hasSetupKey()) {
+                        try {
+                            io.netbird.gomobile.android.Auth auth =
+                                    io.netbird.gomobile.android.Android.newAuth(configurationFilePath, "");
+                            if (auth != null) {
+                                auth.loginWithSetupKeySync(mdmConfig.getSetupKey(), DeviceName.getDeviceName());
+                                Log.i(LOGTAG, "MDM: silent setup key registration completed");
+                            }
+                        } catch (Exception e) {
+                            // Setup key login may fail if already registered or key expired.
+                            // This is not fatal — continue with normal flow.
+                            Log.w(LOGTAG, "MDM: setup key login skipped or failed: " + e.getMessage());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Failed to apply MDM config, continuing with existing config", e);
+            }
+
             try {
                 notifyServiceStateListeners(true);
                 if (urlOpener == null) {
