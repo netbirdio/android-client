@@ -11,50 +11,50 @@
 
     <restriction
         android:key="managementUrl"
-        android:title="Management URL"
-        android:description="NetBird management server URL (e.g., https://api.netbird.io:443)"
+        android:title="@string/mdm_management_url_title"
+        android:description="@string/mdm_management_url_desc"
         android:restrictionType="string"
         android:defaultValue="" />
 
     <restriction
         android:key="setupKey"
-        android:title="Setup Key"
-        android:description="Setup key for automatic device registration. Used once during initial enrollment."
+        android:title="@string/mdm_setup_key_title"
+        android:description="@string/mdm_setup_key_desc"
         android:restrictionType="string"
         android:defaultValue="" />
 
     <restriction
         android:key="adminUrl"
-        android:title="Admin URL"
-        android:description="NetBird admin dashboard URL (e.g., https://app.netbird.io:443)"
+        android:title="@string/mdm_admin_url_title"
+        android:description="@string/mdm_admin_url_desc"
         android:restrictionType="string"
         android:defaultValue="" />
 
     <restriction
         android:key="preSharedKey"
-        android:title="Pre-Shared Key"
-        android:description="WireGuard pre-shared key for additional encryption layer"
+        android:title="@string/mdm_pre_shared_key_title"
+        android:description="@string/mdm_pre_shared_key_desc"
         android:restrictionType="string"
         android:defaultValue="" />
 
     <restriction
         android:key="rosenpassEnabled"
-        android:title="Enable Rosenpass"
-        android:description="Enable Rosenpass post-quantum encryption"
+        android:title="@string/mdm_rosenpass_enabled_title"
+        android:description="@string/mdm_rosenpass_enabled_desc"
         android:restrictionType="bool"
         android:defaultValue="false" />
 
     <restriction
         android:key="rosenpassPermissive"
-        android:title="Rosenpass Permissive Mode"
-        android:description="Allow connections to peers that do not support Rosenpass"
+        android:title="@string/mdm_rosenpass_permissive_title"
+        android:description="@string/mdm_rosenpass_permissive_desc"
         android:restrictionType="bool"
         android:defaultValue="false" />
 
     <restriction
         android:key="disableAutoConnect"
-        android:title="Disable Auto-Connect"
-        android:description="Prevent the VPN from automatically connecting on app launch"
+        android:title="@string/mdm_disable_auto_connect_title"
+        android:description="@string/mdm_disable_auto_connect_desc"
         android:restrictionType="bool"
         android:defaultValue="false" />
 

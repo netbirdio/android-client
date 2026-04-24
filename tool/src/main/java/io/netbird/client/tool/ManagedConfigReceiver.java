@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import io.netbird.gomobile.android.ManagedConfig;
 
 /**
@@ -12,15 +15,15 @@ import io.netbird.gomobile.android.ManagedConfig;
  * when the MDM/EMM pushes updated managed configuration to the device.
  *
  * <p>This receiver re-reads the managed configuration and applies it to the
- * Go SDK config file. If the VPN engine is running and the management URL changed,
- * the engine should be restarted (handled by the EngineRunner via its existing
- * restart mechanism).</p>
+ * Go SDK config file. Work is performed off the main thread via {@code goAsync()}
+ * to avoid ANRs.</p>
  *
  * <p>Register this receiver in AndroidManifest.xml or dynamically in the VPNService.</p>
  */
 public class ManagedConfigReceiver extends BroadcastReceiver {
 
     private static final String TAG = "ManagedConfigReceiver";
+    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -30,19 +33,26 @@ public class ManagedConfigReceiver extends BroadcastReceiver {
 
         Log.i(TAG, "Application restrictions changed, re-reading MDM config");
 
-        ManagedConfig config = ManagedConfigReader.read(context);
-        if (config == null || !config.hasConfig()) {
-            Log.d(TAG, "No MDM config after restrictions change");
-            return;
-        }
+        final PendingResult pendingResult = goAsync();
+        EXECUTOR.execute(() -> {
+            try {
+                synchronized (EngineRunner.MDM_CONFIG_LOCK) {
+                    ManagedConfig config = ManagedConfigReader.read(context);
+                    if (config == null || !config.hasConfig()) {
+                        Log.d(TAG, "No MDM config after restrictions change");
+                        return;
+                    }
 
-        try {
-            ProfileManagerWrapper profileManager = new ProfileManagerWrapper(context);
-            String configPath = profileManager.getActiveConfigPath();
-            config.apply(configPath);
-            Log.i(TAG, "MDM config re-applied after restrictions change");
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to apply MDM config after restrictions change", e);
-        }
+                    ProfileManagerWrapper profileManager = new ProfileManagerWrapper(context);
+                    String configPath = profileManager.getActiveConfigPath();
+                    config.apply(configPath);
+                    Log.i(TAG, "MDM config re-applied after restrictions change");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to apply MDM config after restrictions change", e);
+            } finally {
+                pendingResult.finish();
+            }
+        });
     }
 }
