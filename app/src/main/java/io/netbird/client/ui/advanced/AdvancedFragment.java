@@ -197,6 +197,7 @@ public class AdvancedFragment extends Fragment {
             binding.switchDisableFirewall.setChecked(goPreferences.getDisableFirewall());
             binding.switchAllowSsh.setChecked(goPreferences.getServerSSHAllowed());
             binding.switchBlockInbound.setChecked(goPreferences.getBlockInbound());
+            binding.switchLazyConnection.setChecked(goPreferences.getLazyConnectionEnabled());
 
             // Set up change listeners
             binding.switchDisableClientRoutes.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -252,14 +253,27 @@ public class AdvancedFragment extends Fragment {
                     Log.e(LOGTAG, "Failed to set block inbound", e);
                 }
             });
-            
+
+            binding.switchLazyConnection.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setLazyConnectionEnabled(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set lazy connection", e);
+                }
+            });
+
             // Make parent layouts clickable to toggle switches (for TV remote)
             binding.layoutAllowSsh.setOnClickListener(v -> {
                 binding.switchAllowSsh.toggle();
             });
-            
+
             binding.layoutBlockInbound.setOnClickListener(v -> {
                 binding.switchBlockInbound.toggle();
+            });
+
+            binding.layoutLazyConnection.setOnClickListener(v -> {
+                binding.switchLazyConnection.toggle();
             });
             
             binding.layoutDisableClientRoutes.setOnClickListener(v -> {
