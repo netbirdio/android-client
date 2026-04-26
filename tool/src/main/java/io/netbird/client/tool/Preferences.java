@@ -8,6 +8,10 @@ public class Preferences {
     private final String keyTraceLog = "tracelog";
 
     private final String keyForceRelayConnection = "isConnectionForceRelayed";
+    private final String keyLastExitNodeRoute = "lastExitNodeRoute";
+    private final String keyWidgetVpnRunning = "widgetVpnRunning";
+    private final String keyWidgetExitNodeActive = "widgetExitNodeActive";
+    private final String keyWidgetExitNodeName = "widgetExitNodeName";
 
     private final SharedPreferences sharedPref;
 
@@ -36,6 +40,44 @@ public class Preferences {
 
     public void disableForcedRelayConnection() {
         sharedPref.edit().putBoolean(keyForceRelayConnection, false).apply();
+    }
+
+    public String getLastExitNodeRoute() {
+        return sharedPref.getString(keyLastExitNodeRoute, null);
+    }
+
+    public void setLastExitNodeRoute(String route) {
+        if (route == null || route.trim().isEmpty()) {
+            sharedPref.edit().remove(keyLastExitNodeRoute).apply();
+            return;
+        }
+        sharedPref.edit().putString(keyLastExitNodeRoute, route).apply();
+    }
+
+    public boolean isWidgetVpnRunning() {
+        return sharedPref.getBoolean(keyWidgetVpnRunning, false);
+    }
+
+    public boolean isWidgetExitNodeActive() {
+        return sharedPref.getBoolean(keyWidgetExitNodeActive, false);
+    }
+
+    public String getWidgetExitNodeName() {
+        return sharedPref.getString(keyWidgetExitNodeName, null);
+    }
+
+    public void setWidgetState(boolean vpnRunning, boolean exitNodeActive, String exitNodeName) {
+        SharedPreferences.Editor editor = sharedPref.edit()
+                .putBoolean(keyWidgetVpnRunning, vpnRunning)
+                .putBoolean(keyWidgetExitNodeActive, exitNodeActive);
+
+        if (exitNodeName == null || exitNodeName.trim().isEmpty()) {
+            editor.remove(keyWidgetExitNodeName);
+        } else {
+            editor.putString(keyWidgetExitNodeName, exitNodeName);
+        }
+
+        editor.apply();
     }
 
     public static String defaultServer() {
