@@ -20,6 +20,7 @@ public class NetworkChangeDetector {
     private volatile NetworkAvailabilityListener listener;
     private final AtomicBoolean defaultNetworkCallbackActive = new AtomicBoolean(false);
     private final AtomicReference<Network> currentlyBoundDefaultNetwork = new AtomicReference<>(null);
+    private final Object networkCallbackLock = new Object();
 
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
         this.connectivityManager = connectivityManager;
@@ -69,39 +70,43 @@ public class NetworkChangeDetector {
         defaultNetworkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
-                if (!defaultNetworkCallbackActive.get()) {
-                    Log.d(LOGTAG, "ignoring onAvailable for " + network + "; default callback inactive");
-                    return;
-                }
-                Log.d(LOGTAG, "default network became " + network + ", binding process to it");
-                try {
-                    if (connectivityManager.bindProcessToNetwork(network)) {
-                        currentlyBoundDefaultNetwork.set(network);
-                    } else {
-                        Log.w(LOGTAG, "bindProcessToNetwork returned false for " + network);
+                synchronized (networkCallbackLock) {
+                    if (!defaultNetworkCallbackActive.get()) {
+                        Log.d(LOGTAG, "ignoring onAvailable for " + network + "; default callback inactive");
+                        return;
                     }
-                } catch (Exception e) {
-                    Log.e(LOGTAG, "bindProcessToNetwork failed", e);
+                    Log.d(LOGTAG, "default network became " + network + ", binding process to it");
+                    try {
+                        if (connectivityManager.bindProcessToNetwork(network)) {
+                            currentlyBoundDefaultNetwork.set(network);
+                        } else {
+                            Log.w(LOGTAG, "bindProcessToNetwork returned false for " + network);
+                        }
+                    } catch (Exception e) {
+                        Log.e(LOGTAG, "bindProcessToNetwork failed", e);
+                    }
                 }
             }
 
             @Override
             public void onLost(@NonNull Network network) {
-                if (!defaultNetworkCallbackActive.get()) {
-                    Log.d(LOGTAG, "ignoring onLost for " + network + "; default callback inactive");
-                    return;
-                }
-                if (!network.equals(currentlyBoundDefaultNetwork.get())) {
-                    Log.d(LOGTAG, "ignoring onLost for " + network + "; not the currently bound default network");
-                    return;
-                }
-                Log.d(LOGTAG, "default network " + network + " lost, clearing process binding");
-                try {
-                    if (connectivityManager.bindProcessToNetwork(null)) {
-                        currentlyBoundDefaultNetwork.compareAndSet(network, null);
+                synchronized (networkCallbackLock) {
+                    if (!defaultNetworkCallbackActive.get()) {
+                        Log.d(LOGTAG, "ignoring onLost for " + network + "; default callback inactive");
+                        return;
                     }
-                } catch (Exception e) {
-                    Log.e(LOGTAG, "bindProcessToNetwork(null) failed", e);
+                    if (!network.equals(currentlyBoundDefaultNetwork.get())) {
+                        Log.d(LOGTAG, "ignoring onLost for " + network + "; not the currently bound default network");
+                        return;
+                    }
+                    Log.d(LOGTAG, "default network " + network + " lost, clearing process binding");
+                    try {
+                        if (connectivityManager.bindProcessToNetwork(null)) {
+                            currentlyBoundDefaultNetwork.compareAndSet(network, null);
+                        }
+                    } catch (Exception e) {
+                        Log.e(LOGTAG, "bindProcessToNetwork(null) failed", e);
+                    }
                 }
             }
         };
@@ -116,22 +121,24 @@ public class NetworkChangeDetector {
     }
 
     public void unregisterNetworkCallback() {
-        defaultNetworkCallbackActive.set(false);
         try {
             connectivityManager.unregisterNetworkCallback(networkCallback);
         } catch (Exception e) {
             Log.e(LOGTAG, "failed to unregister network callback", e);
         }
-        try {
-            connectivityManager.unregisterNetworkCallback(defaultNetworkCallback);
-        } catch (Exception e) {
-            Log.e(LOGTAG, "failed to unregister default network callback", e);
-        }
-        try {
-            connectivityManager.bindProcessToNetwork(null);
-            currentlyBoundDefaultNetwork.set(null);
-        } catch (Exception e) {
-            Log.e(LOGTAG, "bindProcessToNetwork(null) on unregister failed", e);
+        synchronized (networkCallbackLock) {
+            defaultNetworkCallbackActive.set(false);
+            try {
+                connectivityManager.unregisterNetworkCallback(defaultNetworkCallback);
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to unregister default network callback", e);
+            }
+            try {
+                connectivityManager.bindProcessToNetwork(null);
+                currentlyBoundDefaultNetwork.set(null);
+            } catch (Exception e) {
+                Log.e(LOGTAG, "bindProcessToNetwork(null) on unregister failed", e);
+            }
         }
     }
 
