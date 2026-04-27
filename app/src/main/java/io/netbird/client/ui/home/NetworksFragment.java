@@ -145,6 +145,7 @@ public class NetworksFragment extends Fragment {
             rememberExitNodeSelection(route);
         } else {
             model.deselectRoute(route);
+            forgetExitNodeSelection(route);
         }
     }
 
@@ -152,6 +153,18 @@ public class NetworksFragment extends Fragment {
         for (Resource resource : resources) {
             if (route.equals(resource.getName()) && resource.isExitNode()) {
                 new Preferences(requireContext()).setLastExitNodeRoute(route);
+                return;
+            }
+        }
+    }
+
+    private void forgetExitNodeSelection(String route) {
+        for (Resource resource : resources) {
+            if (route.equals(resource.getName()) && resource.isExitNode()) {
+                Preferences preferences = new Preferences(requireContext());
+                if (route.equals(preferences.getLastExitNodeRoute())) {
+                    preferences.setLastExitNodeRoute("");
+                }
                 return;
             }
         }

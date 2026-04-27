@@ -2,4 +2,6 @@
     <string name="service_name">NetBird</string>
     <string name="fg_notification_channel_name">NetBird service</string>
     <string name="fg_notification_text">Service is running</string>
+    <string name="widget_open_app_permission_text">Open NetBird to grant VPN permission for the widget</string>
+    <string name="widget_open_app_setup_text">Open NetBird to finish setup before using the widget</string>
 </resources>

@@ -80,6 +80,29 @@ public class Preferences {
         editor.apply();
     }
 
+    public void setWidgetStateAndLastExitNodeRoute(String lastExitNodeRoute,
+                                                   boolean vpnRunning,
+                                                   boolean exitNodeActive,
+                                                   String exitNodeName) {
+        SharedPreferences.Editor editor = sharedPref.edit()
+                .putBoolean(keyWidgetVpnRunning, vpnRunning)
+                .putBoolean(keyWidgetExitNodeActive, exitNodeActive);
+
+        if (lastExitNodeRoute == null || lastExitNodeRoute.trim().isEmpty()) {
+            editor.remove(keyLastExitNodeRoute);
+        } else {
+            editor.putString(keyLastExitNodeRoute, lastExitNodeRoute);
+        }
+
+        if (exitNodeName == null || exitNodeName.trim().isEmpty()) {
+            editor.remove(keyWidgetExitNodeName);
+        } else {
+            editor.putString(keyWidgetExitNodeName, exitNodeName);
+        }
+
+        editor.apply();
+    }
+
     public static String defaultServer() {
         return "https://api.netbird.io";
     }

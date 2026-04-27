@@ -5,7 +5,7 @@
             <size
                 android:width="52dp"
                 android:height="32dp" />
-            <solid android:color="@color/track_off_color" />
+            <solid android:color="@color/track_on_color" />
             <corners android:radius="16dp" />
         </shape>
     </item>

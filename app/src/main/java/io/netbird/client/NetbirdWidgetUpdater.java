@@ -39,7 +39,12 @@ public class NetbirdWidgetUpdater {
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_netbird);
         views.setTextViewText(R.id.widget_connection_status,
-                context.getString(vpnRunning ? R.string.widget_status_connected : R.string.widget_status_disconnected));
+                context.getString(vpnRunning ? R.string.widget_status_connected : R.string.main_status_disconnected));
+        views.setContentDescription(
+                R.id.widget_connection_switch,
+                context.getString(vpnRunning
+                        ? R.string.widget_connection_switch_connected
+                        : R.string.widget_connection_switch_disconnected));
 
         int connectionColor = context.getColor(vpnRunning ? R.color.nb_orange : R.color.nb_button_inactive);
         views.setTextColor(R.id.widget_connection_status, connectionColor);
@@ -58,15 +63,18 @@ public class NetbirdWidgetUpdater {
         views.setTextColor(R.id.widget_exit_status, exitColor);
         views.setInt(R.id.widget_exit_switch, "setBackgroundResource",
                 exitNodeActive ? R.drawable.widget_switch_on : R.drawable.widget_switch_off);
+        views.setContentDescription(
+                R.id.widget_exit_switch,
+                context.getString(exitNodeAvailable
+                        ? (exitNodeActive
+                                ? R.string.widget_exit_switch_enabled
+                                : R.string.widget_exit_switch_disabled)
+                        : R.string.widget_exit_switch_unavailable));
 
         PendingIntent connectionIntent = servicePendingIntent(
                 context,
                 VPNService.ACTION_WIDGET_TOGGLE_CONNECTION,
                 REQUEST_TOGGLE_CONNECTION);
-        PendingIntent exitNodeIntent = servicePendingIntent(
-                context,
-                VPNService.ACTION_WIDGET_TOGGLE_EXIT_NODE,
-                REQUEST_TOGGLE_EXIT_NODE);
 
         views.setOnClickPendingIntent(R.id.widget_connection_switch,
                 connectionIntent);
@@ -74,12 +82,19 @@ public class NetbirdWidgetUpdater {
                 connectionIntent);
         views.setOnClickPendingIntent(R.id.widget_connection_status,
                 connectionIntent);
-        views.setOnClickPendingIntent(R.id.widget_exit_switch,
-                exitNodeIntent);
-        views.setOnClickPendingIntent(R.id.widget_exit_icon,
-                exitNodeIntent);
-        views.setOnClickPendingIntent(R.id.widget_exit_status,
-                exitNodeIntent);
+
+        if (exitNodeAvailable) {
+            PendingIntent exitNodeIntent = servicePendingIntent(
+                    context,
+                    VPNService.ACTION_WIDGET_TOGGLE_EXIT_NODE,
+                    REQUEST_TOGGLE_EXIT_NODE);
+            views.setOnClickPendingIntent(R.id.widget_exit_switch,
+                    exitNodeIntent);
+            views.setOnClickPendingIntent(R.id.widget_exit_icon,
+                    exitNodeIntent);
+            views.setOnClickPendingIntent(R.id.widget_exit_status,
+                    exitNodeIntent);
+        }
 
         return views;
     }

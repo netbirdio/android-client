@@ -16,6 +16,14 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
@@ -38,12 +46,20 @@ public class VPNService extends android.net.VpnService {
     private static final long EXIT_NODE_RETRY_DELAY_MS = 500;
     private static final int WIDGET_STATE_REFRESH_COUNT = 12;
     private static final long WIDGET_STATE_REFRESH_DELAY_MS = 500;
+    private static final String WIDGET_PROVIDER_CLASS_NAME = "io.netbird.client.NetbirdWidgetProvider";
     private final IBinder myBinder = new MyLocalBinder();
+    private final ExecutorService widgetActionExecutor = Executors.newSingleThreadExecutor();
+    private final ScheduledExecutorService widgetRefreshExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final AtomicBoolean widgetExitToggleInFlight = new AtomicBoolean(false);
+    private final AtomicBoolean widgetRefreshInFlight = new AtomicBoolean(false);
+    private final AtomicInteger widgetRefreshIteration = new AtomicInteger(0);
+    private final AtomicReference<ScheduledFuture<?>> widgetRefreshTask = new AtomicReference<>();
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
     private TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
     private Preferences preferences;
+    private ProfileManagerWrapper profileManager;
 
     private RouteChangeListener listener;
 
@@ -72,7 +88,7 @@ public class VPNService extends android.net.VpnService {
         preferences = new Preferences(this);
 
         // Create profile manager for managing profiles
-        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
+        profileManager = new ProfileManagerWrapper(this);
 
         // Create foreground notification before initializing engine
         fgNotification = new ForegroundNotification(this);
@@ -186,6 +202,10 @@ public class VPNService extends android.net.VpnService {
             tunCreator.getHandler().getLooper().quitSafely();
             tunCreator = null;
         }
+
+        stopWidgetStateRefresh();
+        widgetActionExecutor.shutdownNow();
+        widgetRefreshExecutor.shutdownNow();
     }
 
     @Override
@@ -303,12 +323,14 @@ public class VPNService extends android.net.VpnService {
 
         @Override
         public void onStopped() {
+            stopWidgetStateRefresh();
             fgNotification.stopForeground();
             updateWidgetStateAndBroadcast();
         }
 
         @Override
         public void onError(String msg) {
+            stopWidgetStateRefresh();
             fgNotification.stopForeground();
             updateWidgetStateAndBroadcast();
         }
@@ -321,6 +343,11 @@ public class VPNService extends android.net.VpnService {
             return;
         }
 
+        if (!hasUsableActiveProfile()) {
+            promptUserToOpenApp(R.string.widget_open_app_setup_text);
+            return;
+        }
+
         if (!ensureVpnPermissionFromWidget()) {
             return;
         }
@@ -330,6 +357,11 @@ public class VPNService extends android.net.VpnService {
     }
 
     private void handleWidgetExitNodeToggle() {
+        if (!engineRunner.isRunning() && !hasUsableActiveProfile()) {
+            promptUserToOpenApp(R.string.widget_open_app_setup_text);
+            return;
+        }
+
         if (!ensureVpnPermissionFromWidget()) {
             return;
         }
@@ -338,15 +370,20 @@ public class VPNService extends android.net.VpnService {
             engineRunner.runWithoutAuth();
         }
 
-        new Thread(() -> {
+        if (!widgetExitToggleInFlight.compareAndSet(false, true)) {
+            return;
+        }
+
+        widgetActionExecutor.execute(() -> {
             try {
                 toggleExitNodeWhenAvailable();
             } catch (Exception e) {
                 Log.e(LOGTAG, "failed to toggle exit node from widget", e);
             } finally {
+                widgetExitToggleInFlight.set(false);
                 updateWidgetStateAndBroadcast();
             }
-        }).start();
+        });
     }
 
     private boolean ensureVpnPermissionFromWidget() {
@@ -354,23 +391,22 @@ public class VPNService extends android.net.VpnService {
             return true;
         }
 
-        openMainActivity();
-        if (!engineRunner.isRunning()) {
-            fgNotification.stopForeground();
-            stopSelf();
-        }
+        promptUserToOpenApp(R.string.widget_open_app_permission_text);
         updateWidgetStateAndBroadcast();
         return false;
     }
 
-    private void openMainActivity() {
-        Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
-        if (intent == null) {
-            return;
-        }
+    private boolean hasUsableActiveProfile() {
+        return profileManager != null && profileManager.hasUsableActiveProfile();
+    }
 
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+    private void promptUserToOpenApp(int messageResId) {
+        fgNotification.stopForeground();
+        fgNotification.showNotification(getString(messageResId));
+
+        if (!engineRunner.isRunning()) {
+            stopSelf();
+        }
     }
 
     private void toggleExitNodeWhenAvailable() throws Exception {
@@ -405,8 +441,6 @@ public class VPNService extends android.net.VpnService {
         if (shouldSelectTarget) {
             engineRunner.selectRoute(target.name);
         }
-
-        preferences.setLastExitNodeRoute(target.name);
     }
 
     private ExitNode findExitNode(List<ExitNode> exitNodes, String name) {
@@ -439,56 +473,90 @@ public class VPNService extends android.net.VpnService {
         return exitNodes;
     }
 
-    private void updateWidgetStateAndBroadcast() {
+    private synchronized void updateWidgetStateAndBroadcast() {
         if (preferences == null || engineRunner == null) {
             return;
         }
 
         boolean isRunning = engineRunner.isRunning();
         boolean hasSelectedExitNode = false;
-        String exitNodeName = preferences.getLastExitNodeRoute();
+        String lastExitNodeRoute = preferences.getLastExitNodeRoute();
+        String exitNodeName = lastExitNodeRoute;
 
         if (isRunning) {
             for (ExitNode exitNode : getExitNodes()) {
                 if (exitNode.selected) {
                     hasSelectedExitNode = true;
                     exitNodeName = exitNode.name;
-                    preferences.setLastExitNodeRoute(exitNodeName);
+                    lastExitNodeRoute = exitNode.name;
                     break;
                 }
             }
         }
 
-        preferences.setWidgetState(isRunning, hasSelectedExitNode, exitNodeName);
+        preferences.setWidgetStateAndLastExitNodeRoute(
+                lastExitNodeRoute,
+                isRunning,
+                hasSelectedExitNode,
+                exitNodeName);
 
         Intent refreshIntent = new Intent(ACTION_WIDGET_REFRESH);
-        refreshIntent.setPackage(getPackageName());
+        refreshIntent.setClassName(getPackageName(), WIDGET_PROVIDER_CLASS_NAME);
         sendBroadcast(refreshIntent);
     }
 
-    private void scheduleWidgetStateRefresh() {
-        new Thread(() -> {
-            for (int i = 0; i < WIDGET_STATE_REFRESH_COUNT; i++) {
-                try {
-                    Thread.sleep(WIDGET_STATE_REFRESH_DELAY_MS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
+    private synchronized void scheduleWidgetStateRefresh() {
+        if (!widgetRefreshInFlight.compareAndSet(false, true)) {
+            return;
+        }
 
+        widgetRefreshIteration.set(0);
+        AtomicReference<ScheduledFuture<?>> scheduledTaskRef = new AtomicReference<>();
+        ScheduledFuture<?> refreshTask = widgetRefreshExecutor.scheduleWithFixedDelay(() -> {
+            try {
+                int iteration = widgetRefreshIteration.incrementAndGet();
                 updateWidgetStateAndBroadcast();
 
-                if (!engineRunner.isRunning()) {
-                    return;
+                if (iteration >= WIDGET_STATE_REFRESH_COUNT
+                        || !engineRunner.isRunning()
+                        || hasSelectedExitNode()) {
+                    stopWidgetStateRefresh(scheduledTaskRef.get());
                 }
-
-                for (ExitNode exitNode : getExitNodes()) {
-                    if (exitNode.selected) {
-                        return;
-                    }
-                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to refresh widget state", e);
+                stopWidgetStateRefresh(scheduledTaskRef.get());
             }
-        }).start();
+        }, WIDGET_STATE_REFRESH_DELAY_MS, WIDGET_STATE_REFRESH_DELAY_MS, TimeUnit.MILLISECONDS);
+        scheduledTaskRef.set(refreshTask);
+        widgetRefreshTask.set(refreshTask);
+    }
+
+    private boolean hasSelectedExitNode() {
+        for (ExitNode exitNode : getExitNodes()) {
+            if (exitNode.selected) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private synchronized void stopWidgetStateRefresh() {
+        ScheduledFuture<?> refreshTask = widgetRefreshTask.getAndSet(null);
+        if (refreshTask != null) {
+            refreshTask.cancel(false);
+        }
+        widgetRefreshInFlight.set(false);
+    }
+
+    private synchronized void stopWidgetStateRefresh(@Nullable ScheduledFuture<?> expectedTask) {
+        if (expectedTask == null) {
+            return;
+        }
+
+        if (widgetRefreshTask.compareAndSet(expectedTask, null)) {
+            expectedTask.cancel(false);
+            widgetRefreshInFlight.set(false);
+        }
     }
 
     private static class ExitNode {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,6 +127,21 @@ public class ProfileManagerWrapper {
      */
     public String getActiveStateFilePath() throws Exception {
         return profileManager.getActiveStateFilePath();
+    }
+
+    public boolean hasUsableActiveProfile() {
+        try {
+            String configPath = profileManager.getActiveConfigPath();
+            if (configPath == null || configPath.trim().isEmpty()) {
+                return false;
+            }
+
+            File configFile = new File(configPath);
+            return configFile.isFile() && configFile.length() > 0;
+        } catch (Exception e) {
+            Log.w(TAG, "No usable active profile is available", e);
+            return false;
+        }
     }
 
     /**

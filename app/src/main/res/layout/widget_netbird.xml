@@ -25,7 +25,7 @@
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:text="@string/widget_status_disconnected"
+            android:text="@string/main_status_disconnected"
             android:textColor="@color/nb_txt"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -51,6 +51,7 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="12dp"
                 android:background="@drawable/widget_switch_off"
+                android:contentDescription="@string/widget_connection_switch_disconnected"
                 android:text="" />
         </LinearLayout>
     </LinearLayout>
@@ -96,6 +97,7 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="12dp"
                 android:background="@drawable/widget_switch_off"
+                android:contentDescription="@string/widget_exit_switch_unavailable"
                 android:text="" />
         </LinearLayout>
     </LinearLayout>
