@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.core.util.Consumer;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class NetworkChangeDetector {
     private static final String LOGTAG = NetworkChangeDetector.class.getSimpleName();
@@ -19,7 +18,6 @@ public class NetworkChangeDetector {
     private ConnectivityManager.NetworkCallback defaultNetworkCallback;
     private volatile NetworkAvailabilityListener listener;
     private final AtomicBoolean defaultNetworkCallbackActive = new AtomicBoolean(false);
-    private final AtomicReference<Network> currentlyBoundDefaultNetwork = new AtomicReference<>(null);
     private final Object networkCallbackLock = new Object();
 
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
@@ -79,61 +77,27 @@ public class NetworkChangeDetector {
                     }
                     NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(network);
                     if (caps == null) {
-                        Log.w(LOGTAG, "default network " + network + " has no capabilities; skipping bindProcessToNetwork");
+                        Log.w(LOGTAG, "default network " + network + " has no capabilities");
                         return;
                     }
                     if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
-                        Log.w(LOGTAG, "default network " + network + " is a VPN; skipping bindProcessToNetwork to avoid routing loop");
+                        Log.d(LOGTAG, "default network " + network + " is a VPN; ignoring");
                         return;
                     }
-                    Log.d(LOGTAG, "default network became " + network + ", binding process to it");
-                    try {
-                        if (connectivityManager.bindProcessToNetwork(network)) {
-                            currentlyBoundDefaultNetwork.set(network);
-                        } else {
-                            Log.w(LOGTAG, "bindProcessToNetwork returned false for " + network);
-                        }
-                    } catch (Exception e) {
-                        Log.e(LOGTAG, "bindProcessToNetwork failed", e);
-                    }
-
                     // The default-network signal is the authoritative source of
                     // the active transport type; the per-network onAvailable/onLost
                     // pairing can miss seamless WiFi→cellular→WiFi handovers.
-                    if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
-                        if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                            listenerToNotify = listener;
-                            notifyType = Constants.NetworkType.WIFI;
-                        } else if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                            listenerToNotify = listener;
-                            notifyType = Constants.NetworkType.MOBILE;
-                        }
+                    if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        listenerToNotify = listener;
+                        notifyType = Constants.NetworkType.WIFI;
+                    } else if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                        listenerToNotify = listener;
+                        notifyType = Constants.NetworkType.MOBILE;
                     }
+                    Log.d(LOGTAG, "default network became " + network);
                 }
                 if (listenerToNotify != null) {
                     listenerToNotify.onDefaultNetworkTypeChanged(notifyType);
-                }
-            }
-
-            @Override
-            public void onLost(@NonNull Network network) {
-                synchronized (networkCallbackLock) {
-                    if (!defaultNetworkCallbackActive.get()) {
-                        Log.d(LOGTAG, "ignoring onLost for " + network + "; default callback inactive");
-                        return;
-                    }
-                    if (!network.equals(currentlyBoundDefaultNetwork.get())) {
-                        Log.d(LOGTAG, "ignoring onLost for " + network + "; not the currently bound default network");
-                        return;
-                    }
-                    Log.d(LOGTAG, "default network " + network + " lost, clearing process binding");
-                    try {
-                        if (connectivityManager.bindProcessToNetwork(null)) {
-                            currentlyBoundDefaultNetwork.compareAndSet(network, null);
-                        }
-                    } catch (Exception e) {
-                        Log.e(LOGTAG, "bindProcessToNetwork(null) failed", e);
-                    }
                 }
             }
         };
@@ -161,12 +125,6 @@ public class NetworkChangeDetector {
                 connectivityManager.unregisterNetworkCallback(defaultNetworkCallback);
             } catch (Exception e) {
                 Log.e(LOGTAG, "failed to unregister default network callback", e);
-            }
-            try {
-                connectivityManager.bindProcessToNetwork(null);
-                currentlyBoundDefaultNetwork.set(null);
-            } catch (Exception e) {
-                Log.e(LOGTAG, "bindProcessToNetwork(null) on unregister failed", e);
             }
         }
     }
