@@ -49,11 +49,18 @@ class EngineRestarter implements NetworkToggleListener {
 
         isRestartInProgress = true;
 
+        // Snapshot the current listener so we can suppress state events from the
+        // old engine during teardown and re-attach it once the new engine starts.
+        ConnectionListener savedListener = engineRunner.getConnectionListener();
+
         timeoutCallback = () -> {
             if (isRestartInProgress) {
                 Log.e(LOGTAG, "engine restart timeout - forcing flag reset");
                 isRestartInProgress = false;
-                notifyDisconnected();
+                if (savedListener != null) {
+                    engineRunner.setConnectionListener(savedListener);
+                }
+                notifyDisconnected(savedListener);
             }
         };
 
@@ -69,12 +76,16 @@ class EngineRestarter implements NetworkToggleListener {
                 isRestartInProgress = false;  // Reset flag on success
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
+                // Re-attach the listener; the Go notifier will deliver the
+                // current state (typically Connecting) immediately on attach.
+                if (savedListener != null) {
+                    engineRunner.setConnectionListener(savedListener);
+                }
             }
 
             @Override
             public void onStopped() {
                 Log.d(LOGTAG, "engine is stopped, restarting...");
-                notifyConnecting();
                 engineRunner.runWithoutAuth();
             }
 
@@ -84,7 +95,10 @@ class EngineRestarter implements NetworkToggleListener {
                 isRestartInProgress = false; // Resetting flag on error as well
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
-                notifyDisconnected();
+                if (savedListener != null) {
+                    engineRunner.setConnectionListener(savedListener);
+                }
+                notifyDisconnected(savedListener);
             }
         };
         currentListener = serviceStateListener;
@@ -98,12 +112,15 @@ class EngineRestarter implements NetworkToggleListener {
         }
 
         Log.d(LOGTAG, "engine is running, stopping due to network change");
-        notifyConnecting();
+        // Detach the listener before stopping so the old engine's teardown
+        // events (Disconnecting / Disconnected) do not reach the UI; we drive
+        // the visible state ourselves with notifyConnecting().
+        engineRunner.removeStatusListener();
+        notifyConnecting(savedListener);
         engineRunner.stop();
     }
 
-    private void notifyConnecting() {
-        ConnectionListener listener = engineRunner.getConnectionListener();
+    private void notifyConnecting(ConnectionListener listener) {
         if (listener == null) {
             return;
         }
@@ -114,8 +131,7 @@ class EngineRestarter implements NetworkToggleListener {
         }
     }
 
-    private void notifyDisconnected() {
-        ConnectionListener listener = engineRunner.getConnectionListener();
+    private void notifyDisconnected(ConnectionListener listener) {
         if (listener == null) {
             return;
         }
