@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,7 @@ public class VPNService extends android.net.VpnService {
     private static final String WIDGET_PROVIDER_CLASS_NAME = "io.netbird.client.NetbirdWidgetProvider";
     private final IBinder myBinder = new MyLocalBinder();
     private final ExecutorService widgetActionExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService widgetStateExecutor = Executors.newSingleThreadExecutor();
     private final ScheduledExecutorService widgetRefreshExecutor = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean widgetExitToggleInFlight = new AtomicBoolean(false);
     private final AtomicBoolean widgetRefreshInFlight = new AtomicBoolean(false);
@@ -84,7 +86,7 @@ public class VPNService extends android.net.VpnService {
 
         listener = routes -> {
             queueTUNRenewal(routes);
-            updateWidgetStateAndBroadcast();
+            requestWidgetStateUpdate();
         };
 
         notifier = new NetworkChangeNotifier(this);
@@ -210,6 +212,7 @@ public class VPNService extends android.net.VpnService {
 
         stopWidgetStateRefresh();
         widgetActionExecutor.shutdownNow();
+        widgetStateExecutor.shutdownNow();
         widgetRefreshExecutor.shutdownNow();
     }
 
@@ -322,7 +325,7 @@ public class VPNService extends android.net.VpnService {
     public ServiceStateListener serviceStateListener = new ServiceStateListener() {
         @Override
         public void onStarted() {
-            updateWidgetStateAndBroadcast();
+            requestWidgetStateUpdate();
             scheduleWidgetStateRefresh();
         }
 
@@ -330,21 +333,21 @@ public class VPNService extends android.net.VpnService {
         public void onStopped() {
             stopWidgetStateRefresh();
             fgNotification.stopForeground();
-            updateWidgetStateAndBroadcast();
+            requestWidgetStateUpdate();
         }
 
         @Override
         public void onError(String msg) {
             stopWidgetStateRefresh();
             fgNotification.stopForeground();
-            updateWidgetStateAndBroadcast();
+            requestWidgetStateUpdate();
         }
     };
 
     private void handleWidgetConnectionToggle() {
         if (engineRunner.isRunning()) {
             engineRunner.stop();
-            updateWidgetStateAndBroadcast();
+            requestWidgetStateUpdate();
             return;
         }
 
@@ -358,7 +361,7 @@ public class VPNService extends android.net.VpnService {
         }
 
         engineRunner.runWithoutAuth();
-        updateWidgetStateAndBroadcast();
+        requestWidgetStateUpdate();
     }
 
     private void handleWidgetExitNodeToggle() {
@@ -386,7 +389,7 @@ public class VPNService extends android.net.VpnService {
                 Log.e(LOGTAG, "failed to toggle exit node from widget", e);
             } finally {
                 widgetExitToggleInFlight.set(false);
-                updateWidgetStateAndBroadcast();
+                requestWidgetStateUpdate();
             }
         });
     }
@@ -397,8 +400,20 @@ public class VPNService extends android.net.VpnService {
         }
 
         promptUserToOpenApp(R.string.widget_open_app_permission_text);
-        updateWidgetStateAndBroadcast();
+        requestWidgetStateUpdate();
         return false;
+    }
+
+    private void requestWidgetStateUpdate() {
+        if (widgetStateExecutor.isShutdown()) {
+            return;
+        }
+
+        try {
+            widgetStateExecutor.execute(this::updateWidgetStateAndBroadcast);
+        } catch (RejectedExecutionException e) {
+            Log.w(LOGTAG, "widget state update was rejected", e);
+        }
     }
 
     private boolean hasUsableActiveProfile() {
@@ -548,7 +563,7 @@ public class VPNService extends android.net.VpnService {
         ScheduledFuture<?> refreshTask = widgetRefreshExecutor.scheduleWithFixedDelay(() -> {
             try {
                 int iteration = widgetRefreshIteration.incrementAndGet();
-                updateWidgetStateAndBroadcast();
+                requestWidgetStateUpdate();
 
                 if (iteration >= WIDGET_STATE_REFRESH_COUNT
                         || !engineRunner.isRunning()
