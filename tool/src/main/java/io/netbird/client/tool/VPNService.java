@@ -1,18 +1,23 @@
 package io.netbird.client.tool;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.VpnService;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +47,10 @@ public class VPNService extends android.net.VpnService {
     public static final String ACTION_WIDGET_REFRESH = "io.netbird.client.widget.action.REFRESH";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
     private static final String EXIT_NODE_NETWORK = "0.0.0.0/0";
-    private static final int EXIT_NODE_RETRY_COUNT = 12;
-    private static final long EXIT_NODE_RETRY_DELAY_MS = 500;
     private static final int WIDGET_STATE_REFRESH_COUNT = 12;
     private static final long WIDGET_STATE_REFRESH_DELAY_MS = 500;
+    private static final int EXIT_NODE_RETRY_COUNT = WIDGET_STATE_REFRESH_COUNT * 2;
+    private static final long EXIT_NODE_RETRY_DELAY_MS = 500;
     private static final String WIDGET_PROVIDER_CLASS_NAME = "io.netbird.client.NetbirdWidgetProvider";
     private final IBinder myBinder = new MyLocalBinder();
     private final ExecutorService widgetActionExecutor = Executors.newSingleThreadExecutor();
@@ -402,11 +407,26 @@ public class VPNService extends android.net.VpnService {
 
     private void promptUserToOpenApp(int messageResId) {
         fgNotification.stopForeground();
-        fgNotification.showNotification(getString(messageResId));
+        String message = getString(messageResId);
+        if (canPostNotifications()) {
+            fgNotification.showNotification(message);
+        } else {
+            Log.w(LOGTAG, "POST_NOTIFICATIONS is not granted; falling back to Toast for widget prompt");
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        }
 
         if (!engineRunner.isRunning()) {
             stopSelf();
         }
+    }
+
+    private boolean canPostNotifications() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return true;
+        }
+
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private void toggleExitNodeWhenAvailable() throws Exception {
@@ -458,29 +478,40 @@ public class VPNService extends android.net.VpnService {
 
     private List<ExitNode> getExitNodes() {
         List<ExitNode> exitNodes = new ArrayList<>();
-        if (!engineRunner.isRunning()) {
+        EngineRunner currentEngineRunner = engineRunner;
+        if (currentEngineRunner == null || !currentEngineRunner.isRunning()) {
             return exitNodes;
         }
 
-        NetworkArray networks = engineRunner.networks();
-        for (int i = 0; i < networks.size(); i++) {
-            var network = networks.get(i);
-            if (EXIT_NODE_NETWORK.equals(network.getNetwork())) {
-                exitNodes.add(new ExitNode(network.getName(), network.getIsSelected()));
+        try {
+            NetworkArray networks = currentEngineRunner.networks();
+            if (networks == null) {
+                return exitNodes;
             }
+
+            for (int i = 0; i < networks.size(); i++) {
+                var network = networks.get(i);
+                if (network != null && EXIT_NODE_NETWORK.equals(network.getNetwork())) {
+                    exitNodes.add(new ExitNode(network.getName(), network.getIsSelected()));
+                }
+            }
+        } catch (Exception e) {
+            Log.w(LOGTAG, "failed to fetch exit nodes from engine", e);
         }
 
         return exitNodes;
     }
 
-    private synchronized void updateWidgetStateAndBroadcast() {
-        if (preferences == null || engineRunner == null) {
+    private void updateWidgetStateAndBroadcast() {
+        Preferences currentPreferences = preferences;
+        EngineRunner currentEngineRunner = engineRunner;
+        if (currentPreferences == null || currentEngineRunner == null) {
             return;
         }
 
-        boolean isRunning = engineRunner.isRunning();
+        boolean isRunning = currentEngineRunner.isRunning();
         boolean hasSelectedExitNode = false;
-        String lastExitNodeRoute = preferences.getLastExitNodeRoute();
+        String lastExitNodeRoute = currentPreferences.getLastExitNodeRoute();
         String exitNodeName = lastExitNodeRoute;
 
         if (isRunning) {
@@ -494,15 +525,17 @@ public class VPNService extends android.net.VpnService {
             }
         }
 
-        preferences.setWidgetStateAndLastExitNodeRoute(
-                lastExitNodeRoute,
-                isRunning,
-                hasSelectedExitNode,
-                exitNodeName);
+        synchronized (this) {
+            currentPreferences.setWidgetStateAndLastExitNodeRoute(
+                    lastExitNodeRoute,
+                    isRunning,
+                    hasSelectedExitNode,
+                    exitNodeName);
 
-        Intent refreshIntent = new Intent(ACTION_WIDGET_REFRESH);
-        refreshIntent.setClassName(getPackageName(), WIDGET_PROVIDER_CLASS_NAME);
-        sendBroadcast(refreshIntent);
+            Intent refreshIntent = new Intent(ACTION_WIDGET_REFRESH);
+            refreshIntent.setClassName(getPackageName(), WIDGET_PROVIDER_CLASS_NAME);
+            sendBroadcast(refreshIntent);
+        }
     }
 
     private synchronized void scheduleWidgetStateRefresh() {

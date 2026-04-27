@@ -13,11 +13,13 @@ import androidx.core.app.NotificationCompat;
 
 class ForegroundNotification {
     private static final int NOTIFICATION_ID = 102;
+    private static final int PROMPT_NOTIFICATION_ID = 103;
 
     private final VpnService service;
 
     public ForegroundNotification(android.net.VpnService vpnService) {
         this.service = vpnService;
+        ensureNotificationChannel();
     }
 
     public void startForeground() {
@@ -33,12 +35,10 @@ class ForegroundNotification {
     }
 
     public void showNotification(String text) {
-        getNotificationManager().notify(NOTIFICATION_ID, buildNotification(text, false));
+        getNotificationManager().notify(PROMPT_NOTIFICATION_ID, buildNotification(text, false));
     }
 
     private Notification buildNotification(String text, boolean ongoing) {
-        ensureNotificationChannel();
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(
                 service.getApplication(),
                 service.getPackageName())
@@ -72,10 +72,25 @@ class ForegroundNotification {
     private PendingIntent createLaunchAppPendingIntent() {
         Intent notificationIntent = service.getPackageManager().getLaunchIntentForPackage(service.getPackageName());
         if (notificationIntent == null) {
-            notificationIntent = new Intent();
-            notificationIntent.setClassName(
-                    service.getPackageName(),
-                    service.getPackageName() + ".MainActivity");
+            Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
+            launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            launcherIntent.setPackage(service.getPackageName());
+            if (launcherIntent.resolveActivity(service.getPackageManager()) != null) {
+                notificationIntent = launcherIntent;
+            }
+        }
+
+        if (notificationIntent == null) {
+            Intent mainActivityIntent = new Intent(Intent.ACTION_MAIN);
+            mainActivityIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            mainActivityIntent.setClassName(service.getPackageName(), "io.netbird.client.MainActivity");
+            if (mainActivityIntent.resolveActivity(service.getPackageManager()) != null) {
+                notificationIntent = mainActivityIntent;
+            }
+        }
+
+        if (notificationIntent == null) {
+            return null;
         }
 
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
