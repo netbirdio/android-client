@@ -70,6 +70,8 @@ public class NetworkChangeDetector {
         defaultNetworkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
+                NetworkAvailabilityListener listenerToNotify = null;
+                int notifyType = 0;
                 synchronized (networkCallbackLock) {
                     if (!defaultNetworkCallbackActive.get()) {
                         Log.d(LOGTAG, "ignoring onAvailable for " + network + "; default callback inactive");
@@ -89,6 +91,22 @@ public class NetworkChangeDetector {
                     } catch (Exception e) {
                         Log.e(LOGTAG, "bindProcessToNetwork failed", e);
                     }
+
+                    // The default-network signal is the authoritative source of
+                    // the active transport type; the per-network onAvailable/onLost
+                    // pairing can miss seamless WiFi→cellular→WiFi handovers.
+                    if (caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
+                        if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                            listenerToNotify = listener;
+                            notifyType = Constants.NetworkType.WIFI;
+                        } else if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                            listenerToNotify = listener;
+                            notifyType = Constants.NetworkType.MOBILE;
+                        }
+                    }
+                }
+                if (listenerToNotify != null) {
+                    listenerToNotify.onDefaultNetworkTypeChanged(notifyType);
                 }
             }
 

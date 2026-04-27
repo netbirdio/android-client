@@ -5,9 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 
 public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityListener {
+    private static final int UNKNOWN_NETWORK_TYPE = -1;
     private final Map<Integer, Boolean> availableNetworkTypes;
     private final BooleanSupplier shouldNotify;
     private NetworkToggleListener listener;
+    private volatile int lastDefaultType = UNKNOWN_NETWORK_TYPE;
 
     public ConcreteNetworkAvailabilityListener() {
         this(() -> true);
@@ -24,28 +26,26 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
 
     @Override
     public void onNetworkAvailable(@Constants.NetworkType int networkType) {
-        boolean isWifiAvailable = Boolean.TRUE.equals(availableNetworkTypes.get(Constants.NetworkType.WIFI));
-
         availableNetworkTypes.put(networkType, true);
-
-        // if wifi is available and wasn't before, notifies listener.
-        // Android prioritizes wifi over mobile data network by default.
-        if (!isWifiAvailable && networkType == Constants.NetworkType.WIFI) {
-            notifyListener();
-        }
     }
 
     @Override
     public void onNetworkLost(@Constants.NetworkType int networkType) {
-        boolean isMobileAvailable = Boolean.TRUE.equals(availableNetworkTypes.get(Constants.NetworkType.MOBILE));
-
         availableNetworkTypes.remove(networkType);
+    }
 
-        // if wifi is lost and mobile data is available, notifies listener.
-        // No use to notify it if there's no other type of network available.
-        if (isMobileAvailable && networkType == Constants.NetworkType.WIFI) {
-            notifyListener();
+    @Override
+    public void onDefaultNetworkTypeChanged(@Constants.NetworkType int networkType) {
+        if (networkType == lastDefaultType) {
+            return;
         }
+        int previous = lastDefaultType;
+        lastDefaultType = networkType;
+        if (previous == UNKNOWN_NETWORK_TYPE) {
+            // first observation after subscribe; not a real transition
+            return;
+        }
+        notifyListener();
     }
 
     private void notifyListener() {
