@@ -75,6 +75,10 @@ public class NetworkChangeDetector {
                         Log.d(LOGTAG, "ignoring onAvailable for " + network + "; default callback inactive");
                         return;
                     }
+                    NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(network);
+                    if (caps != null && !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
+                        Log.w(LOGTAG, "default network " + network + " is a VPN; binding the process to it would create a routing loop");
+                    }
                     Log.d(LOGTAG, "default network became " + network + ", binding process to it");
                     try {
                         if (connectivityManager.bindProcessToNetwork(network)) {
