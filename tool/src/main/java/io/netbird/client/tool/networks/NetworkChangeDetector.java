@@ -78,7 +78,11 @@ public class NetworkChangeDetector {
                         return;
                     }
                     NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(network);
-                    if (caps != null && !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
+                    if (caps == null) {
+                        Log.w(LOGTAG, "default network " + network + " has no capabilities; skipping bindProcessToNetwork");
+                        return;
+                    }
+                    if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
                         Log.w(LOGTAG, "default network " + network + " is a VPN; skipping bindProcessToNetwork to avoid routing loop");
                         return;
                     }
@@ -96,7 +100,7 @@ public class NetworkChangeDetector {
                     // The default-network signal is the authoritative source of
                     // the active transport type; the per-network onAvailable/onLost
                     // pairing can miss seamless WiFi→cellular→WiFi handovers.
-                    if (caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
+                    if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
                         if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                             listenerToNotify = listener;
                             notifyType = Constants.NetworkType.WIFI;
