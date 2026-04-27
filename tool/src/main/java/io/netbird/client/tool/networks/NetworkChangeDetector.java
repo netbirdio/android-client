@@ -120,8 +120,10 @@ public class NetworkChangeDetector {
         NetworkRequest.Builder builder = new NetworkRequest.Builder();
         builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         connectivityManager.registerNetworkCallback(builder.build(), networkCallback);
-        defaultNetworkCallbackActive.set(true);
-        connectivityManager.registerDefaultNetworkCallback(defaultNetworkCallback);
+        synchronized (networkCallbackLock) {
+            defaultNetworkCallbackActive.set(true);
+            connectivityManager.registerDefaultNetworkCallback(defaultNetworkCallback);
+        }
     }
 
     public void unregisterNetworkCallback() {
