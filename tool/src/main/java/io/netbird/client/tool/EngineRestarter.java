@@ -300,6 +300,20 @@ class EngineRestarter implements NetworkToggleListener {
     }
 
     /**
+     * Cancels any pending debounced restart. Called whenever an external
+     * actor (typically a user-driven Connect/Disconnect) takes over the
+     * engine lifecycle, so the network-change-driven restart does not
+     * interfere with that explicit action.
+     */
+    public void cancelPendingRestart() {
+        if (restartScheduled) {
+            Log.d(LOGTAG, "external action took over engine lifecycle; cancelling pending restart");
+            handler.removeCallbacks(restartRunnable);
+            restartScheduled = false;
+        }
+    }
+
+    /**
      * <p>Cleans up resources, like the restart runnable and timeout callback.</p>
      * <p>Call this when the EngineRestarter is no longer needed to prevent memory leaks.</p>
      */

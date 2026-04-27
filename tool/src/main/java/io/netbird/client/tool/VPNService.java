@@ -85,6 +85,9 @@ public class VPNService extends android.net.VpnService {
             public void onReceive(Context context, Intent intent) {
                 if (ACTION_STOP_ENGINE.equals(intent.getAction())) {
                     Log.d(LOGTAG, "Received stop engine broadcast");
+                    if (engineRestarter != null) {
+                        engineRestarter.cancelPendingRestart();
+                    }
                     if (engineRunner != null) {
                         engineRunner.stop();
                     }
@@ -109,6 +112,7 @@ public class VPNService extends android.net.VpnService {
 
         if (INTENT_ALWAYS_ON_START.equals(intent.getAction())) {
             fgNotification.startForeground();
+            engineRestarter.cancelPendingRestart();
             engineRunner.runWithoutAuth();
         }
         if (INTENT_ACTION_START.equals(intent.getAction())) {
@@ -167,6 +171,9 @@ public class VPNService extends android.net.VpnService {
     @Override
     public void onRevoke() {
         Log.d(LOGTAG, "VPN permission on revoke");
+        if (engineRestarter != null) {
+            engineRestarter.cancelPendingRestart();
+        }
         if (engineRunner != null) {
             engineRunner.stop();
             stopForeground(true);
@@ -193,10 +200,12 @@ public class VPNService extends android.net.VpnService {
 
         public void runEngine(URLOpener urlOpener, boolean isAndroidTV) {
             fgNotification.startForeground();
+            engineRestarter.cancelPendingRestart();
             engineRunner.run(urlOpener, isAndroidTV);
         }
 
         public void stopEngine() {
+            engineRestarter.cancelPendingRestart();
             engineRunner.stop();
         }
 
