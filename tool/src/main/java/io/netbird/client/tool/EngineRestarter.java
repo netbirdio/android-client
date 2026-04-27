@@ -5,6 +5,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import io.netbird.client.tool.networks.NetworkToggleListener;
 import io.netbird.gomobile.android.ConnectionListener;
 
@@ -23,10 +26,25 @@ class EngineRestarter implements NetworkToggleListener {
     private ServiceStateListener currentListener;
 
     private volatile boolean isRestartInProgress = false;
+    private volatile boolean restartScheduled = false;
+    private final Runnable connectedObserver = this::onEngineReconnected;
+
     public EngineRestarter(EngineRunner engineRunner) {
         this.engineRunner = engineRunner;
         this.handler = new Handler(Looper.getMainLooper());
         this.restartRunnable = this::restartEngine;
+        this.engineRunner.addOnConnectedObserver(connectedObserver);
+    }
+
+    private void onEngineReconnected() {
+        // The Go core reconnected on its own; the pending restart is no
+        // longer needed. Cancel the debounced restart so we do not tear
+        // down a working connection.
+        if (restartScheduled) {
+            Log.d(LOGTAG, "engine reconnected on its own, cancelling pending restart");
+            restartScheduled = false;
+            handler.removeCallbacks(restartRunnable);
+        }
     }
 
     /**
@@ -36,6 +54,8 @@ class EngineRestarter implements NetworkToggleListener {
      * <p>If the engine isn't running, this method does nothing.</p>
      */
     private void restartEngine() {
+        restartScheduled = false;
+
         // Prevent concurrent restarts
         if (isRestartInProgress) {
             Log.d(LOGTAG, "restart already in progress, ignoring duplicate request");
@@ -49,17 +69,28 @@ class EngineRestarter implements NetworkToggleListener {
 
         isRestartInProgress = true;
 
-        // Snapshot the current listener so we can suppress state events from the
-        // old engine during teardown and re-attach it once the new engine starts.
+        // Snapshot the current listener and wrap it so disconnect events from
+        // the old engine teardown — and the synthetic Disconnected the new
+        // engine emits before its first ClientStart() — do not reach the UI.
         ConnectionListener savedListener = engineRunner.getConnectionListener();
+        FilteringConnectionListener filteringListener =
+                savedListener != null ? new FilteringConnectionListener(savedListener) : null;
+        if (filteringListener != null) {
+            engineRunner.setConnectionListener(filteringListener);
+        }
+
+        // Hold a reference to suppressed external listeners so we can
+        // unsuppress them on completion, error, or timeout.
+        AtomicReference<List<ServiceStateListener>> suppressedHolder = new AtomicReference<>();
 
         timeoutCallback = () -> {
             if (isRestartInProgress) {
                 Log.e(LOGTAG, "engine restart timeout - forcing flag reset");
                 isRestartInProgress = false;
-                if (savedListener != null) {
-                    engineRunner.setConnectionListener(savedListener);
+                if (filteringListener != null) {
+                    filteringListener.allowAll();
                 }
+                unsuppressAll(suppressedHolder.get());
                 notifyDisconnected(savedListener);
             }
         };
@@ -76,11 +107,14 @@ class EngineRestarter implements NetworkToggleListener {
                 isRestartInProgress = false;  // Reset flag on success
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
-                // Re-attach the listener; the Go notifier will deliver the
-                // current state (typically Connecting) immediately on attach.
-                if (savedListener != null) {
-                    engineRunner.setConnectionListener(savedListener);
+                // The Go ClientStart() will fire OnConnecting shortly; from
+                // that point onward we want the listener to see real state
+                // again. The filter stays in place until the first Connecting
+                // / Connected event passes through.
+                if (filteringListener != null) {
+                    filteringListener.allowAfterFirstConnectingOrConnected();
                 }
+                unsuppressAll(suppressedHolder.get());
             }
 
             @Override
@@ -95,9 +129,10 @@ class EngineRestarter implements NetworkToggleListener {
                 isRestartInProgress = false; // Resetting flag on error as well
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
-                if (savedListener != null) {
-                    engineRunner.setConnectionListener(savedListener);
+                if (filteringListener != null) {
+                    filteringListener.allowAll();
                 }
+                unsuppressAll(suppressedHolder.get());
                 notifyDisconnected(savedListener);
             }
         };
@@ -108,16 +143,33 @@ class EngineRestarter implements NetworkToggleListener {
             Log.d(LOGTAG, "engine stopped before restart could begin - aborting");
             handler.removeCallbacks(timeoutCallback);
             isRestartInProgress = false;
+            if (filteringListener != null) {
+                engineRunner.setConnectionListener(savedListener);
+            }
             return;
         }
 
+        // Suppress external service-state listeners so the old engine's
+        // onStopped (and the new engine's onStarted) do not reach the UI;
+        // we drive UI state through ConnectionListener exclusively during
+        // the restart window.
+        List<ServiceStateListener> suppressed =
+                engineRunner.snapshotExternalListeners(serviceStateListener);
+        for (ServiceStateListener s : suppressed) {
+            engineRunner.suppressServiceStateListener(s);
+        }
+        suppressedHolder.set(suppressed);
+
         Log.d(LOGTAG, "engine is running, stopping due to network change");
-        // Detach the listener before stopping so the old engine's teardown
-        // events (Disconnecting / Disconnected) do not reach the UI; we drive
-        // the visible state ourselves with notifyConnecting().
-        engineRunner.removeStatusListener();
         notifyConnecting(savedListener);
         engineRunner.stop();
+    }
+
+    private void unsuppressAll(List<ServiceStateListener> suppressed) {
+        if (suppressed == null) return;
+        for (ServiceStateListener s : suppressed) {
+            engineRunner.unsuppressServiceStateListener(s);
+        }
     }
 
     private void notifyConnecting(ConnectionListener listener) {
@@ -142,11 +194,107 @@ class EngineRestarter implements NetworkToggleListener {
         }
     }
 
+    /**
+     * Wraps a ConnectionListener and drops Disconnecting/Disconnected events
+     * during a restart. Disconnects from the old engine's teardown — and the
+     * default-state replay the Go notifier sends to a listener attached
+     * before the new engine's ClientStart() — would otherwise flash the UI
+     * to Disconnected. Filtering ends as soon as the first real Connecting
+     * or Connected event arrives from the new engine.
+     */
+    private static final class FilteringConnectionListener implements ConnectionListener {
+        private final ConnectionListener delegate;
+        private volatile boolean dropDisconnects = true;
+        private volatile boolean releaseAfterFirstActive = false;
+
+        FilteringConnectionListener(ConnectionListener delegate) {
+            this.delegate = delegate;
+        }
+
+        void allowAll() {
+            dropDisconnects = false;
+            releaseAfterFirstActive = false;
+        }
+
+        void allowAfterFirstConnectingOrConnected() {
+            releaseAfterFirstActive = true;
+        }
+
+        @Override
+        public void onConnecting() {
+            if (releaseAfterFirstActive) {
+                dropDisconnects = false;
+            }
+            try {
+                delegate.onConnecting();
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onConnecting failed: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onConnected() {
+            if (releaseAfterFirstActive) {
+                dropDisconnects = false;
+            }
+            try {
+                delegate.onConnected();
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onConnected failed: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onDisconnecting() {
+            if (dropDisconnects) {
+                Log.d(LOGTAG, "filtered onDisconnecting during restart");
+                return;
+            }
+            try {
+                delegate.onDisconnecting();
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onDisconnecting failed: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onDisconnected() {
+            if (dropDisconnects) {
+                Log.d(LOGTAG, "filtered onDisconnected during restart");
+                return;
+            }
+            try {
+                delegate.onDisconnected();
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onDisconnected failed: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onAddressChanged(String fqdn, String ip) {
+            try {
+                delegate.onAddressChanged(fqdn, ip);
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onAddressChanged failed: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onPeersListChanged(long numberOfPeers) {
+            try {
+                delegate.onPeersListChanged(numberOfPeers);
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onPeersListChanged failed: " + e.getMessage());
+            }
+        }
+    }
+
     @Override
     public void onNetworkTypeChanged() {
         Log.d(LOGTAG, "network type changed, scheduling restart with "
                 + DEBOUNCE_DELAY_MS + "ms debounce.");
 
+        restartScheduled = true;
         handler.removeCallbacks(restartRunnable);
         handler.postDelayed(restartRunnable, DEBOUNCE_DELAY_MS);
     }
@@ -157,6 +305,7 @@ class EngineRestarter implements NetworkToggleListener {
      */
     public void cleanup() {
         handler.removeCallbacks(restartRunnable);
+        restartScheduled = false;
 
         if (timeoutCallback != null) {
             handler.removeCallbacks(timeoutCallback);
@@ -166,6 +315,8 @@ class EngineRestarter implements NetworkToggleListener {
             engineRunner.removeServiceStateListener(currentListener);
             currentListener = null;
         }
+
+        engineRunner.removeOnConnectedObserver(connectedObserver);
 
         isRestartInProgress = false;
     }

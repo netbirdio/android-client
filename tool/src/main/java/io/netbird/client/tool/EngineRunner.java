@@ -28,6 +28,8 @@ class EngineRunner {
     private final ProfileManagerWrapper profileManager;
     private boolean engineIsRunning = false;
     Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
+    private final Set<ServiceStateListener> suppressedServiceStateListeners = ConcurrentHashMap.newKeySet();
+    private final Set<Runnable> connectedObservers = ConcurrentHashMap.newKeySet();
     private final Client goClient;
     private ConnectionListener connectionListener;
 
@@ -125,8 +127,21 @@ class EngineRunner {
     }
 
     public synchronized void setConnectionListener(ConnectionListener listener) {
-        this.connectionListener = listener;
-        goClient.setConnectionListener(listener);
+        ConnectionListener wrapped = listener == null ? null : new ConnectionListener() {
+            @Override public void onConnecting() { listener.onConnecting(); }
+            @Override public void onConnected() {
+                listener.onConnected();
+                for (Runnable obs : connectedObservers) {
+                    try { obs.run(); } catch (Exception e) { Log.w(LOGTAG, "connected observer failed", e); }
+                }
+            }
+            @Override public void onDisconnecting() { listener.onDisconnecting(); }
+            @Override public void onDisconnected() { listener.onDisconnected(); }
+            @Override public void onAddressChanged(String f, String i) { listener.onAddressChanged(f, i); }
+            @Override public void onPeersListChanged(long n) { listener.onPeersListChanged(n); }
+        };
+        this.connectionListener = wrapped;
+        goClient.setConnectionListener(wrapped);
     }
 
     public synchronized void removeStatusListener() {
@@ -136,6 +151,19 @@ class EngineRunner {
 
     synchronized ConnectionListener getConnectionListener() {
         return connectionListener;
+    }
+
+    /**
+     * Registers a callback that fires every time the engine reports
+     * OnConnected. EngineRestarter uses this to cancel a pending restart
+     * when the Go core has already reconnected on its own.
+     */
+    public void addOnConnectedObserver(Runnable observer) {
+        connectedObservers.add(observer);
+    }
+
+    public void removeOnConnectedObserver(Runnable observer) {
+        connectedObservers.remove(observer);
     }
 
     public synchronized void addServiceStateListener(ServiceStateListener serviceStateListener) {
@@ -164,6 +192,29 @@ class EngineRunner {
 
     public synchronized void removeServiceStateListener(ServiceStateListener serviceStateListener) {
         serviceStateListeners.remove(serviceStateListener);
+        suppressedServiceStateListeners.remove(serviceStateListener);
+    }
+
+    /**
+     * Marks a listener as suppressed: it will not receive onStarted / onStopped
+     * notifications until {@link #unsuppressServiceStateListener} is called.
+     * Used by EngineRestarter to hide the engine teardown from external UI
+     * listeners during a restart.
+     */
+    public synchronized void suppressServiceStateListener(ServiceStateListener listener) {
+        suppressedServiceStateListeners.add(listener);
+    }
+
+    public synchronized void unsuppressServiceStateListener(ServiceStateListener listener) {
+        suppressedServiceStateListeners.remove(listener);
+    }
+
+    public synchronized java.util.List<ServiceStateListener> snapshotExternalListeners(ServiceStateListener exclude) {
+        java.util.List<ServiceStateListener> out = new java.util.ArrayList<>();
+        for (ServiceStateListener s : serviceStateListeners) {
+            if (s != exclude) out.add(s);
+        }
+        return out;
     }
 
     public synchronized void stop() {
@@ -191,6 +242,9 @@ class EngineRunner {
 
     private synchronized void notifyServiceStateListeners(boolean engineIsRunning) {
         for (ServiceStateListener s : serviceStateListeners) {
+            if (suppressedServiceStateListeners.contains(s)) {
+                continue;
+            }
             if (engineIsRunning) {
                 s.onStarted();
             } else {
