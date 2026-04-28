@@ -127,21 +127,44 @@ class EngineRunner {
     }
 
     public synchronized void setConnectionListener(ConnectionListener listener) {
-        ConnectionListener wrapped = listener == null ? null : new ConnectionListener() {
-            @Override public void onConnecting() { listener.onConnecting(); }
-            @Override public void onConnected() {
-                listener.onConnected();
-                for (Runnable obs : connectedObservers) {
-                    try { obs.run(); } catch (Exception e) { Log.w(LOGTAG, "connected observer failed", e); }
-                }
-            }
-            @Override public void onDisconnecting() { listener.onDisconnecting(); }
-            @Override public void onDisconnected() { listener.onDisconnected(); }
-            @Override public void onAddressChanged(String f, String i) { listener.onAddressChanged(f, i); }
-            @Override public void onPeersListChanged(long n) { listener.onPeersListChanged(n); }
-        };
+        // Unwrap any previous ObservingConnectionListener to avoid stacking
+        // wrappers across repeated set/get cycles (e.g. EngineRestarter snapshots
+        // the current listener and re-installs it after wrapping its own filter
+        // around it).
+        ConnectionListener raw = unwrap(listener);
+        ConnectionListener wrapped = raw == null ? null : new ObservingConnectionListener(raw, connectedObservers);
         this.connectionListener = wrapped;
         goClient.setConnectionListener(wrapped);
+    }
+
+    private static ConnectionListener unwrap(ConnectionListener listener) {
+        ConnectionListener current = listener;
+        while (current instanceof ObservingConnectionListener) {
+            current = ((ObservingConnectionListener) current).delegate;
+        }
+        return current;
+    }
+
+    private static final class ObservingConnectionListener implements ConnectionListener {
+        final ConnectionListener delegate;
+        private final java.util.Set<Runnable> connectedObservers;
+
+        ObservingConnectionListener(ConnectionListener delegate, java.util.Set<Runnable> connectedObservers) {
+            this.delegate = delegate;
+            this.connectedObservers = connectedObservers;
+        }
+
+        @Override public void onConnecting() { delegate.onConnecting(); }
+        @Override public void onConnected() {
+            delegate.onConnected();
+            for (Runnable obs : connectedObservers) {
+                try { obs.run(); } catch (Exception e) { Log.w(LOGTAG, "connected observer failed", e); }
+            }
+        }
+        @Override public void onDisconnecting() { delegate.onDisconnecting(); }
+        @Override public void onDisconnected() { delegate.onDisconnected(); }
+        @Override public void onAddressChanged(String f, String i) { delegate.onAddressChanged(f, i); }
+        @Override public void onPeersListChanged(long n) { delegate.onPeersListChanged(n); }
     }
 
     public synchronized void removeStatusListener() {

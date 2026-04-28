@@ -72,7 +72,9 @@ class EngineRestarter implements NetworkToggleListener {
         // Snapshot the current listener and wrap it so disconnect events from
         // the old engine teardown — and the synthetic Disconnected the new
         // engine emits before its first ClientStart() — do not reach the UI.
-        ConnectionListener savedListener = engineRunner.getConnectionListener();
+        // Unwrap any leftover FilteringConnectionListener from a previous
+        // restart so wrappers do not stack on each cycle.
+        ConnectionListener savedListener = unwrapFilter(engineRunner.getConnectionListener());
         FilteringConnectionListener filteringListener =
                 savedListener != null ? new FilteringConnectionListener(savedListener) : null;
         if (filteringListener != null) {
@@ -91,6 +93,12 @@ class EngineRestarter implements NetworkToggleListener {
                     filteringListener.allowAll();
                 }
                 unsuppressAll(suppressedHolder.get());
+                // Unregister so a late onStopped can no longer trigger
+                // runWithoutAuth against this stale listener.
+                if (currentListener != null) {
+                    engineRunner.removeServiceStateListener(currentListener);
+                    currentListener = null;
+                }
                 notifyDisconnected(savedListener);
             }
         };
@@ -107,6 +115,7 @@ class EngineRestarter implements NetworkToggleListener {
                 isRestartInProgress = false;  // Reset flag on success
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
+                currentListener = null;
                 // The Go ClientStart() will fire OnConnecting shortly; from
                 // that point onward we want the listener to see real state
                 // again. The filter stays in place until the first Connecting
@@ -129,6 +138,7 @@ class EngineRestarter implements NetworkToggleListener {
                 isRestartInProgress = false; // Resetting flag on error as well
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
+                currentListener = null;
                 if (filteringListener != null) {
                     filteringListener.allowAll();
                 }
@@ -172,6 +182,14 @@ class EngineRestarter implements NetworkToggleListener {
         }
     }
 
+    private static ConnectionListener unwrapFilter(ConnectionListener listener) {
+        ConnectionListener current = listener;
+        while (current instanceof FilteringConnectionListener) {
+            current = ((FilteringConnectionListener) current).delegate;
+        }
+        return current;
+    }
+
     private void notifyConnecting(ConnectionListener listener) {
         if (listener == null) {
             return;
@@ -203,7 +221,7 @@ class EngineRestarter implements NetworkToggleListener {
      * or Connected event arrives from the new engine.
      */
     private static final class FilteringConnectionListener implements ConnectionListener {
-        private final ConnectionListener delegate;
+        final ConnectionListener delegate;
         private volatile boolean dropDisconnects = true;
         private volatile boolean releaseAfterFirstActive = false;
 
