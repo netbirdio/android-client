@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android Enterprise Managed Configurations (App Restrictions) schema.
+  This defines the configuration keys that MDM/EMM solutions can push to the app.
+  Follows the AppConfig standard (appconfig.org) for key naming conventions.
+
+  Supported MDM platforms: Microsoft Intune, VMware Workspace ONE, Google Admin Console,
+  MobileIron, and any Android Enterprise-compatible EMM.
+-->
+<restrictions xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <restriction
+        android:key="managementUrl"
+        android:title="@string/mdm_management_url_title"
+        android:description="@string/mdm_management_url_desc"
+        android:restrictionType="string"
+        android:defaultValue="" />
+
+    <restriction
+        android:key="setupKey"
+        android:title="@string/mdm_setup_key_title"
+        android:description="@string/mdm_setup_key_desc"
+        android:restrictionType="string"
+        android:defaultValue="" />
+
+    <restriction
+        android:key="adminUrl"
+        android:title="@string/mdm_admin_url_title"
+        android:description="@string/mdm_admin_url_desc"
+        android:restrictionType="string"
+        android:defaultValue="" />
+
+    <restriction
+        android:key="preSharedKey"
+        android:title="@string/mdm_pre_shared_key_title"
+        android:description="@string/mdm_pre_shared_key_desc"
+        android:restrictionType="string"
+        android:defaultValue="" />
+
+    <restriction
+        android:key="rosenpassEnabled"
+        android:title="@string/mdm_rosenpass_enabled_title"
+        android:description="@string/mdm_rosenpass_enabled_desc"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="rosenpassPermissive"
+        android:title="@string/mdm_rosenpass_permissive_title"
+        android:description="@string/mdm_rosenpass_permissive_desc"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="disableAutoConnect"
+        android:title="@string/mdm_disable_auto_connect_title"
+        android:description="@string/mdm_disable_auto_connect_desc"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+</restrictions>

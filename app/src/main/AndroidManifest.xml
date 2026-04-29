@@ -31,6 +31,10 @@
         android:theme="@style/Theme.NetBird"
         tools:targetApi="31">
 
+        <meta-data
+            android:name="android.content.APP_RESTRICTIONS"
+            android:resource="@xml/app_restrictions" />
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
@@ -55,6 +59,14 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+
+        <receiver
+            android:name="io.netbird.client.tool.ManagedConfigReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.APPLICATION_RESTRICTIONS_CHANGED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

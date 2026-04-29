@@ -23,6 +23,12 @@ import io.netbird.gomobile.android.URLOpener;
 class EngineRunner {
 
     private static final String LOGTAG = "EngineRunner";
+
+    /**
+     * Lock to serialise MDM config apply operations between EngineRunner.runClient()
+     * and ManagedConfigReceiver.onReceive().
+     */
+    static final Object MDM_CONFIG_LOCK = new Object();
     private final Context context;
     private final boolean isDebuggable;
     private final ProfileManagerWrapper profileManager;
@@ -93,6 +99,43 @@ class EngineRunner {
             // This allows profile switching without recreating the entire Client
             var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath, context.getCacheDir().getAbsolutePath());
             Log.d(LOGTAG, "Running engine with config: " + configurationFilePath + ", state: " + stateFilePath);
+
+            // Apply MDM managed configuration before starting the engine.
+            // MDM values override user-set preferences on every launch.
+            try {
+                synchronized (MDM_CONFIG_LOCK) {
+                    io.netbird.gomobile.android.ManagedConfig mdmConfig = ManagedConfigReader.read(context);
+                    if (mdmConfig != null && mdmConfig.hasConfig()) {
+                        mdmConfig.apply(configurationFilePath);
+                        Log.i(LOGTAG, "MDM managed configuration applied");
+
+                        // If MDM provides a setup key, attempt silent registration.
+                        // loginWithSetupKeySync will call the management server which
+                        // returns success (already registered) or registers the peer.
+                        // The server is the authority — no local enrollment flag needed.
+                        if (mdmConfig.hasSetupKey()) {
+                            try {
+                                io.netbird.gomobile.android.Auth auth =
+                                        io.netbird.gomobile.android.Android.newAuth(
+                                                configurationFilePath,
+                                                mdmConfig.getManagementURL());
+                                if (auth != null) {
+                                    auth.loginWithSetupKeySync(
+                                            mdmConfig.getSetupKey(),
+                                            DeviceName.getDeviceName());
+                                    Log.i(LOGTAG, "MDM: silent setup key registration completed");
+                                }
+                            } catch (Exception e) {
+                                // Setup key login may fail if already registered or key expired.
+                                // This is not fatal — continue with normal flow.
+                                Log.w(LOGTAG, "MDM: setup key login skipped or failed: " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Failed to apply MDM config, continuing with existing config", e);
+            }
 
             try {
                 notifyServiceStateListeners(true);

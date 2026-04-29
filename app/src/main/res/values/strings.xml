@@ -145,4 +145,20 @@
     <string name="profiles_success_switched">Switched to profile \'%s\'</string>
     <string name="profiles_success_logged_out">Logged out from profile \'%s\'</string>
     <string name="profiles_success_removed">Profile \'%s\' removed successfully</string>
+
+    <!-- MDM managed configuration (app restrictions) titles and descriptions -->
+    <string name="mdm_management_url_title">Management URL</string>
+    <string name="mdm_management_url_desc">NetBird management server URL (e.g., https://api.netbird.io:443)</string>
+    <string name="mdm_setup_key_title">Setup Key</string>
+    <string name="mdm_setup_key_desc">Setup key for automatic device registration. Used once during initial enrollment.</string>
+    <string name="mdm_admin_url_title">Admin URL</string>
+    <string name="mdm_admin_url_desc">NetBird admin dashboard URL (e.g., https://app.netbird.io:443)</string>
+    <string name="mdm_pre_shared_key_title">Pre-Shared Key</string>
+    <string name="mdm_pre_shared_key_desc">WireGuard pre-shared key for additional encryption layer</string>
+    <string name="mdm_rosenpass_enabled_title">Enable Rosenpass</string>
+    <string name="mdm_rosenpass_enabled_desc">Enable Rosenpass post-quantum encryption</string>
+    <string name="mdm_rosenpass_permissive_title">Rosenpass Permissive Mode</string>
+    <string name="mdm_rosenpass_permissive_desc">Allow connections to peers that do not support Rosenpass</string>
+    <string name="mdm_disable_auto_connect_title">Disable Auto-Connect</string>
+    <string name="mdm_disable_auto_connect_desc">Prevent the VPN from automatically connecting on app launch</string>
 </resources>
