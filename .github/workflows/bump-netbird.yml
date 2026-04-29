@@ -1,0 +1,68 @@
+name: Bump netbird submodule
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'NetBird release tag (e.g. v0.30.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.NETBIRD_DEV_BOT_GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config --global user.email "dev@netbird.io"
+          git config --global user.name "netbirddev"
+
+      - name: Check out tag in submodule
+        run: |
+          cd netbird
+          git fetch --tags origin
+          git checkout "${{ inputs.tag }}"
+
+      - name: Create branch and commit
+        id: branch
+        run: |
+          version="${{ inputs.tag }}"
+          version="${version#v}"
+          branch="bump-netbird-${version}"
+          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
+
+          git checkout -b "${branch}"
+          git add netbird
+          if git diff --cached --quiet; then
+            echo "no_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Submodule already at ${{ inputs.tag }}, nothing to do"
+            exit 0
+          fi
+          echo "no_changes=false" >> "$GITHUB_OUTPUT"
+          git commit -m "Bump netbird submodule to ${{ inputs.tag }}"
+          git push --set-upstream origin "${branch}"
+
+      - name: Create pull request
+        if: steps.branch.outputs.no_changes != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.NETBIRD_DEV_BOT_GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base main \
+            --head "${{ steps.branch.outputs.branch }}" \
+            --title "Bump netbird submodule to ${{ inputs.tag }}" \
+            --body "Automated submodule bump triggered by netbird release ${{ inputs.tag }}."
