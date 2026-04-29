@@ -31,9 +31,11 @@ public class NetbirdWidgetUpdater {
         boolean vpnRunning = preferences.isWidgetVpnRunning();
         boolean exitNodeActive = preferences.isWidgetExitNodeActive();
         String exitNodeName = preferences.getWidgetExitNodeName();
-
-        if (!vpnRunning && isEmpty(exitNodeName)) {
-            exitNodeName = preferences.getLastExitNodeRoute();
+        if (vpnRunning && !VPNService.isServiceRunning(context)) {
+            preferences.clearWidgetState();
+            vpnRunning = false;
+            exitNodeActive = false;
+            exitNodeName = null;
         }
         boolean exitNodeAvailable = !isEmpty(exitNodeName);
 
@@ -83,7 +85,7 @@ public class NetbirdWidgetUpdater {
         views.setOnClickPendingIntent(R.id.widget_connection_status,
                 connectionIntent);
 
-        if (exitNodeAvailable) {
+        if (exitNodeAvailable || !vpnRunning) {
             PendingIntent exitNodeIntent = servicePendingIntent(
                     context,
                     VPNService.ACTION_WIDGET_TOGGLE_EXIT_NODE,

@@ -72,6 +72,7 @@ public class ProfileManagerWrapper {
         stopEngine();
 
         profileManager.switchProfile(profileName);
+        clearWidgetDisplayState();
     }
 
     /**
@@ -101,6 +102,9 @@ public class ProfileManagerWrapper {
         }
 
         profileManager.logoutProfile(profileName);
+        if (activeProfile.equals(profileName)) {
+            clearWidgetDisplayState();
+        }
     }
 
     /**
@@ -110,7 +114,16 @@ public class ProfileManagerWrapper {
         if (profileName == null || profileName.trim().isEmpty()) {
             throw new IllegalArgumentException("Profile name cannot be empty");
         }
+        String activeProfile = getActiveProfile();
+        boolean removingActiveProfile = activeProfile.equals(profileName);
+        if (removingActiveProfile) {
+            stopEngine();
+        }
+
         profileManager.removeProfile(profileName);
+        if (removingActiveProfile) {
+            clearWidgetDisplayState();
+        }
     }
 
     /**
@@ -156,6 +169,15 @@ public class ProfileManagerWrapper {
         } catch (Exception e) {
             Log.w(TAG, "Failed to send stop engine broadcast: " + e.getMessage());
             // Don't throw exception - profile operations should continue even if stop fails
+        }
+    }
+
+    private void clearWidgetDisplayState() {
+        try {
+            new Preferences(context).clearWidgetState();
+            VPNService.sendWidgetRefreshBroadcast(context);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to clear widget display state", e);
         }
     }
 }

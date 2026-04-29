@@ -27,7 +27,6 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentNetworksBinding;
-import io.netbird.client.tool.Preferences;
 
 public class NetworksFragment extends Fragment {
 
@@ -142,31 +141,8 @@ public class NetworksFragment extends Fragment {
     private void routeSwitchToggleHandler(String route, boolean isChecked) throws Exception {
         if (isChecked) {
             model.selectRoute(route);
-            rememberExitNodeSelection(route);
         } else {
             model.deselectRoute(route);
-            forgetExitNodeSelection(route);
-        }
-    }
-
-    private void rememberExitNodeSelection(String route) {
-        for (Resource resource : resources) {
-            if (route.equals(resource.getName()) && resource.isExitNode()) {
-                new Preferences(requireContext()).setLastExitNodeRoute(route);
-                return;
-            }
-        }
-    }
-
-    private void forgetExitNodeSelection(String route) {
-        for (Resource resource : resources) {
-            if (route.equals(resource.getName()) && resource.isExitNode()) {
-                Preferences preferences = new Preferences(requireContext());
-                if (route.equals(preferences.getLastExitNodeRoute())) {
-                    preferences.setLastExitNodeRoute("");
-                }
-                return;
-            }
         }
     }
 }

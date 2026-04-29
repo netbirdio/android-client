@@ -8,7 +8,6 @@ public class Preferences {
     private final String keyTraceLog = "tracelog";
 
     private final String keyForceRelayConnection = "isConnectionForceRelayed";
-    private final String keyLastExitNodeRoute = "lastExitNodeRoute";
     private final String keyWidgetVpnRunning = "widgetVpnRunning";
     private final String keyWidgetExitNodeActive = "widgetExitNodeActive";
     private final String keyWidgetExitNodeName = "widgetExitNodeName";
@@ -42,18 +41,6 @@ public class Preferences {
         sharedPref.edit().putBoolean(keyForceRelayConnection, false).apply();
     }
 
-    public String getLastExitNodeRoute() {
-        return sharedPref.getString(keyLastExitNodeRoute, null);
-    }
-
-    public void setLastExitNodeRoute(String route) {
-        if (route == null || route.trim().isEmpty()) {
-            sharedPref.edit().remove(keyLastExitNodeRoute).apply();
-            return;
-        }
-        sharedPref.edit().putString(keyLastExitNodeRoute, route).apply();
-    }
-
     public boolean isWidgetVpnRunning() {
         return sharedPref.getBoolean(keyWidgetVpnRunning, false);
     }
@@ -80,27 +67,12 @@ public class Preferences {
         editor.apply();
     }
 
-    public void setWidgetStateAndLastExitNodeRoute(String lastExitNodeRoute,
-                                                   boolean vpnRunning,
-                                                   boolean exitNodeActive,
-                                                   String exitNodeName) {
-        SharedPreferences.Editor editor = sharedPref.edit()
-                .putBoolean(keyWidgetVpnRunning, vpnRunning)
-                .putBoolean(keyWidgetExitNodeActive, exitNodeActive);
-
-        if (lastExitNodeRoute == null || lastExitNodeRoute.trim().isEmpty()) {
-            editor.remove(keyLastExitNodeRoute);
-        } else {
-            editor.putString(keyLastExitNodeRoute, lastExitNodeRoute);
-        }
-
-        if (exitNodeName == null || exitNodeName.trim().isEmpty()) {
-            editor.remove(keyWidgetExitNodeName);
-        } else {
-            editor.putString(keyWidgetExitNodeName, exitNodeName);
-        }
-
-        editor.apply();
+    public void clearWidgetState() {
+        sharedPref.edit()
+                .putBoolean(keyWidgetVpnRunning, false)
+                .putBoolean(keyWidgetExitNodeActive, false)
+                .remove(keyWidgetExitNodeName)
+                .commit();
     }
 
     public static String defaultServer() {
