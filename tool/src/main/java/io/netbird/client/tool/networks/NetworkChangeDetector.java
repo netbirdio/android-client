@@ -9,15 +9,13 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.util.Consumer;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class NetworkChangeDetector {
     private static final String LOGTAG = NetworkChangeDetector.class.getSimpleName();
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
     private ConnectivityManager.NetworkCallback defaultNetworkCallback;
     private volatile NetworkAvailabilityListener listener;
-    private final AtomicBoolean defaultNetworkCallbackActive = new AtomicBoolean(false);
+    private boolean defaultNetworkCallbackActive = false;
     private final Object networkCallbackLock = new Object();
 
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
@@ -71,7 +69,7 @@ public class NetworkChangeDetector {
                 NetworkAvailabilityListener listenerToNotify = null;
                 int notifyType = 0;
                 synchronized (networkCallbackLock) {
-                    if (!defaultNetworkCallbackActive.get()) {
+                    if (!defaultNetworkCallbackActive) {
                         Log.d(LOGTAG, "ignoring onAvailable for " + network + "; default callback inactive");
                         return;
                     }
@@ -108,7 +106,7 @@ public class NetworkChangeDetector {
         builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         connectivityManager.registerNetworkCallback(builder.build(), networkCallback);
         synchronized (networkCallbackLock) {
-            defaultNetworkCallbackActive.set(true);
+            defaultNetworkCallbackActive = true;
             connectivityManager.registerDefaultNetworkCallback(defaultNetworkCallback);
         }
     }
@@ -120,7 +118,7 @@ public class NetworkChangeDetector {
             Log.e(LOGTAG, "failed to unregister network callback", e);
         }
         synchronized (networkCallbackLock) {
-            defaultNetworkCallbackActive.set(false);
+            defaultNetworkCallbackActive = false;
             try {
                 connectivityManager.unregisterNetworkCallback(defaultNetworkCallback);
             } catch (Exception e) {

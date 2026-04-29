@@ -116,12 +116,10 @@ class EngineRestarter implements NetworkToggleListener {
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
                 currentListener = null;
-                // The Go ClientStart() will fire OnConnecting shortly; from
-                // that point onward we want the listener to see real state
-                // again. The filter stays in place until the first Connecting
-                // / Connected event passes through.
-                if (filteringListener != null) {
-                    filteringListener.allowAfterFirstConnectingOrConnected();
+                // Restore the original listener so the FilteringConnectionListener
+                // wrapper does not accumulate across restart cycles.
+                if (filteringListener != null && savedListener != null) {
+                    engineRunner.setConnectionListener(savedListener);
                 }
                 unsuppressAll(suppressedHolder.get());
             }
@@ -217,13 +215,13 @@ class EngineRestarter implements NetworkToggleListener {
      * during a restart. Disconnects from the old engine's teardown — and the
      * default-state replay the Go notifier sends to a listener attached
      * before the new engine's ClientStart() — would otherwise flash the UI
-     * to Disconnected. Filtering ends as soon as the first real Connecting
-     * or Connected event arrives from the new engine.
+     * to Disconnected. The wrapper is replaced with the original listener on
+     * successful restart (or has its filter disabled via allowAll on error /
+     * timeout), so it never lives past a single restart cycle.
      */
     private static final class FilteringConnectionListener implements ConnectionListener {
         final ConnectionListener delegate;
         private volatile boolean dropDisconnects = true;
-        private volatile boolean releaseAfterFirstActive = false;
 
         FilteringConnectionListener(ConnectionListener delegate) {
             this.delegate = delegate;
@@ -231,18 +229,10 @@ class EngineRestarter implements NetworkToggleListener {
 
         void allowAll() {
             dropDisconnects = false;
-            releaseAfterFirstActive = false;
-        }
-
-        void allowAfterFirstConnectingOrConnected() {
-            releaseAfterFirstActive = true;
         }
 
         @Override
         public void onConnecting() {
-            if (releaseAfterFirstActive) {
-                dropDisconnects = false;
-            }
             try {
                 delegate.onConnecting();
             } catch (Exception e) {
@@ -252,9 +242,6 @@ class EngineRestarter implements NetworkToggleListener {
 
         @Override
         public void onConnected() {
-            if (releaseAfterFirstActive) {
-                dropDisconnects = false;
-            }
             try {
                 delegate.onConnected();
             } catch (Exception e) {

@@ -85,9 +85,7 @@ public class VPNService extends android.net.VpnService {
             public void onReceive(Context context, Intent intent) {
                 if (ACTION_STOP_ENGINE.equals(intent.getAction())) {
                     Log.d(LOGTAG, "Received stop engine broadcast");
-                    if (engineRestarter != null) {
-                        engineRestarter.cancelPendingRestart();
-                    }
+                    engineRestarter.cancelPendingRestart();
                     if (engineRunner != null) {
                         engineRunner.stop();
                     }
@@ -171,9 +169,7 @@ public class VPNService extends android.net.VpnService {
     @Override
     public void onRevoke() {
         Log.d(LOGTAG, "VPN permission on revoke");
-        if (engineRestarter != null) {
-            engineRestarter.cancelPendingRestart();
-        }
+        engineRestarter.cancelPendingRestart();
         if (engineRunner != null) {
             engineRunner.stop();
             stopForeground(true);
