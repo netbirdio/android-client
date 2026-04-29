@@ -117,13 +117,10 @@ public class ProfileManagerWrapper {
         String activeProfile = getActiveProfile();
         boolean removingActiveProfile = activeProfile.equals(profileName);
         if (removingActiveProfile) {
-            stopEngine();
+            throw new IllegalStateException("Cannot remove active profile");
         }
 
         profileManager.removeProfile(profileName);
-        if (removingActiveProfile) {
-            clearWidgetDisplayState();
-        }
     }
 
     /**
