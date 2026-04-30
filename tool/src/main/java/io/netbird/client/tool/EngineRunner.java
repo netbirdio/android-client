@@ -163,6 +163,19 @@ class EngineRunner {
         goClient.stop();
     }
 
+    /**
+     * Notify the Go client that the underlying network changed (WiFi/cellular).
+     * This triggers an immediate re-sync of NetworkAddresses with the management
+     * server for posture check re-evaluation.
+     */
+    public void notifyNetworkChanged() {
+        try {
+            goClient.onUnderlyingNetworkChanged();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "notifyNetworkChanged: " + e.getMessage());
+        }
+    }
+
     public PeerInfoArray peersInfo() {
         return goClient.peersList();
     }

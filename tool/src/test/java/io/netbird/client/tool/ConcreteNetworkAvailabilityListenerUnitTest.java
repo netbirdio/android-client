@@ -53,11 +53,11 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
         var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
 
         // Act:
-        networkChangeDetector.activateMobile();
-        networkChangeDetector.activateWifi();
+        networkChangeDetector.activateMobile();  // new network type -> notify
+        networkChangeDetector.activateWifi();     // new network type -> notify
 
-        // Assert:
-        assertEquals(1, networkToggleListener.totalTimesNetworkTypeChanged);
+        // Assert: both mobile and wifi becoming available trigger notifications
+        assertEquals(2, networkToggleListener.totalTimesNetworkTypeChanged);
     }
 
     @Test
@@ -70,16 +70,16 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
         var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
 
         // Act:
-        networkChangeDetector.activateMobile();
-        networkChangeDetector.activateWifi();   // upgraded, network changes.
-        networkChangeDetector.deactivateWifi(); // downgraded, network changes.
+        networkChangeDetector.activateMobile();  // new network type -> notify
+        networkChangeDetector.activateWifi();    // new network type -> notify
+        networkChangeDetector.deactivateWifi();  // lost, mobile still available -> notify
 
-        // Assert:
-        assertEquals(2, networkToggleListener.totalTimesNetworkTypeChanged);
+        // Assert: each event triggers a notification
+        assertEquals(3, networkToggleListener.totalTimesNetworkTypeChanged);
     }
 
     @Test
-    public void shouldNotNotifyListenerNetworkDidNotUpgrade() {
+    public void shouldNotifyListenerOnAnyNetworkChange() {
         // Assemble:
         var networkToggleListener = new MockNetworkToggleListener();
         var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
@@ -92,11 +92,11 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
 
         networkToggleListener.resetCounter();
 
-        networkChangeDetector.activateMobile();
-        networkChangeDetector.deactivateMobile();
+        networkChangeDetector.activateMobile();    // new network type -> notify
+        networkChangeDetector.deactivateMobile();  // lost, wifi still available -> notify
 
-        // Assert:
-        assertEquals(0, networkToggleListener.totalTimesNetworkTypeChanged);
+        // Assert: every network change notifies for posture check re-evaluation
+        assertEquals(2, networkToggleListener.totalTimesNetworkTypeChanged);
     }
 
     @Test

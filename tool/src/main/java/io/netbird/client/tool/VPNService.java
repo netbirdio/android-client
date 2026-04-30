@@ -76,6 +76,12 @@ public class VPNService extends android.net.VpnService {
         networkChangeDetector = new NetworkChangeDetector(
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
         networkChangeDetector.subscribe(networkAvailabilityListener);
+        // Notify Go layer on any network change for posture check re-evaluation
+        networkChangeDetector.setNetworkChangedCallback(() -> {
+            if (engineRunner != null) {
+                engineRunner.notifyNetworkChanged();
+            }
+        });
         networkChangeDetector.registerNetworkCallback();
 
         // Register broadcast receiver for stopping engine (e.g., during profile switch)

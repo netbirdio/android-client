@@ -13,26 +13,24 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
 
     @Override
     public void onNetworkAvailable(@Constants.NetworkType int networkType) {
-        boolean isWifiAvailable = Boolean.TRUE.equals(availableNetworkTypes.get(Constants.NetworkType.WIFI));
+        Boolean wasAvailable = availableNetworkTypes.put(networkType, true);
 
-        availableNetworkTypes.put(networkType, true);
-
-        // if wifi is available and wasn't before, notifies listener.
-        // Android prioritizes wifi over mobile data network by default.
-        if (!isWifiAvailable && networkType == Constants.NetworkType.WIFI) {
+        // Always notify on any network change so the engine re-syncs
+        // NetworkAddresses with the management server. This ensures
+        // posture checks see the current network (e.g. WiFi subnet)
+        // immediately after a network switch.
+        if (!Boolean.TRUE.equals(wasAvailable)) {
             notifyListener();
         }
     }
 
     @Override
     public void onNetworkLost(@Constants.NetworkType int networkType) {
-        boolean isMobileAvailable = Boolean.TRUE.equals(availableNetworkTypes.get(Constants.NetworkType.MOBILE));
-
         availableNetworkTypes.remove(networkType);
 
-        // if wifi is lost and mobile data is available, notifies listener.
-        // No use to notify it if there's no other type of network available.
-        if (isMobileAvailable && networkType == Constants.NetworkType.WIFI) {
+        // Notify on any network loss if another network is still available,
+        // so the engine re-syncs with updated NetworkAddresses.
+        if (!availableNetworkTypes.isEmpty()) {
             notifyListener();
         }
     }
