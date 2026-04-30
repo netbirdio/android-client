@@ -15,6 +15,9 @@ import androidx.fragment.app.Fragment;
 
 import com.airbnb.lottie.LottieAnimationView;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
@@ -36,6 +39,10 @@ public class HomeFragment extends Fragment implements StateListener {
     private LottieAnimationView buttonConnect;
     private ButtonAnimation buttonAnimation;
     private boolean isConnected;
+
+    // serializes peer-list refreshes off the UI thread; serviceAccessor.getPeersList()
+    // is a JNI call into Go that can take seconds during engine bootstrap/teardown
+    private ExecutorService refreshExecutor;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -115,6 +122,7 @@ public class HomeFragment extends Fragment implements StateListener {
             }, 200);
         }
 
+        refreshExecutor = Executors.newSingleThreadExecutor();
         stateListenerRegistry.registerServiceStateListener(this);
         return root;
     }
@@ -124,6 +132,10 @@ public class HomeFragment extends Fragment implements StateListener {
         super.onDestroyView();
         buttonAnimation.destroy();
         stateListenerRegistry.unregisterServiceStateListener(this);
+        if (refreshExecutor != null) {
+            refreshExecutor.shutdown();
+            refreshExecutor = null;
+        }
         FrameLayout openPanelCardView = binding.peersBtn;
         openPanelCardView.setOnClickListener(null);
         binding = null;
@@ -191,15 +203,21 @@ public class HomeFragment extends Fragment implements StateListener {
 
     @Override
     public void onPeersListChanged(long numberOfPeers) {
-        PeerInfoArray peersList = serviceAccessor.getPeersList();
-        int connected = 0;
-        for (int i = 0; i < peersList.size(); i++) {
-            PeerInfo peer = peersList.get(i);
-            if(Status.fromLong(peer.getConnStatus()) == Status.CONNECTED) {
-                connected++;
-            }
+        ExecutorService executor = refreshExecutor;
+        if (executor == null) {
+            return;
         }
-        updatePeerCount(connected, peersList.size());
+        executor.execute(() -> {
+            PeerInfoArray peersList = serviceAccessor.getPeersList();
+            int connected = 0;
+            for (int i = 0; i < peersList.size(); i++) {
+                PeerInfo peer = peersList.get(i);
+                if(Status.fromLong(peer.getConnStatus()) == Status.CONNECTED) {
+                    connected++;
+                }
+            }
+            updatePeerCount(connected, peersList.size());
+        });
     }
 
     private void updatePeerCount(int connectedPeers, long totalPeers) {
