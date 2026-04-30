@@ -1,18 +1,36 @@
 package io.netbird.client.tool;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.VpnService;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
@@ -26,12 +44,31 @@ public class VPNService extends android.net.VpnService {
     private final static String LOGTAG = "service";
     public static final String INTENT_ACTION_START = "io.netbird.client.intent.action.START_SERVICE";
     public static final String ACTION_STOP_ENGINE = "io.netbird.client.intent.action.STOP_ENGINE";
+    public static final String ACTION_WIDGET_TOGGLE_CONNECTION = "io.netbird.client.widget.action.TOGGLE_CONNECTION";
+    public static final String ACTION_WIDGET_TOGGLE_EXIT_NODE = "io.netbird.client.widget.action.TOGGLE_EXIT_NODE";
+    public static final String ACTION_WIDGET_REFRESH = "io.netbird.client.widget.action.REFRESH";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
+    private static final String EXIT_NODE_NETWORK = "0.0.0.0/0";
+    private static final int WIDGET_STATE_REFRESH_COUNT = 12;
+    private static final long WIDGET_STATE_REFRESH_DELAY_MS = 500;
+    private static final int EXIT_NODE_RETRY_COUNT = WIDGET_STATE_REFRESH_COUNT * 2;
+    private static final long EXIT_NODE_RETRY_DELAY_MS = 500;
+    private static final String WIDGET_PROVIDER_CLASS_NAME = "io.netbird.client.NetbirdWidgetProvider";
     private final IBinder myBinder = new MyLocalBinder();
+    private final ExecutorService widgetActionExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService widgetStateExecutor = Executors.newSingleThreadExecutor();
+    private final ScheduledExecutorService widgetRefreshExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final AtomicBoolean widgetExitToggleInFlight = new AtomicBoolean(false);
+    private final AtomicBoolean widgetRefreshInFlight = new AtomicBoolean(false);
+    private final AtomicInteger widgetRefreshIteration = new AtomicInteger(0);
+    private final AtomicReference<ScheduledFuture<?>> widgetRefreshTask = new AtomicReference<>();
+    private volatile String lastSelectedExitNodeName;
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
     private TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
+    private Preferences preferences;
+    private ProfileManagerWrapper profileManager;
 
     private RouteChangeListener listener;
 
@@ -49,15 +86,18 @@ public class VPNService extends android.net.VpnService {
         var tunAdapter = new IFace(this);
         var iFaceDiscover = new IFaceDiscover();
 
-        listener = this::queueTUNRenewal;
+        listener = routes -> {
+            queueTUNRenewal(routes);
+            requestWidgetStateUpdate();
+        };
 
         notifier = new NetworkChangeNotifier(this);
         notifier.addRouteChangeListener(listener);
 
-        Preferences preferences = new Preferences(this);
+        preferences = new Preferences(this);
 
         // Create profile manager for managing profiles
-        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
+        profileManager = new ProfileManagerWrapper(this);
 
         // Create foreground notification before initializing engine
         fgNotification = new ForegroundNotification(this);
@@ -84,6 +124,7 @@ public class VPNService extends android.net.VpnService {
             public void onReceive(Context context, Intent intent) {
                 if (ACTION_STOP_ENGINE.equals(intent.getAction())) {
                     Log.d(LOGTAG, "Received stop engine broadcast");
+                    lastSelectedExitNodeName = null;
                     if (engineRunner != null) {
                         engineRunner.stop();
                     }
@@ -112,6 +153,16 @@ public class VPNService extends android.net.VpnService {
         }
         if (INTENT_ACTION_START.equals(intent.getAction())) {
             fgNotification.startForeground();
+        }
+        if (ACTION_WIDGET_TOGGLE_CONNECTION.equals(intent.getAction())) {
+            fgNotification.startForeground();
+            handleWidgetConnectionToggle();
+            return START_NOT_STICKY;
+        }
+        if (ACTION_WIDGET_TOGGLE_EXIT_NODE.equals(intent.getAction())) {
+            fgNotification.startForeground();
+            handleWidgetExitNodeToggle();
+            return START_NOT_STICKY;
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -152,6 +203,7 @@ public class VPNService extends android.net.VpnService {
 
         engineRunner.stop();
         stopForeground(true);
+        clearWidgetStateAndBroadcast();
 
         if (this.notifier != null) {
             this.notifier.removeRouteChangeListener(listener);
@@ -161,6 +213,11 @@ public class VPNService extends android.net.VpnService {
             tunCreator.getHandler().getLooper().quitSafely();
             tunCreator = null;
         }
+
+        stopWidgetStateRefresh();
+        widgetActionExecutor.shutdownNow();
+        widgetStateExecutor.shutdownNow();
+        widgetRefreshExecutor.shutdownNow();
     }
 
     @Override
@@ -169,6 +226,7 @@ public class VPNService extends android.net.VpnService {
         if (engineRunner != null) {
             engineRunner.stop();
             stopForeground(true);
+            clearWidgetStateAndBroadcast();
         }
     }
 
@@ -269,22 +327,376 @@ public class VPNService extends android.net.VpnService {
         return false;
     }
 
+    public static void sendWidgetRefreshBroadcast(Context context) {
+        Intent refreshIntent = new Intent(ACTION_WIDGET_REFRESH);
+        refreshIntent.setClassName(context.getPackageName(), WIDGET_PROVIDER_CLASS_NAME);
+        context.sendBroadcast(refreshIntent);
+    }
+
+    public static boolean isServiceRunning(Context context) {
+        ActivityManager activityManager =
+                (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager == null) {
+            return false;
+        }
+
+        for (ActivityManager.RunningServiceInfo service
+                : activityManager.getRunningServices(Integer.MAX_VALUE)) {
+            if (VPNService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ServiceStateListener serviceStateListener = new ServiceStateListener() {
         @Override
         public void onStarted() {
-
+            requestWidgetStateUpdate();
+            scheduleWidgetStateRefresh();
         }
 
         @Override
         public void onStopped() {
+            stopWidgetStateRefresh();
             fgNotification.stopForeground();
+            requestWidgetStateUpdate();
         }
 
         @Override
         public void onError(String msg) {
+            stopWidgetStateRefresh();
             fgNotification.stopForeground();
+            requestWidgetStateUpdate();
         }
     };
+
+    private void handleWidgetConnectionToggle() {
+        if (engineRunner.isRunning()) {
+            engineRunner.stop();
+            requestWidgetStateUpdate();
+            return;
+        }
+
+        if (!hasUsableActiveProfile()) {
+            promptUserToOpenApp(R.string.widget_open_app_setup_text);
+            return;
+        }
+
+        if (!ensureVpnPermissionFromWidget()) {
+            return;
+        }
+
+        engineRunner.runWithoutAuth();
+        requestWidgetStateUpdate();
+    }
+
+    private void handleWidgetExitNodeToggle() {
+        boolean isRunning = engineRunner.isRunning();
+        if (!isRunning && !hasUsableActiveProfile()) {
+            promptUserToOpenApp(R.string.widget_open_app_setup_text);
+            return;
+        }
+
+        if (!ensureVpnPermissionFromWidget()) {
+            return;
+        }
+
+        if (!isRunning) {
+            engineRunner.runWithoutAuth();
+            requestWidgetStateUpdate();
+            runExitNodeActionWhenAvailable(true);
+            return;
+        }
+
+        runExitNodeActionWhenAvailable(false);
+    }
+
+    private void runExitNodeActionWhenAvailable(boolean enableOnly) {
+        if (!widgetExitToggleInFlight.compareAndSet(false, true)) {
+            return;
+        }
+
+        widgetActionExecutor.execute(() -> {
+            try {
+                if (enableOnly) {
+                    enableExitNodeWhenAvailable();
+                } else {
+                    toggleExitNodeWhenAvailable();
+                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to toggle exit node from widget", e);
+            } finally {
+                widgetExitToggleInFlight.set(false);
+                requestWidgetStateUpdate();
+            }
+        });
+    }
+
+    private boolean ensureVpnPermissionFromWidget() {
+        if (VpnService.prepare(this) == null) {
+            return true;
+        }
+
+        promptUserToOpenApp(R.string.widget_open_app_permission_text);
+        requestWidgetStateUpdate();
+        return false;
+    }
+
+    private void requestWidgetStateUpdate() {
+        if (widgetStateExecutor.isShutdown()) {
+            return;
+        }
+
+        try {
+            widgetStateExecutor.execute(this::updateWidgetStateAndBroadcast);
+        } catch (RejectedExecutionException e) {
+            Log.w(LOGTAG, "widget state update was rejected", e);
+        }
+    }
+
+    private boolean hasUsableActiveProfile() {
+        return profileManager != null && profileManager.hasUsableActiveProfile();
+    }
+
+    private void promptUserToOpenApp(int messageResId) {
+        fgNotification.stopForeground();
+        String message = getString(messageResId);
+        if (canPostNotifications()) {
+            fgNotification.showNotification(message);
+        } else {
+            Log.w(LOGTAG, "POST_NOTIFICATIONS is not granted; falling back to Toast for widget prompt");
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        }
+
+        if (!engineRunner.isRunning()) {
+            stopSelf();
+        }
+    }
+
+    private boolean canPostNotifications() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return true;
+        }
+
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void toggleExitNodeWhenAvailable() throws Exception {
+        for (int i = 0; i < EXIT_NODE_RETRY_COUNT; i++) {
+            var exitNodes = getExitNodes();
+            if (!exitNodes.isEmpty()) {
+                toggleExitNode(exitNodes);
+                return;
+            }
+
+            try {
+                Thread.sleep(EXIT_NODE_RETRY_DELAY_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+    }
+
+    private void enableExitNodeWhenAvailable() throws Exception {
+        for (int i = 0; i < EXIT_NODE_RETRY_COUNT; i++) {
+            var exitNodes = getExitNodes();
+            if (!exitNodes.isEmpty()) {
+                enableExitNode(exitNodes);
+                return;
+            }
+
+            try {
+                Thread.sleep(EXIT_NODE_RETRY_DELAY_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+    }
+
+    private void toggleExitNode(List<ExitNode> exitNodes) throws Exception {
+        boolean deselectedSelectedExitNode = false;
+        for (ExitNode exitNode : exitNodes) {
+            if (exitNode.selected) {
+                lastSelectedExitNodeName = exitNode.name;
+                engineRunner.deselectRoute(exitNode.name);
+                deselectedSelectedExitNode = true;
+            }
+        }
+
+        if (!deselectedSelectedExitNode) {
+            enableExitNode(exitNodes);
+        }
+    }
+
+    private void enableExitNode(List<ExitNode> exitNodes) throws Exception {
+        for (ExitNode exitNode : exitNodes) {
+            if (exitNode.selected) {
+                lastSelectedExitNodeName = exitNode.name;
+                return;
+            }
+        }
+
+        ExitNode target = findExitNode(exitNodes, lastSelectedExitNodeName);
+        if (target == null) {
+            target = exitNodes.get(0);
+        }
+
+        engineRunner.selectRoute(target.name);
+        lastSelectedExitNodeName = target.name;
+    }
+
+    private ExitNode findExitNode(List<ExitNode> exitNodes, String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (ExitNode exitNode : exitNodes) {
+            if (name.equals(exitNode.name)) {
+                return exitNode;
+            }
+        }
+        return null;
+    }
+
+    private List<ExitNode> getExitNodes() {
+        List<ExitNode> exitNodes = new ArrayList<>();
+        EngineRunner currentEngineRunner = engineRunner;
+        if (currentEngineRunner == null || !currentEngineRunner.isRunning()) {
+            return exitNodes;
+        }
+
+        try {
+            NetworkArray networks = currentEngineRunner.networks();
+            if (networks == null) {
+                return exitNodes;
+            }
+
+            for (int i = 0; i < networks.size(); i++) {
+                var network = networks.get(i);
+                if (network != null && EXIT_NODE_NETWORK.equals(network.getNetwork())) {
+                    exitNodes.add(new ExitNode(network.getName(), network.getIsSelected()));
+                }
+            }
+        } catch (Exception e) {
+            Log.w(LOGTAG, "failed to fetch exit nodes from engine", e);
+        }
+
+        return exitNodes;
+    }
+
+    private void updateWidgetStateAndBroadcast() {
+        Preferences currentPreferences = preferences;
+        EngineRunner currentEngineRunner = engineRunner;
+        if (currentPreferences == null || currentEngineRunner == null) {
+            return;
+        }
+
+        boolean isRunning = currentEngineRunner.isRunning();
+        boolean hasSelectedExitNode = false;
+        String exitNodeName = null;
+
+        if (isRunning) {
+            List<ExitNode> exitNodes = getExitNodes();
+            for (ExitNode exitNode : exitNodes) {
+                if (exitNode.selected) {
+                    hasSelectedExitNode = true;
+                    exitNodeName = exitNode.name;
+                    lastSelectedExitNodeName = exitNode.name;
+                    break;
+                }
+            }
+            if (!hasSelectedExitNode && !exitNodes.isEmpty()) {
+                ExitNode displayNode = findExitNode(exitNodes, lastSelectedExitNodeName);
+                if (displayNode == null) {
+                    displayNode = exitNodes.get(0);
+                }
+                exitNodeName = displayNode.name;
+            }
+        }
+
+        synchronized (this) {
+            currentPreferences.setWidgetState(isRunning, hasSelectedExitNode, exitNodeName);
+            sendWidgetRefreshBroadcast(this);
+        }
+    }
+
+    private void clearWidgetStateAndBroadcast() {
+        lastSelectedExitNodeName = null;
+        Preferences currentPreferences = preferences;
+        if (currentPreferences == null) {
+            currentPreferences = new Preferences(this);
+        }
+        currentPreferences.clearWidgetState();
+        sendWidgetRefreshBroadcast(this);
+    }
+
+    private synchronized void scheduleWidgetStateRefresh() {
+        if (!widgetRefreshInFlight.compareAndSet(false, true)) {
+            return;
+        }
+
+        widgetRefreshIteration.set(0);
+        AtomicReference<ScheduledFuture<?>> scheduledTaskRef = new AtomicReference<>();
+        ScheduledFuture<?> refreshTask = widgetRefreshExecutor.scheduleWithFixedDelay(() -> {
+            try {
+                int iteration = widgetRefreshIteration.incrementAndGet();
+                requestWidgetStateUpdate();
+
+                if (iteration >= WIDGET_STATE_REFRESH_COUNT
+                        || !engineRunner.isRunning()
+                        || hasSelectedExitNode()) {
+                    stopWidgetStateRefresh(scheduledTaskRef.get());
+                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to refresh widget state", e);
+                stopWidgetStateRefresh(scheduledTaskRef.get());
+            }
+        }, WIDGET_STATE_REFRESH_DELAY_MS, WIDGET_STATE_REFRESH_DELAY_MS, TimeUnit.MILLISECONDS);
+        scheduledTaskRef.set(refreshTask);
+        widgetRefreshTask.set(refreshTask);
+    }
+
+    private boolean hasSelectedExitNode() {
+        for (ExitNode exitNode : getExitNodes()) {
+            if (exitNode.selected) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private synchronized void stopWidgetStateRefresh() {
+        ScheduledFuture<?> refreshTask = widgetRefreshTask.getAndSet(null);
+        if (refreshTask != null) {
+            refreshTask.cancel(false);
+        }
+        widgetRefreshInFlight.set(false);
+    }
+
+    private synchronized void stopWidgetStateRefresh(@Nullable ScheduledFuture<?> expectedTask) {
+        if (expectedTask == null) {
+            return;
+        }
+
+        if (widgetRefreshTask.compareAndSet(expectedTask, null)) {
+            expectedTask.cancel(false);
+            widgetRefreshInFlight.set(false);
+        }
+    }
+
+    private static class ExitNode {
+        private final String name;
+        private final boolean selected;
+
+        ExitNode(String name, boolean selected) {
+            this.name = name;
+            this.selected = selected;
+        }
+    }
 
     private TUNCreatorLooperThread tunCreator;
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +72,7 @@ public class ProfileManagerWrapper {
         stopEngine();
 
         profileManager.switchProfile(profileName);
+        clearWidgetDisplayState();
     }
 
     /**
@@ -100,6 +102,9 @@ public class ProfileManagerWrapper {
         }
 
         profileManager.logoutProfile(profileName);
+        if (activeProfile.equals(profileName)) {
+            clearWidgetDisplayState();
+        }
     }
 
     /**
@@ -109,6 +114,12 @@ public class ProfileManagerWrapper {
         if (profileName == null || profileName.trim().isEmpty()) {
             throw new IllegalArgumentException("Profile name cannot be empty");
         }
+        String activeProfile = getActiveProfile();
+        boolean removingActiveProfile = activeProfile.equals(profileName);
+        if (removingActiveProfile) {
+            throw new IllegalStateException("Cannot remove active profile");
+        }
+
         profileManager.removeProfile(profileName);
     }
 
@@ -128,6 +139,21 @@ public class ProfileManagerWrapper {
         return profileManager.getActiveStateFilePath();
     }
 
+    public boolean hasUsableActiveProfile() {
+        try {
+            String configPath = profileManager.getActiveConfigPath();
+            if (configPath == null || configPath.trim().isEmpty()) {
+                return false;
+            }
+
+            File configFile = new File(configPath);
+            return configFile.isFile() && configFile.length() > 0;
+        } catch (Exception e) {
+            Log.w(TAG, "No usable active profile is available", e);
+            return false;
+        }
+    }
+
     /**
      * Stops the VPN engine (disconnects) without stopping the service
      */
@@ -140,6 +166,15 @@ public class ProfileManagerWrapper {
         } catch (Exception e) {
             Log.w(TAG, "Failed to send stop engine broadcast: " + e.getMessage());
             // Don't throw exception - profile operations should continue even if stop fails
+        }
+    }
+
+    private void clearWidgetDisplayState() {
+        try {
+            new Preferences(context).clearWidgetState();
+            VPNService.sendWidgetRefreshBroadcast(context);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to clear widget display state", e);
         }
     }
 }
