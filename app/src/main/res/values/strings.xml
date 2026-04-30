@@ -96,6 +96,8 @@
     <string name="advanced_allow_ssh_desc">Allows SSH connections to this device</string>
     <string name="advanced_block_inbound">Block inbound connections</string>
     <string name="advanced_block_inbound_desc">Blocks all inbound connections to this device and routed networks. This overrides any policies received from the management service</string>
+    <string name="advanced_lazy_connection">Lazy connection</string>
+    <string name="advanced_lazy_connection_desc">Defer per-peer connection setup until first actual traffic. Reduces background load but adds latency to the first packet to a peer</string>
 
 
     <string name="desc_logo">NetBird logo</string>
