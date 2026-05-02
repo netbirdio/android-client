@@ -214,6 +214,30 @@ class EngineRunner {
         }
     }
 
+    public String getServerPushedConnectionMode() {
+        try {
+            return goClient.getServerPushedConnectionMode();
+        } catch (Throwable t) {
+            android.util.Log.d(LOGTAG, "getServerPushedConnectionMode unavailable: " + t.getMessage());
+            return "";
+        }
+    }
+
+    public long getServerPushedRelayTimeoutSecs() {
+        try { return goClient.getServerPushedRelayTimeoutSecs(); }
+        catch (Throwable t) { return 0; }
+    }
+
+    public long getServerPushedP2pTimeoutSecs() {
+        try { return goClient.getServerPushedP2pTimeoutSecs(); }
+        catch (Throwable t) { return 0; }
+    }
+
+    public long getServerPushedP2pRetryMaxSecs() {
+        try { return goClient.getServerPushedP2pRetryMaxSecs(); }
+        catch (Throwable t) { return 0; }
+    }
+
     public String debugBundle(boolean anonymize) throws Exception {
         String configPath = profileManager.getActiveConfigPath();
         String statePath = profileManager.getActiveStateFilePath();

@@ -98,6 +98,12 @@
     <string name="advanced_block_inbound_desc">Blocks all inbound connections to this device and routed networks. This overrides any policies received from the management service</string>
     <string name="advanced_lazy_connection">Lazy connection</string>
     <string name="advanced_lazy_connection_desc">Defer per-peer connection setup until first actual traffic. Reduces background load but adds latency to the first packet to a peer</string>
+    <string name="advanced_connection_mode">Connection mode</string>
+    <string name="advanced_connection_mode_desc">Override the connection mode pushed by the server. Leave on \"Follow server\" to use the server-configured value. Other modes activate the timeout fields below.</string>
+    <string name="advanced_relay_timeout">Relay timeout (seconds; leave empty to use server default)</string>
+    <string name="advanced_p2p_timeout">P2P (ICE) timeout (seconds; leave empty to use server default)</string>
+    <string name="advanced_p2p_retry_max">P2P retry-max cap (seconds; leave empty to use server default)</string>
+    <string name="advanced_timeout_hint">use server default</string>
 
 
     <string name="desc_logo">NetBird logo</string>

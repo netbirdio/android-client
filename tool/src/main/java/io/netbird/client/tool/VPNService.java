@@ -243,6 +243,22 @@ public class VPNService extends android.net.VpnService {
             return engineRunner.debugBundle(anonymize);
         }
 
+        public String getServerPushedConnectionMode() {
+            return engineRunner.getServerPushedConnectionMode();
+        }
+
+        public long getServerPushedRelayTimeoutSecs() {
+            return engineRunner.getServerPushedRelayTimeoutSecs();
+        }
+
+        public long getServerPushedP2pTimeoutSecs() {
+            return engineRunner.getServerPushedP2pTimeoutSecs();
+        }
+
+        public long getServerPushedP2pRetryMaxSecs() {
+            return engineRunner.getServerPushedP2pRetryMaxSecs();
+        }
+
         public void selectRoute(String route) throws Exception {
             engineRunner.selectRoute(route);
         }

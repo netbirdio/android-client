@@ -422,6 +422,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public String getServerPushedConnectionMode() {
+        if (mBinder == null) {
+            return "";
+        }
+        return mBinder.getServerPushedConnectionMode();
+    }
+
+    @Override
+    public long getServerPushedRelayTimeoutSecs() {
+        if (mBinder == null) return 0;
+        return mBinder.getServerPushedRelayTimeoutSecs();
+    }
+
+    @Override
+    public long getServerPushedP2pTimeoutSecs() {
+        if (mBinder == null) return 0;
+        return mBinder.getServerPushedP2pTimeoutSecs();
+    }
+
+    @Override
+    public long getServerPushedP2pRetryMaxSecs() {
+        if (mBinder == null) return 0;
+        return mBinder.getServerPushedP2pRetryMaxSecs();
+    }
+
+    @Override
     public void addRouteChangeListener(RouteChangeListener listener) {
         if (mBinder == null) {
             Log.w(LOGTAG, "VPN binder is null");

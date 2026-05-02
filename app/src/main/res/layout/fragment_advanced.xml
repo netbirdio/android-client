@@ -268,51 +268,106 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/layout_lazy_connection"
+                android:id="@+id/layout_connection_mode"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/focus_highlight"
-                android:clickable="true"
-                android:focusable="true"
-                android:focusableInTouchMode="false"
                 android:orientation="vertical"
                 android:padding="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/layout_block_inbound">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:text="@string/advanced_connection_mode"
+                    android:textColor="@color/nb_txt_light" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/advanced_lazy_connection"
-                        android:textColor="@color/nb_txt_light" />
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switch_lazy_connection"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:clickable="false"
-                        android:focusable="false" />
-
-                </LinearLayout>
+                <Spinner
+                    android:id="@+id/spinner_connection_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:popupBackground="@color/nb_bg"
+                    android:dropDownVerticalOffset="4dp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="0dp"
                     android:layout_marginTop="2dp"
-                    android:layout_marginEnd="48dp"
-                    android:text="@string/advanced_lazy_connection_desc"
+                    android:text="@string/advanced_connection_mode_desc"
                     android:textColor="@color/nb_txt_light"
                     android:textSize="12sp" />
+
+                <LinearLayout
+                    android:id="@+id/layout_timeouts_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/advanced_relay_timeout"
+                        android:textColor="@color/nb_txt_light"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/edit_relay_timeout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="postalCode"
+                        android:hint="@string/advanced_timeout_hint"
+                        android:inputType="number"
+                        android:maxLength="9"
+                        android:textColor="@color/nb_txt_light"
+                        android:textColorHint="@color/nb_txt_light" />
+
+                    <TextView
+                        android:id="@+id/label_p2p_timeout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/advanced_p2p_timeout"
+                        android:textColor="@color/nb_txt_light"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/edit_p2p_timeout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="postalCode"
+                        android:hint="@string/advanced_timeout_hint"
+                        android:inputType="number"
+                        android:maxLength="9"
+                        android:textColor="@color/nb_txt_light"
+                        android:textColorHint="@color/nb_txt_light" />
+
+                    <TextView
+                        android:id="@+id/label_p2p_retry_max"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/advanced_p2p_retry_max"
+                        android:textColor="@color/nb_txt_light"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/edit_p2p_retry_max"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="postalCode"
+                        android:hint="@string/advanced_timeout_hint"
+                        android:inputType="number"
+                        android:maxLength="9"
+                        android:textColor="@color/nb_txt_light"
+                        android:textColorHint="@color/nb_txt_light" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -329,7 +384,7 @@
                 android:padding="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/layout_lazy_connection">
+                app:layout_constraintTop_toBottomOf="@id/layout_connection_mode">
 
                 <LinearLayout
                     android:layout_width="match_parent"

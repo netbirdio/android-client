@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Connection mode entries shown in the AdvancedFragment spinner.
+         Index 0 = follow server (clears local override). The mapping
+         from index to canonical mode string lives in AdvancedFragment.java. -->
+    <string-array name="connection_mode_entries">
+        <item>Follow server</item>
+        <item>relay-forced</item>
+        <item>p2p</item>
+        <item>p2p-lazy</item>
+        <item>p2p-dynamic</item>
+    </string-array>
+</resources>

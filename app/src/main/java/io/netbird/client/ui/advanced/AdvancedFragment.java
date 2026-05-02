@@ -3,10 +3,15 @@ package io.netbird.client.ui.advanced;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -197,7 +202,12 @@ public class AdvancedFragment extends Fragment {
             binding.switchDisableFirewall.setChecked(goPreferences.getDisableFirewall());
             binding.switchAllowSsh.setChecked(goPreferences.getServerSSHAllowed());
             binding.switchBlockInbound.setChecked(goPreferences.getBlockInbound());
-            binding.switchLazyConnection.setChecked(goPreferences.getLazyConnectionEnabled());
+
+            // Connection mode + timeouts (Phase 3.7h Android UI). Default
+            // selection is "Follow server" (index 0 in connection_mode_entries),
+            // which clears any local override. Selecting an explicit mode
+            // unhides the timeout fields below.
+            initializeConnectionModeUI();
 
             // Set up change listeners
             binding.switchDisableClientRoutes.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -254,15 +264,6 @@ public class AdvancedFragment extends Fragment {
                 }
             });
 
-            binding.switchLazyConnection.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                try {
-                    goPreferences.setLazyConnectionEnabled(isChecked);
-                    goPreferences.commit();
-                } catch (Exception e) {
-                    Log.e(LOGTAG, "Failed to set lazy connection", e);
-                }
-            });
-
             // Make parent layouts clickable to toggle switches (for TV remote)
             binding.layoutAllowSsh.setOnClickListener(v -> {
                 binding.switchAllowSsh.toggle();
@@ -270,10 +271,6 @@ public class AdvancedFragment extends Fragment {
 
             binding.layoutBlockInbound.setOnClickListener(v -> {
                 binding.switchBlockInbound.toggle();
-            });
-
-            binding.layoutLazyConnection.setOnClickListener(v -> {
-                binding.switchLazyConnection.toggle();
             });
             
             binding.layoutDisableClientRoutes.setOnClickListener(v -> {
@@ -295,6 +292,200 @@ public class AdvancedFragment extends Fragment {
         } catch (Exception e) {
             Log.e(LOGTAG, "Failed to initialize engine config switches", e);
         }
+    }
+
+    /**
+     * Mapping from spinner position to canonical connection-mode string.
+     * Index 0 = "Follow server" -> empty string clears the local override
+     * so the daemon uses the server-pushed value. Other entries set an
+     * explicit local override that wins over the server value.
+     *
+     * Order matches connection_mode_entries (res/values/connection_mode_array.xml):
+     * Follow server, relay-forced, p2p, p2p-lazy, p2p-dynamic.
+     */
+    private static final String[] CONNECTION_MODE_VALUES = new String[] {
+            "",             // 0: Follow server
+            "relay-forced", // 1
+            "p2p",          // 2
+            "p2p-lazy",     // 3
+            "p2p-dynamic"   // 4
+    };
+
+    private void initializeConnectionModeUI() {
+        try {
+            // Build a theme-aware adapter so the dropdown uses our nb_txt color
+            // and the popup picks up nb_bg in dark mode.
+            // The "Follow server" entry gets a "(currently: <mode>)" suffix
+            // that surfaces the value the management server most recently
+            // pushed -- refreshed on every spinner-touch in case the engine
+            // was not connected yet when the fragment first opened.
+            refreshConnectionModeAdapter();
+
+            // Hydrate spinner from current persisted local override.
+            String currentMode = goPreferences.getConnectionMode();
+            int selectedIdx = 0;
+            for (int i = 0; i < CONNECTION_MODE_VALUES.length; i++) {
+                if (CONNECTION_MODE_VALUES[i].equals(currentMode)) {
+                    selectedIdx = i;
+                    break;
+                }
+            }
+            binding.spinnerConnectionMode.setSelection(selectedIdx);
+            updateTimeoutsVisibility(selectedIdx);
+
+            // Hydrate timeout fields with the locally-stored override (if any).
+            // Empty when no override is set so the user sees the field is
+            // currently inactive; the hint text shows the server-pushed
+            // default for that field as guidance.
+            long relay = goPreferences.getRelayTimeoutSeconds();
+            long p2p = goPreferences.getP2pTimeoutSeconds();
+            long retry = goPreferences.getP2pRetryMaxSeconds();
+            binding.editRelayTimeout.setText(relay == 0 ? "" : String.valueOf(relay));
+            binding.editP2pTimeout.setText(p2p == 0 ? "" : String.valueOf(p2p));
+            binding.editP2pRetryMax.setText(retry == 0 ? "" : String.valueOf(retry));
+
+            // Refresh the "(currently: ...)" suffix every time the spinner is
+            // touched. Cheap (just a getter call to the engine), and covers
+            // the case where the user opens this fragment before the daemon
+            // received its first PeerConfig.
+            binding.spinnerConnectionMode.setOnTouchListener((v, event) -> {
+                if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) {
+                    refreshConnectionModeAdapter();
+                }
+                return false;
+            });
+
+            binding.spinnerConnectionMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    try {
+                        goPreferences.setConnectionMode(CONNECTION_MODE_VALUES[position]);
+                        goPreferences.commit();
+                    } catch (Exception e) {
+                        Log.e(LOGTAG, "Failed to set connection mode", e);
+                    }
+                    updateTimeoutsVisibility(position);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) { }
+            });
+
+            wireTimeoutEditOnBlur(binding.editRelayTimeout, "relay", v -> {
+                try { goPreferences.setRelayTimeoutSeconds(v); goPreferences.commit(); }
+                catch (Exception e) { Log.e(LOGTAG, "Failed to set relay timeout", e); }
+            });
+            wireTimeoutEditOnBlur(binding.editP2pTimeout, "p2p", v -> {
+                try { goPreferences.setP2pTimeoutSeconds(v); goPreferences.commit(); }
+                catch (Exception e) { Log.e(LOGTAG, "Failed to set p2p timeout", e); }
+            });
+            wireTimeoutEditOnBlur(binding.editP2pRetryMax, "p2pRetryMax", v -> {
+                try { goPreferences.setP2pRetryMaxSeconds(v); goPreferences.commit(); }
+                catch (Exception e) { Log.e(LOGTAG, "Failed to set p2p retry max", e); }
+            });
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to initialize connection mode UI", e);
+        }
+    }
+
+    private void refreshConnectionModeAdapter() {
+        if (binding == null) return;
+        String[] base = getResources().getStringArray(R.array.connection_mode_entries);
+        String[] entries = base.clone();
+        String pushed = "";
+        try {
+            if (requireActivity() instanceof io.netbird.client.ServiceAccessor) {
+                pushed = ((io.netbird.client.ServiceAccessor) requireActivity())
+                        .getServerPushedConnectionMode();
+            }
+        } catch (Throwable t) {
+            Log.d(LOGTAG, "no server-pushed mode available yet: " + t.getMessage());
+        }
+        if (pushed != null && !pushed.isEmpty()) {
+            entries[0] = base[0] + " (currently: " + pushed + ")";
+        } else {
+            entries[0] = base[0] + " (engine not yet connected)";
+        }
+        int currentSelection = binding.spinnerConnectionMode.getSelectedItemPosition();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(), R.layout.spinner_item_themed, entries);
+        adapter.setDropDownViewResource(R.layout.spinner_item_themed);
+        binding.spinnerConnectionMode.setAdapter(adapter);
+        if (currentSelection >= 0 && currentSelection < entries.length) {
+            binding.spinnerConnectionMode.setSelection(currentSelection);
+        }
+        // Server-pushed timeout values may have changed too; refresh hints.
+        refreshTimeoutHints();
+    }
+
+    private void updateTimeoutsVisibility(int spinnerPosition) {
+        // Inactivity timeouts only apply when the lazy/dynamic connection
+        // manager is active. Mapping (CONNECTION_MODE_VALUES indices):
+        //   0 follow-server : hide all (server may push any mode; default off)
+        //   1 relay-forced  : hide all (relay tunnel always up, no teardown)
+        //   2 p2p           : hide all (no inactivity manager runs)
+        //   3 p2p-lazy      : show relay_timeout (whole-peer teardown)
+        //   4 p2p-dynamic   : show all three (ICE-only + relay + retry-cap)
+        boolean lazyActive = (spinnerPosition == 3 || spinnerPosition == 4);
+        boolean dynamicActive = (spinnerPosition == 4);
+
+        binding.layoutTimeoutsContainer.setVisibility(lazyActive ? View.VISIBLE : View.GONE);
+        if (!lazyActive) return;
+
+        // relay timeout shown for both p2p-lazy and p2p-dynamic.
+        binding.labelP2pTimeout.setVisibility(dynamicActive ? View.VISIBLE : View.GONE);
+        binding.editP2pTimeout.setVisibility(dynamicActive ? View.VISIBLE : View.GONE);
+        binding.labelP2pRetryMax.setVisibility(dynamicActive ? View.VISIBLE : View.GONE);
+        binding.editP2pRetryMax.setVisibility(dynamicActive ? View.VISIBLE : View.GONE);
+
+        // Refresh hint text from the latest server-pushed values so users
+        // see what they would inherit if they leave a field blank.
+        refreshTimeoutHints();
+    }
+
+    private void refreshTimeoutHints() {
+        long relayServer = 0, p2pServer = 0, retryServer = 0;
+        try {
+            if (requireActivity() instanceof io.netbird.client.ServiceAccessor) {
+                io.netbird.client.ServiceAccessor sa =
+                        (io.netbird.client.ServiceAccessor) requireActivity();
+                relayServer = sa.getServerPushedRelayTimeoutSecs();
+                p2pServer = sa.getServerPushedP2pTimeoutSecs();
+                retryServer = sa.getServerPushedP2pRetryMaxSecs();
+            }
+        } catch (Throwable t) {
+            Log.d(LOGTAG, "server-pushed timeouts unavailable: " + t.getMessage());
+        }
+        binding.editRelayTimeout.setHint(formatHint(relayServer));
+        binding.editP2pTimeout.setHint(formatHint(p2pServer));
+        binding.editP2pRetryMax.setHint(formatHint(retryServer));
+    }
+
+    private static String formatHint(long secs) {
+        if (secs <= 0) {
+            return "use server default";
+        }
+        return "use server default (" + secs + "s)";
+    }
+
+    private interface LongConsumer { void accept(long v); }
+
+    private void wireTimeoutEditOnBlur(EditText edit, String label, LongConsumer onCommit) {
+        edit.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) return;
+            String s = edit.getText().toString().trim();
+            long val = 0;
+            if (!s.isEmpty()) {
+                try { val = Long.parseLong(s); }
+                catch (NumberFormatException nfe) {
+                    Log.w(LOGTAG, "Invalid " + label + " timeout: " + s);
+                    edit.setText("");
+                    return;
+                }
+                if (val < 0) val = 0;
+            }
+            onCommit.accept(val);
+        });
     }
 
     @Override
