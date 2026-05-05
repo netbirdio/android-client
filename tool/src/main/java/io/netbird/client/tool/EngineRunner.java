@@ -236,4 +236,17 @@ class EngineRunner {
             throw e;
         }
     }
+
+    public String debugBundle(boolean anonymize) throws Exception {
+        String configPath = profileManager.getActiveConfigPath();
+        String statePath = profileManager.getActiveStateFilePath();
+        String cacheDir = context.getCacheDir().getAbsolutePath();
+        var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
+        try {
+            return goClient.debugBundle(platformFiles, anonymize);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "goClient error", e);
+            throw e;
+        }
+    }
 }
