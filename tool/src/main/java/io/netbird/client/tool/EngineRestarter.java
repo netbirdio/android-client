@@ -26,7 +26,9 @@ class EngineRestarter implements NetworkToggleListener {
     private ServiceStateListener currentListener;
 
     private volatile boolean isRestartInProgress = false;
-    private volatile boolean restartScheduled = false;
+    private boolean restartScheduled = false;
+    private final Object restartLock = new Object();
+    private final AtomicReference<List<ServiceStateListener>> suppressedHolder = new AtomicReference<>();
     private final Runnable connectedObserver = this::onEngineReconnected;
 
     public EngineRestarter(EngineRunner engineRunner) {
@@ -40,10 +42,12 @@ class EngineRestarter implements NetworkToggleListener {
         // The Go core reconnected on its own; the pending restart is no
         // longer needed. Cancel the debounced restart so we do not tear
         // down a working connection.
-        if (restartScheduled) {
-            Log.d(LOGTAG, "engine reconnected on its own, cancelling pending restart");
-            restartScheduled = false;
-            handler.removeCallbacks(restartRunnable);
+        synchronized (restartLock) {
+            if (restartScheduled) {
+                Log.d(LOGTAG, "engine reconnected on its own, cancelling pending restart");
+                restartScheduled = false;
+                handler.removeCallbacks(restartRunnable);
+            }
         }
     }
 
@@ -54,7 +58,9 @@ class EngineRestarter implements NetworkToggleListener {
      * <p>If the engine isn't running, this method does nothing.</p>
      */
     private void restartEngine() {
-        restartScheduled = false;
+        synchronized (restartLock) {
+            restartScheduled = false;
+        }
 
         // Prevent concurrent restarts
         if (isRestartInProgress) {
@@ -81,10 +87,6 @@ class EngineRestarter implements NetworkToggleListener {
             engineRunner.setConnectionListener(filteringListener);
         }
 
-        // Hold a reference to suppressed external listeners so we can
-        // unsuppress them on completion, error, or timeout.
-        AtomicReference<List<ServiceStateListener>> suppressedHolder = new AtomicReference<>();
-
         timeoutCallback = () -> {
             if (isRestartInProgress) {
                 Log.e(LOGTAG, "engine restart timeout - forcing flag reset");
@@ -92,7 +94,7 @@ class EngineRestarter implements NetworkToggleListener {
                 if (filteringListener != null) {
                     filteringListener.allowAll();
                 }
-                unsuppressAll(suppressedHolder.get());
+                unsuppressAll(suppressedHolder.getAndSet(null));
                 // Unregister so a late onStopped can no longer trigger
                 // runWithoutAuth against this stale listener.
                 if (currentListener != null) {
@@ -121,7 +123,7 @@ class EngineRestarter implements NetworkToggleListener {
                 if (filteringListener != null && savedListener != null) {
                     engineRunner.setConnectionListener(savedListener);
                 }
-                unsuppressAll(suppressedHolder.get());
+                unsuppressAll(suppressedHolder.getAndSet(null));
             }
 
             @Override
@@ -140,7 +142,7 @@ class EngineRestarter implements NetworkToggleListener {
                 if (filteringListener != null) {
                     filteringListener.allowAll();
                 }
-                unsuppressAll(suppressedHolder.get());
+                unsuppressAll(suppressedHolder.getAndSet(null));
                 notifyDisconnected(savedListener);
             }
         };
@@ -299,9 +301,11 @@ class EngineRestarter implements NetworkToggleListener {
         Log.d(LOGTAG, "network type changed, scheduling restart with "
                 + DEBOUNCE_DELAY_MS + "ms debounce.");
 
-        restartScheduled = true;
-        handler.removeCallbacks(restartRunnable);
-        handler.postDelayed(restartRunnable, DEBOUNCE_DELAY_MS);
+        synchronized (restartLock) {
+            restartScheduled = true;
+            handler.removeCallbacks(restartRunnable);
+            handler.postDelayed(restartRunnable, DEBOUNCE_DELAY_MS);
+        }
     }
 
     /**
@@ -311,10 +315,12 @@ class EngineRestarter implements NetworkToggleListener {
      * interfere with that explicit action.
      */
     public void cancelPendingRestart() {
-        if (restartScheduled) {
-            Log.d(LOGTAG, "external action took over engine lifecycle; cancelling pending restart");
-            handler.removeCallbacks(restartRunnable);
-            restartScheduled = false;
+        synchronized (restartLock) {
+            if (restartScheduled) {
+                Log.d(LOGTAG, "external action took over engine lifecycle; cancelling pending restart");
+                handler.removeCallbacks(restartRunnable);
+                restartScheduled = false;
+            }
         }
     }
 
@@ -323,8 +329,10 @@ class EngineRestarter implements NetworkToggleListener {
      * <p>Call this when the EngineRestarter is no longer needed to prevent memory leaks.</p>
      */
     public void cleanup() {
-        handler.removeCallbacks(restartRunnable);
-        restartScheduled = false;
+        synchronized (restartLock) {
+            handler.removeCallbacks(restartRunnable);
+            restartScheduled = false;
+        }
 
         if (timeoutCallback != null) {
             handler.removeCallbacks(timeoutCallback);
@@ -334,6 +342,11 @@ class EngineRestarter implements NetworkToggleListener {
             engineRunner.removeServiceStateListener(currentListener);
             currentListener = null;
         }
+
+        // Restore visibility for any external listeners that were suppressed
+        // by an in-flight restart, so the upcoming engine stop is delivered
+        // to them rather than swallowed by the suppression set.
+        unsuppressAll(suppressedHolder.getAndSet(null));
 
         engineRunner.removeOnConnectedObserver(connectedObserver);
 
