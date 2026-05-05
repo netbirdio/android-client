@@ -17,4 +17,6 @@ public interface ServiceAccessor {
 
     void addRouteChangeListener(RouteChangeListener listener);
     void removeRouteChangeListener(RouteChangeListener listener);
+
+    String debugBundle(boolean anonymize) throws Exception;
 }

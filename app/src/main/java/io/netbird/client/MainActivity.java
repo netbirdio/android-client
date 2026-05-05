@@ -414,6 +414,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public String debugBundle(boolean anonymize) throws Exception {
+        if (mBinder == null) {
+            throw new Exception("VPN service not connected");
+        }
+        return mBinder.debugBundle(anonymize);
+    }
+
+    @Override
     public void addRouteChangeListener(RouteChangeListener listener) {
         if (mBinder == null) {
             Log.w(LOGTAG, "VPN binder is null");

@@ -45,6 +45,7 @@ android {
         versionName = rootProject.extra["appVersionName"] as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments["timeout_msec"] = "3600000"
     }
 
     buildTypes {
@@ -80,6 +81,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.uiautomator)
+    androidTestImplementation(libs.test.rules)
     implementation(libs.browser)  // Added for CustomTabsIntent
     implementation(libs.lottie)
     implementation(libs.zxing)

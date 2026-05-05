@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <!-- Material Design "dns" outlined icon -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M19,15v4H5v-4h14m2,-2H3v8h18v-8zM19,3v4H5V3h14m2,-2H3v8h18V1zM7,8.5c0.83,0 1.5,-0.67 1.5,-1.5S7.83,5.5 7,5.5 5.5,6.17 5.5,7 6.17,8.5 7,8.5zM7,18.5c0.83,0 1.5,-0.67 1.5,-1.5s-0.67,-1.5 -1.5,-1.5 -1.5,0.67 -1.5,1.5 0.67,1.5 1.5,1.5z" />
+</vector>
