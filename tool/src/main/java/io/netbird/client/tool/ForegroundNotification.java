@@ -26,7 +26,9 @@ class ForegroundNotification {
         NotificationChannel channel = new NotificationChannel(
                 channelId,
                 service.getResources().getString(R.string.fg_notification_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT);
+                NotificationManager.IMPORTANCE_LOW);
+        channel.setSound(null, null);
+        channel.enableVibration(false);
         ((NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 
         Intent notificationIntent = new Intent();

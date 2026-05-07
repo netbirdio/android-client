@@ -8,6 +8,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.netbird.client.PeersStateListener;
 import io.netbird.client.PeersStateListenerAdapter;
@@ -19,6 +23,11 @@ import io.netbird.gomobile.android.PeerInfoArray;
 public class PeersFragmentViewModel extends ViewModel implements PeersStateListener {
     private final PeersStateListenerAdapter peersAdapter;
     private final ServiceAccessor serviceAccessor;
+
+    // serializes peer-list refreshes off the UI thread; serviceAccessor.getPeersList()
+    // is a JNI call into Go that can take seconds during engine bootstrap/teardown
+    private final ExecutorService refreshExecutor = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean isCleared = new AtomicBoolean(false);
 
     private final MutableLiveData<PeersFragmentUiState> uiState =
             new MutableLiveData<>(new PeersFragmentUiState(new ArrayList<>()));
@@ -70,13 +79,24 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
 
     @Override
     protected void onCleared() {
+        isCleared.set(true);
         peersAdapter.clearListener();
+        refreshExecutor.shutdown();
         super.onCleared();
     }
 
     @Override
     public void onPeersChanged(long totalPeers) {
-        var peers = getPeers(serviceAccessor.getPeersList());
-        this.uiState.postValue(new PeersFragmentUiState(peers));
+        if (isCleared.get()) {
+            return;
+        }
+        try {
+            refreshExecutor.execute(() -> {
+                var peers = getPeers(serviceAccessor.getPeersList());
+                uiState.postValue(new PeersFragmentUiState(peers));
+            });
+        } catch (RejectedExecutionException ignored) {
+            // executor shut down concurrently in onCleared; safe to drop
+        }
     }
 }

@@ -16,20 +16,14 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
             this.listener = listener;
         }
 
-        public void activateWifi() {
-            this.listener.onNetworkAvailable(Constants.NetworkType.WIFI);
+        public void defaultBecameWifi() {
+            this.listener.onDefaultNetworkTypeChanged(Constants.NetworkType.WIFI);
         }
-        public void deactivateWifi() {
-            this.listener.onNetworkLost(Constants.NetworkType.WIFI);
-        }
-        public void activateMobile() {
-            this.listener.onNetworkAvailable(Constants.NetworkType.MOBILE);
-        }
-        public void deactivateMobile() {
-            this.listener.onNetworkLost(Constants.NetworkType.MOBILE);
+        public void defaultBecameMobile() {
+            this.listener.onDefaultNetworkTypeChanged(Constants.NetworkType.MOBILE);
         }
     }
-    
+
     private static class MockNetworkToggleListener implements NetworkToggleListener {
         private int totalTimesNetworkTypeChanged = 0;
 
@@ -44,78 +38,92 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
     }
 
     @Test
-    public void shouldNotifyListenerNetworkUpgraded() {
-        // Assemble:
+    public void shouldNotifyOnMobileToWifiTransition() {
         var networkToggleListener = new MockNetworkToggleListener();
-        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
         networkAvailabilityListener.subscribe(networkToggleListener);
 
-        var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
+        var detector = new MockNetworkChangeDetector(networkAvailabilityListener);
 
-        // Act:
-        networkChangeDetector.activateMobile();
-        networkChangeDetector.activateWifi();
+        detector.defaultBecameMobile(); // first observation, not a transition
+        detector.defaultBecameWifi();   // mobile -> wifi
 
-        // Assert:
         assertEquals(1, networkToggleListener.totalTimesNetworkTypeChanged);
     }
 
     @Test
-    public void shouldNotifyListenerNetworkDowngraded() {
-        // Assemble:
+    public void shouldNotifyOnWifiToMobileTransition() {
         var networkToggleListener = new MockNetworkToggleListener();
-        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
         networkAvailabilityListener.subscribe(networkToggleListener);
 
-        var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
+        var detector = new MockNetworkChangeDetector(networkAvailabilityListener);
 
-        // Act:
-        networkChangeDetector.activateMobile();
-        networkChangeDetector.activateWifi();   // upgraded, network changes.
-        networkChangeDetector.deactivateWifi(); // downgraded, network changes.
+        detector.defaultBecameWifi();   // first observation
+        detector.defaultBecameMobile(); // wifi -> mobile
 
-        // Assert:
-        assertEquals(2, networkToggleListener.totalTimesNetworkTypeChanged);
+        assertEquals(1, networkToggleListener.totalTimesNetworkTypeChanged);
     }
 
     @Test
-    public void shouldNotNotifyListenerNetworkDidNotUpgrade() {
-        // Assemble:
+    public void shouldNotifyOnEachTypeFlip() {
         var networkToggleListener = new MockNetworkToggleListener();
-        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
         networkAvailabilityListener.subscribe(networkToggleListener);
 
-        var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
+        var detector = new MockNetworkChangeDetector(networkAvailabilityListener);
 
-        // Act:
-        networkChangeDetector.activateWifi();
+        detector.defaultBecameMobile(); // first observation
+        detector.defaultBecameWifi();   // +1
+        detector.defaultBecameMobile(); // +1
+        detector.defaultBecameWifi();   // +1
 
-        networkToggleListener.resetCounter();
+        assertEquals(3, networkToggleListener.totalTimesNetworkTypeChanged);
+    }
 
-        networkChangeDetector.activateMobile();
-        networkChangeDetector.deactivateMobile();
+    @Test
+    public void shouldNotNotifyOnDuplicateSameType() {
+        var networkToggleListener = new MockNetworkToggleListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
+        networkAvailabilityListener.subscribe(networkToggleListener);
 
-        // Assert:
+        var detector = new MockNetworkChangeDetector(networkAvailabilityListener);
+
+        detector.defaultBecameWifi();
+        detector.defaultBecameWifi();
+        detector.defaultBecameWifi();
+
         assertEquals(0, networkToggleListener.totalTimesNetworkTypeChanged);
     }
 
     @Test
-    public void shouldNotNotifyListenerNoNetworksAvailable() {
-        // Assemble:
+    public void shouldNotNotifyOnInitialObservation() {
+        // The first onDefaultNetworkTypeChanged after subscribe is the
+        // current state, not a transition.
         var networkToggleListener = new MockNetworkToggleListener();
-        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
         networkAvailabilityListener.subscribe(networkToggleListener);
 
-        var networkChangeDetector = new MockNetworkChangeDetector(networkAvailabilityListener);
+        var detector = new MockNetworkChangeDetector(networkAvailabilityListener);
 
-        // Act:
-        networkChangeDetector.activateWifi();
+        detector.defaultBecameWifi();
 
-        networkToggleListener.resetCounter();
+        assertEquals(0, networkToggleListener.totalTimesNetworkTypeChanged);
+    }
 
-        networkChangeDetector.deactivateWifi();
+    @Test
+    public void shouldNotNotifyWhenShouldNotifyReturnsFalse() {
+        // shouldNotify gates notifications, e.g. while engine is not running.
+        var networkToggleListener = new MockNetworkToggleListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> false);
+        networkAvailabilityListener.subscribe(networkToggleListener);
 
-        // Assert:
+        var detector = new MockNetworkChangeDetector(networkAvailabilityListener);
+
+        detector.defaultBecameMobile();
+        detector.defaultBecameWifi();
+        detector.defaultBecameMobile();
+
         assertEquals(0, networkToggleListener.totalTimesNetworkTypeChanged);
     }
 }
