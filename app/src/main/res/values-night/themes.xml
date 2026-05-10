@@ -37,9 +37,10 @@
 
     <style name="Theme.NetBird.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <!-- for peers fragment -->
-    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+    <!-- Bottom sheet uses dark surface in night mode. -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Design.BottomSheetDialog">
         <item name="colorPrimary">@color/nb_orange</item>
+        <item name="colorSurface">@color/nb_bg</item>
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
@@ -57,4 +58,6 @@
         <item name="thumbTint">@color/switch_thumb_color</item>
         <item name="trackTint">@color/switch_track_color</item>
     </style>
+
+    <style name="Theme.NetBird.Card" parent="ThemeOverlay.MaterialComponents.Dark" />
 </resources>

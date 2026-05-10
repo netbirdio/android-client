@@ -17,7 +17,9 @@
     <color name="nb_gray_bg">#eeeeee</color>
     <color name="nb_gray_separator">#dadada</color>
     <color name="nb_gray_border">#ececec</color>
+    <color name="nb_chip_border">#cfcfcf</color>
     <color name="nb_orange">#F58431</color>
+    <color name="nb_orange_15">#26F58431</color>
     <color name="nb_txt">#454545</color>
     <color name="nb_txt_light">#7c7c7c</color>
     <color name="nb_button_inactive">#4E4E4E</color>
@@ -26,4 +28,6 @@
     <color name="thumb_off_color">#FFFFFF</color>
     <color name="track_on_color">#89F58431</color>
     <color name="track_off_color">#40000000</color>
+    <color name="profile_background">#F2F2F2</color>
+    <color name="profile_card_background">@color/white</color>
 </resources>

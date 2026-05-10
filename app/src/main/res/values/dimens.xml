@@ -8,4 +8,6 @@
     <dimen name="dialog_horizontal_margin">16dp</dimen>
     <dimen name="dialog_max_width">560dp</dimen>
     <dimen name="fragment_max_width">500dp</dimen>
+    <!-- Bottom-nav reserved space; scrollable fragments add this as bottom padding so content doesn't disappear behind the nav bar. -->
+    <dimen name="bottom_nav_inset">80dp</dimen>
 </resources>

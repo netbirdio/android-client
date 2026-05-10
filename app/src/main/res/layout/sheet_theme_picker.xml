@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="16dp">
+
+    <View
+        android:layout_width="36dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/separator" />
+
+    <TextView
+        style="@style/SettingsSectionHeader"
+        android:text="@string/advanced_theme_title" />
+
+    <LinearLayout
+        android:id="@+id/theme_row_system"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/sheet_row_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/advanced_theme_system"
+            android:textColor="@color/nb_txt"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/theme_check_system"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_check"
+            android:visibility="invisible"
+            app:tint="@color/nb_orange" />
+    </LinearLayout>
+
+    <include layout="@layout/list_item_setting_divider" />
+
+    <LinearLayout
+        android:id="@+id/theme_row_light"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/sheet_row_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/advanced_theme_light"
+            android:textColor="@color/nb_txt"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/theme_check_light"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_check"
+            android:visibility="invisible"
+            app:tint="@color/nb_orange" />
+    </LinearLayout>
+
+    <include layout="@layout/list_item_setting_divider" />
+
+    <LinearLayout
+        android:id="@+id/theme_row_dark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/sheet_row_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/advanced_theme_dark"
+            android:textColor="@color/nb_txt"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/theme_check_dark"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_check"
+            android:visibility="invisible"
+            app:tint="@color/nb_orange" />
+    </LinearLayout>
+
+</LinearLayout>

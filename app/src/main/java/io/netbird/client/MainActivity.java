@@ -12,29 +12,28 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Html;
 import android.util.Log;
-import android.view.KeyEvent;
+import android.util.TypedValue;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
@@ -48,7 +47,7 @@ import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.URLOpener;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceAccessor, StateListenerRegistry {
+public class MainActivity extends AppCompatActivity implements ServiceAccessor, StateListenerRegistry {
 
     private StateListAnimator stateAnim;
 
@@ -103,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setSupportActionBar(binding.appBarMain.toolbar);
+        setSupportActionBar(binding.toolbar);
 
         isRunningOnTV = PlatformUtils.isAndroidTV(this);
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
@@ -114,69 +113,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.i(LOGTAG, "Running on ChromeOS - using device code flow for authentication");
         }
 
-        setVersionText();
+        NavigationBarView bottomNav = (NavigationBarView) binding.bottomNav;
 
-        DrawerLayout drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
-
-        // Set the listener for menu item selections
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Update profile menu item with active profile name
-        updateProfileMenuItem(navigationView);
-        
-        // On TV, request focus when drawer opens so D-pad navigation works
-        if (isRunningOnTV) {
-            drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-                @Override
-                public void onDrawerOpened(View drawerView) {
-                    // Request focus on the drawer when it opens
-                    navigationView.postDelayed(() -> {
-                        navigationView.setFocusable(true);
-                        navigationView.setFocusableInTouchMode(false);
-                        
-                        if (!navigationView.requestFocus()) {
-                            Log.d(LOGTAG, "NavigationView couldn't get focus, trying menu items");
-                        }
-                        
-                        // Try to find and focus the first visible menu item
-                        View menuView = navigationView.getChildAt(0);
-                        if (menuView != null) {
-                            View firstFocusable = menuView.findFocus();
-                            if (firstFocusable == null) {
-                                menuView.requestFocus();
-                            }
-                        }
-                    }, 100); // Delay to let drawer animation finish
-                }
-                
-                @Override
-                public void onDrawerClosed(View drawerView) {
-                    // Return focus to main content when drawer closed
-                    View mainContent = findViewById(R.id.nav_host_fragment_content_main);
-                    if (mainContent != null) {
-                        mainContent.requestFocus();
-                    }
-                }
-            });
-        }
-
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home)
-                .setOpenableLayout(drawer)
-                .build();
+        // All four bottom-nav destinations are top-level — no Up arrow on those.
+        final Set<Integer> topLevelDestinations = new HashSet<>();
+        topLevelDestinations.add(R.id.nav_home);
+        topLevelDestinations.add(R.id.nav_peers);
+        topLevelDestinations.add(R.id.nav_networks);
+        topLevelDestinations.add(R.id.nav_settings);
+        mAppBarConfiguration = new AppBarConfiguration.Builder(topLevelDestinations).build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(bottomNav, navController);
 
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-            if (destination.getId() == R.id.nav_home) {
+            int destId = destination.getId();
+
+            // Hide bottom nav on first-launch onboarding so the screen is clean.
+            if (destId == R.id.firstInstallFragment) {
+                bottomNav.setVisibility(View.GONE);
+            } else {
+                bottomNav.setVisibility(View.VISIBLE);
+            }
+
+            // Top-level destinations (Home, Peers, Networks, Settings) don't need a toolbar —
+            // bottom nav already identifies the screen. Sub-screens keep the toolbar with title + Up arrow.
+            boolean isTopLevel = topLevelDestinations.contains(destId);
+            setToolbarVisible(!isTopLevel);
+
+            if (destId == R.id.nav_home) {
                 removeToolbarShadow();
-                // Update profile menu item when returning to home (e.g., after profile switch)
-                if (binding != null && binding.navView != null) {
-                    updateProfileMenuItem(binding.navView);
-                }
             } else {
                 resetToolbar();
             }
@@ -272,15 +238,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        // Update profile menu item when returning to MainActivity
-        if (binding != null && binding.navView != null) {
-            updateProfileMenuItem(binding.navView);
-        }
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
     }
@@ -319,23 +276,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.nav_docs) {
-            item.setCheckable(false);
-            binding.drawerLayout.closeDrawers();
-            openDocs();
-            return true;
-        }
-
-        // Use NavigationUI which handles launchSingleTop and saveState/restoreState
-        // This prevents fragment recreation and preserves state when alternating between destinations
-        boolean isHandled = NavigationUI.onNavDestinationSelected(item, navController);
-        binding.drawerLayout.closeDrawers();
-        return isHandled;
     }
 
     @Override
@@ -480,12 +420,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         serviceStateListeners.remove(listener);
     }
 
-    private void openDocs() {
-        String url = "https://docs.netbird.io";  // Replace with the desired URL
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(intent);
-    }
-
     private void startService() {
         Log.i(LOGTAG, "start VPN service");
         Intent intent = new Intent(this, VPNService.class);
@@ -504,21 +438,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private void setToolbarVisible(boolean visible) {
+        ViewGroup.LayoutParams lp = binding.toolbar.getLayoutParams();
+        int targetHeight;
+        if (visible) {
+            TypedValue tv = new TypedValue();
+            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+                targetHeight = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+            } else {
+                targetHeight = (int) (56 * getResources().getDisplayMetrics().density);
+            }
+        } else {
+            targetHeight = 0;
+        }
+        if (lp.height == targetHeight) {
+            return;
+        }
+        lp.height = targetHeight;
+        binding.toolbar.setLayoutParams(lp);
+        // Ensure AppBarLayout re-measures itself so the content below shifts up correctly.
+        binding.appbar.requestLayout();
+    }
+
     private void removeToolbarShadow() {
-        stateAnim = binding.appBarMain.appbar.getStateListAnimator();
-        binding.appBarMain.appbar.setStateListAnimator(null);
-        binding.appBarMain.appbar.setElevation(0f);
-        binding.appBarMain.toolbar.setElevation(0);
-        binding.appBarMain.toolbar.setBackground(new ColorDrawable(ContextCompat.getColor(this, R.color.nb_bg_home)));
+        stateAnim = binding.appbar.getStateListAnimator();
+        binding.appbar.setStateListAnimator(null);
+        binding.appbar.setElevation(0f);
+        binding.toolbar.setElevation(0);
+        binding.toolbar.setBackground(new ColorDrawable(ContextCompat.getColor(this, R.color.nb_bg_home)));
     }
 
     private void resetToolbar() {
         if(stateAnim!=null) {
-            binding.appBarMain.appbar.setStateListAnimator(stateAnim);
+            binding.appbar.setStateListAnimator(stateAnim);
         }
-        binding.appBarMain.appbar.setElevation(10f);
-        binding.appBarMain.toolbar.setElevation(0);
-        binding.appBarMain.toolbar.setBackground(new ColorDrawable(ContextCompat.getColor(this, R.color.nb_bg)));
+        binding.appbar.setElevation(10f);
+        binding.toolbar.setElevation(0);
+        binding.toolbar.setBackground(new ColorDrawable(ContextCompat.getColor(this, R.color.nb_bg)));
     }
 
     private void showAlwaysOnDialog(Runnable onDismissAction) {
@@ -540,19 +496,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         alertDialog.show();
-    }
-
-    private void setVersionText() {
-        try {
-            try {
-                String packageName = getPackageName();
-                String versionName = getPackageManager().getPackageInfo(packageName, 0).versionName;
-                binding.navVersion.setText(versionName);
-            } catch (Exception e) {
-                binding.navVersion.setText("");
-            }
-        } catch (Exception e) {
-        }
     }
 
     ConnectionListener connectionListener = new ConnectionListener() {
@@ -634,56 +577,4 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
         }
     };
-
-    private void updateProfileMenuItem(NavigationView navigationView) {
-        try {
-            // Get active profile from ProfileManager instead of reading file
-            io.netbird.client.tool.ProfileManagerWrapper profileManager =
-                new io.netbird.client.tool.ProfileManagerWrapper(this);
-            String activeProfile = profileManager.getActiveProfile();
-            Menu menu = navigationView.getMenu();
-            MenuItem profileItem = menu.findItem(R.id.nav_profiles);
-            if (profileItem != null && activeProfile != null) {
-                profileItem.setTitle(activeProfile);
-            }
-        } catch (Exception e) {
-            Log.e(LOGTAG, "Failed to update profile menu item", e);
-        }
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (!isRunningOnTV) {
-            return super.onKeyDown(keyCode, event);
-        }
-        else {
-            Log.d(LOGTAG, "Key pressed: " + keyCode + " (" + KeyEvent.keyCodeToString(keyCode) + "), repeat: " + event.getRepeatCount());
-
-            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                boolean isOnHomeScreen = navController != null &&
-                    navController.getCurrentDestination() != null &&
-                    navController.getCurrentDestination().getId() == R.id.nav_home;
-
-                if (event.getRepeatCount() == 0 && isOnHomeScreen && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    Toast.makeText(this, R.string.tv_menu_hint, Toast.LENGTH_SHORT).show();
-                }
-
-                // drawer is not selectable on Android 16+, so we open via a long press of the left d-pad button instead
-                if (event.getRepeatCount() > 0 && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    Log.d(LOGTAG, "Long press LEFT detected - opening drawer");
-                    binding.drawerLayout.openDrawer(GravityCompat.START);
-                    binding.navView.requestFocus();
-                    return true;
-                }
-            }
-
-            if (keyCode == KeyEvent.KEYCODE_BACK && binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                Log.d(LOGTAG, "Closing drawer with BACK");
-                binding.drawerLayout.closeDrawer(GravityCompat.START);
-                return true;
-            }
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
 }

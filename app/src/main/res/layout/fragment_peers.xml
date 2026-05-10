@@ -4,13 +4,18 @@
     android:id="@+id/fragment_peers"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/nb_bg_peers"
     tools:context=".ui.home.PeersFragment">
 
     <include
         android:id="@+id/zeroPeerLayout"
         layout="@layout/layout_zero_peer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -80,6 +85,8 @@
             android:id="@+id/peers_recycler_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/bottom_nav_inset"
             app:layout_constraintTop_toBottomOf="@id/search_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

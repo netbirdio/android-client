@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:theme="@style/Theme.NetBird.Card"
+    app:cardBackgroundColor="@color/profile_card_background"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
@@ -17,7 +19,7 @@
             android:id="@+id/icon_profile"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_menu_profile"
+            android:src="@drawable/ic_profile_avatar"
             android:contentDescription="@string/menu_profiles"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,18 +31,16 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="8dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/nb_txt"
             android:ellipsize="end"
             android:maxLines="1"
-            tools:text="default"
+            android:textAppearance="@style/TextAppearance.NetBird.ProfileName"
             app:layout_constraintTop_toTopOf="@id/icon_profile"
             app:layout_constraintBottom_toBottomOf="@id/icon_profile"
             app:layout_constraintStart_toEndOf="@id/icon_profile"
             app:layout_constraintEnd_toStartOf="@id/badge_active"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintHorizontal_chainStyle="packed" />
+            app:layout_constraintHorizontal_chainStyle="packed"
+            tools:text="default" />
 
         <TextView
             android:id="@+id/badge_active"

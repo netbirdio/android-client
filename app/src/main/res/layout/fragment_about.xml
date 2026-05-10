@@ -73,7 +73,7 @@
         android:id="@+id/text_rights"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="112dp"
         android:textAlignment="center"
         android:text="@string/about_rights"
         app:layout_constraintBottom_toBottomOf="parent"

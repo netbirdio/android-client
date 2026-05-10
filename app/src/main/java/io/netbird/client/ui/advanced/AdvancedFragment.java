@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,13 +16,12 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import io.netbird.client.R;
-import io.netbird.client.databinding.ComponentSwitchBinding;
 import io.netbird.client.databinding.FragmentAdvancedBinding;
 import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.ProfileManagerWrapper;
 
 
-public class AdvancedFragment extends Fragment {
+public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThemeChangedListener {
 
     private static final String hiddenKey = "********";
     private static final String LOGTAG = "AdvancedFragment";
@@ -42,12 +40,9 @@ public class AdvancedFragment extends Fragment {
         alertDialog.show();
     }
 
-    private void configureForceRelayConnectionSwitch(@NonNull ComponentSwitchBinding binding, @NonNull Preferences preferences) {
-        binding.switchTitle.setText(R.string.advanced_force_relay_conn);
-        binding.switchDescription.setText(R.string.advanced_force_relay_conn_desc);
-
-        binding.switchControl.setChecked(preferences.isConnectionForceRelayed());
-        binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+    private void configureForceRelayConnectionSwitch(@NonNull Preferences preferences) {
+        binding.switchForceRelayConnection.setChecked(preferences.isConnectionForceRelayed());
+        binding.switchForceRelayConnection.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 preferences.enableForcedRelayConnection();
             } else {
@@ -56,11 +51,8 @@ public class AdvancedFragment extends Fragment {
 
             showReconnectionNeededWarningDialog();
         });
-        
-        // Make parent layout clickable to toggle switch (for TV remote)
-        binding.getRoot().setOnClickListener(v -> {
-            binding.switchControl.toggle();
-        });
+
+        binding.layoutForceRelayConnection.setOnClickListener(v -> binding.switchForceRelayConnection.toggle());
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -137,11 +129,8 @@ public class AdvancedFragment extends Fragment {
                 Toast.makeText(inflater.getContext(), "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-        
-        // Make parent layout clickable to toggle switch (for TV remote)
-        binding.layoutRosenpas.setOnClickListener(v -> {
-            binding.switchRosenpass.toggle();
-        });
+
+        binding.layoutRosenpas.setOnClickListener(v -> binding.switchRosenpass.toggle());
 
         binding.switchRosenpassPermissive.setOnCheckedChangeListener((buttonView, isChecked) -> {
             goPreferences.setRosenpassPermissive(isChecked);
@@ -152,40 +141,32 @@ public class AdvancedFragment extends Fragment {
                 Toast.makeText(inflater.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
             }
         });
-        
-        // Make parent layout clickable to toggle switch (for TV remote)
-        binding.layoutRosenpassPermissive.setOnClickListener(v -> {
-            binding.switchRosenpassPermissive.toggle();
-        });
 
-        configureForceRelayConnectionSwitch(binding.layoutForceRelayConnection, preferences);
+        binding.layoutRosenpassPermissive.setOnClickListener(v -> binding.switchRosenpassPermissive.toggle());
+
+        configureForceRelayConnectionSwitch(preferences);
 
         // Initialize engine config switches (your settings)
         initializeEngineConfigSwitches();
 
-        // Theme-picker initialisieren
+        // Theme picker row
         SharedPreferences sharedPreferences = inflater.getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
         int themeMode = sharedPreferences.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        RadioGroup radioGroup = binding.radioGroupTheme;
-        if (themeMode == AppCompatDelegate.MODE_NIGHT_NO) {
-            radioGroup.check(binding.radioThemeLight.getId());
-        } else if (themeMode == AppCompatDelegate.MODE_NIGHT_YES) {
-            radioGroup.check(binding.radioThemeDark.getId());
-        } else {
-            radioGroup.check(binding.radioThemeSystem.getId());
-        }
-        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            int mode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
-            if (checkedId == binding.radioThemeLight.getId()) {
-                mode = AppCompatDelegate.MODE_NIGHT_NO;
-            } else if (checkedId == binding.radioThemeDark.getId()) {
-                mode = AppCompatDelegate.MODE_NIGHT_YES;
-            }
-            sharedPreferences.edit().putInt("theme_mode", mode).apply();
-            AppCompatDelegate.setDefaultNightMode(mode);
+        binding.themeValue.setText(ThemePickerSheet.labelFor(requireContext(), themeMode));
+
+        binding.rowTheme.setOnClickListener(v -> {
+            ThemePickerSheet sheet = new ThemePickerSheet();
+            sheet.show(getChildFragmentManager(), "ThemePickerSheet");
         });
 
         return root;
+    }
+
+    @Override
+    public void onThemeChanged(int mode) {
+        if (binding != null) {
+            binding.themeValue.setText(ThemePickerSheet.labelFor(requireContext(), mode));
+        }
     }
 
     private void initializeEngineConfigSwitches() {
@@ -252,31 +233,14 @@ public class AdvancedFragment extends Fragment {
                     Log.e(LOGTAG, "Failed to set block inbound", e);
                 }
             });
-            
-            // Make parent layouts clickable to toggle switches (for TV remote)
-            binding.layoutAllowSsh.setOnClickListener(v -> {
-                binding.switchAllowSsh.toggle();
-            });
-            
-            binding.layoutBlockInbound.setOnClickListener(v -> {
-                binding.switchBlockInbound.toggle();
-            });
-            
-            binding.layoutDisableClientRoutes.setOnClickListener(v -> {
-                binding.switchDisableClientRoutes.toggle();
-            });
-            
-            binding.layoutDisableServerRoutes.setOnClickListener(v -> {
-                binding.switchDisableServerRoutes.toggle();
-            });
-            
-            binding.layoutDisableDns.setOnClickListener(v -> {
-                binding.switchDisableDns.toggle();
-            });
-            
-            binding.layoutDisableFirewall.setOnClickListener(v -> {
-                binding.switchDisableFirewall.toggle();
-            });
+
+            // Make parent rows clickable to toggle switches (for TV remote)
+            binding.layoutAllowSsh.setOnClickListener(v -> binding.switchAllowSsh.toggle());
+            binding.layoutBlockInbound.setOnClickListener(v -> binding.switchBlockInbound.toggle());
+            binding.layoutDisableClientRoutes.setOnClickListener(v -> binding.switchDisableClientRoutes.toggle());
+            binding.layoutDisableServerRoutes.setOnClickListener(v -> binding.switchDisableServerRoutes.toggle());
+            binding.layoutDisableDns.setOnClickListener(v -> binding.switchDisableDns.toggle());
+            binding.layoutDisableFirewall.setOnClickListener(v -> binding.switchDisableFirewall.toggle());
 
         } catch (Exception e) {
             Log.e(LOGTAG, "Failed to initialize engine config switches", e);

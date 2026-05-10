@@ -53,7 +53,15 @@ public class ProfileManagerWrapper {
         try {
             return profileManager.getActiveProfile();
         } catch (Exception e) {
-            Log.e(TAG, "Failed to get active profile", e);
+            // First-launch / fresh install: the profile state file is empty, so the
+            // engine returns "unexpected end of JSON input". Treat this as the
+            // implicit "default" profile and don't pollute the log with stack traces.
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("unexpected end of JSON input")) {
+                Log.d(TAG, "Active profile not initialised yet; falling back to default");
+            } else {
+                Log.e(TAG, "Failed to get active profile", e);
+            }
             return "default";
         }
     }

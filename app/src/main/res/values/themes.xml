@@ -61,4 +61,26 @@
     <style name="AlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
+
+    <!-- Day-mode definition for Theme.NetBird.Card (mirrors values-night) -->
+    <style name="Theme.NetBird.Card" parent="ThemeOverlay.MaterialComponents.Light" />
+
+    <!-- Reusable TextAppearance for profile name to avoid repeating attributes in layouts -->
+    <style name="TextAppearance.NetBird.ProfileName" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/nb_txt</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SettingsSectionHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/nb_txt_light</item>
+        <item name="android:textSize">13sp</item>
+    </style>
 </resources>

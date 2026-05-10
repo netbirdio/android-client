@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/settings_row_bg"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="56dp"
+    android:orientation="horizontal"
+    android:paddingStart="20dp"
+    android:paddingEnd="16dp">
+
+    <ImageView
+        android:id="@+id/setting_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="@null"
+        app:tint="@color/nb_orange"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        tools:src="@drawable/ic_menu_profile" />
+
+    <TextView
+        android:id="@+id/setting_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_weight="1"
+        android:textColor="@color/nb_txt"
+        android:textSize="16sp"
+        tools:text="Profiles" />
+
+    <TextView
+        android:id="@+id/setting_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="14sp"
+        tools:text="default" />
+
+    <ImageView
+        android:id="@+id/setting_accessory"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_chevron_right"
+        app:tint="@color/nb_txt_light"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+</LinearLayout>

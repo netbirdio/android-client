@@ -17,7 +17,9 @@
     <color name="nb_gray_bg">#1C1E21</color>
     <color name="nb_gray_separator">#32363D</color>
     <color name="nb_gray_border">#545961</color>
+    <color name="nb_chip_border">#545961</color>
     <color name="nb_orange">#F68330</color>
+    <color name="nb_orange_15">#26F68330</color>
     <color name="nb_txt">#FEFEFE</color>
     <color name="nb_txt_light">#7E858F</color>
     <color name="nb_button_inactive">#545961</color>
@@ -26,4 +28,6 @@
     <color name="thumb_off_color">#545961</color>
     <color name="track_on_color">#F6833080</color>
     <color name="track_off_color">#32363D</color>
+    <color name="profile_background">@color/nb_bg</color>
+    <color name="profile_card_background">@color/nb_gray_light</color>
 </resources>

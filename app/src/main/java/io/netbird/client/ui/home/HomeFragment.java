@@ -3,11 +3,10 @@ package io.netbird.client.ui.home;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,19 +14,14 @@ import androidx.fragment.app.Fragment;
 
 import com.airbnb.lottie.LottieAnimationView;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import io.netbird.client.PlatformUtils;
-import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentHomeBinding;
-import io.netbird.gomobile.android.PeerInfo;
-import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.client.tool.ProfileManagerWrapper;
 
-public class HomeFragment extends Fragment implements StateListener {
+public class HomeFragment extends Fragment implements StateListener, ProfilePickerSheet.OnProfileSwitchedListener {
 
     private FragmentHomeBinding binding;
     private ServiceAccessor serviceAccessor;
@@ -39,10 +33,6 @@ public class HomeFragment extends Fragment implements StateListener {
     private LottieAnimationView buttonConnect;
     private ButtonAnimation buttonAnimation;
     private boolean isConnected;
-
-    // serializes peer-list refreshes off the UI thread; serviceAccessor.getPeersList()
-    // is a JNI call into Go that can take seconds during engine bootstrap/teardown
-    private ExecutorService refreshExecutor;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -67,8 +57,6 @@ public class HomeFragment extends Fragment implements StateListener {
         textHostname = binding.textHostname;
         textNetworkAddress = binding.textNetworkAddress;
         TextView textConnStatus = binding.textConnectionStatus;
-
-        updatePeerCount(0,0);
 
         buttonConnect = binding.btnConnect;
         // Try to load the correct Lottie file for dark/light mode, fallback to light if dark is missing
@@ -104,15 +92,12 @@ public class HomeFragment extends Fragment implements StateListener {
             }
         });
 
-        // peers button
-        FrameLayout openPanelCardView = binding.peersBtn;
-        openPanelCardView.setOnClickListener(v -> {
-            // Clear focus from the button to remove highlight
-            v.clearFocus();
-            
-            BottomDialogFragment fragment = new BottomDialogFragment();
-            fragment.show(getParentFragmentManager(), fragment.getTag());
+        binding.profileChip.setOnClickListener(v -> {
+            ProfilePickerSheet sheet = new ProfilePickerSheet();
+            sheet.show(getChildFragmentManager(), "ProfilePickerSheet");
         });
+
+        updateProfileChip();
 
         if (PlatformUtils.isAndroidTV(requireContext())) {
             root.postDelayed(() -> {
@@ -122,9 +107,31 @@ public class HomeFragment extends Fragment implements StateListener {
             }, 200);
         }
 
-        refreshExecutor = Executors.newSingleThreadExecutor();
         stateListenerRegistry.registerServiceStateListener(this);
         return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateProfileChip();
+    }
+
+    @Override
+    public void onProfileSwitched(String newActiveName) {
+        updateProfileChip();
+    }
+
+    private void updateProfileChip() {
+        if (binding == null) return;
+        try {
+            ProfileManagerWrapper profileManager = new ProfileManagerWrapper(requireContext());
+            String activeProfile = profileManager.getActiveProfile();
+            binding.profileChipText.setText(activeProfile != null ? activeProfile : "");
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Failed to read active profile", e);
+            binding.profileChipText.setText("");
+        }
     }
 
     @Override
@@ -132,12 +139,6 @@ public class HomeFragment extends Fragment implements StateListener {
         super.onDestroyView();
         buttonAnimation.destroy();
         stateListenerRegistry.unregisterServiceStateListener(this);
-        if (refreshExecutor != null) {
-            refreshExecutor.shutdown();
-            refreshExecutor = null;
-        }
-        FrameLayout openPanelCardView = binding.peersBtn;
-        openPanelCardView.setOnClickListener(null);
         binding = null;
     }
 
@@ -193,7 +194,6 @@ public class HomeFragment extends Fragment implements StateListener {
             buttonAnimation.disconnected();
             buttonConnect.setEnabled(true);
         });
-        updatePeerCount(0, 0);
     }
 
     @Override
@@ -203,29 +203,6 @@ public class HomeFragment extends Fragment implements StateListener {
 
     @Override
     public void onPeersListChanged(long numberOfPeers) {
-        ExecutorService executor = refreshExecutor;
-        if (executor == null) {
-            return;
-        }
-        executor.execute(() -> {
-            PeerInfoArray peersList = serviceAccessor.getPeersList();
-            int connected = 0;
-            for (int i = 0; i < peersList.size(); i++) {
-                PeerInfo peer = peersList.get(i);
-                if(Status.fromLong(peer.getConnStatus()) == Status.CONNECTED) {
-                    connected++;
-                }
-            }
-            updatePeerCount(connected, peersList.size());
-        });
-    }
-
-    private void updatePeerCount(int connectedPeers, long totalPeers) {
-        if(binding==null) return;
-        TextView textPeersCount = binding.textOpenPanel;
-        String text = getString(R.string.peers_connected, connectedPeers, totalPeers);
-        textPeersCount.post(() ->
-                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
-        );
+        // peer count badge moved to bottom navigation; intentionally noop here
     }
 }
