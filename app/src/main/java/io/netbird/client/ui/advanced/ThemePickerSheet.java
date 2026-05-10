@@ -46,12 +46,31 @@ public class ThemePickerSheet extends BottomSheetDialogFragment {
         binding.themeCheckSystem.setVisibility(mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM ? View.VISIBLE : View.INVISIBLE);
         binding.themeCheckLight.setVisibility(mode == AppCompatDelegate.MODE_NIGHT_NO ? View.VISIBLE : View.INVISIBLE);
         binding.themeCheckDark.setVisibility(mode == AppCompatDelegate.MODE_NIGHT_YES ? View.VISIBLE : View.INVISIBLE);
+
+        applyRowAccessibility(binding.themeRowSystem, mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+                getString(io.netbird.client.R.string.advanced_theme_system));
+        applyRowAccessibility(binding.themeRowLight, mode == AppCompatDelegate.MODE_NIGHT_NO,
+                getString(io.netbird.client.R.string.advanced_theme_light));
+        applyRowAccessibility(binding.themeRowDark, mode == AppCompatDelegate.MODE_NIGHT_YES,
+                getString(io.netbird.client.R.string.advanced_theme_dark));
+    }
+
+    private void applyRowAccessibility(View row, boolean selected, String label) {
+        row.setContentDescription(label);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            row.setStateDescription(selected ? getString(io.netbird.client.R.string.theme_picker_selected) : null);
+        }
+        row.setSelected(selected);
     }
 
     private void pick(int mode) {
         SharedPreferences prefs = requireContext().getSharedPreferences("settings", 0);
         prefs.edit().putInt("theme_mode", mode).apply();
         AppCompatDelegate.setDefaultNightMode(mode);
+        if (binding != null) {
+            binding.getRoot().announceForAccessibility(
+                    getString(io.netbird.client.R.string.theme_picker_announce, labelFor(requireContext(), mode)));
+        }
         if (getParentFragment() instanceof OnThemeChangedListener) {
             ((OnThemeChangedListener) getParentFragment()).onThemeChanged(mode);
         }
