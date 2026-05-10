@@ -53,9 +53,12 @@ public class ProfileManagerWrapper {
         try {
             return profileManager.getActiveProfile();
         } catch (Exception e) {
-            // First-launch / fresh install: the profile state file is empty, so the
-            // engine returns "unexpected end of JSON input". Treat this as the
-            // implicit "default" profile and don't pollute the log with stack traces.
+            // First-launch / fresh install: the profile state file exists but is empty,
+            // so the engine returns "unexpected end of JSON input" wrapped in a generic
+            // gomobile proxyerror. The wrapped error chain isn't exposed across the
+            // gomobile binding, so we have to inspect the message text — a stable
+            // string from Go's encoding/json package — to distinguish this benign
+            // case from real failures we want to log loudly.
             String msg = e.getMessage();
             if (msg != null && msg.contains("unexpected end of JSON input")) {
                 Log.d(TAG, "Active profile not initialised yet; falling back to default");
