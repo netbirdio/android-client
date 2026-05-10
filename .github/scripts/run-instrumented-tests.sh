@@ -10,16 +10,21 @@ set +e
 mkdir -p screen-recordings
 adb shell mkdir -p /sdcard/recordings
 
+# Sentinel must exist before the background loop starts; otherwise the first
+# iteration sees no file and exits immediately.
+touch /tmp/record_active
 (
   i=0
   while [ -f /tmp/record_active ]; do
     seg=$(printf "seg_%03d.mp4" "$i")
+    echo "[record] starting $seg"
     adb shell screenrecord --time-limit 180 --bit-rate 4000000 "/sdcard/recordings/$seg"
+    echo "[record] $seg exited"
     i=$((i + 1))
   done
+  echo "[record] loop ended"
 ) &
 REC_LOOP_PID=$!
-touch /tmp/record_active
 
 ./gradlew --no-daemon connectedDebugAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest \

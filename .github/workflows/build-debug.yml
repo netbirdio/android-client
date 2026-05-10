@@ -130,10 +130,13 @@ jobs:
         id: avd-cache
         uses: actions/cache@v4
         with:
+          # ANDROID_HOME is set by the runner image but not visible to
+          # ${{ env.X }} at expression-eval time; hardcoded to the path on
+          # ubuntu-latest.
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-            ${{ env.ANDROID_HOME }}/system-images/android-30/google_apis/x86_64
+            /usr/local/lib/android/sdk/system-images/android-30/google_apis/x86_64
           key: avd-api30-google_apis-x86_64-pixel_3a-v1
 
       - name: Create AVD snapshot
