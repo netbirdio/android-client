@@ -49,8 +49,17 @@ runs:
       uses: actions/setup-go@v5
       with:
         go-version-file: "netbird/go.mod"
+        cache-dependency-path: "netbird/go.sum"
+
+    - name: Cache Android NDK
+      id: ndk-cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.ANDROID_HOME }}/ndk/23.1.7779620
+        key: ndk-23.1.7779620
 
     - name: Setup NDK
+      if: steps.ndk-cache.outputs.cache-hit != 'true'
       shell: bash
       run: ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.1.7779620"
 
@@ -58,7 +67,15 @@ runs:
       shell: bash
       run: echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620" >> $GITHUB_ENV
 
+    - name: Cache gomobile binary
+      id: gomobile-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/go/bin/gomobile
+        key: gomobile-v0.0.0-20251113184115-a159579294ab
+
     - name: Install gomobile
+      if: steps.gomobile-cache.outputs.cache-hit != 'true'
       shell: bash
       run: go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20251113184115-a159579294ab
 
