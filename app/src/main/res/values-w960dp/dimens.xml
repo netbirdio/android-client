@@ -1,0 +1,5 @@
+<resources>
+    <!-- On w960dp+ the bottom nav becomes a side rail (see layout-w960dp/activity_main.xml),
+         so fragments don't need to reserve vertical space for it. -->
+    <dimen name="bottom_nav_inset">0dp</dimen>
+</resources>
