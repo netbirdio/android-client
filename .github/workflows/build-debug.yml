@@ -138,7 +138,35 @@ jobs:
           disk-size: 4096M
           heap-size: 512M
           disable-animations: true
-          script: ./gradlew --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest -Pandroid.testInstrumentationRunnerArguments.setupKey="$INSTRUMENTATION_NB_SETUP_KEY"
+          script: |
+            set +e
+            mkdir -p screen-recordings
+            adb shell mkdir -p /sdcard/recordings
+
+            # screenrecord caps each segment at 180s, so loop until we stop it.
+            (
+              i=0
+              while [ -f /tmp/record_active ]; do
+                seg=$(printf "seg_%03d.mp4" "$i")
+                adb shell screenrecord --time-limit 180 --bit-rate 4000000 /sdcard/recordings/$seg
+                i=$((i+1))
+              done
+            ) &
+            REC_LOOP_PID=$!
+            touch /tmp/record_active
+
+            ./gradlew --no-daemon connectedDebugAndroidTest \
+              -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest \
+              -Pandroid.testInstrumentationRunnerArguments.setupKey="$INSTRUMENTATION_NB_SETUP_KEY"
+            TEST_EXIT=$?
+
+            rm -f /tmp/record_active
+            adb shell pkill -SIGINT screenrecord 2>/dev/null || true
+            wait $REC_LOOP_PID 2>/dev/null || true
+            sleep 3
+            adb pull /sdcard/recordings ./screen-recordings/ || true
+
+            exit $TEST_EXIT
 
       - name: Upload test results
         if: always()
@@ -148,4 +176,13 @@ jobs:
           path: |
             app/build/reports/androidTests/
             tool/build/reports/androidTests/
+          retention-days: 3
+
+      - name: Upload screen recordings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumented-test-screen-recordings
+          path: screen-recordings/
+          if-no-files-found: warn
           retention-days: 3
