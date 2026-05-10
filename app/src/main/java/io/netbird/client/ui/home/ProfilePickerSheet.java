@@ -138,9 +138,9 @@ public class ProfilePickerSheet extends BottomSheetDialogFragment {
                 return;
             }
             try {
-                profileManager.addProfile(profileName);
+                profileManager.addProfile(sanitized);
                 Toast.makeText(requireContext(),
-                        getString(R.string.profiles_success_added, profileName),
+                        getString(R.string.profiles_success_added, sanitized),
                         Toast.LENGTH_SHORT).show();
                 loadProfiles();
             } catch (Exception e) {
@@ -148,7 +148,7 @@ public class ProfilePickerSheet extends BottomSheetDialogFragment {
                 String msg = e.getMessage();
                 if (msg != null && msg.contains("already exists")) {
                     Toast.makeText(requireContext(),
-                            getString(R.string.profiles_error_already_exists, profileName),
+                            getString(R.string.profiles_error_already_exists, sanitized),
                             Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(requireContext(),
