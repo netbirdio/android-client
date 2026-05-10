@@ -129,12 +129,13 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             int destId = destination.getId();
 
-            // Hide bottom nav on first-launch onboarding so the screen is clean.
+            // First-launch onboarding takes the whole screen — hide both nav surfaces.
             if (destId == R.id.firstInstallFragment) {
                 bottomNav.setVisibility(View.GONE);
-            } else {
-                bottomNav.setVisibility(View.VISIBLE);
+                setToolbarVisible(false);
+                return;
             }
+            bottomNav.setVisibility(View.VISIBLE);
 
             // Top-level destinations (Home, Peers, Networks, Settings) don't need a toolbar —
             // bottom nav already identifies the screen. Sub-screens keep the toolbar with title + Up arrow.
