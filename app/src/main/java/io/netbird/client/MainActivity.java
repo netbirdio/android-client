@@ -55,6 +55,7 @@ import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.SSHClient;
 import io.netbird.gomobile.android.URLOpener;
 
 
@@ -183,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         topLevelDestinations.add(R.id.nav_home);
         topLevelDestinations.add(R.id.nav_peers);
         topLevelDestinations.add(R.id.nav_networks);
+        topLevelDestinations.add(R.id.nav_ssh_sessions);
         topLevelDestinations.add(R.id.nav_settings);
         mAppBarConfiguration = new AppBarConfiguration.Builder(topLevelDestinations).build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
@@ -208,7 +210,9 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             int destId = destination.getId();
 
             // First-launch onboarding takes the whole screen — hide both nav surfaces.
-            if (destId == R.id.firstInstallFragment) {
+            // The SSH terminal does the same, so the keyboard and xterm grid get the
+            // full height rather than competing with the toolbar and bottom nav.
+            if (destId == R.id.firstInstallFragment || destId == R.id.nav_ssh_terminal) {
                 bottomNav.setVisibility(View.GONE);
                 setToolbarVisible(false);
                 return;
@@ -224,7 +228,12 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                 removeToolbarShadow();
             } else {
                 resetToolbar();
+                dismissBottomSheets();
             }
+        });
+
+        sshUrlOpener = new CustomTabURLOpener(this, () -> {
+            // Custom Tab closed; SSH device-code polling will time out if not completed.
         });
 
         if (!useDeviceCodeFlow) {
@@ -518,6 +527,42 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             throw new Exception("VPN service not connected");
         }
         return mBinder.debugBundle(anonymize);
+    }
+
+    @Override
+    public SSHClient newSSHClient() {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return null;
+        }
+        return mBinder.newSSHClient();
+    }
+
+    private CustomTabURLOpener sshUrlOpener;
+
+    @Override
+    public io.netbird.gomobile.android.URLOpener getSSHURLOpener() {
+        return sshUrlOpener;
+    }
+
+    private void dismissBottomSheets() {
+        for (androidx.fragment.app.Fragment f : getSupportFragmentManager().getFragments()) {
+            dismissBottomSheetsRecursive(f);
+        }
+    }
+
+    private void dismissBottomSheetsRecursive(androidx.fragment.app.Fragment fragment) {
+        if (fragment instanceof com.google.android.material.bottomsheet.BottomSheetDialogFragment) {
+            try {
+                ((com.google.android.material.bottomsheet.BottomSheetDialogFragment) fragment).dismissAllowingStateLoss();
+            } catch (Exception ignore) {
+                // Already detached/dismissed.
+            }
+            return;
+        }
+        for (androidx.fragment.app.Fragment child : fragment.getChildFragmentManager().getFragments()) {
+            dismissBottomSheetsRecursive(child);
+        }
     }
 
     @Override

@@ -16,6 +16,7 @@
     <string name="bottom_nav_home">Home</string>
     <string name="bottom_nav_peers">Peers</string>
     <string name="bottom_nav_networks">Resources</string>
+    <string name="bottom_nav_ssh">SSH</string>
     <string name="bottom_nav_settings">Settings</string>
 
     <string name="settings_section_connection">Connection</string>
@@ -63,6 +64,23 @@
     <string name="peers_clipboard_copy_ip">Copy IP</string>
     <string name="peers_clipboard_copy_ipv6">Copy IPv6</string>
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
+    <string name="peers_action_ssh">SSH</string>
+    <string name="ssh_terminal_title">SSH Terminal</string>
+    <string name="ssh_dialog_title">SSH to %1$s</string>
+    <string name="ssh_dialog_host">Host (IP or FQDN)</string>
+    <string name="ssh_dialog_username">Username</string>
+    <string name="ssh_dialog_username_default">pzoli</string>
+    <string name="ssh_dialog_port">Port</string>
+    <string name="ssh_dialog_port_default">22022</string>
+    <string name="ssh_dialog_password">Password</string>
+    <string name="ssh_dialog_password_optional">Password (optional, classic SSH only)</string>
+    <string name="ssh_dialog_connect">Connect</string>
+    <string name="ssh_dialog_cancel">Cancel</string>
+    <string name="menu_ssh">SSH</string>
+    <string name="ssh_sessions_title">SSH Sessions</string>
+    <string name="ssh_sessions_empty">No active SSH sessions.\nTap + to start one.</string>
+    <string name="ssh_new_connection_title">New SSH connection</string>
+    <string name="ssh_session_close">Close session</string>
     <string name="peers_desc_filter">Filter</string>
 
     <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->

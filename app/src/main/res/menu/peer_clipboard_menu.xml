@@ -8,4 +8,7 @@
     <item
         android:id="@+id/copy_ipv6"
         android:title="@string/peers_clipboard_copy_ipv6" />
+    <item
+        android:id="@+id/ssh_connect"
+        android:title="@string/peers_action_ssh" />
 </menu>

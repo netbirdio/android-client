@@ -20,6 +20,7 @@ import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.SSHClient;
 import io.netbird.gomobile.android.TunSettings;
 import io.netbird.gomobile.android.URLOpener;
 
@@ -301,6 +302,10 @@ public class VPNService extends android.net.VpnService {
 
         public void deselectRoute(String route) throws Exception {
             engineRunner.deselectRoute(route);
+        }
+
+        public SSHClient newSSHClient() {
+            return engineRunner.newSSHClient();
         }
     }
 

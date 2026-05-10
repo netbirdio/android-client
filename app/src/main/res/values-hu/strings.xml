@@ -16,6 +16,7 @@
     <string name="bottom_nav_home">Kezdőlap</string>
     <string name="bottom_nav_peers">Peerek</string>
     <string name="bottom_nav_networks">Erőforrások</string>
+    <string name="bottom_nav_ssh">SSH</string>
     <string name="bottom_nav_settings">Beállítások</string>
 
     <string name="settings_section_connection">Kapcsolat</string>

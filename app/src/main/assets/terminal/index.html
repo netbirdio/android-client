@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>NetBird SSH</title>
+<link rel="stylesheet" href="xterm.css">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+  #terminal {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+  }
+  .xterm-viewport::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+<div id="terminal"></div>
+<script src="xterm.js"></script>
+<script src="xterm-addon-fit.js"></script>
+<script>
+(function () {
+  var bridge = window.AndroidSSH;
+  var term = new Terminal({
+    cursorBlink: true,
+    fontFamily: 'monospace',
+    fontSize: 14,
+    theme: { background: '#000000', foreground: '#e6e6e6' },
+    convertEol: false,
+    scrollback: 5000,
+  });
+  var fit = new FitAddon.FitAddon();
+  term.loadAddon(fit);
+  term.open(document.getElementById('terminal'));
+
+  function applyFit() {
+    try {
+      fit.fit();
+    } catch (e) {
+      // Layout not ready yet
+      return;
+    }
+    if (bridge && bridge.onResize) {
+      bridge.onResize(term.cols, term.rows);
+    }
+  }
+
+  // Forward keystrokes to native side
+  term.onData(function (data) {
+    if (bridge && bridge.onInput) {
+      bridge.onInput(data);
+    }
+  });
+
+  // Resize on viewport changes
+  window.addEventListener('resize', applyFit);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', applyFit);
+  }
+
+  // Called from Java to clear the terminal before replaying the scrollback
+  // when the fragment re-attaches to an existing session.
+  window.resetTerminal = function () {
+    term.reset();
+  };
+
+  // Called from Java with base64-encoded UTF-8 bytes from the SSH session.
+  window.writeFromHost = function (b64) {
+    try {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      term.write(bytes);
+    } catch (e) {
+      term.write('\r\n[terminal decode error]\r\n');
+    }
+  };
+
+  // Called from Java to print a status / error line in the terminal.
+  window.printStatus = function (text) {
+    term.write('\r\n\x1b[33m' + text + '\x1b[0m\r\n');
+  };
+
+  // Initial fit and signal ready (which triggers SSH connect on the Java side).
+  setTimeout(function () {
+    applyFit();
+    if (bridge && bridge.onReady) {
+      bridge.onReady(term.cols, term.rows);
+    }
+    term.focus();
+  }, 50);
+})();
+</script>
+</body>
+</html>
