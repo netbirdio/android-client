@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Runs connectedDebugAndroidTest while recording the emulator screen in the
-# background. screenrecord caps each clip at 180s, so we loop until the test
-# finishes, then upload the segments as an artifact from the workflow.
+# Runs connectedDebugAndroidTest while capturing the emulator screen and
+# logcat in the background. screenrecord caps each clip at 180s, so we loop
+# until the test finishes; logcat streams continuously to a file. Both end
+# up in screen-recordings/ and are uploaded as an artifact from the workflow.
 #
 # Expects $INSTRUMENTATION_NB_SETUP_KEY in the environment.
 
@@ -9,6 +10,10 @@ set +e
 
 mkdir -p screen-recordings
 adb shell mkdir -p /sdcard/recordings
+
+adb logcat -c
+adb logcat -v threadtime > screen-recordings/logcat.log 2>&1 &
+LOGCAT_PID=$!
 
 # Sentinel must exist before the background loop starts; otherwise the first
 # iteration sees no file and exits immediately.
@@ -36,5 +41,8 @@ adb shell pkill -SIGINT screenrecord 2>/dev/null || true
 wait "$REC_LOOP_PID" 2>/dev/null || true
 sleep 3
 adb pull /sdcard/recordings ./screen-recordings/ || true
+
+kill "$LOGCAT_PID" 2>/dev/null || true
+wait "$LOGCAT_PID" 2>/dev/null || true
 
 exit $TEST_EXIT
