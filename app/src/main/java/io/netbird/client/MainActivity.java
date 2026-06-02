@@ -38,6 +38,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
+import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.VPNService;
@@ -124,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Update profile menu item with active profile name
         updateProfileMenuItem(navigationView);
-        
+
         // On TV, request focus when drawer opens so D-pad navigation works
         if (isRunningOnTV) {
             drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
@@ -640,11 +641,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Get active profile from ProfileManager instead of reading file
             io.netbird.client.tool.ProfileManagerWrapper profileManager =
                 new io.netbird.client.tool.ProfileManagerWrapper(this);
-            String activeProfile = profileManager.getActiveProfile();
+            Profile activeProfile = profileManager.getActiveProfile();
             Menu menu = navigationView.getMenu();
             MenuItem profileItem = menu.findItem(R.id.nav_profiles);
             if (profileItem != null && activeProfile != null) {
-                profileItem.setTitle(activeProfile);
+                profileItem.setTitle(activeProfile.getName());
             }
         } catch (Exception e) {
             Log.e(LOGTAG, "Failed to update profile menu item", e);

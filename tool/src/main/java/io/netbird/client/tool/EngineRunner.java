@@ -83,7 +83,7 @@ class EngineRunner {
             try {
                 configurationFilePath = profileManager.getActiveConfigPath();
                 stateFilePath = profileManager.getActiveStateFilePath();
-                String activeProfile = profileManager.getActiveProfile();
+                Profile activeProfile = profileManager.getActiveProfile();
                 Log.d(LOGTAG, "Initializing engine with profile: " + activeProfile);
                 Log.d(LOGTAG, "Config path: " + configurationFilePath);
                 Log.d(LOGTAG, "State path: " + stateFilePath);
