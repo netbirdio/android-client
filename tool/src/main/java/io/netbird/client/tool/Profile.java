@@ -11,6 +11,9 @@ public class Profile {
         if (name == null) {
             throw new IllegalArgumentException("Profile name cannot be null");
         }
+        if (id == null) {
+            throw new IllegalArgumentException("ID cannot be null");
+        }
         this.id = id;
         this.name = name;
         this.isActive = isActive;
