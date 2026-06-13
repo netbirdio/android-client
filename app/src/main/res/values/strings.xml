@@ -27,7 +27,7 @@
 
     <string name="about_version">Version:&#160;</string>
     <string name="about_license"><u>License agreement</u></string>
-    <string name="about_privacy_poliy"><u>Privacy policy</u></string>
+    <string name="about_privacy_policy"><u>Privacy policy</u></string>
     <string name="about_rights">© 2025 NetBird all rights reserved</string>
 
     <string name="zero_peers_no_machines">It looks like there are no machines that you can connect to…</string>
@@ -67,7 +67,7 @@
 
     <string name="change_server_success_title">Server was changed</string>
     <string name="change_server_success_desc">Click on the connect button to continue</string>
-    <string name="change_server_success_cloe">Ok</string>
+    <string name="change_server_success_close">Ok</string>
     <string name="change_server_success_icon">Success icon</string>
 
 
