@@ -1,4 +1,4 @@
-package io.netbird.client;
+package io.netbird.client.tool;
 
 import android.content.Context;
 import android.content.RestrictionsManager;
@@ -12,14 +12,17 @@ import org.json.JSONObject;
 import io.netbird.gomobile.android.PolicyFetcher;
 
 /**
- * MDMPolicyFetcher reads the current Android managed-config snapshot from
- * RestrictionsManager and returns it as a JSON-encoded string to the Go
- * layer. Registered once at app start via Android.setMobilePolicyFetcher;
- * the Go side invokes fetchJSON() on every LoadPolicy call so the response
- * is always fresh.
+ * MDMPolicyFetcher reads the current Android managed-config snapshot
+ * from RestrictionsManager and returns it as a JSON-encoded string to
+ * the Go layer. Registered on the goClient via setMDMPolicyFetcher
+ * inside EngineRunner; the Go side invokes fetchJSON() on every
+ * Loader.Load call so the response is always fresh.
  *
- * Returns an empty string when no managed config is set — the daemon side
- * treats that as the "no MDM source present" sentinel.
+ * Returns an empty string when no managed config is set — the daemon
+ * side treats that as the "no MDM source present" sentinel.
+ *
+ * Lives in the tool package so the network-extension target can
+ * instantiate it without depending on the app package.
  */
 public class MDMPolicyFetcher implements PolicyFetcher {
     private static final String TAG = "MDMPolicyFetcher";

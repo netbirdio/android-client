@@ -48,6 +48,12 @@ class EngineRunner {
                 iFaceDiscover,
                 networkChangeListener);
 
+        // Per-Client MDM policy fetcher (DI on the goClient side).
+        // The Go layer holds the *mdm.Loader on this Client instance;
+        // every Run/RunWithoutLogin call overlays the latest MDM
+        // policy on top of the freshly resolved Config.
+        goClient.setMDMPolicyFetcher(new MDMPolicyFetcher(context));
+
         updateLogLevel(isTraceLogEnabled, isDebuggable);
     }
 

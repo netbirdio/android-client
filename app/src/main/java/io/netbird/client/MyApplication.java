@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
-import io.netbird.gomobile.android.Android;
-
 public class MyApplication extends Application {
 
     @Override
@@ -17,9 +15,9 @@ public class MyApplication extends Application {
         int themeMode = prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         AppCompatDelegate.setDefaultNightMode(themeMode);
 
-        // Register the MDM policy fetcher exactly once for the process
-        // lifetime. The Go side invokes fetchJSON() on every LoadPolicy
-        // call so the returned snapshot is always fresh — no caching here.
-        Android.setMobilePolicyFetcher(new MDMPolicyFetcher(this));
+        // NOTE: the MDM policy fetcher is registered on the goClient
+        // instance inside EngineRunner — see EngineRunner constructor.
+        // Process-wide registration was removed when the Go side moved
+        // to per-Client DI for the Loader.
     }
 }
