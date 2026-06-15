@@ -148,4 +148,58 @@
     <string name="profiles_success_switched">Switched to profile \'%s\'</string>
     <string name="profiles_success_logged_out">Logged out from profile \'%s\'</string>
     <string name="profiles_success_removed">Profile \'%s\' removed successfully</string>
+
+    <!-- MDM application restrictions: titles + descriptions surfaced to the
+         Device Owner / Profile Owner UI (Intune, MobileIron, TestDPC) when
+         the admin configures NetBird via managed config. -->
+    <string name="restriction_managementURL_title">Management URL</string>
+    <string name="restriction_managementURL_description">URL of the NetBird management server. Format https://host[:port].</string>
+
+    <string name="restriction_preSharedKey_title">Pre-shared key</string>
+    <string name="restriction_preSharedKey_description">WireGuard pre-shared key used as an additional symmetric secret. Secret value.</string>
+
+    <string name="restriction_disableAutoConnect_title">Disable auto-connect</string>
+    <string name="restriction_disableAutoConnect_description">When enabled, the tunnel does not auto-connect at app start.</string>
+
+    <string name="restriction_disableClientRoutes_title">Disable client routes</string>
+    <string name="restriction_disableClientRoutes_description">When enabled, this client does not consume routes advertised by routing peers.</string>
+
+    <string name="restriction_disableServerRoutes_title">Disable server routes</string>
+    <string name="restriction_disableServerRoutes_description">When enabled, this client does not act as a routing peer for other clients.</string>
+
+    <string name="restriction_blockInbound_title">Block inbound</string>
+    <string name="restriction_blockInbound_description">When enabled, the client blocks all inbound peer traffic on the WireGuard interface.</string>
+
+    <string name="restriction_allowServerSSH_title">Allow server SSH</string>
+    <string name="restriction_allowServerSSH_description">When enabled, this client accepts incoming SSH sessions via NetBird SSH.</string>
+
+    <string name="restriction_rosenpassEnabled_title">Enable Rosenpass</string>
+    <string name="restriction_rosenpassEnabled_description">Enables Rosenpass post-quantum key exchange on WireGuard tunnels.</string>
+
+    <string name="restriction_rosenpassPermissive_title">Rosenpass permissive</string>
+    <string name="restriction_rosenpassPermissive_description">When enabled, falls back to plain WireGuard if a peer does not support Rosenpass.</string>
+
+    <string name="restriction_wireguardPort_title">WireGuard port</string>
+    <string name="restriction_wireguardPort_description">UDP port for the local WireGuard interface. Allowed range 1-65535.</string>
+
+    <string name="restriction_splitTunnelMode_title">Split tunnel mode</string>
+    <string name="restriction_splitTunnelMode_description">Choose allow (only listed apps route through NetBird) or disallow (listed apps bypass NetBird).</string>
+
+    <string name="restriction_splitTunnelApps_title">Split tunnel apps</string>
+    <string name="restriction_splitTunnelApps_description">Comma-separated list of package names used by the selected split-tunnel mode.</string>
+
+    <string name="restriction_disableUpdateSettings_title">Disable update settings</string>
+    <string name="restriction_disableUpdateSettings_description">When enabled, blocks every configuration change from the UI and CLI.</string>
+
+    <string name="restriction_disableProfiles_title">Disable profiles</string>
+    <string name="restriction_disableProfiles_description">When enabled, the client cannot list, create, switch or remove NetBird connection profiles.</string>
+
+    <string name="restriction_disableNetworks_title">Disable networks</string>
+    <string name="restriction_disableNetworks_description">When enabled, the client UI cannot list, select or deselect NetBird networks.</string>
+
+    <string name="restriction_disableAdvancedView_title">Disable advanced view</string>
+    <string name="restriction_disableAdvancedView_description">When enabled, the new UI hides the advanced-view section.</string>
+
+    <string name="restriction_disableMetricsCollection_title">Disable metrics collection</string>
+    <string name="restriction_disableMetricsCollection_description">When enabled, the client does not collect or report local usage metrics.</string>
 </resources>
