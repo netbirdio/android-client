@@ -39,6 +39,7 @@ public class VPNService extends android.net.VpnService {
     private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
     private EngineRestarter engineRestarter;
     private android.content.BroadcastReceiver stopEngineReceiver;
+    private android.content.BroadcastReceiver mdmPolicyChangedReceiver;
 
     @Override
     public void onCreate() {
@@ -99,6 +100,32 @@ public class VPNService extends android.net.VpnService {
                 filter,
                 Context.RECEIVER_NOT_EXPORTED
         );
+
+        // Listen for MDM managed-config changes. The OS broadcasts this
+        // intent whenever a Device Owner / Profile Owner pushes new
+        // application restrictions; the receiver only signals the engine
+        // to restart with a freshly resolved Config — the actual values
+        // are read on demand by MDMPolicyFetcher.fetchJSON during the
+        // next Run.
+        mdmPolicyChangedReceiver = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED.equals(intent.getAction())) {
+                    Log.d(LOGTAG, "Received MDM policy change broadcast");
+                    if (engineRunner != null) {
+                        engineRunner.onMDMPolicyChanged();
+                    }
+                }
+            }
+        };
+        android.content.IntentFilter mdmFilter = new android.content.IntentFilter(
+                Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+        androidx.core.content.ContextCompat.registerReceiver(
+                this,
+                mdmPolicyChangedReceiver,
+                mdmFilter,
+                Context.RECEIVER_NOT_EXPORTED
+        );
     }
 
     @Override
@@ -145,6 +172,13 @@ public class VPNService extends android.net.VpnService {
                 unregisterReceiver(stopEngineReceiver);
             } catch (IllegalArgumentException e) {
                 Log.w(LOGTAG, "Receiver not registered", e);
+            }
+        }
+        if (mdmPolicyChangedReceiver != null) {
+            try {
+                unregisterReceiver(mdmPolicyChangedReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.w(LOGTAG, "MDM receiver not registered", e);
             }
         }
 

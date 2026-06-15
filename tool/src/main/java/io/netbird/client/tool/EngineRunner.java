@@ -245,6 +245,18 @@ class EngineRunner {
         goClient.stop();
     }
 
+    /**
+     * Invoked by the platform broadcast receiver when the OS reports a
+     * managed-config change (Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED).
+     * Delegates to the Go layer; on the Go side this stops the current
+     * engine context so the outer loop (runClient) wakes up and re-invokes
+     * Run with a freshly resolved Config that includes the latest MDM
+     * overlay.
+     */
+    public synchronized void onMDMPolicyChanged() {
+        goClient.onMDMPolicyChanged();
+    }
+
     public PeerInfoArray peersInfo() {
         return goClient.peersList();
     }
