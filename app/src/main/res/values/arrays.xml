@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Display labels for the splitTunnelMode managed restriction. -->
+    <string-array name="restriction_splitTunnelMode_entries">
+        <item>Allow only listed apps (everything else bypasses)</item>
+        <item>Disallow listed apps (everything else routes)</item>
+    </string-array>
+    <!-- Raw values written into RestrictionsManager for splitTunnelMode. -->
+    <string-array name="restriction_splitTunnelMode_values">
+        <item>allow</item>
+        <item>disallow</item>
+    </string-array>
+</resources>

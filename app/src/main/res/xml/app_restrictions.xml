@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Managed-configuration schema for the NetBird Android client.
+    Read by Device Owner / Profile Owner (Intune, MobileIron, Workspace ONE,
+    JumpCloud, TestDPC) to render a configuration UI; pushed values land in
+    RestrictionsManager.getApplicationRestrictions() and are surfaced to the
+    Go layer via MDMPolicyFetcher.fetchJSON().
+
+    Key names mirror the canonical mdm.Key* constants in
+    client/mdm/policy.go (lowerCamelCase). Adding a key here is purely
+    discovery for the MDM admin UI — the Go side determines which keys
+    actually take effect.
+-->
+<restrictions xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <restriction
+        android:key="managementURL"
+        android:title="@string/restriction_managementURL_title"
+        android:description="@string/restriction_managementURL_description"
+        android:restrictionType="string"
+        android:defaultValue="https://api.netbird.io:443" />
+
+    <restriction
+        android:key="preSharedKey"
+        android:title="@string/restriction_preSharedKey_title"
+        android:description="@string/restriction_preSharedKey_description"
+        android:restrictionType="string" />
+
+    <restriction
+        android:key="disableAutoConnect"
+        android:title="@string/restriction_disableAutoConnect_title"
+        android:description="@string/restriction_disableAutoConnect_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="disableClientRoutes"
+        android:title="@string/restriction_disableClientRoutes_title"
+        android:description="@string/restriction_disableClientRoutes_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="disableServerRoutes"
+        android:title="@string/restriction_disableServerRoutes_title"
+        android:description="@string/restriction_disableServerRoutes_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="blockInbound"
+        android:title="@string/restriction_blockInbound_title"
+        android:description="@string/restriction_blockInbound_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="allowServerSSH"
+        android:title="@string/restriction_allowServerSSH_title"
+        android:description="@string/restriction_allowServerSSH_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="rosenpassEnabled"
+        android:title="@string/restriction_rosenpassEnabled_title"
+        android:description="@string/restriction_rosenpassEnabled_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="rosenpassPermissive"
+        android:title="@string/restriction_rosenpassPermissive_title"
+        android:description="@string/restriction_rosenpassPermissive_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="wireguardPort"
+        android:title="@string/restriction_wireguardPort_title"
+        android:description="@string/restriction_wireguardPort_description"
+        android:restrictionType="integer"
+        android:defaultValue="51820" />
+
+    <restriction
+        android:key="splitTunnelMode"
+        android:title="@string/restriction_splitTunnelMode_title"
+        android:description="@string/restriction_splitTunnelMode_description"
+        android:restrictionType="choice"
+        android:entries="@array/restriction_splitTunnelMode_entries"
+        android:entryValues="@array/restriction_splitTunnelMode_values"
+        android:defaultValue="allow" />
+
+    <restriction
+        android:key="splitTunnelApps"
+        android:title="@string/restriction_splitTunnelApps_title"
+        android:description="@string/restriction_splitTunnelApps_description"
+        android:restrictionType="string" />
+
+    <restriction
+        android:key="disableUpdateSettings"
+        android:title="@string/restriction_disableUpdateSettings_title"
+        android:description="@string/restriction_disableUpdateSettings_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="disableProfiles"
+        android:title="@string/restriction_disableProfiles_title"
+        android:description="@string/restriction_disableProfiles_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="disableNetworks"
+        android:title="@string/restriction_disableNetworks_title"
+        android:description="@string/restriction_disableNetworks_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="disableAdvancedView"
+        android:title="@string/restriction_disableAdvancedView_title"
+        android:description="@string/restriction_disableAdvancedView_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+    <restriction
+        android:key="disableMetricsCollection"
+        android:title="@string/restriction_disableMetricsCollection_title"
+        android:description="@string/restriction_disableMetricsCollection_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+
+</restrictions>

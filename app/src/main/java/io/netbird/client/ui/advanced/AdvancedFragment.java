@@ -1,9 +1,13 @@
 package io.netbird.client.ui.advanced;
 
 import android.content.Context;
+import android.content.RestrictionsManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.view.View;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -292,8 +296,76 @@ public class AdvancedFragment extends Fragment {
                 binding.switchDisableIpv6.toggle();
             });
 
+            applyMDMLocks();
+
         } catch (Exception e) {
             Log.e(LOGTAG, "Failed to initialize engine config switches", e);
+        }
+    }
+
+    /**
+     * Lock and align every UI control whose corresponding key is currently
+     * MDM-enforced. The list of managed keys + their enforced values is
+     * read directly from RestrictionsManager — the same OS-native source
+     * the Go layer uses (via MDMPolicyFetcher). No round-trip to Go is
+     * needed, and the two sides cannot diverge.
+     *
+     * For each managed key:
+     *   - the switch is forced to the MDM value (overrides the user's
+     *     on-disk preference);
+     *   - the switch + its surrounding clickable layout are disabled so
+     *     the user cannot toggle them.
+     */
+    private void applyMDMLocks() {
+        Context ctx = getContext();
+        if (ctx == null) {
+            return;
+        }
+        RestrictionsManager rm = (RestrictionsManager) ctx.getSystemService(Context.RESTRICTIONS_SERVICE);
+        if (rm == null) {
+            return;
+        }
+        android.os.Bundle restrictions = rm.getApplicationRestrictions();
+        if (restrictions == null || restrictions.isEmpty()) {
+            return;
+        }
+
+        lockSwitchIfManaged(restrictions, "rosenpassEnabled", binding.switchRosenpass, binding.layoutRosenpas);
+        lockSwitchIfManaged(restrictions, "rosenpassPermissive", binding.switchRosenpassPermissive, binding.layoutRosenpassPermissive);
+        lockSwitchIfManaged(restrictions, "allowServerSSH", binding.switchAllowSsh, binding.layoutAllowSsh);
+        lockSwitchIfManaged(restrictions, "blockInbound", binding.switchBlockInbound, binding.layoutBlockInbound);
+        lockSwitchIfManaged(restrictions, "disableClientRoutes", binding.switchDisableClientRoutes, binding.layoutDisableClientRoutes);
+        lockSwitchIfManaged(restrictions, "disableServerRoutes", binding.switchDisableServerRoutes, binding.layoutDisableServerRoutes);
+
+        // PreSharedKey is a string, not a bool; lock the field if managed.
+        if (restrictions.containsKey("preSharedKey")) {
+            EditText psk = binding.presharedKey;
+            psk.setEnabled(false);
+            // Show the redaction sentinel so the actual MDM value is never
+            // leaked into the UI — matches the daemon-side behavior of
+            // GetConfig.
+            psk.setText(hiddenKey);
+            binding.btnSave.setEnabled(false);
+        }
+    }
+
+    /**
+     * Helper: if `key` is present in the OS-pushed restrictions, force the
+     * switch to its enforced bool value and disable the switch and its
+     * parent layout. The parent layout must be disabled too, otherwise
+     * the TV-remote "tap layout to toggle switch" path remains active.
+     */
+    private void lockSwitchIfManaged(android.os.Bundle restrictions, String key,
+                                     CompoundButton switchCtrl, View parentLayout) {
+        if (switchCtrl == null || !restrictions.containsKey(key)) {
+            return;
+        }
+        boolean value = restrictions.getBoolean(key);
+        switchCtrl.setChecked(value);
+        switchCtrl.setEnabled(false);
+        if (parentLayout != null) {
+            parentLayout.setEnabled(false);
+            parentLayout.setClickable(false);
         }
     }
 

@@ -31,6 +31,13 @@
         android:theme="@style/Theme.NetBird"
         tools:targetApi="31">
 
+        <!-- Managed-configuration schema. Read by Device Owner / Profile
+             Owner controllers (Intune, MobileIron, TestDPC, etc.) so the
+             admin UI can render proper inputs for each MDM-managed key. -->
+        <meta-data
+            android:name="android.content.APP_RESTRICTIONS"
+            android:resource="@xml/app_restrictions" />
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
