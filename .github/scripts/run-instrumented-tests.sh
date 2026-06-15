@@ -9,6 +9,7 @@
 set +e
 
 mkdir -p screen-recordings
+adb shell rm -rf /sdcard/recordings
 adb shell mkdir -p /sdcard/recordings
 
 adb logcat -c
@@ -31,9 +32,18 @@ touch /tmp/record_active
 ) &
 REC_LOOP_PID=$!
 
-./gradlew --no-daemon connectedDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest \
+GRADLE_ARGS=(
+  --no-daemon :app:connectedDebugAndroidTest
+  -Pandroid.testInstrumentationRunnerArguments.class=io.netbird.client.E2eSuite
+  -Pandroid.testInstrumentationRunnerArguments.listener=io.netbird.client.FailFast
   -Pandroid.testInstrumentationRunnerArguments.setupKey="$INSTRUMENTATION_NB_SETUP_KEY"
+)
+
+if [ -n "$INSTRUMENTATION_EXIT_NODE_SETUP_KEY" ]; then
+  GRADLE_ARGS+=(-Pandroid.testInstrumentationRunnerArguments.exitNodeSetupKey="$INSTRUMENTATION_EXIT_NODE_SETUP_KEY")
+fi
+
+./gradlew "${GRADLE_ARGS[@]}"
 TEST_EXIT=$?
 
 rm -f /tmp/record_active

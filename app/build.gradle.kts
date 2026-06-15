@@ -45,7 +45,18 @@ android {
         versionName = rootProject.extra["appVersionName"] as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments["timeout_msec"] = "3600000"
+        testInstrumentationRunnerArguments["timeout_msec"] = "300000"
+
+        // Pass setup keys from the environment to the e2e tests (a -P arg still overrides).
+        mapOf(
+            "setupKey" to "INSTRUMENTATION_NB_SETUP_KEY",
+            "exitNodeSetupKey" to "INSTRUMENTATION_EXIT_NODE_SETUP_KEY"
+        ).forEach { (arg, envVar) ->
+            val value = System.getenv(envVar)
+            if (!value.isNullOrBlank()) {
+                testInstrumentationRunnerArguments[arg] = value
+            }
+        }
     }
 
     buildTypes {

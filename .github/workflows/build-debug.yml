@@ -158,6 +158,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         env:
           INSTRUMENTATION_NB_SETUP_KEY: ${{ secrets.INSTRUMENTATION_NB_SETUP_KEY }}
+          INSTRUMENTATION_EXIT_NODE_SETUP_KEY: ${{ secrets.INSTRUMENTATION_EXIT_NODE_SETUP_KEY }}
         with:
           api-level: 30
           target: google_apis
