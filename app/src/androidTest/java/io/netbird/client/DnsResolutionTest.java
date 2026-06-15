@@ -92,7 +92,6 @@ public class DnsResolutionTest {
         harness.enableTouchVisualization();
 
         harness.grantVpnConsent();
-        LoginFlow.ensureForceRelayDisabled(activity, harness.device());
 
         profileName = LoginFlow.createAndSwitchToFreshProfile(activity, harness.device(), "dns");
         LoginFlow.loginWithSetupKey(activity, harness.device(), setupKey);

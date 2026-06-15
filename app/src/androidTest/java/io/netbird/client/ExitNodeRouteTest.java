@@ -85,7 +85,6 @@ public class ExitNodeRouteTest {
         harness.enableTouchVisualization();
 
         harness.grantVpnConsent();
-        LoginFlow.ensureForceRelayDisabled(activity, harness.device());
 
         profileName = LoginFlow.createAndSwitchToFreshProfile(activity, harness.device(), "exit-node");
         LoginFlow.loginWithSetupKey(activity, harness.device(), setupKey);

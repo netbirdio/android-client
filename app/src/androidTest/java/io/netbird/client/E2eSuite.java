@@ -1,5 +1,9 @@
 package io.netbird.client;
 
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
+
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -23,4 +27,14 @@ import org.junit.runners.Suite;
         ExitNodeRouteTest.class,
 })
 public class E2eSuite {
+
+    /**
+     * Force relay is a global setting that defaults ON and would stop the
+     * relay-less peer connecting. Turn it off ONCE, before any test runs.
+     */
+    @BeforeClass
+    public static void disableForceRelay() throws Exception {
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        LoginFlow.setForceRelay(E2eAppRule.activity(), device, false);
+    }
 }

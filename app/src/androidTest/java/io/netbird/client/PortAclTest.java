@@ -98,7 +98,6 @@ public class PortAclTest {
         harness.enableTouchVisualization();
 
         harness.grantVpnConsent();
-        LoginFlow.ensureForceRelayDisabled(activity, harness.device());
 
         // Fresh profile + login, like the Robot suite's per-test InitNetBird.
         profileName = LoginFlow.createAndSwitchToFreshProfile(activity, harness.device(), "port-acl");

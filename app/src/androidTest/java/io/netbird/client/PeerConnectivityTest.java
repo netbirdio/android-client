@@ -95,7 +95,8 @@ public class PeerConnectivityTest {
     /**
      * Shared body: fresh profile → login → connect → ping {@code peerFqdn}
      * through the tunnel. This is the Android equivalent of the Robot
-     * {@code Try Peer Connectivity ${peer_name}} keyword.
+     * {@code Try Peer Connectivity ${peer_name}} keyword. Force-relay is
+     * disabled once for the whole suite (see {@link E2eSuite}).
      */
     private void connectAndPing(String peerFqdn, String scenario) throws Exception {
         Bundle args = InstrumentationRegistry.getArguments();
@@ -109,9 +110,6 @@ public class PeerConnectivityTest {
         harness.enableTouchVisualization();
 
         harness.grantVpnConsent();
-        // Global pre-step (once for the whole suite): peers can't connect P2P
-        // with force-relay on, which it is by default.
-        LoginFlow.ensureForceRelayDisabled(activity, harness.device());
 
         // 1. Create a fresh, isolated profile (Android equivalent of the Robot
         // suite's `netbird profile add test-<random>`), then log in into it.

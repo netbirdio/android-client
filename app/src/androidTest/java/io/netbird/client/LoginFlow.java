@@ -236,18 +236,14 @@ final class LoginFlow {
         Log.i(TAG, "Removed profile " + profileName);
     }
 
-    private static boolean forceRelayDisabled = false;
-
     /**
-     * Turn off the "Force relay connection" toggle in the Advanced screen so
-     * peers can connect directly (P2P). It defaults ON (a global setting), which
-     * prevents the relay-less peer from connecting. This is a one-time suite
-     * pre-step: every test's {@code @Before} calls it, but it only acts once.
+     * Set the "Force relay connection" toggle (a global setting) to {@code
+     * enabled} via the Advanced screen. Each test sets the value it needs rather
+     * than relying on the previous test's state, so the toggle is reset between
+     * tests. Only clicks when the current state differs.
      */
-    static void ensureForceRelayDisabled(MainActivity activity, UiDevice device) throws InterruptedException {
-        if (forceRelayDisabled) {
-            return;
-        }
+    static void setForceRelay(MainActivity activity, UiDevice device, boolean enabled)
+            throws InterruptedException {
         navigateTo(activity, R.id.nav_advanced);
 
         // The switch is far down the scrollable Advanced screen — scroll to it.
@@ -258,15 +254,14 @@ final class LoginFlow {
             dumpScreenshot(device, "force-relay-switch-missing");
             fail("Force relay connection switch not found in Advanced screen");
         }
-        if (toggle.isChecked()) {
+        if (toggle.isChecked() != enabled) {
             toggle.click();
             // Toggling pops a "reconnection needed" warning; dismiss it.
             confirmDialog(device);
-            Log.i(TAG, "Disabled force relay connection");
+            Log.i(TAG, "Set force relay connection to " + enabled);
         } else {
-            Log.i(TAG, "Force relay connection already off");
+            Log.i(TAG, "Force relay connection already " + enabled);
         }
-        forceRelayDisabled = true;
     }
 
     /**
