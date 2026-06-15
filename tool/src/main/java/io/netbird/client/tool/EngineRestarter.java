@@ -309,6 +309,22 @@ class EngineRestarter implements NetworkToggleListener {
     }
 
     /**
+     * Triggers the same stop + restart sequence used by the network-change
+     * path, but without the debounce delay. Used by the MDM policy-change
+     * broadcast receiver: when an admin pushes a new managed config the
+     * engine must restart immediately so the new values take effect on the
+     * next Run (which re-reads MDM via MDMPolicyFetcher).
+     */
+    public void requestRestartNow() {
+        Log.d(LOGTAG, "explicit restart requested (no debounce)");
+        synchronized (restartLock) {
+            restartScheduled = true;
+            handler.removeCallbacks(restartRunnable);
+            handler.post(restartRunnable);
+        }
+    }
+
+    /**
      * Cancels any pending debounced restart. Called whenever an external
      * actor (typically a user-driven Connect/Disconnect) takes over the
      * engine lifecycle, so the network-change-driven restart does not

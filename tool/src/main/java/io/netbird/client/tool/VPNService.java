@@ -112,8 +112,13 @@ public class VPNService extends android.net.VpnService {
             public void onReceive(Context context, Intent intent) {
                 if (Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED.equals(intent.getAction())) {
                     Log.d(LOGTAG, "Received MDM policy change broadcast");
-                    if (engineRunner != null) {
-                        engineRunner.onMDMPolicyChanged();
+                    // Route through EngineRestarter so the existing restart
+                    // machinery (state-listener gating, UI suppression
+                    // window, runWithoutAuth on stop) handles the stop +
+                    // re-run cleanly. A bare engineRunner.stop() leaves the
+                    // engine stopped with no one to relaunch it.
+                    if (engineRestarter != null) {
+                        engineRestarter.requestRestartNow();
                     }
                 }
             }
