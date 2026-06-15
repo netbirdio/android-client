@@ -36,7 +36,7 @@ public class Resource {
     }
 
     public boolean isExitNode() {
-        return address.equals("0.0.0.0/0");
+        return address != null && (address.contains("0.0.0.0/0") || address.contains("::/0"));
     }
 
     public boolean isSelected() {

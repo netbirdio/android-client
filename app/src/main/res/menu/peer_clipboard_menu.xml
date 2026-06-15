@@ -5,4 +5,7 @@
     <item
         android:id="@+id/copy_ip"
         android:title="@string/peers_clipboard_copy_ip" />
+    <item
+        android:id="@+id/copy_ipv6"
+        android:title="@string/peers_clipboard_copy_ipv6" />
 </menu>

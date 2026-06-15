@@ -197,6 +197,7 @@ public class AdvancedFragment extends Fragment {
             binding.switchDisableFirewall.setChecked(goPreferences.getDisableFirewall());
             binding.switchAllowSsh.setChecked(goPreferences.getServerSSHAllowed());
             binding.switchBlockInbound.setChecked(goPreferences.getBlockInbound());
+            binding.switchDisableIpv6.setChecked(goPreferences.getDisableIPv6());
 
             // Set up change listeners
             binding.switchDisableClientRoutes.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -252,7 +253,16 @@ public class AdvancedFragment extends Fragment {
                     Log.e(LOGTAG, "Failed to set block inbound", e);
                 }
             });
-            
+
+            binding.switchDisableIpv6.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setDisableIPv6(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set disable IPv6", e);
+                }
+            });
+
             // Make parent layouts clickable to toggle switches (for TV remote)
             binding.layoutAllowSsh.setOnClickListener(v -> {
                 binding.switchAllowSsh.toggle();
@@ -276,6 +286,10 @@ public class AdvancedFragment extends Fragment {
             
             binding.layoutDisableFirewall.setOnClickListener(v -> {
                 binding.switchDisableFirewall.toggle();
+            });
+
+            binding.layoutDisableIpv6.setOnClickListener(v -> {
+                binding.switchDisableIpv6.toggle();
             });
 
         } catch (Exception e) {

@@ -94,7 +94,8 @@ class EngineRunner {
 
             // Create fresh PlatformFiles with current config/state paths
             // This allows profile switching without recreating the entire Client
-            var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath, context.getCacheDir().getAbsolutePath());
+            String cacheDir = context.getCacheDir().getAbsolutePath();
+            var platformFiles = new AndroidPlatformFiles(configurationFilePath, stateFilePath, cacheDir);
             Log.d(LOGTAG, "Running engine with config: " + configurationFilePath + ", state: " + stateFilePath);
 
             try {
@@ -298,19 +299,6 @@ class EngineRunner {
         }
     }
 
-    public String debugBundle(boolean anonymize) throws Exception {
-        String configPath = profileManager.getActiveConfigPath();
-        String statePath = profileManager.getActiveStateFilePath();
-        String cacheDir = context.getCacheDir().getAbsolutePath();
-        var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
-        try {
-            return goClient.debugBundle(platformFiles, anonymize);
-        } catch (Exception e) {
-            Log.e(LOGTAG, "goClient error", e);
-            throw e;
-        }
-    }
-
     public void selectRoute(String route) throws Exception {
         Log.d(LOGTAG, String.format("selecting route: %s", route));
         try {
@@ -329,6 +317,19 @@ class EngineRunner {
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             notifyError(e);
+            throw e;
+        }
+    }
+
+    public String debugBundle(boolean anonymize) throws Exception {
+        String configPath = profileManager.getActiveConfigPath();
+        String statePath = profileManager.getActiveStateFilePath();
+        String cacheDir = context.getCacheDir().getAbsolutePath();
+        var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
+        try {
+            return goClient.debugBundle(platformFiles, anonymize);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "goClient error", e);
             throw e;
         }
     }
