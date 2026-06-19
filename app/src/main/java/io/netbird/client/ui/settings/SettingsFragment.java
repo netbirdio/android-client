@@ -18,6 +18,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentSettingsBinding;
+import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
 
 public class SettingsFragment extends Fragment {
@@ -86,8 +87,8 @@ public class SettingsFragment extends Fragment {
         if (binding == null) return;
         try {
             ProfileManagerWrapper profileManager = new ProfileManagerWrapper(requireContext());
-            String activeProfile = profileManager.getActiveProfile();
-            binding.activeProfileName.setText(activeProfile != null ? activeProfile : "");
+            Profile activeProfile = profileManager.getActiveProfile();
+            binding.activeProfileName.setText(activeProfile != null ? activeProfile.getName() : "");
         } catch (Exception e) {
             Log.e(LOGTAG, "Failed to read active profile", e);
             binding.activeProfileName.setText("");

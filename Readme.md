@@ -7,7 +7,7 @@
      <a href="https://github.com/netbirdio/netbird/blob/main/LICENSE">
        <img height="20" src="https://www.gnu.org/graphics/gplv3-88x31.png" />
      </a>
-    <a href="https://join.slack.com/t/netbirdio/shared_invite/zt-vrahf41g-ik1v7fV8du6t0RwxSrJ96A">
+    <a href="https://docs.netbird.io/slack-url">
         <img src="https://img.shields.io/badge/slack-@netbird-red.svg?logo=slack"/>
      </a>    
   </p>
@@ -20,7 +20,7 @@
   <br/>
   See <a href="https://netbird.io/docs/">Documentation</a>
   <br/>
-   Join our <a href="https://join.slack.com/t/netbirdio/shared_invite/zt-vrahf41g-ik1v7fV8du6t0RwxSrJ96A">Slack channel</a>
+   Join our <a href="https://docs.netbird.io/slack-url">Slack channel</a>
   <br/>
 
 </strong>

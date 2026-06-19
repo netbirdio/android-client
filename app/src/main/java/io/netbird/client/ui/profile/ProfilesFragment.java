@@ -129,35 +129,11 @@ public class ProfilesFragment extends Fragment {
                         return false;
                     }
 
-                    // Validate profile name based on go client sanitization rules
-                    String sanitizedName = sanitizeProfileName(profileName);
-                    if (sanitizedName.isEmpty()) {
-                        Toast.makeText(requireContext(),
-                                "Profile name must contain at least one letter, digit, underscore or hyphen",
-                                Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-
                     addProfile(profileName);
                     return true;
                 }).show();
     }
 
-    /**
-     * Sanitizes profile name using the same rules as the go client.
-     * Only keeps letters, digits, underscores, and hyphens.
-     * This matches the sanitization in netbird/client/internal/profilemanager/profilemanager.go
-     */
-    private String sanitizeProfileName(String name) {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < name.length(); i++) {
-            char c = name.charAt(i);
-            if (Character.isLetterOrDigit(c) || c == '_' || c == '-') {
-                result.append(c);
-            }
-        }
-        return result.toString();
-    }
 
     private void showSwitchDialog(Profile profile) {
         createDialog(
@@ -205,11 +181,7 @@ public class ProfilesFragment extends Fragment {
         } catch (Exception e) {
             Log.e(TAG, "Failed to add profile", e);
             String errorMsg = e.getMessage();
-            if (errorMsg != null && errorMsg.contains("already exists")) {
-                Toast.makeText(requireContext(),
-                        getString(R.string.profiles_error_already_exists, profileName),
-                        Toast.LENGTH_SHORT).show();
-            } else {
+            if (errorMsg != null) {
                 Toast.makeText(requireContext(),
                         "Failed to add profile: " + e.getMessage(),
                         Toast.LENGTH_SHORT).show();
@@ -220,7 +192,7 @@ public class ProfilesFragment extends Fragment {
     private void switchProfile(Profile profile) {
         try {
             // Switch profile (VPN service will be stopped automatically in ProfileManagerWrapper)
-            profileManager.switchProfile(profile.getName());
+            profileManager.switchProfile(profile.getID());
 
             Toast.makeText(requireContext(),
                     getString(R.string.profiles_success_switched, profile.getName()),
@@ -241,7 +213,7 @@ public class ProfilesFragment extends Fragment {
     private void logoutProfile(Profile profile) {
         try {
             // Logout from profile (VPN service will be stopped automatically if it's the active profile)
-            profileManager.logoutProfile(profile.getName());
+            profileManager.logoutProfile(profile.getID());
 
             Toast.makeText(requireContext(),
                     getString(R.string.profiles_success_logged_out, profile.getName()),
@@ -258,7 +230,7 @@ public class ProfilesFragment extends Fragment {
 
     private void removeProfile(Profile profile) {
         try {
-            if (profile.getName().equals("default")) {
+            if (profile.getID().equals("default")) {
                 Toast.makeText(requireContext(),
                         R.string.profiles_error_cannot_remove_default,
                         Toast.LENGTH_SHORT).show();
@@ -272,7 +244,7 @@ public class ProfilesFragment extends Fragment {
                 return;
             }
 
-            profileManager.removeProfile(profile.getName());
+            profileManager.removeProfile(profile.getID());
             Toast.makeText(requireContext(),
                     getString(R.string.profiles_success_removed, profile.getName()),
                     Toast.LENGTH_SHORT).show();

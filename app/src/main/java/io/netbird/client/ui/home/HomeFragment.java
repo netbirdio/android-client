@@ -19,6 +19,7 @@ import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentHomeBinding;
+import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
 
 public class HomeFragment extends Fragment implements StateListener, ProfilePickerSheet.OnProfileSwitchedListener {
@@ -126,8 +127,8 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
         if (binding == null) return;
         try {
             ProfileManagerWrapper profileManager = new ProfileManagerWrapper(requireContext());
-            String activeProfile = profileManager.getActiveProfile();
-            binding.profileChipText.setText(activeProfile != null ? activeProfile : "");
+            Profile activeProfile = profileManager.getActiveProfile();
+            binding.profileChipText.setText(activeProfile != null ? activeProfile.getName() : "");
         } catch (Exception e) {
             Log.e("HomeFragment", "Failed to read active profile", e);
             binding.profileChipText.setText("");
