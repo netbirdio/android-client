@@ -24,10 +24,25 @@
     <color name="nb_txt_light">#7E858F</color>
     <color name="nb_button_inactive">#545961</color>
 
+    <!-- Bottom navigation unselected item colour (white on the dark home background) -->
+    <color name="tab_unselected">#FFFFFF</color>
+
     <color name="thumb_on_color">#F58431</color>
     <color name="thumb_off_color">#545961</color>
     <color name="track_on_color">#F6833080</color>
     <color name="track_off_color">#32363D</color>
+
+    <!-- Custom home connect toggle -->
+    <color name="connect_track_on">#F58431</color>
+    <color name="connect_track_off">#3A3A3A</color>
+    <color name="connect_track_off_stroke">#00000000</color>
+    <color name="connect_thumb_on">#FFFFFF</color>
+    <color name="connect_thumb_off">#FFFFFF</color>
+
+    <!-- Connection info rows -->
+    <color name="info_row_bg">#1C1E22</color>
+    <color name="info_row_stroke">#2E3238</color>
+
     <color name="profile_background">@color/nb_bg</color>
     <color name="profile_card_background">@color/nb_gray_light</color>
 </resources>

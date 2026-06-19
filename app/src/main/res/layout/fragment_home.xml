@@ -11,102 +11,12 @@
     android:focusableInTouchMode="false"
     tools:context=".ui.home.HomeFragment">
 
-    <Space
-        android:id="@+id/spacer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:layout_constraintTop_toTopOf="@id/top_guideline"
-        app:layout_constraintBottom_toTopOf="@id/barrier_below_bg_mask_container"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.412" />
-
-    <View
-        android:id="@+id/mask_background"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/nb_bg_mask"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:layout_constraintTop_toTopOf="@id/spacer"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/bg_mask_container"
-        app:layout_constraintEnd_toEndOf="@id/bg_mask_container" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier_below_bg_mask_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="bg_mask_container" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bg_mask_container"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:layout_constraintTop_toTopOf="@id/top_guideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:id="@+id/bg_mask"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/main_desc_bg_mask"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:scaleType="fitCenter"
-            android:src="@drawable/bg_bottom"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/btn_connect"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:background="@drawable/focus_highlight"
-            android:clickable="true"
-            android:contentDescription="@string/main_desc_connect"
-            android:focusable="true"
-            android:focusableInTouchMode="false"
-            android:scaleType="fitCenter"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="0.07"
-            app:layout_constraintWidth_percent="0.79" />
-
-        <TextView
-            android:id="@+id/text_connection_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:text="@string/main_status_disconnected"
-            android:textAlignment="center"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="22sp"
-            app:layout_constraintTop_toBottomOf="@id/btn_connect"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+    <!-- Profile chip, top-center -->
     <LinearLayout
         android:id="@+id/profile_chip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/profile_chip_bg"
         android:clickable="true"
         android:focusable="true"
@@ -143,43 +53,202 @@
             app:tint="@color/nb_txt" />
     </LinearLayout>
 
+    <!-- NetBird logo -->
+    <ImageView
+        android:id="@+id/home_logo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/main_desc_logo"
+        android:focusable="false"
+        android:scaleType="fitCenter"
+        android:src="@drawable/nb_logo_full"
+        app:layout_constraintTop_toBottomOf="@id/profile_chip"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.42" />
+
+    <!-- Connect toggle -->
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/btn_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@null"
+        android:clickable="true"
+        android:contentDescription="@string/main_desc_connect"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:switchMinWidth="92dp"
+        android:thumb="@drawable/connect_switch_thumb"
+        app:thumbTint="@color/connect_thumb_tint"
+        app:track="@drawable/connect_switch_track"
+        app:trackTint="@color/connect_track_tint"
+        app:layout_constraintTop_toBottomOf="@id/home_logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Connection status -->
+    <TextView
+        android:id="@+id/text_connection_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:fontFamily="@font/inter_variable"
+        android:focusable="false"
+        android:text="@string/main_status_disconnected"
+        android:textAlignment="center"
+        android:textColor="@color/nb_txt"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/btn_connect"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- IP / network address (monospace, emphasized) -->
     <TextView
         android:id="@+id/text_hostname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/jetbrains_mono_variable"
         android:focusable="false"
-        android:focusableInTouchMode="false"
         android:textAlignment="center"
-        android:textColor="@color/nb_txt_light"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/profile_chip"
+        android:textColor="@color/nb_txt"
+        android:textSize="15sp"
+        app:layout_constraintTop_toBottomOf="@id/text_connection_status"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="budafoki.netbird.cloud" />
+        tools:text="sdk-phone-x86-64.netbird.cloud" />
 
-    <TextView
-        android:id="@+id/text_network_address"
+    <!-- Hostname summary (muted) + chevron. Tapping toggles the info rows below. -->
+    <LinearLayout
+        android:id="@+id/network_address_summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:textAlignment="center"
-        android:textColor="@color/nb_txt_light"
-        android:textSize="16sp"
-        tools:text="100.127.123.95/16"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/focus_highlight"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone"
+        tools:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/text_hostname"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/top_guideline"
-        android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/text_network_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/jetbrains_mono_variable"
+            android:focusable="false"
+            android:textAlignment="center"
+            android:textColor="@color/nb_txt_light"
+            android:textSize="14sp"
+            tools:text="100.72.68.65/16" />
+
+        <ImageView
+            android:id="@+id/info_rows_chevron"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="2dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_drop_down"
+            app:tint="@color/nb_txt_light" />
+    </LinearLayout>
+
+    <!-- Info rows: IP address + secondary value. Hidden until the summary above is tapped. -->
+    <LinearLayout
+        android:id="@+id/info_rows"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.25" />
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/network_address_summary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Primary: IP / CIDR -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/info_row_bg"
+            android:gravity="center_vertical"
+            android:minHeight="52dp"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/text_ip_address"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/jetbrains_mono_variable"
+                android:textColor="@color/nb_txt"
+                android:textSize="15sp"
+                tools:text="100.72.74.247/16" />
+
+            <ImageButton
+                android:id="@+id/btn_copy_ip"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/focus_highlight"
+                android:contentDescription="@string/main_desc_copy"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_content_copy"
+                app:tint="@color/nb_txt_light" />
+        </LinearLayout>
+
+        <!-- Secondary value (IPv6). Only shown when an IPv6 address is available. -->
+        <LinearLayout
+            android:id="@+id/secondary_value_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/info_row_bg"
+            android:gravity="center_vertical"
+            android:minHeight="52dp"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/text_secondary_value"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/jetbrains_mono_variable"
+                android:text="@string/main_value_empty"
+                android:textColor="@color/nb_txt"
+                android:textSize="15sp" />
+
+            <ImageButton
+                android:id="@+id/btn_copy_secondary"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/focus_highlight"
+                android:contentDescription="@string/main_desc_copy"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_content_copy"
+                app:tint="@color/nb_txt_light" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

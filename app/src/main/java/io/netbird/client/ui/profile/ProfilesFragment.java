@@ -174,9 +174,6 @@ public class ProfilesFragment extends Fragment {
     private void addProfile(String profileName) {
         try {
             profileManager.addProfile(profileName);
-            Toast.makeText(requireContext(),
-                    getString(R.string.profiles_success_added, profileName),
-                    Toast.LENGTH_SHORT).show();
             loadProfiles();
         } catch (Exception e) {
             Log.e(TAG, "Failed to add profile", e);
@@ -193,10 +190,6 @@ public class ProfilesFragment extends Fragment {
         try {
             // Switch profile (VPN service will be stopped automatically in ProfileManagerWrapper)
             profileManager.switchProfile(profile.getID());
-
-            Toast.makeText(requireContext(),
-                    getString(R.string.profiles_success_switched, profile.getName()),
-                    Toast.LENGTH_SHORT).show();
 
             loadProfiles();
 

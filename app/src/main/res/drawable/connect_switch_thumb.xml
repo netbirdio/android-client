@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Circular thumb for the home connect toggle. Colour comes from app:thumbTint
+     (connect_thumb_tint); this shape only defines size. The inset keeps the thumb
+     floating inside the taller track. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="4dp"
+    android:insetRight="4dp"
+    android:insetTop="4dp"
+    android:insetBottom="4dp">
+
+    <shape android:shape="oval">
+        <size
+            android:width="36dp"
+            android:height="36dp" />
+        <solid android:color="@android:color/white" />
+    </shape>
+
+</inset>

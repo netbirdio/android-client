@@ -90,9 +90,6 @@ public class ProfilePickerSheet extends BottomSheetDialogFragment {
         }
         try {
             profileManager.switchProfile(profile.getName());
-            Toast.makeText(requireContext(),
-                    getString(R.string.profiles_success_switched, profile.getName()),
-                    Toast.LENGTH_SHORT).show();
 
             if (getParentFragment() instanceof OnProfileSwitchedListener) {
                 ((OnProfileSwitchedListener) getParentFragment()).onProfileSwitched(profile.getName());
@@ -139,9 +136,6 @@ public class ProfilePickerSheet extends BottomSheetDialogFragment {
             }
             try {
                 profileManager.addProfile(sanitized);
-                Toast.makeText(requireContext(),
-                        getString(R.string.profiles_success_added, sanitized),
-                        Toast.LENGTH_SHORT).show();
                 loadProfiles();
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add profile", e);

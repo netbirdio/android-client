@@ -23,8 +23,14 @@
     <string name="settings_documentation">Documentation</string>
 
     <string name="main_status_disconnected">Disconnected</string>
-    <string name="main_desc_bg_mask">background mask</string>
+    <string name="main_status_connecting">Connecting…</string>
+    <string name="main_status_connected">Connected</string>
+    <string name="main_status_disconnecting">Disconnecting…</string>
     <string name="main_desc_connect">connect-disconnect</string>
+    <string name="main_desc_logo">NetBird logo</string>
+    <string name="main_desc_copy">Copy to clipboard</string>
+    <string name="main_copied">Copied</string>
+    <string name="main_value_empty">–</string>
 
     <string name="fragment_firstinstall_txt">By default you will connect to NetBird\'s cloud servers. You can access the change_server menu to use another server.</string>
     <string name="fragment_firstinstall_continue">Continue</string>
@@ -151,8 +157,6 @@
     <string name="profiles_error_already_exists">Profile \'%s\' already exists</string>
     <string name="profiles_error_cannot_remove_active">Cannot remove the active profile. Switch to another profile first.</string>
     <string name="profiles_error_cannot_remove_default">Cannot remove the default profile</string>
-    <string name="profiles_success_added">Profile \'%s\' created successfully</string>
-    <string name="profiles_success_switched">Switched to profile \'%s\'</string>
     <string name="profiles_success_logged_out">Logged out from profile \'%s\'</string>
     <string name="profiles_success_removed">Profile \'%s\' removed successfully</string>
 </resources>

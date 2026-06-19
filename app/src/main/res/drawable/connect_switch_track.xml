@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill-shaped track for the home connect toggle. Colour comes from app:trackTint
+     (connect_track_tint); this shape only defines size and corner radius. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <size android:width="88dp" android:height="44dp" />
+    <corners android:radius="100dp" />
+    <solid android:color="@android:color/white" />
+</shape>

@@ -1,20 +1,24 @@
 package io.netbird.client.ui.home;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import io.netbird.client.PlatformUtils;
+import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.StateListenerRegistry;
@@ -30,9 +34,10 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
 
     private TextView textHostname;
     private TextView textNetworkAddress;
+    private TextView textIpAddress;
+    private TextView textConnStatus;
 
-    private LottieAnimationView buttonConnect;
-    private ButtonAnimation buttonAnimation;
+    private SwitchMaterial buttonConnect;
     private boolean isConnected;
 
     @Override
@@ -57,25 +62,14 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
 
         textHostname = binding.textHostname;
         textNetworkAddress = binding.textNetworkAddress;
-        TextView textConnStatus = binding.textConnectionStatus;
+        textIpAddress = binding.textIpAddress;
+        textConnStatus = binding.textConnectionStatus;
 
         buttonConnect = binding.btnConnect;
-        // Try to load the correct Lottie file for dark/light mode, fallback to light if dark is missing
-        boolean isDarkMode = (requireContext().getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-        String lottieFile = isDarkMode ? "button_full_dark.json" : "button_full.json";
-        try {
-            buttonConnect.setAnimation(lottieFile);
-        } catch (Exception e) {
-            // fallback to light mode animation if dark mode file is missing or invalid
-            buttonConnect.setAnimation("button_full.json");
-        }
 
-        if(buttonAnimation == null) {
-            buttonAnimation = new ButtonAnimation();
-        }
-        buttonAnimation.refresh(buttonConnect, textConnStatus);
-
+        // Toggle taps drive the connection. We use a click listener rather than a
+        // checked-change listener so that programmatic state updates coming from the
+        // service (connected/disconnected callbacks) don't trigger a connection switch.
         buttonConnect.setOnClickListener(v -> {
             if (serviceAccessor == null) {
                 return;
@@ -84,14 +78,20 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
             if (isConnected) {
                 // We're currently connected, so disconnect
                 buttonConnect.setEnabled(false);
-                buttonAnimation.disconnecting();
+                setStatusText(R.string.main_status_disconnecting);
                 serviceAccessor.switchConnection(false);
             } else {
                 // We're currently disconnected, so connect
-                buttonAnimation.connecting();
+                setStatusText(R.string.main_status_connecting);
                 serviceAccessor.switchConnection(true);
             }
         });
+
+        binding.btnCopyIp.setOnClickListener(v -> copyToClipboard(textIpAddress.getText()));
+        binding.btnCopySecondary.setOnClickListener(v -> copyToClipboard(binding.textSecondaryValue.getText()));
+
+        // Tapping the address summary expands/collapses the detailed info rows.
+        binding.networkAddressSummary.setOnClickListener(v -> toggleInfoRows());
 
         binding.profileChip.setOnClickListener(v -> {
             ProfilePickerSheet sheet = new ProfilePickerSheet();
@@ -135,12 +135,56 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
         }
     }
 
+    private void toggleInfoRows() {
+        if (binding == null) return;
+        boolean expand = binding.infoRows.getVisibility() != View.VISIBLE;
+        binding.infoRows.setVisibility(expand ? View.VISIBLE : View.GONE);
+        binding.infoRowsChevron.animate().rotation(expand ? 180f : 0f).setDuration(150).start();
+    }
+
+    private void copyToClipboard(CharSequence value) {
+        Context ctx = getContext();
+        if (ctx == null || value == null) return;
+        String text = value.toString().trim();
+        // Don't copy the empty-state placeholder.
+        if (TextUtils.isEmpty(text) || getString(R.string.main_value_empty).equals(text)) {
+            return;
+        }
+        ClipboardManager clipboard = (ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard == null) return;
+        clipboard.setPrimaryClip(ClipData.newPlainText("NetBird", text));
+        Toast.makeText(ctx, R.string.main_copied, Toast.LENGTH_SHORT).show();
+    }
+
+    private void setStatusText(int resId) {
+        if (textConnStatus == null) return;
+        textConnStatus.post(() -> {
+            if (textConnStatus != null) {
+                textConnStatus.setText(resId);
+            }
+        });
+    }
+
+    private void setToggle(boolean checked, boolean enabled, int statusResId) {
+        if (buttonConnect == null) return;
+        buttonConnect.post(() -> {
+            if (buttonConnect == null) return;
+            buttonConnect.setChecked(checked);
+            buttonConnect.setEnabled(enabled);
+            setStatusText(statusResId);
+        });
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        buttonAnimation.destroy();
         stateListenerRegistry.unregisterServiceStateListener(this);
         binding = null;
+        buttonConnect = null;
+        textConnStatus = null;
+        textHostname = null;
+        textNetworkAddress = null;
+        textIpAddress = null;
     }
 
     @Override
@@ -157,49 +201,71 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
     @Override
     public void onEngineStopped() {
         isConnected = false;
-        buttonConnect.post(() -> {
-            buttonAnimation.disconnected();
-            buttonConnect.setEnabled(true);
-        });
+        setToggle(false, true, R.string.main_status_disconnected);
     }
 
     @Override
-    public void onAddressChanged(String netAddr, String hostname) {
-        if(textNetworkAddress == null || textHostname == null) {
+    public void onAddressChanged(String fqdn, String ip) {
+        if (binding == null) {
             return;
         }
 
-        textNetworkAddress.post(() -> textNetworkAddress.setText(netAddr));
-        textHostname.post(() -> textHostname.setText(hostname));
+        // The engine packs the addresses as "IPv4\nIPv6" when an IPv6 address is
+        // available (see Status.UpdateLocalPeerState); otherwise it's just the IPv4.
+        String ipv4 = "";
+        String ipv6 = "";
+        if (!TextUtils.isEmpty(ip)) {
+            String[] parts = ip.split("\n", 2);
+            ipv4 = parts[0].trim();
+            if (parts.length > 1) {
+                ipv6 = parts[1].trim();
+            }
+        }
+
+        final String fIpv4 = ipv4;
+        final String fIpv6 = ipv6;
+        final boolean hasIpv4 = !TextUtils.isEmpty(fIpv4);
+        binding.getRoot().post(() -> {
+            if (binding == null) return;
+            // Emphasized line shows the hostname (fqdn); muted summary shows the IPv4 address.
+            binding.textHostname.setText(fqdn);
+            binding.textNetworkAddress.setText(fIpv4);
+            // Primary info row shows the IPv4 address.
+            binding.textIpAddress.setText(fIpv4);
+            // Secondary info row shows the IPv6 address only when one is available.
+            boolean hasIpv6 = !TextUtils.isEmpty(fIpv6);
+            binding.textSecondaryValue.setText(hasIpv6 ? fIpv6 : "");
+            binding.secondaryValueRow.setVisibility(hasIpv6 ? View.VISIBLE : View.GONE);
+            // Only show the muted address summary (with chevron) when we have an address.
+            binding.networkAddressSummary.setVisibility(hasIpv4 ? View.VISIBLE : View.GONE);
+            // Without an address there's nothing to expand: collapse the info rows and reset the chevron.
+            if (!hasIpv4) {
+                binding.infoRows.setVisibility(View.GONE);
+                binding.infoRowsChevron.setRotation(0f);
+            }
+        });
     }
 
     @Override
     public void onConnected() {
         isConnected = true;
-
-        buttonConnect.post(() -> {
-            buttonAnimation.connected();
-            buttonConnect.setEnabled(true);
-        });
+        setToggle(true, true, R.string.main_status_connected);
     }
 
     @Override
     public void onConnecting() {
-        buttonConnect.post(() -> buttonAnimation.connecting());
+        setToggle(true, false, R.string.main_status_connecting);
     }
 
     @Override
     public void onDisconnected() {
         isConnected = false;
-        buttonConnect.post(() -> {
-            buttonAnimation.disconnected();
-            buttonConnect.setEnabled(true);
-        });
+        setToggle(false, true, R.string.main_status_disconnected);
     }
 
     @Override
     public void onDisconnecting() {
-        buttonConnect.post(() -> buttonAnimation.disconnecting());
+        setToggle(false, false, R.string.main_status_disconnecting);
     }
 
     @Override
