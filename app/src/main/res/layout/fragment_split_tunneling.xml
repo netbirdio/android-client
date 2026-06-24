@@ -83,6 +83,16 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:listitem="@layout/list_item_app" />
 
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/recycler_apps"
+            app:layout_constraintBottom_toBottomOf="@id/recycler_apps"
+            app:layout_constraintStart_toStartOf="@id/recycler_apps"
+            app:layout_constraintEnd_toEndOf="@id/recycler_apps" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

@@ -1,5 +1,6 @@
 package io.netbird.client.ui.splittunneling;
 
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -9,7 +10,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import io.netbird.client.R;
@@ -34,12 +36,14 @@ public class SplitTunnelingFragment extends Fragment {
     private SplitTunnelingAdapter adapter;
     private Preferences preferences;
     private List<AppInfo> allApps = new ArrayList<>();
+    private ExecutorService backgroundExecutor;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentSplitTunnelingBinding.inflate(inflater, container, false);
         preferences = new Preferences(requireContext());
+        backgroundExecutor = Executors.newSingleThreadExecutor();
         setupUI();
         loadApps();
         return binding.getRoot();
@@ -97,35 +101,59 @@ public class SplitTunnelingFragment extends Fragment {
     }
 
     private void loadApps() {
-        PackageManager pm = requireContext().getPackageManager();
-        List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        Set<String> selectedApps = preferences.getSplitTunnelingApps();
-        String myPackageName = requireContext().getPackageName();
+        if (backgroundExecutor == null) return;
+        Context context = getContext();
+        if (context == null) return;
 
-        allApps = apps.stream()
-                .filter(app -> !app.packageName.equals(myPackageName))
-                .map(app -> {
-                    String name = pm.getApplicationLabel(app).toString();
-                    Drawable icon = pm.getApplicationIcon(app);
-                    return new AppInfo(name, app.packageName, icon, selectedApps.contains(app.packageName));
-                })
-                .sorted((a, b) -> a.name.compareToIgnoreCase(b.name))
-                .collect(Collectors.toList());
+        PackageManager pm = context.getPackageManager();
+        String myPackageName = context.getPackageName();
+        binding.progressBar.setVisibility(View.VISIBLE);
 
-        adapter.setApps(allApps);
+        backgroundExecutor.execute(() -> {
+            List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+            Set<String> selectedApps = preferences.getSplitTunnelingApps();
+
+            List<AppInfo> loadedApps = apps.stream()
+                    .filter(app -> !app.packageName.equals(myPackageName))
+                    .map(app -> {
+                        String name = pm.getApplicationLabel(app).toString();
+                        Drawable icon = pm.getApplicationIcon(app);
+                        return new AppInfo(name, app.packageName, icon, selectedApps.contains(app.packageName));
+                    })
+                    .sorted((a, b) -> a.name.compareToIgnoreCase(b.name))
+                    .collect(Collectors.toList());
+
+            if (binding != null) {
+                binding.getRoot().post(() -> {
+                    if (binding != null) {
+                        allApps = loadedApps;
+                        adapter.setApps(allApps);
+                        binding.progressBar.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
     }
 
     private void saveApps() {
-        Set<String> selectedApps = allApps.stream()
-                .filter(app -> app.isSelected)
-                .map(app -> app.packageName)
-                .collect(Collectors.toSet());
-        preferences.setSplitTunnelingApps(selectedApps);
+        if (backgroundExecutor == null) return;
+        List<AppInfo> appsSnapshot = new ArrayList<>(allApps);
+        backgroundExecutor.execute(() -> {
+            Set<String> selectedApps = appsSnapshot.stream()
+                    .filter(app -> app.isSelected)
+                    .map(app -> app.packageName)
+                    .collect(Collectors.toSet());
+            preferences.setSplitTunnelingApps(selectedApps);
+        });
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (backgroundExecutor != null) {
+            backgroundExecutor.shutdown();
+            backgroundExecutor = null;
+        }
         binding = null;
     }
 }

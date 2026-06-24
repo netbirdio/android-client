@@ -152,7 +152,7 @@ class IFace implements TunAdapter {
 
         if (mode == Preferences.SplitTunnelingMode.INCLUDE) {
             if (apps.isEmpty()) {
-                Log.w(LOGTAG, "Include mode selected but no apps specified, VPN will be effectively disabled for all apps");
+                Log.w(LOGTAG, "Include mode selected but no apps specified, VPN will be effectively enabled for all apps");
             }
             for (String app : apps) {
                 try {
