@@ -12,6 +12,7 @@ import android.system.OsConstants;
 import android.util.Log;
 
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import io.netbird.gomobile.android.TunAdapter;
@@ -86,10 +87,7 @@ class IFace implements TunAdapter {
             Log.d(LOGTAG, "add route: "+r.addr+"/"+r.prefixLength);
         }
 
-        disallowApp(builder, "com.google.android.projection.gearhead");
-        disallowApp(builder, "com.google.android.apps.chromecast.app");
-        disallowApp(builder, "com.google.android.apps.messaging");
-        disallowApp(builder, "com.google.stadia.android");
+        applySplitTunneling(builder);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             builder.setMetered(false);
@@ -142,6 +140,41 @@ class IFace implements TunAdapter {
         try {
             builder.addDisallowedApplication(packageName);
         } catch (PackageManager.NameNotFoundException ignored) {
+        }
+    }
+
+    private void applySplitTunneling(VpnService.Builder builder) {
+        Preferences prefs = new Preferences(vpnService);
+        Preferences.SplitTunnelingMode mode = prefs.getSplitTunnelingMode();
+        Set<String> apps = prefs.getSplitTunnelingApps();
+
+        Log.d(LOGTAG, "Applying split tunneling mode: " + mode);
+
+        if (mode == Preferences.SplitTunnelingMode.INCLUDE) {
+            if (apps.isEmpty()) {
+                Log.w(LOGTAG, "Include mode selected but no apps specified, VPN will be effectively disabled for all apps");
+            }
+            for (String app : apps) {
+                try {
+                    builder.addAllowedApplication(app);
+                    Log.d(LOGTAG, "Allowed app: " + app);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.w(LOGTAG, "App not found for allowed list: " + app);
+                }
+            }
+        } else {
+            // Default and EXCLUDE mode
+            disallowApp(builder, "com.google.android.projection.gearhead");
+            disallowApp(builder, "com.google.android.apps.chromecast.app");
+            disallowApp(builder, "com.google.android.apps.messaging");
+            disallowApp(builder, "com.google.stadia.android");
+
+            if (mode == Preferences.SplitTunnelingMode.EXCLUDE) {
+                for (String app : apps) {
+                    disallowApp(builder, app);
+                    Log.d(LOGTAG, "Disallowed app: " + app);
+                }
+            }
         }
     }
 

@@ -114,6 +114,13 @@
     <string name="advanced_theme_desc">Choose the app appearance mode.</string>
     <string name="advanced_force_relay_conn">Force relay connection</string>
     <string name="advanced_force_relay_conn_desc">Forces usage of relay when connecting to peers</string>
+    <string name="advanced_split_tunneling">Split Tunneling</string>
+    <string name="advanced_split_tunneling_desc">Select which apps should use or bypass the VPN</string>
+    <string name="split_tunneling_title">Split Tunneling</string>
+    <string name="split_tunneling_mode_none">None (All apps use VPN)</string>
+    <string name="split_tunneling_mode_exclude">Exclude (Selected apps bypass VPN)</string>
+    <string name="split_tunneling_mode_include">Include (Selected apps use VPN)</string>
+    <string name="split_tunneling_search_hint">Search apps</string>
     <string name="exclamation_mark">exclamation mark</string>
     <string name="reconnectionNeededWarningMessage">To apply the setting, you will need to reconnect.</string>
     <string name="change_server_setup_key_warning">Using setup keys for user devices is not recommended. SSO with MFA provides stronger security, proper user-device association, and periodic re-authentication.</string>

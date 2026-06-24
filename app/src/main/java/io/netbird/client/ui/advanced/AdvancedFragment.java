@@ -15,6 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import io.netbird.client.R;
 import io.netbird.client.databinding.ComponentSwitchBinding;
@@ -183,6 +185,11 @@ public class AdvancedFragment extends Fragment {
             }
             sharedPreferences.edit().putInt("theme_mode", mode).apply();
             AppCompatDelegate.setDefaultNightMode(mode);
+        });
+
+        binding.layoutSplitTunneling.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.nav_split_tunneling);
         });
 
         return root;

@@ -37,6 +37,12 @@
         tools:layout="@layout/fragment_profiles" />
 
     <fragment
+        android:id="@+id/nav_split_tunneling"
+        android:name="io.netbird.client.ui.splittunneling.SplitTunnelingFragment"
+        android:label="@string/split_tunneling_title"
+        tools:layout="@layout/fragment_split_tunneling" />
+
+    <fragment
         android:id="@+id/nav_change_server"
         android:name="io.netbird.client.ui.server.ChangeServerFragment"
         android:label="@string/menu_change_server"
