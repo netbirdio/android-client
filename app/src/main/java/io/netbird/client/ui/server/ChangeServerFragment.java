@@ -258,7 +258,7 @@ public class ChangeServerFragment extends Fragment {
     }
 
     private String deviceName() {
-        return Build.PRODUCT;
+        return Build.MODEL;
     }
 
     private void disableUIElements() {
