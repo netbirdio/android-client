@@ -52,10 +52,13 @@ public class ProfileManagerWrapper {
     public Profile getActiveProfile() {
         try {
             io.netbird.gomobile.android.Profile p = profileManager.getActiveProfile();
-            return new Profile(p.getID(), p.getName(), true);
+            if (p == null)  {
+              throw new IllegalStateException("Active profile is unavailable");
+            }
+            return new Profile(p.getID(), p.getName(), p.getIsActive());
         } catch (Exception e) {
             Log.e(TAG, "Failed to get active profile", e);
-            return new Profile("default", "default", true);
+            throw new IllegalStateException("Failed to get active profile", e);
         }
     }
 
