@@ -36,7 +36,7 @@ public class ProfileManagerWrapper {
                 for (int i = 0; i < array.length(); i++) {
                     io.netbird.gomobile.android.Profile p = array.get(i);
                     if (p != null) {
-                        profiles.add(new Profile(p.getName(), p.getIsActive()));
+                        profiles.add(new Profile(p.getID(), p.getName(), p.getIsActive()));
                     }
                 }
             }
@@ -49,12 +49,16 @@ public class ProfileManagerWrapper {
     /**
      * Gets the currently active profile name
      */
-    public String getActiveProfile() {
+    public Profile getActiveProfile() {
         try {
-            return profileManager.getActiveProfile();
+            io.netbird.gomobile.android.Profile p = profileManager.getActiveProfile();
+            if (p == null)  {
+              throw new IllegalStateException("Active profile is unavailable");
+            }
+            return new Profile(p.getID(), p.getName(), p.getIsActive());
         } catch (Exception e) {
             Log.e(TAG, "Failed to get active profile", e);
-            return "default";
+            throw new IllegalStateException("Failed to get active profile", e);
         }
     }
 
@@ -62,15 +66,15 @@ public class ProfileManagerWrapper {
      * Switches to a different profile
      * Stops the VPN service before switching
      */
-    public void switchProfile(String profileName) throws Exception {
-        if (profileName == null || profileName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Profile name cannot be empty");
+    public void switchProfile(String id) throws Exception {
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be empty");
         }
 
         // Stop VPN service before switching profile
         stopEngine();
 
-        profileManager.switchProfile(profileName);
+        profileManager.switchProfile(id);
     }
 
     /**
@@ -87,29 +91,29 @@ public class ProfileManagerWrapper {
      * Logs out from a profile (clears authentication, requires re-login)
      * Stops the VPN service if logging out from the active profile
      */
-    public void logoutProfile(String profileName) throws Exception {
-        if (profileName == null || profileName.trim().isEmpty()) {
+    public void logoutProfile(String id) throws Exception {
+        if (id == null) {
             throw new IllegalArgumentException("Profile name cannot be empty");
         }
 
         // Check if logging out from active profile
-        String activeProfile = getActiveProfile();
-        if (activeProfile.equals(profileName)) {
+        Profile activeProfile = getActiveProfile();
+        if (activeProfile.getID().equals(id)) {
             // Stop VPN service if logging out from active profile
             stopEngine();
         }
 
-        profileManager.logoutProfile(profileName);
+        profileManager.logoutProfile(id);
     }
 
     /**
      * Removes a profile
      */
-    public void removeProfile(String profileName) throws Exception {
-        if (profileName == null || profileName.trim().isEmpty()) {
+    public void removeProfile(String id) throws Exception {
+        if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("Profile name cannot be empty");
         }
-        profileManager.removeProfile(profileName);
+        profileManager.removeProfile(id);
     }
 
     /**
