@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="nb_sheet_bg">#FFFFFF</color>
     <color name="nb_bg">#F2F2F2</color>
     <color name="nb_bg_peers">#F5F5F5</color>
     <color name="nb_bg_home">#F5F5F5</color>

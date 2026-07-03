@@ -22,7 +22,7 @@
         android:paddingTop="12dp"
         android:paddingBottom="8dp"
         android:text="@string/profile_picker_title"
-        android:textColor="@color/nb_txt_light"
+        android:textColor="#B3B3B3"
         android:textSize="13sp"
         android:textAllCaps="true" />
 

@@ -22,6 +22,8 @@
         <!-- Peer and Network bottom Button background -->
         <item name="colorSurface">@color/white</item>
         <item name="nbTabBackground">@color/nb_gray_bg</item>
+
+        <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
     </style>
 
     <style name="Theme.NetBird.NoActionBar">
@@ -39,7 +41,13 @@
     <!-- for peers fragment -->
     <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="colorPrimary">@color/nb_orange</item>
+        <item name="colorSurface">@color/nb_sheet_bg</item>
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="bottomSheetStyle">@style/Widget.NetBird.BottomSheet</item>
+    </style>
+
+    <style name="Widget.NetBird.BottomSheet" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bottom_sheet_bg</item>
     </style>
 
 
