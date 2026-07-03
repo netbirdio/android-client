@@ -84,7 +84,7 @@
         android:thumb="@drawable/connect_switch_thumb"
         app:thumbTint="@color/connect_thumb_tint"
         app:track="@drawable/connect_switch_track"
-        app:trackTint="@color/connect_track_tint"
+        app:useMaterialThemeColors="false"
         app:layout_constraintTop_toBottomOf="@id/home_logo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

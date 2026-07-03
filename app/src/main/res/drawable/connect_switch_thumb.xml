@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Circular thumb for the home connect toggle. Colour comes from app:thumbTint
-     (connect_thumb_tint); this shape only defines size. The inset keeps the thumb
-     floating inside the taller track. -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="4dp"
-    android:insetRight="4dp"
-    android:insetTop="4dp"
-    android:insetBottom="4dp">
+     (connect_thumb_tint). A transparent full-size layer keeps the drawable bounds at
+     the track height (44dp) so the switch size is unchanged; the visible white oval is
+     a smaller, centred item that floats inside the track. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <shape android:shape="oval">
-        <size
-            android:width="36dp"
-            android:height="36dp" />
-        <solid android:color="@android:color/white" />
-    </shape>
+    <!-- Transparent spacer: fixes the thumb bounds to the track height (44dp) -->
+    <item>
+        <shape android:shape="oval">
+            <size
+                android:width="44dp"
+                android:height="44dp" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
 
-</inset>
+    <!-- Visible thumb: smaller circle, centred -->
+    <item
+        android:width="38dp"
+        android:height="38dp"
+        android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="@android:color/white" />
+        </shape>
+    </item>
+
+</layer-list>

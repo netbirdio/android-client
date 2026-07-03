@@ -10,7 +10,7 @@
 
     <color name="nb_bg">#F2F2F2</color>
     <color name="nb_bg_peers">#F5F5F5</color>
-    <color name="nb_bg_home">#DEDEDE</color>
+    <color name="nb_bg_home">#F5F5F5</color>
     <color name="nb_bg_mask">#F2F2F2</color>
     <color name="nb_gray_light">#F5F5F5</color>
     <color name="nb_gray_dark">#4E4E4E</color>
@@ -34,8 +34,8 @@
 
     <!-- Custom home connect toggle -->
     <color name="connect_track_on">#F58431</color>
-    <color name="connect_track_off">#3A3A3A</color>
-    <color name="connect_track_off_stroke">#00000000</color>
+    <color name="connect_track_off">#D0D0D0</color>
+    <color name="connect_track_off_stroke">#B5B5B5</color>
     <color name="connect_thumb_on">#FFFFFF</color>
     <color name="connect_thumb_off">#FFFFFF</color>
 

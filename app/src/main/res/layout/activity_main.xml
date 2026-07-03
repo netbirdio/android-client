@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/nb_bg"
+        android:background="@color/white"
         app:itemIconTint="@color/tab_icon_color"
         app:itemTextColor="@color/tab_text_color"
         app:labelVisibilityMode="labeled"
