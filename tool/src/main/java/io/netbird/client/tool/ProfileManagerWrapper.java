@@ -52,21 +52,13 @@ public class ProfileManagerWrapper {
     public Profile getActiveProfile() {
         try {
             io.netbird.gomobile.android.Profile p = profileManager.getActiveProfile();
-            return new Profile(p.getID(), p.getName(), true);
-        } catch (Exception e) {
-            // First-launch / fresh install: the profile state file exists but is empty,
-            // so the engine returns "unexpected end of JSON input" wrapped in a generic
-            // gomobile proxyerror. The wrapped error chain isn't exposed across the
-            // gomobile binding, so we have to inspect the message text — a stable
-            // string from Go's encoding/json package — to distinguish this benign
-            // case from real failures we want to log loudly.
-            String msg = e.getMessage();
-            if (msg != null && msg.contains("unexpected end of JSON input")) {
-                Log.d(TAG, "Active profile not initialised yet; falling back to default");
-            } else {
-                Log.e(TAG, "Failed to get active profile", e);
+            if (p == null)  {
+              throw new IllegalStateException("Active profile is unavailable");
             }
-            return new Profile("default", "default", true);
+            return new Profile(p.getID(), p.getName(), p.getIsActive());
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get active profile", e);
+            throw new IllegalStateException("Failed to get active profile", e);
         }
     }
 
