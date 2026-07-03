@@ -24,8 +24,14 @@
     <color name="nb_txt_light">#7E858F</color>
     <color name="nb_button_inactive">#545961</color>
 
+    <!-- Chrome surfaces: white in light mode, dark in night mode -->
+    <color name="nb_bottom_nav_bg">#181A1D</color>
+    <color name="nb_chip_bg">#181A1D</color>
+
     <!-- Bottom navigation unselected item colour (white on the dark home background) -->
     <color name="tab_unselected">#FFFFFF</color>
+    <!-- Bottom navigation unselected icon colour (white on the dark bottom nav) -->
+    <color name="tab_icon_unselected">#FFFFFF</color>
 
     <color name="thumb_on_color">#F58431</color>
     <color name="thumb_off_color">#545961</color>
