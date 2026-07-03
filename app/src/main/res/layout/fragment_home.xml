@@ -186,7 +186,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:minHeight="52dp"
+            android:minHeight="40dp"
             android:orientation="horizontal"
             android:paddingStart="16dp"
             android:paddingEnd="8dp">
@@ -198,16 +198,16 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/jetbrains_mono_variable"
                 android:textColor="@color/nb_txt"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 tools:text="100.72.74.247/16" />
 
             <ImageButton
                 android:id="@+id/btn_copy_ip"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
                 android:background="@drawable/focus_highlight"
                 android:contentDescription="@string/main_desc_copy"
-                android:padding="8dp"
+                android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_content_copy"
                 app:tint="@color/nb_txt_light" />
@@ -219,7 +219,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:minHeight="52dp"
+            android:minHeight="40dp"
             android:orientation="horizontal"
             android:paddingStart="16dp"
             android:paddingEnd="8dp"
@@ -231,18 +231,20 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:ellipsize="middle"
                 android:fontFamily="@font/jetbrains_mono_variable"
+                android:singleLine="true"
                 android:text="@string/main_value_empty"
                 android:textColor="@color/nb_txt"
-                android:textSize="15sp" />
+                android:textSize="12sp" />
 
             <ImageButton
                 android:id="@+id/btn_copy_secondary"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
                 android:background="@drawable/focus_highlight"
                 android:contentDescription="@string/main_desc_copy"
-                android:padding="8dp"
+                android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_content_copy"
                 app:tint="@color/nb_txt_light" />
