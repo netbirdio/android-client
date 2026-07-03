@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Circular thumb for the home connect toggle. Colours are baked in here (no thumbTint)
-     so the drop shadow survives; the switch has useMaterialThemeColors="false" to avoid
-     a default tint. A transparent full-size layer fixes the bounds to the track height
-     (44dp); soft, downward-offset dark circles behind the white oval form the shadow. -->
+<!-- Circular thumb for the home connect toggle. The white colour is baked in here (no
+     thumbTint); the switch has useMaterialThemeColors="false" to avoid a default tint.
+     A transparent full-size layer fixes the bounds to the track height (44dp); the
+     visible white oval is a smaller, centred item that floats inside the track. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Transparent spacer: fixes the thumb bounds to the track height (44dp) -->
@@ -12,28 +12,6 @@
                 android:width="44dp"
                 android:height="44dp" />
             <solid android:color="@android:color/transparent" />
-        </shape>
-    </item>
-
-    <!-- Soft outer shadow, offset slightly down -->
-    <item
-        android:width="42dp"
-        android:height="42dp"
-        android:gravity="center"
-        android:top="2dp">
-        <shape android:shape="oval">
-            <solid android:color="#1A000000" />
-        </shape>
-    </item>
-
-    <!-- Tighter, darker shadow, offset slightly down -->
-    <item
-        android:width="40dp"
-        android:height="40dp"
-        android:gravity="center"
-        android:top="1dp">
-        <shape android:shape="oval">
-            <solid android:color="#33000000" />
         </shape>
     </item>
 
