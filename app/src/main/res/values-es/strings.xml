@@ -1,0 +1,151 @@
+<resources>
+    <string name="app_name">NetBird</string>
+    <string name="navigation_drawer_open">Abrir panel de navegación</string>
+    <string name="navigation_drawer_close">Cerrar panel de navegación</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Encabezado de navegación</string>
+    <string name="action_settings">Configuración</string>
+    <string name="quick_settings_tile_label">NetBird</string>
+
+    <string name="menu_advanced">Avanzado</string>
+    <string name="menu_about">Acerca de</string>
+    <string name="menu_docs">Documentación</string>
+    <string name="menu_change_server">Cambiar servidor</string>
+    <string name="menu_profiles">Perfiles</string>
+    <string name="menu_troubleshoot">Solucionar problemas</string>
+
+    <string name="main_status_disconnected">Desconectado</string>
+    <string name="main_desc_bg_mask">máscara de fondo</string>
+    <string name="main_desc_connect">conectar-desconectar</string>
+
+    <string name="fragment_firstinstall_txt">De forma predeterminada, se conectará a los servidores en la nube de NetBird. Puede acceder al menú de cambio de servidor para utilizar otro servidor.</string>
+    <string name="fragment_firstinstall_continue">Continuar</string>
+    <string name="fragment_firstinstall_desc_logo">Logotipo de NetBird</string>
+    <string name="fragment_firstinstall_androidtv_beta">El soporte para Android TV está actualmente en fase de pruebas. Es posible que algunas funciones no funcionen como se espera.</string>
+
+
+    <string name="about_version">Versión:&#160;</string>
+    <string name="about_license"><u>Acuerdo de licencia</u></string>
+    <string name="about_privacy_policy"><u>Política de privacidad</u></string>
+    <string name="about_rights">© 2025 NetBird. Todos los derechos reservados.</string>
+
+    <string name="zero_peers_no_machines">Parece que no hay máquinas a las que pueda conectarse…</string>
+    <string name="zero_peers_btn_learn_why">Saber por qué</string>
+
+    <string name="btn_close">Cerrar</string>
+    <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>de</b> <b>%2$d</b> pares conectados]]></string>
+    <string name="peers_hint_search_peers">Buscar pares</string>
+    <string name="peer_filter_all">Todos</string>
+    <string name="peer_filter_idle">Inactivo</string>
+    <string name="peer_filter_connecting">Conectando</string>
+    <string name="peer_filter_connected">Conectado</string>
+    <string name="peers_clipboard_copy_ip">Copiar IP</string>
+    <string name="peers_clipboard_copy_ipv6">Copiar IPv6</string>
+    <string name="peers_clipboard_copy_fqdn">Copiar FQDN</string>
+    <string name="peers_desc_filter">Filtro</string>
+
+
+    <string name="resources_connected"><![CDATA[<b>%1$d</b> <b>de</b> <b>%2$d</b> recursos conectados]]></string>
+    <string name="networks_hint_search_networks">Buscar recursos</string>
+    <string name="networks_desc_exit_node">nodo de salida</string>
+
+    <string name="change_server_title_server">Servidor</string>
+    <string name="change_server_hint">https://example-api.domain.com:443</string>
+    <string name="change_server_setup_key">Añadir este dispositivo con una clave de configuración</string>
+    <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
+    <string name="change_server_error_invalid_setup_key">Formato de clave de configuración no válido</string>
+
+    <string name="change_server_btn">Cambiar</string>
+    <string name="change_server_verifying">Verificando…</string>
+    <string name="change_server_btn_reset">Usar el servidor de NetBird</string>
+
+    <string name="change_server_alert_title">Cambiar servidor</string>
+    <string name="change_server_alert_yes">Sí</string>
+    <string name="change_server_alert_cancel">Cancelar</string>
+    <string name="change_server_alert_desc">Cambiar de servidor borrará la configuración local y desconectará este dispositivo de la cuenta actual de NetBird.</string>
+
+    <string name="change_server_success_title">Se ha cambiado el servidor</string>
+    <string name="change_server_success_desc">Pulse el botón de conectar para continuar</string>
+    <string name="change_server_success_close">Aceptar</string>
+    <string name="change_server_success_icon">Icono de éxito</string>
+
+
+    <string name="advanced_title_presharedkey">Añadir una clave precompartida</string>
+    <string name="advanced_details">Solo se comunicará con los pares que utilicen la misma clave.</string>
+    <string name="advanced_hint">Añadir una clave precompartida</string>
+    <string name="advanced_save">Guardar</string>
+    <string name="advanced_presharedkey_saved_success">Clave precompartida guardada correctamente</string>
+    <string name="advanced_presharedkey_save_error">Error al guardar la clave precompartida</string>
+    <string name="advanced_tracelog">Activar el nivel de registro de seguimiento.</string>
+    <string name="advanced_share_logs">Compartir registros</string>
+    <string name="troubleshoot_debug_bundle">Subir paquete de depuración</string>
+    <string name="troubleshoot_anonymize">Anonimizar datos confidenciales</string>
+    <string name="advanced_rosenpass">Activar Rosenpass</string>
+    <string name="advanced_rosenpass_permissive">Activar el modo permisivo de Rosenpass.</string>
+    <string name="advanced_title_network_security">Red y seguridad</string>
+
+    <string name="advanced_disable_client_routes">Desactivar rutas de cliente</string>
+    <string name="advanced_disable_client_routes_desc">Evita que este dispositivo procese las rutas de cliente recibidas desde el servicio de gestión</string>
+    <string name="advanced_disable_server_routes">Desactivar rutas de servidor</string>
+    <string name="advanced_disable_server_routes_desc">Evita que este dispositivo actúe como enrutador para las rutas de servidor recibidas desde el servicio de gestión</string>
+    <string name="advanced_disable_dns">Desactivar DNS</string>
+    <string name="advanced_disable_dns_desc">Desactiva la configuración de DNS de NetBird en este dispositivo</string>
+    <string name="advanced_disable_firewall">Desactivar cortafuegos</string>
+    <string name="advanced_disable_firewall_desc">Desactiva el cortafuegos de NetBird</string>
+    <string name="advanced_disable_ipv6">Desactivar IPv6</string>
+    <string name="advanced_disable_ipv6_desc">Desactiva el direccionamiento de superposición IPv6 en la interfaz del túnel</string>
+    <string name="advanced_allow_ssh">Activar SSH</string>
+    <string name="advanced_allow_ssh_desc">Permite conexiones SSH a este dispositivo</string>
+    <string name="advanced_block_inbound">Bloquear conexiones entrantes</string>
+    <string name="advanced_block_inbound_desc">Bloquea todas las conexiones entrantes a este dispositivo y a las redes enrutadas. Esto prevalece sobre cualquier política recibida desde el servicio de gestión</string>
+
+
+    <string name="desc_logo">Logotipo de NetBird</string>
+    <string name="desc_exclamation_mark">signo de exclamación</string>
+    <string name="desc_peers_empty">caja vacía</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[Tiene una aplicación de VPN que tiene la opción Siempre activa habilitada. Para activar la aplicación NetBird, primero debe ir a su <b>Configuración de red e Internet</b> → <b>Avanzado</b> → Revise el <b>icono de engranaje</b> de todas las aplicaciones que aparecen en esta página. Desactive la opción Siempre activa para las aplicaciones que no sean NetBird.]]></string>
+
+    <string name="advanced_theme_system">Sistema</string>
+    <string name="advanced_theme_title">Modo de tema</string>
+    <string name="advanced_theme_dark">Oscuro</string>
+    <string name="advanced_theme_light">Claro</string>
+    <string name="advanced_theme_desc">Elija el modo de apariencia de la aplicación.</string>
+    <string name="advanced_force_relay_conn">Forzar conexión de retransmisión</string>
+    <string name="advanced_force_relay_conn_desc">Fuerza el uso de la retransmisión al conectarse con los pares</string>
+    <string name="exclamation_mark">signo de exclamación</string>
+    <string name="reconnectionNeededWarningMessage">Para aplicar la configuración, deberá volver a conectarse.</string>
+    <string name="change_server_setup_key_warning">No se recomienda el uso de claves de configuración para dispositivos de usuario. El SSO con MFA proporciona una seguridad más sólida, una asociación adecuada entre usuario y dispositivo, y una autenticación periódica.</string>
+    <string name="change_server_error_invalid_server_url">Formato de URL no válido</string>
+    <string name="device_code">Código de dispositivo: %s</string>
+    <string name="tv_menu_hint">Mantenga pulsado el botón direccional izquierdo para abrir el menú</string>
+
+    <!-- Profile strings -->
+    <string name="profile_default">Perfil: predeterminado</string>
+    <string name="profile_tap_to_manage">Toque para gestionar los perfiles</string>
+    <string name="profiles_title">Perfiles</string>
+    <string name="profiles_active">Activo</string>
+    <string name="profiles_add">Añadir perfil</string>
+    <string name="profiles_switch">Cambiar</string>
+    <string name="profiles_logout">Cerrar sesión</string>
+    <string name="profiles_remove">Eliminar</string>
+    <string name="profiles_dialog_add_title">Nuevo perfil</string>
+    <string name="profiles_dialog_add_message">Introduzca un nombre para el nuevo perfil:</string>
+    <string name="profiles_dialog_add_hint">Nombre del perfil</string>
+    <string name="profiles_dialog_switch_title">Cambiar de perfil</string>
+    <string name="profiles_dialog_switch_message">¿Cambiar al perfil \'%s\'?\n\nEsto desconectará la conexión actual.</string>
+    <string name="profiles_dialog_logout_title">Cerrar sesión del perfil</string>
+    <string name="profiles_dialog_logout_message">¿Cerrar sesión del perfil \'%s\'?\n\nDeberá volver a autenticarse para usar este perfil de nuevo.</string>
+    <string name="profiles_dialog_remove_title">Eliminar perfil</string>
+    <string name="profiles_dialog_remove_message">¿Está seguro de que desea eliminar el perfil \'%s\'?\n\nEsta acción no se puede deshacer.</string>
+    <string name="profiles_error_empty_name">El nombre del perfil no puede estar vacío</string>
+    <string name="profiles_error_invalid_name">El nombre del perfil solo puede contener letras, números, guiones y guiones bajos</string>
+    <string name="profiles_error_already_exists">El perfil \'%s\' ya existe</string>
+    <string name="profiles_error_cannot_remove_active">No se puede eliminar el perfil activo. Cambie primero a otro perfil.</string>
+    <string name="profiles_error_cannot_remove_default">No se puede eliminar el perfil predeterminado</string>
+    <string name="profiles_success_added">Perfil \'%s\' creado correctamente</string>
+    <string name="profiles_success_switched">Se ha cambiado al perfil \'%s\'</string>
+    <string name="profiles_success_logged_out">Sesión cerrada correctamente en el perfil \'%s\'</string>
+    <string name="profiles_success_removed">Perfil \'%s\' eliminado correctamente</string>
+</resources>

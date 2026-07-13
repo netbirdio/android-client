@@ -61,7 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:textAlignment="center"
-        android:text="@string/about_privacy_poliy"
+        android:text="@string/about_privacy_policy"
         android:textColor="@color/nb_orange"
         android:clickable="true"
         android:focusable="true"
