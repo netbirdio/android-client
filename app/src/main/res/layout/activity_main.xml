@@ -39,6 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@color/nb_bottom_nav_bg"
+        app:itemBackground="@drawable/bottom_nav_item_bg"
         app:itemIconTint="@color/tab_icon_color"
         app:itemTextColor="@color/tab_text_color"
         app:labelVisibilityMode="labeled"

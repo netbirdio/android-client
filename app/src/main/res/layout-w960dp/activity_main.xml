@@ -14,6 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="@color/nb_bg"
+        app:itemBackground="@drawable/bottom_nav_item_bg"
         app:itemIconTint="@color/tab_icon_color"
         app:itemTextColor="@color/tab_text_color"
         app:labelVisibilityMode="labeled"
