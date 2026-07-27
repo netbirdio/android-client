@@ -238,10 +238,17 @@ public class PeerDetailFragment extends Fragment {
         addRow(inflater, rows, R.drawable.ic_key, getString(R.string.peer_detail_rosenpass),
                 getString(peer.isRosenpassEnabled() ? R.string.peer_detail_yes : R.string.peer_detail_no), null);
 
+        // Listed as plain rows under a section header, one route per line, matching
+        // the iOS client's Routes section.
         List<String> routes = peer.getRoutes();
         if (routes != null && !routes.isEmpty()) {
-            addRow(inflater, rows, R.drawable.ic_layers, getString(R.string.peer_detail_networks),
-                    String.valueOf(routes.size()), String.join("\n", routes));
+            addHeader(inflater, rows, R.string.peer_detail_networks);
+            for (String route : routes) {
+                TextView routeView = (TextView) inflater.inflate(
+                        R.layout.list_item_peer_detail_route, rows, false);
+                routeView.setText(route);
+                rows.addView(routeView);
+            }
         }
 
         addIceRow(inflater, rows, R.drawable.ic_computer, R.string.peer_detail_local_ice,
@@ -252,6 +259,13 @@ public class PeerDetailFragment extends Fragment {
         // Keys are read from the front when eyeballing them, so clip the tail.
         addRow(inflater, rows, R.drawable.ic_key, getString(R.string.peer_detail_public_key),
                 orDash(peer.getPubKey()), peer.getPubKey(), TextUtils.TruncateAt.END);
+    }
+
+    private void addHeader(LayoutInflater inflater, LinearLayout rows, @StringRes int label) {
+        TextView header = (TextView) inflater.inflate(
+                R.layout.list_item_peer_detail_header, rows, false);
+        header.setText(label);
+        rows.addView(header);
     }
 
     /** Skipped entirely when neither the type nor the endpoint is known, as on desktop. */
