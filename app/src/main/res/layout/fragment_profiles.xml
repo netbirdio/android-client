@@ -20,7 +20,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="16dp"
-            android:paddingBottom="@dimen/bottom_nav_inset"
+            android:paddingBottom="@dimen/bottom_nav_fab_inset"
             android:clipToPadding="false"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
