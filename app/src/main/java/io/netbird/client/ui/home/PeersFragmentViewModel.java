@@ -110,6 +110,9 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
                 break;
             }
         }
+        // The Go side iterates a map, so the order changes between fetches; sort for
+        // a stable display and so Peer's value equality isn't defeated by shuffling.
+        Collections.sort(routes);
         return routes;
     }
 

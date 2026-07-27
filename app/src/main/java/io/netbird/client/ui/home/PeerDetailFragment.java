@@ -242,7 +242,7 @@ public class PeerDetailFragment extends Fragment {
         // the iOS client's Routes section.
         List<String> routes = peer.getRoutes();
         if (routes != null && !routes.isEmpty()) {
-            addHeader(inflater, rows, R.string.peer_detail_networks);
+            addHeader(inflater, rows, R.drawable.ic_layers, R.string.peer_detail_networks);
             for (String route : routes) {
                 TextView routeView = (TextView) inflater.inflate(
                         R.layout.list_item_peer_detail_route, rows, false);
@@ -261,10 +261,11 @@ public class PeerDetailFragment extends Fragment {
                 orDash(peer.getPubKey()), peer.getPubKey(), TextUtils.TruncateAt.END);
     }
 
-    private void addHeader(LayoutInflater inflater, LinearLayout rows, @StringRes int label) {
-        TextView header = (TextView) inflater.inflate(
-                R.layout.list_item_peer_detail_header, rows, false);
-        header.setText(label);
+    private void addHeader(LayoutInflater inflater, LinearLayout rows, @DrawableRes int icon,
+                           @StringRes int label) {
+        View header = inflater.inflate(R.layout.list_item_peer_detail_header, rows, false);
+        ((ImageView) header.findViewById(R.id.peer_detail_header_icon)).setImageResource(icon);
+        ((TextView) header.findViewById(R.id.peer_detail_header_text)).setText(label);
         rows.addView(header);
     }
 
