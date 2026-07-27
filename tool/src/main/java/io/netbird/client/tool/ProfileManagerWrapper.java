@@ -107,6 +107,20 @@ public class ProfileManagerWrapper {
     }
 
     /**
+     * Renames a profile. Only the display name changes; the profile keeps its ID
+     * and its config stays in the same file.
+     */
+    public void renameProfile(String id, String newName) throws Exception {
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be empty");
+        }
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Profile name cannot be empty");
+        }
+        profileManager.renameProfile(id, newName);
+    }
+
+    /**
      * Removes a profile
      */
     public void removeProfile(String id) throws Exception {

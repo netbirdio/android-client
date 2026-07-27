@@ -5,6 +5,7 @@ import static android.view.View.GONE;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,11 @@ import io.netbird.client.tool.ProfileManagerWrapper;
 
 public class ProfilesFragment extends Fragment {
     private static final String TAG = "ProfilesFragment";
+
+    // Mirror the Go core's limits: a new profile's name doubles as its on-disk
+    // filename, while a renamed profile only changes its display name.
+    private static final int MAX_PROFILE_ID_LEN = 64;
+    private static final int MAX_PROFILE_NAME_LEN = 128;
     private RecyclerView recyclerView;
     private ProfilesAdapter adapter;
     private ProfileManagerWrapper profileManager;
@@ -52,6 +58,11 @@ public class ProfilesFragment extends Fragment {
             @Override
             public void onSwitchProfile(Profile profile) {
                 showSwitchDialog(profile);
+            }
+
+            @Override
+            public void onRenameProfile(Profile profile) {
+                showRenameDialog(profile);
             }
 
             @Override
@@ -88,6 +99,12 @@ public class ProfilesFragment extends Fragment {
 
     @SuppressLint("InflateParams")
     private AlertDialog createDialog(String title, String message, @Nullable String inputHint, DialogCallback callback) {
+        return createDialog(title, message, inputHint, null, MAX_PROFILE_ID_LEN, callback);
+    }
+
+    @SuppressLint("InflateParams")
+    private AlertDialog createDialog(String title, String message, @Nullable String inputHint,
+                                     @Nullable String prefill, int maxLength, DialogCallback callback) {
         boolean hasInput = inputHint != null;
 
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_simple_edit_text, null);
@@ -101,6 +118,11 @@ public class ProfilesFragment extends Fragment {
         EditText input = dialogView.findViewById(R.id.edit_text_dialog);
         if (hasInput) {
             input.setHint(inputHint);
+            input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
+            if (prefill != null) {
+                input.setText(prefill);
+                input.setSelection(prefill.length());
+            }
         } else {
             input.setVisibility(GONE);
         }
@@ -136,6 +158,27 @@ public class ProfilesFragment extends Fragment {
                 }).show();
     }
 
+
+    private void showRenameDialog(Profile profile) {
+        createDialog(
+                getString(R.string.profiles_dialog_rename_title),
+                getString(R.string.profiles_dialog_rename_message, profile.getName()),
+                getString(R.string.profiles_dialog_rename_hint),
+                profile.getName(),
+                MAX_PROFILE_NAME_LEN,
+                newName -> {
+                    if (newName == null || newName.isEmpty()) {
+                        Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                    if (newName.equals(profile.getName())) {
+                        return true;
+                    }
+
+                    renameProfile(profile, newName);
+                    return true;
+                }).show();
+    }
 
     private void showSwitchDialog(Profile profile) {
         createDialog(
@@ -188,6 +231,23 @@ public class ProfilesFragment extends Fragment {
         }
     }
 
+    private void renameProfile(Profile profile, String newName) {
+        try {
+            profileManager.renameProfile(profile.getID(), newName);
+
+            Toast.makeText(requireContext(),
+                    getString(R.string.profiles_success_renamed, newName),
+                    Toast.LENGTH_SHORT).show();
+
+            loadProfiles();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to rename profile", e);
+            Toast.makeText(requireContext(),
+                    "Failed to rename profile: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void switchProfile(Profile profile) {
         try {
             // Switch profile (VPN service will be stopped automatically in ProfileManagerWrapper)
@@ -226,7 +286,7 @@ public class ProfilesFragment extends Fragment {
 
     private void removeProfile(Profile profile) {
         try {
-            if (profile.getID().equals("default")) {
+            if (ProfilesAdapter.DEFAULT_PROFILE_ID.equals(profile.getID())) {
                 Toast.makeText(requireContext(),
                         R.string.profiles_error_cannot_remove_default,
                         Toast.LENGTH_SHORT).show();

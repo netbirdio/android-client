@@ -37,10 +37,26 @@
             app:layout_constraintTop_toTopOf="@id/icon_profile"
             app:layout_constraintBottom_toBottomOf="@id/icon_profile"
             app:layout_constraintStart_toEndOf="@id/icon_profile"
-            app:layout_constraintEnd_toStartOf="@id/badge_active"
+            app:layout_constraintEnd_toStartOf="@id/btn_rename"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintHorizontal_chainStyle="packed"
             tools:text="default" />
+
+        <ImageView
+            android:id="@+id/btn_rename"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/profiles_rename"
+            android:focusable="true"
+            android:padding="6dp"
+            android:src="@drawable/ic_edit"
+            app:layout_constraintBottom_toBottomOf="@id/icon_profile"
+            app:layout_constraintEnd_toStartOf="@id/badge_active"
+            app:layout_constraintStart_toEndOf="@id/text_profile_name"
+            app:layout_constraintTop_toTopOf="@id/icon_profile"
+            app:tint="@color/nb_txt_light" />
 
         <TextView
             android:id="@+id/badge_active"
@@ -58,7 +74,7 @@
             tools:visibility="visible"
             app:layout_constraintTop_toTopOf="@id/icon_profile"
             app:layout_constraintBottom_toBottomOf="@id/icon_profile"
-            app:layout_constraintStart_toEndOf="@id/text_profile_name"
+            app:layout_constraintStart_toEndOf="@id/btn_rename"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0" />
 

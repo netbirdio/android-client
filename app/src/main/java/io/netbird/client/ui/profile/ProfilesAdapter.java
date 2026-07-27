@@ -17,11 +17,15 @@ import io.netbird.client.tool.Profile;
 
 public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.ProfileViewHolder> {
 
+    /** ID of the built-in profile, which cannot be removed. Must match the Go core. */
+    static final String DEFAULT_PROFILE_ID = "default";
+
     private final List<Profile> profiles;
     private final ProfileActionListener listener;
 
     public interface ProfileActionListener {
         void onSwitchProfile(Profile profile);
+        void onRenameProfile(Profile profile);
         void onLogoutProfile(Profile profile);
         void onRemoveProfile(Profile profile);
     }
@@ -53,6 +57,7 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
     static class ProfileViewHolder extends RecyclerView.ViewHolder {
         private final TextView textName;
         private final TextView badgeActive;
+        private final ImageView btnRename;
         private final Button btnSwitch;
         private final Button btnLogout;
         private final Button btnRemove;
@@ -61,6 +66,7 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
             super(itemView);
             textName = itemView.findViewById(R.id.text_profile_name);
             badgeActive = itemView.findViewById(R.id.badge_active);
+            btnRename = itemView.findViewById(R.id.btn_rename);
             btnSwitch = itemView.findViewById(R.id.btn_switch);
             btnLogout = itemView.findViewById(R.id.btn_logout);
             btnRemove = itemView.findViewById(R.id.btn_remove);
@@ -79,14 +85,13 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
                 btnSwitch.setText(R.string.profiles_switch);
             }
 
-            // Disable remove for default profile
-            if (profile.getName().equals("default")) {
-                btnRemove.setEnabled(false);
-                btnRemove.setAlpha(0.5f);
-            } else {
-                btnRemove.setEnabled(true);
-                btnRemove.setAlpha(1.0f);
-            }
+            // Disable remove for the default profile. Keyed on ID, not name: the
+            // name is user-editable and no longer identifies the default profile.
+            boolean isDefault = DEFAULT_PROFILE_ID.equals(profile.getID());
+            btnRemove.setEnabled(!isDefault);
+            btnRemove.setAlpha(isDefault ? 0.5f : 1.0f);
+
+            btnRename.setOnClickListener(v -> listener.onRenameProfile(profile));
 
             btnSwitch.setOnClickListener(v -> {
                 if (!profile.isActive()) {
@@ -99,7 +104,7 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
             });
 
             btnRemove.setOnClickListener(v -> {
-                if (!profile.getName().equals("default")) {
+                if (!DEFAULT_PROFILE_ID.equals(profile.getID())) {
                     listener.onRemoveProfile(profile);
                 }
             });

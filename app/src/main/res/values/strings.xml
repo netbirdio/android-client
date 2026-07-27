@@ -148,6 +148,11 @@
     <string name="profiles_dialog_add_title">New Profile</string>
     <string name="profiles_dialog_add_message">Enter a name for the new profile:</string>
     <string name="profiles_dialog_add_hint">Profile name</string>
+    <string name="profiles_rename">Rename profile</string>
+    <string name="profiles_dialog_rename_title">Rename Profile</string>
+    <string name="profiles_dialog_rename_message">Enter a new name for profile \'%s\':</string>
+    <string name="profiles_dialog_rename_hint">Profile name</string>
+    <string name="profiles_success_renamed">Profile renamed to \'%s\'</string>
     <string name="profiles_dialog_switch_title">Switch Profile</string>
     <string name="profiles_dialog_switch_message">Switch to profile \'%s\'?\n\nThis will disconnect the current connection.</string>
     <string name="profiles_dialog_logout_title">Logout from Profile</string>
