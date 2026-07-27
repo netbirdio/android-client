@@ -2,11 +2,10 @@ package io.netbird.client.ui.home;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +27,13 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
     private static final String TAG = "PeersFragmentViewModel";
 
     private final PeersStateListenerAdapter peersAdapter;
-    private final ServiceAccessor serviceAccessor;
+
+    // The accessor is the Activity, which this ViewModel outlives across configuration
+    // changes (language switch, rotation). The fragment re-supplies the current one on
+    // every view creation and clears it on view destruction; holding a reference
+    // captured at construction would keep reading through a dead Activity's unbound
+    // service connection forever.
+    private volatile ServiceAccessor serviceAccessor;
 
     // serializes peer-list refreshes off the UI thread; serviceAccessor.getPeersList()
     // is a JNI call into Go that can take seconds during engine bootstrap/teardown
@@ -38,23 +43,12 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
     private final MutableLiveData<PeersFragmentUiState> uiState =
             new MutableLiveData<>(new PeersFragmentUiState(new ArrayList<>()));
 
-    public PeersFragmentViewModel(ServiceAccessor serviceAccessor) {
+    public PeersFragmentViewModel() {
         peersAdapter = new PeersStateListenerAdapter(this);
-        this.serviceAccessor = serviceAccessor;
     }
 
-    public static ViewModelProvider.Factory getFactory(ServiceAccessor serviceAccessor) {
-        return new ViewModelProvider.Factory() {
-            @NonNull
-            @Override
-            @SuppressWarnings("unchecked")
-            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                if (modelClass.isAssignableFrom(PeersFragmentViewModel.class)) {
-                    return (T) new PeersFragmentViewModel(serviceAccessor);
-                }
-                throw new IllegalArgumentException("Unknown ViewModel class");
-            }
-        };
+    public void setServiceAccessor(@Nullable ServiceAccessor serviceAccessor) {
+        this.serviceAccessor = serviceAccessor;
     }
 
     private List<Peer> getPeers(PeerInfoArray peersInfo) {
@@ -148,8 +142,18 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
         }
         try {
             refreshExecutor.execute(() -> {
-                var peers = getPeers(serviceAccessor.getPeersList());
-                uiState.postValue(new PeersFragmentUiState(peers));
+                ServiceAccessor accessor = serviceAccessor;
+                if (accessor == null) {
+                    return;
+                }
+                PeerInfoArray peersInfo = accessor.getPeersList();
+                if (peersInfo == null) {
+                    // Service not bound (yet): keep the last snapshot instead of
+                    // flashing an empty list. Another refresh follows once the binder
+                    // arrives and the engine replays its state.
+                    return;
+                }
+                uiState.postValue(new PeersFragmentUiState(getPeers(peersInfo)));
             });
         } catch (RejectedExecutionException ignored) {
             // executor shut down concurrently in onCleared; safe to drop

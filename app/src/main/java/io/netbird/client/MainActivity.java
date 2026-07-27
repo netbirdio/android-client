@@ -68,6 +68,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
     private final List<StateListener> serviceStateListeners = new ArrayList<>();
+    // Route listeners are often registered before the service binding completes
+    // (fragments come up first), so they are queued here and attached to the binder
+    // in onServiceConnected.
+    private final List<RouteChangeListener> routeChangeListeners = new ArrayList<>();
     private URLOpener urlOpener;
     private QrCodeDialog qrCodeDialog;
 
@@ -89,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             mBinder = (VPNService.MyLocalBinder) binder;
             mBinder.setConnectionStateListener(connectionListener);
             mBinder.addServiceStateListener(serviceStateListener);
+            for (RouteChangeListener listener : routeChangeListeners) {
+                mBinder.addRouteChangeListener(listener);
+            }
         }
 
         @Override
@@ -331,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     public PeerInfoArray getPeersList() {
         if (mBinder == null) {
             Log.w(LOGTAG, "VPN binder is null");
-            return new PeerInfoArray();
+            return null;
         }
 
         return mBinder.peersInfo();
@@ -341,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     public NetworkArray getNetworks() {
         if (mBinder == null) {
             Log.w(LOGTAG, "VPN binder is null");
-            return new NetworkArray();
+            return null;
         }
 
         return mBinder.networks();
@@ -377,9 +384,12 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     @Override
     public void addRouteChangeListener(RouteChangeListener listener) {
+        if (!routeChangeListeners.contains(listener)) {
+            routeChangeListeners.add(listener);
+        }
+
         if (mBinder == null) {
-            Log.w(LOGTAG, "VPN binder is null");
-            return;
+            return; // queued; attached in onServiceConnected
         }
 
         mBinder.addRouteChangeListener(listener);
@@ -387,8 +397,9 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     @Override
     public void removeRouteChangeListener(RouteChangeListener listener) {
+        routeChangeListeners.remove(listener);
+
         if (mBinder == null) {
-            Log.w(LOGTAG, "VPN binder is null");
             return;
         }
 

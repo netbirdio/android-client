@@ -64,8 +64,10 @@ public class PeersFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        model = new ViewModelProvider(this, PeersFragmentViewModel.getFactory(serviceAccessor))
-                .get(PeersFragmentViewModel.class);
+        model = new ViewModelProvider(this).get(PeersFragmentViewModel.class);
+        // The model survives configuration changes (e.g. language switch) while the
+        // Activity behind the accessor does not — hand it the current one every time.
+        model.setServiceAccessor(serviceAccessor);
         stateListenerRegistry.registerServiceStateListener(model.getStateListener());
         // Load eagerly: a fresh fragment (e.g. returning to this tab) would otherwise
         // sit on the zero-peers view until the next peer-change event happens to fire.
@@ -157,6 +159,9 @@ public class PeersFragment extends Fragment {
     public void onDestroyView() {
         if (model != null) {
             stateListenerRegistry.unregisterServiceStateListener(model.getStateListener());
+            // Drop the Activity reference so a retained model can't leak it or keep
+            // reading through a dead Activity's torn-down service connection.
+            model.setServiceAccessor(null);
         }
         binding = null;
         super.onDestroyView();

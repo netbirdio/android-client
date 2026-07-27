@@ -117,8 +117,10 @@ public class PeerDetailFragment extends Fragment {
         // Activity-scoped and therefore NOT the instance PeersFragment drives (that one
         // is fragment-scoped), so this model needs its own event registration and an
         // eager first load — nothing else ever fills it.
-        model = new ViewModelProvider(requireActivity(), PeersFragmentViewModel.getFactory(serviceAccessor))
-                .get(PeersFragmentViewModel.class);
+        model = new ViewModelProvider(requireActivity()).get(PeersFragmentViewModel.class);
+        // The model survives configuration changes (e.g. language switch) while the
+        // Activity behind the accessor does not — hand it the current one every time.
+        model.setServiceAccessor(serviceAccessor);
         stateListenerRegistry.registerServiceStateListener(model.getStateListener());
         model.refreshPeers();
 
@@ -172,6 +174,9 @@ public class PeerDetailFragment extends Fragment {
         // object from the one the fragment-scoped PeersFragment model registered.
         if (model != null && stateListenerRegistry != null) {
             stateListenerRegistry.unregisterServiceStateListener(model.getStateListener());
+            // Drop the Activity reference so the retained model can't leak it or keep
+            // reading through a dead Activity's torn-down service connection.
+            model.setServiceAccessor(null);
         }
         binding = null;
         super.onDestroyView();
