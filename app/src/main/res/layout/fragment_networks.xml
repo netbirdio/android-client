@@ -66,8 +66,6 @@
             android:id="@+id/networks_recycler_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:clipToPadding="false"
-            android:paddingBottom="@dimen/bottom_nav_inset"
             app:layout_constraintTop_toBottomOf="@id/search_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
