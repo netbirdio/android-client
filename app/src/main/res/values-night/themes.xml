@@ -61,10 +61,6 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
-    <style name="Widget.MyApp.SwitchMaterial.Custom" parent="Widget.MaterialComponents.CompoundButton.Switch">
-        <item name="thumbTint">@color/switch_thumb_color</item>
-        <item name="trackTint">@color/switch_track_color</item>
-    </style>
 
     <style name="Theme.NetBird.Card" parent="ThemeOverlay.MaterialComponents.Dark" />
 

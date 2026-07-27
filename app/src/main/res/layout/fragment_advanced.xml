@@ -94,6 +94,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_rosenpass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -126,6 +127,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_rosenpass_permissive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -177,6 +179,7 @@
             </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_allow_ssh"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -225,6 +228,7 @@
             </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_block_inbound"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -273,6 +277,7 @@
             </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_disable_client_routes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -321,6 +326,7 @@
             </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_disable_server_routes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -369,6 +375,7 @@
             </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_disable_dns"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -417,6 +424,7 @@
             </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_disable_firewall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -465,6 +473,7 @@
             </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_disable_ipv6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -513,6 +522,7 @@
             </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                style="@style/Widget.NetBird.Switch"
                 android:id="@+id/switch_force_relay_connection"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

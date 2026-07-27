@@ -60,10 +60,6 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
-    <style name="Widget.MyApp.SwitchMaterial.Custom" parent="Widget.MaterialComponents.CompoundButton.Switch">
-        <item name="thumbTint">@color/switch_thumb_color</item>
-        <item name="trackTint">@color/switch_track_color</item>
-    </style>
     <attr name="nbTabBackground" format="color|reference" />
 
     <!-- MaterialComponents-based so Material widgets inside custom dialog
@@ -150,5 +146,15 @@
         <item name="android:textSize">14sp</item>
         <item name="cornerRadius">6dp</item>
         <item name="rippleColor">@color/nb_danger</item>
+    </style>
+
+    <!-- List-row switch matching the home connect toggle: orange track when on, grey with a
+         thin border when off, white thumb. useMaterialThemeColors must stay false or the
+         theme tint paints over the colours baked into the drawables. -->
+    <style name="Widget.NetBird.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
+        <item name="android:thumb">@drawable/nb_switch_thumb</item>
+        <item name="track">@drawable/nb_switch_track</item>
+        <item name="useMaterialThemeColors">false</item>
+        <item name="android:switchMinWidth">34dp</item>
     </style>
 </resources>
