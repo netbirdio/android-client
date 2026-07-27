@@ -27,7 +27,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="mypeer.really.long.long.long.longexample.selfhosted"
-        android:textColor="@color/nb_txt_light"
+        android:textColor="@color/nb_txt"
         android:textSize="14sp"
         android:maxLines="1"
         android:ellipsize="end"

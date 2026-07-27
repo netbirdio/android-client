@@ -22,7 +22,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="home long text here because"
-        android:textColor="@color/nb_txt_light"
+        android:textColor="@color/nb_txt"
         android:textSize="14sp"
         android:maxLines="2"
         android:ellipsize="end"
