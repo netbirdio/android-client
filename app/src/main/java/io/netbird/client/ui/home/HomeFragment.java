@@ -44,6 +44,19 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private SwitchMaterial buttonConnect;
     private boolean isConnected;
 
+    private enum EngineState { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED }
+
+    private static final long PENDING_ACTION_TIMEOUT_MS = 7_000;
+
+    // Action latch, mirroring the desktop MainConnectionStatusSwitch: while a tap
+    // is in flight, engine reports that contradict its target (e.g. the transient
+    // Connecting emitted during teardown before the engine-side Disconnecting
+    // latch is set) don't repaint the toggle, so it can't flicker.
+    private volatile EngineState lastEngineState = EngineState.DISCONNECTED;
+    private volatile EngineState pendingTarget;
+    private volatile boolean sawConnectingSinceTap;
+    private final Runnable pendingTimeout = this::expirePendingAction;
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -81,11 +94,13 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
             if (isConnected) {
                 // We're currently connected, so disconnect
+                beginPendingAction(EngineState.DISCONNECTED);
                 buttonConnect.setEnabled(false);
                 setStatusText(R.string.main_status_disconnecting);
                 serviceAccessor.switchConnection(false);
             } else {
                 // We're currently disconnected, so connect
+                beginPendingAction(EngineState.CONNECTED);
                 setStatusText(R.string.main_status_connecting);
                 serviceAccessor.switchConnection(true);
             }
@@ -194,6 +209,93 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         });
     }
 
+    private void onEngineState(EngineState state) {
+        lastEngineState = state;
+        isConnected = state == EngineState.CONNECTED;
+        if (shouldSuppressPaint(state)) {
+            return;
+        }
+        applyEngineState(state);
+    }
+
+    /**
+     * Decides whether an engine state report may repaint the toggle while a user
+     * action is pending, and releases the latch once the action completes or
+     * demonstrably fails.
+     */
+    private boolean shouldSuppressPaint(EngineState state) {
+        EngineState target = pendingTarget;
+        if (target == null) {
+            return false;
+        }
+        if (state == target) {
+            clearPendingAction();
+            return false;
+        }
+        if (target == EngineState.DISCONNECTED) {
+            // Only same-direction progress may paint while disconnecting.
+            return state != EngineState.DISCONNECTING;
+        }
+        // target == CONNECTED
+        if (state == EngineState.CONNECTING) {
+            sawConnectingSinceTap = true;
+            return false;
+        }
+        if (state == EngineState.DISCONNECTED && sawConnectingSinceTap) {
+            // A real attempt ran and ended disconnected: the connect failed.
+            // Release the latch so the failure is visible.
+            clearPendingAction();
+            return false;
+        }
+        return true;
+    }
+
+    private void applyEngineState(EngineState state) {
+        switch (state) {
+            case CONNECTING:
+                setToggle(true, false, R.string.main_status_connecting);
+                break;
+            case CONNECTED:
+                setToggle(true, true, R.string.main_status_connected);
+                break;
+            case DISCONNECTING:
+                setToggle(false, false, R.string.main_status_disconnecting);
+                break;
+            case DISCONNECTED:
+                setToggle(false, true, R.string.main_status_disconnected);
+                break;
+        }
+    }
+
+    private void beginPendingAction(EngineState target) {
+        pendingTarget = target;
+        sawConnectingSinceTap = false;
+        View root = binding != null ? binding.getRoot() : null;
+        if (root != null) {
+            root.removeCallbacks(pendingTimeout);
+            root.postDelayed(pendingTimeout, PENDING_ACTION_TIMEOUT_MS);
+        }
+    }
+
+    private void clearPendingAction() {
+        pendingTarget = null;
+        View root = binding != null ? binding.getRoot() : null;
+        if (root != null) {
+            root.removeCallbacks(pendingTimeout);
+        }
+    }
+
+    private void expirePendingAction() {
+        if (pendingTarget == null) {
+            return;
+        }
+        // The engine never reached the target (e.g. the action hung or failed
+        // silently); fall back to painting whatever it last reported instead of
+        // staying latched forever.
+        pendingTarget = null;
+        applyEngineState(lastEngineState);
+    }
+
     /**
      * Applies a view update immediately when we're already on the main thread, and posts it
      * otherwise. State replayed at listener-registration time arrives on the main thread before
@@ -217,6 +319,10 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         if (serviceAccessor != null) {
             serviceAccessor.removeRouteChangeListener(this);
         }
+        if (binding != null) {
+            binding.getRoot().removeCallbacks(pendingTimeout);
+        }
+        pendingTarget = null;
         binding = null;
         buttonConnect = null;
         textConnStatus = null;
@@ -238,8 +344,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
     @Override
     public void onEngineStopped() {
-        isConnected = false;
-        setToggle(false, true, R.string.main_status_disconnected);
+        onEngineState(EngineState.DISCONNECTED);
         updateExitNodeRow();
     }
 
@@ -334,26 +439,24 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
     @Override
     public void onConnected() {
-        isConnected = true;
-        setToggle(true, true, R.string.main_status_connected);
+        onEngineState(EngineState.CONNECTED);
         updateExitNodeRow();
     }
 
     @Override
     public void onConnecting() {
-        setToggle(true, false, R.string.main_status_connecting);
+        onEngineState(EngineState.CONNECTING);
     }
 
     @Override
     public void onDisconnected() {
-        isConnected = false;
-        setToggle(false, true, R.string.main_status_disconnected);
+        onEngineState(EngineState.DISCONNECTED);
         updateExitNodeRow();
     }
 
     @Override
     public void onDisconnecting() {
-        setToggle(false, false, R.string.main_status_disconnecting);
+        onEngineState(EngineState.DISCONNECTING);
     }
 
     @Override
