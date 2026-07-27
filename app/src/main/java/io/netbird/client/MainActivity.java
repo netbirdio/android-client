@@ -140,14 +140,17 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(bottomNav, navController);
 
-        // Peer detail is a sibling of the tabs rather than a child, so tapping a tab
-        // navigates away without unwinding it. NavigationUI derives the bottom-nav
-        // selection from the current destination, and peer detail matches no nav item,
-        // which strands the bar with nothing highlighted. Clear it on the way out.
+        // Sub-screens (peer detail, and everything under Settings) are siblings of
+        // the tabs rather than children, so tapping a tab navigates away without
+        // unwinding them. NavigationUI derives the bottom-nav selection from the
+        // current destination, so one left on the back stack both strands the bar
+        // with nothing highlighted and reappears when its tab is tapped again.
+        // Keyed on "not a tab" rather than a list of sub-screens, so destinations
+        // added later are handled without touching this.
         bottomNav.setOnItemSelectedListener(item -> {
             NavDestination current = navController.getCurrentDestination();
-            if (current != null && current.getId() == R.id.nav_peer_detail) {
-                navController.popBackStack(R.id.nav_peer_detail, true);
+            if (current != null && !topLevelDestinations.contains(current.getId())) {
+                navController.popBackStack(current.getId(), true);
             }
             return NavigationUI.onNavDestinationSelected(item, navController);
         });
