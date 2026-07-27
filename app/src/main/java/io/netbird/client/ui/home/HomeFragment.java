@@ -54,7 +54,6 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     // latch is set) don't repaint the toggle, so it can't flicker.
     private volatile EngineState lastEngineState = EngineState.DISCONNECTED;
     private volatile EngineState pendingTarget;
-    private volatile boolean sawConnectingSinceTap;
     private final Runnable pendingTimeout = this::expirePendingAction;
 
     @Override
@@ -87,21 +86,30 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         // Toggle taps drive the connection. We use a click listener rather than a
         // checked-change listener so that programmatic state updates coming from the
         // service (connected/disconnected callbacks) don't trigger a connection switch.
+        //
+        // A tap has already flipped the switch by the time this runs: SwitchMaterial is a
+        // CompoundButton, and CompoundButton.performClick() toggles isChecked before
+        // dispatching the click. So every branch must paint the toggle through setToggle()
+        // rather than only the label, otherwise the switch keeps whatever position the tap
+        // gave it while the text says something else.
         buttonConnect.setOnClickListener(v -> {
             if (serviceAccessor == null) {
+                // Nothing will drive the connection, so undo the tap's flip.
+                setToggle(isConnected, true, isConnected
+                        ? R.string.main_status_connected
+                        : R.string.main_status_disconnected);
                 return;
             }
 
             if (isConnected) {
                 // We're currently connected, so disconnect
                 beginPendingAction(EngineState.DISCONNECTED);
-                buttonConnect.setEnabled(false);
-                setStatusText(R.string.main_status_disconnecting);
+                setToggle(false, false, R.string.main_status_disconnecting);
                 serviceAccessor.switchConnection(false);
             } else {
                 // We're currently disconnected, so connect
                 beginPendingAction(EngineState.CONNECTED);
-                setStatusText(R.string.main_status_connecting);
+                setToggle(true, true, R.string.main_status_connecting);
                 serviceAccessor.switchConnection(true);
             }
         });
@@ -186,22 +194,20 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         Toast.makeText(ctx, R.string.main_copied, Toast.LENGTH_SHORT).show();
     }
 
-    private void setStatusText(int resId) {
-        runOnUi(() -> {
-            if (textConnStatus != null) {
-                textConnStatus.setText(resId);
-            }
-        });
-    }
-
     private void setToggle(boolean checked, boolean enabled, int statusResId) {
         runOnUi(() -> {
             if (buttonConnect != null) {
+                // setChecked animates the thumb; on a freshly inflated view that reads as the
+                // toggle sliding into place, so snap it to its final position instead. Only do
+                // so when this call actually changes the state: SwitchCompat's jump ends the
+                // in-flight position animator, and the tap handler runs while the tap's own
+                // slide (which already put the switch in the requested state) is still playing.
+                boolean changed = buttonConnect.isChecked() != checked;
                 buttonConnect.setChecked(checked);
                 buttonConnect.setEnabled(enabled);
-                // setChecked animates the thumb; on a freshly inflated view that reads as the
-                // toggle sliding into place, so snap it to its final position instead.
-                buttonConnect.jumpDrawablesToCurrentState();
+                if (changed) {
+                    buttonConnect.jumpDrawablesToCurrentState();
+                }
             }
             if (textConnStatus != null) {
                 textConnStatus.setText(statusResId);
@@ -238,12 +244,14 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         }
         // target == CONNECTED
         if (state == EngineState.CONNECTING) {
-            sawConnectingSinceTap = true;
+            // Same-direction progress: let it paint.
             return false;
         }
-        if (state == EngineState.DISCONNECTED && sawConnectingSinceTap) {
-            // A real attempt ran and ended disconnected: the connect failed.
-            // Release the latch so the failure is visible.
+        if (state == EngineState.DISCONNECTED) {
+            // The connect ended disconnected, so it failed. This covers the attempt that
+            // reported Connecting first as well as the one that never got that far (the
+            // engine refused up front, e.g. the VPN permission was declined); in both
+            // cases latching on would strand the toggle in the position the tap gave it.
             clearPendingAction();
             return false;
         }
@@ -269,7 +277,6 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
     private void beginPendingAction(EngineState target) {
         pendingTarget = target;
-        sawConnectingSinceTap = false;
         View root = binding != null ? binding.getRoot() : null;
         if (root != null) {
             root.removeCallbacks(pendingTimeout);
