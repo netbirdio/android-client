@@ -50,6 +50,9 @@ public class SettingsFragment extends Fragment {
         binding.rowAdvanced.setOnClickListener(v ->
                 navController.navigate(R.id.nav_advanced));
 
+        binding.rowLanguage.setOnClickListener(v ->
+                new LanguagePickerSheet().show(getChildFragmentManager(), "language_picker"));
+
         binding.rowTroubleshoot.setOnClickListener(v ->
                 navController.navigate(R.id.nav_troubleshoot));
 
@@ -63,7 +66,7 @@ public class SettingsFragment extends Fragment {
             } catch (ActivityNotFoundException e) {
                 Log.w(LOGTAG, "No browser available to open documentation URL", e);
                 Toast.makeText(requireContext(),
-                        "No browser app available to open " + DOCS_URL,
+                        getString(R.string.settings_no_browser, DOCS_URL),
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -75,6 +78,7 @@ public class SettingsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateActiveProfileName();
+        binding.currentLanguageName.setText(LanguagePickerSheet.currentLanguageLabel(requireContext()));
     }
 
     @Override

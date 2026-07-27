@@ -106,7 +106,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
 
         } catch (Exception e) {
             Log.e(LOGTAG, "Error getting Rosenpass settings", e);
-            Toast.makeText(inflater.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
+            Toast.makeText(inflater.getContext(), getString(R.string.error_generic, e.toString()), Toast.LENGTH_SHORT).show();
             binding.switchRosenpass.setChecked(false);
             binding.switchRosenpassPermissive.setEnabled(false);
         }
@@ -126,7 +126,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
                 goPreferences.commit();
             } catch (Exception e) {
                 Log.e(LOGTAG, "Error committing Rosenpass settings", e);
-                Toast.makeText(inflater.getContext(), "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(inflater.getContext(), getString(R.string.error_generic, e.toString()), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -138,7 +138,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
                 goPreferences.commit();
             } catch (Exception e) {
                 Log.e(LOGTAG, "Error committing Rosenpass settings", e);
-                Toast.makeText(inflater.getContext(), "Error: " + e, Toast.LENGTH_SHORT).show();
+                Toast.makeText(inflater.getContext(), getString(R.string.error_generic, e.toString()), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -286,7 +286,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
         try {
             configFilePath = profileManager.getActiveConfigPath();
         } catch (Exception e) {
-            Toast.makeText(context, "Failed to get config path: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.error_config_path, e.getMessage()), Toast.LENGTH_LONG).show();
             return;
         }
         io.netbird.gomobile.android.Preferences preferences = new io.netbird.gomobile.android.Preferences(configFilePath);

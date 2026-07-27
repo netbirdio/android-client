@@ -193,4 +193,18 @@
     <string name="profiles_error_cannot_remove_default">Cannot remove the default profile</string>
     <string name="profiles_success_logged_out">Logged out from profile \'%s\'</string>
     <string name="profiles_success_removed">Profile \'%s\' removed successfully</string>
+
+    <!-- Language picker. The label mirrors the desktop app's Display Language setting. -->
+    <string name="settings_language">Display Language</string>
+    <string name="language_system_default">System default</string>
+    <string name="language_picker_announce">Language set to %1$s</string>
+
+    <!-- Messages previously hardcoded in code, extracted so they can be translated. -->
+    <string name="error_vpn_permission_required">VPN permission required</string>
+    <string name="about_version_unknown">unknown</string>
+    <string name="error_generic">Error: %s</string>
+    <string name="error_config_path">Failed to get config path: %s</string>
+    <string name="troubleshoot_key_copied">Debug bundle key copied to clipboard</string>
+    <string name="troubleshoot_bundle_failed">Failed to create debug bundle: %s</string>
+    <string name="settings_no_browser">No browser app available to open %s</string>
 </resources>

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentAboutBinding;
 
 public class AboutFragment extends Fragment {
@@ -31,7 +32,7 @@ public class AboutFragment extends Fragment {
 
             binding.txtVersionString.setText(versionName);
         } catch (Exception e) {
-            binding.txtVersionString.setText("unknown");
+            binding.txtVersionString.setText(R.string.about_version_unknown);
         }
 
         binding.txtLicense.setOnClickListener(v -> onLicenseClick(v));

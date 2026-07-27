@@ -1,0 +1,210 @@
+<resources>
+    <string name="app_name">NetBird</string>
+    <string name="quick_settings_tile_label">NetBird</string>
+
+    <string name="menu_advanced">詳細設定</string>
+    <string name="menu_about">情報</string>
+    <string name="menu_change_server">サーバーを変更</string>
+    <string name="menu_profiles">プロファイル</string>
+    <string name="menu_troubleshoot">トラブルシューティング</string>
+
+    <string name="profile_picker_title">使用中のプロファイル</string>
+    <string name="profile_picker_add">プロファイルを追加</string>
+    <string name="profile_picker_manage">プロファイルの管理</string>
+    <string name="profile_picker_show_all">すべてのプロファイルを表示（%1$d）</string>
+
+    <string name="bottom_nav_home">ホーム</string>
+    <string name="bottom_nav_peers">ピア</string>
+    <string name="bottom_nav_networks">リソース</string>
+    <string name="bottom_nav_settings">設定</string>
+
+    <string name="settings_section_connection">接続</string>
+    <string name="settings_section_settings">設定</string>
+    <string name="settings_section_information">情報</string>
+    <string name="settings_documentation">ドキュメント</string>
+
+    <string name="main_status_disconnected">未接続</string>
+    <string name="main_status_connecting">接続中…</string>
+    <string name="main_status_connected">接続済み</string>
+    <string name="main_status_disconnecting">切断中…</string>
+    <string name="main_desc_connect">接続/切断</string>
+    <string name="main_desc_logo">NetBird ロゴ</string>
+    <string name="main_desc_copy">クリップボードにコピー</string>
+    <string name="main_copied">コピーしました</string>
+    <string name="main_value_empty">–</string>
+
+    <string name="fragment_firstinstall_txt">デフォルトでは NetBird のクラウドサーバーに接続します。「サーバーを変更」メニューから別のサーバーを使用できます。</string>
+    <string name="fragment_firstinstall_continue">続ける</string>
+    <string name="fragment_firstinstall_desc_logo">NetBird ロゴ</string>
+    <string name="fragment_firstinstall_androidtv_beta">Android TV のサポートは現在ベータ版です。一部の機能は期待どおりに動作しない場合があります。</string>
+
+
+    <string name="about_version">バージョン:&#160;</string>
+    <string name="about_license"><u>ライセンス契約</u></string>
+    <string name="about_privacy_poliy"><u>プライバシーポリシー</u></string>
+    <string name="about_rights">© 2026 NetBird. All Rights Reserved.</string>
+
+    <string name="zero_peers_no_machines">接続できるマシンがないようです…</string>
+    <string name="zero_peers_btn_learn_why">理由を確認</string>
+
+    <string name="btn_close">閉じる</string>
+    <string name="peers_connected"><![CDATA[<b>%2$d</b>台中<b>%1$d</b>台のピアが接続中]]></string>
+    <string name="peers_hint_search_peers">ピアを検索</string>
+    <string name="peer_filter_all">すべて</string>
+    <string name="peer_filter_idle">アイドル</string>
+    <string name="peer_filter_connecting">接続中</string>
+    <string name="peer_filter_connected">接続済み</string>
+    <string name="peers_clipboard_copy_ip">IP をコピー</string>
+    <string name="peers_clipboard_copy_ipv6">IPv6 をコピー</string>
+    <string name="peers_clipboard_copy_fqdn">FQDN をコピー</string>
+    <string name="peers_desc_filter">フィルター</string>
+
+    <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->
+    <string name="peer_detail_title">ピア</string>
+    <string name="peer_detail_refresh">更新</string>
+    <string name="peer_detail_copy">コピー</string>
+    <string name="peer_detail_copied">クリップボードにコピーしました</string>
+    <string name="peer_detail_netbird_ip">NetBird IP</string>
+    <string name="peer_detail_netbird_ipv6">NetBird IPv6</string>
+    <string name="peer_detail_connection">接続</string>
+    <string name="peer_detail_connection_relayed">リレー経由</string>
+    <string name="peer_detail_connection_p2p">P2P</string>
+    <string name="peer_detail_relay_address">リレー</string>
+    <string name="peer_detail_latency">レイテンシ</string>
+    <string name="peer_detail_latency_value">%1$d ms</string>
+    <string name="peer_detail_rosenpass">Rosenpass 有効</string>
+    <string name="peer_detail_transfer">バイト</string>
+    <string name="peer_detail_bytes_received">受信</string>
+    <string name="peer_detail_bytes_sent">送信</string>
+    <string name="peer_detail_status_since">最終接続更新</string>
+    <string name="peer_detail_networks">リソース</string>
+    <string name="peer_detail_local_ice">ローカル ICE</string>
+    <string name="peer_detail_remote_ice">リモート ICE</string>
+    <string name="peer_detail_ice_with_type">%1$s (%2$s)</string>
+    <string name="peer_detail_public_key">公開鍵</string>
+    <string name="peer_detail_just_now">たった今</string>
+    <string name="peer_detail_unknown">-</string>
+    <string name="peer_detail_yes">はい</string>
+    <string name="peer_detail_no">いいえ</string>
+
+
+    <string name="resources_connected"><![CDATA[<b>%2$d</b>件中<b>%1$d</b>件のリソースが接続中]]></string>
+    <string name="networks_hint_search_networks">リソースを検索</string>
+    <string name="networks_desc_exit_node">出口ノード</string>
+
+    <string name="change_server_title_server">サーバー</string>
+    <string name="change_server_hint">https://example-api.domain.com:443</string>
+    <string name="change_server_setup_key">セットアップキーでこのデバイスを追加</string>
+    <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
+    <string name="change_server_error_invalid_setup_key">セットアップキーの形式が無効です</string>
+
+    <string name="change_server_btn">変更</string>
+    <string name="change_server_verifying">確認中…</string>
+    <string name="change_server_btn_reset">NetBird サーバーを使用</string>
+
+    <string name="change_server_alert_title">サーバーを変更</string>
+    <string name="change_server_alert_yes">はい</string>
+    <string name="change_server_alert_cancel">キャンセル</string>
+    <string name="change_server_alert_desc">サーバーを変更すると、ローカル設定が消去され、このデバイスは現在の NetBird アカウントから切断されます。</string>
+
+    <string name="change_server_success_title">サーバーを変更しました</string>
+    <string name="change_server_success_desc">続行するには接続ボタンをタップしてください</string>
+    <string name="change_server_success_cloe">OK</string>
+    <string name="change_server_success_icon">成功アイコン</string>
+
+
+    <string name="advanced_section_presharedkey">事前共有鍵</string>
+    <string name="advanced_section_rosenpass">Rosenpass</string>
+    <string name="advanced_section_appearance">外観</string>
+    <string name="advanced_details">同じ鍵を使用するピアとのみ通信できます。</string>
+    <string name="advanced_hint">事前共有鍵を追加</string>
+    <string name="advanced_save">保存</string>
+    <string name="advanced_presharedkey_saved_success">事前共有鍵を保存しました</string>
+    <string name="advanced_presharedkey_save_error">事前共有鍵を保存できませんでした</string>
+    <string name="advanced_tracelog">トレースログレベルを有効にします。</string>
+    <string name="troubleshoot_debug_bundle">デバッグバンドルをアップロード</string>
+    <string name="troubleshoot_anonymize">機密データを匿名化</string>
+    <string name="troubleshoot_section_logging">ログ</string>
+    <string name="troubleshoot_section_debug_bundle">デバッグバンドル</string>
+    <string name="advanced_rosenpass">Rosenpass を有効にする</string>
+    <string name="advanced_rosenpass_permissive">Rosenpass の寛容モードを有効にします。</string>
+    <string name="advanced_title_network_security">ネットワークとセキュリティ</string>
+
+    <string name="advanced_disable_client_routes">クライアントルートを無効にする</string>
+    <string name="advanced_disable_client_routes_desc">管理サービスから受信したクライアントルートをこのデバイスで処理しないようにします</string>
+    <string name="advanced_disable_server_routes">サーバールートを無効にする</string>
+    <string name="advanced_disable_server_routes_desc">管理サービスから受信したサーバールートのルーターとしてこのデバイスが動作しないようにします</string>
+    <string name="advanced_disable_dns">DNSを無効にする</string>
+    <string name="advanced_disable_dns_desc">このデバイスで NetBird の DNS 設定を無効にします</string>
+    <string name="advanced_disable_firewall">ファイアウォールを無効にする</string>
+    <string name="advanced_disable_firewall_desc">NetBird のファイアウォールを無効にします</string>
+    <string name="advanced_disable_ipv6">IPv6を無効にする</string>
+    <string name="advanced_disable_ipv6_desc">トンネルインターフェースでの IPv6 オーバーレイアドレッシングを無効にします</string>
+    <string name="advanced_allow_ssh">SSHを有効にする</string>
+    <string name="advanced_allow_ssh_desc">このデバイスへの SSH 接続を許可します</string>
+    <string name="advanced_block_inbound">受信接続をブロック</string>
+    <string name="advanced_block_inbound_desc">このデバイスおよびルーティングされたネットワークへのすべての受信接続をブロックします。管理サービスから受信したポリシーより優先されます</string>
+
+
+    <string name="desc_logo">NetBird ロゴ</string>
+    <string name="desc_exclamation_mark">感嘆符</string>
+    <string name="desc_peers_empty">空の箱</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[「常時接続 VPN」が有効になっている VPN アプリがあります。NetBird アプリを有効にするには、まず<b>「ネットワークとインターネット」設定</b> → <b>「詳細設定」</b> → このページに表示されているすべてのアプリの<b>歯車アイコン</b>を確認してください。NetBird 以外のアプリの「常時接続 VPN」を無効にしてください。]]></string>
+
+    <string name="theme_picker_selected">選択済み</string>
+    <string name="theme_picker_announce">%1$s テーマを選択しました</string>
+
+    <string name="advanced_theme_system">システム</string>
+    <string name="advanced_theme_title">テーマモード</string>
+    <string name="advanced_theme_dark">ダーク</string>
+    <string name="advanced_theme_light">ライト</string>
+    <string name="advanced_force_relay_conn">リレー接続を強制する</string>
+    <string name="advanced_force_relay_conn_desc">ピアへの接続時にリレーの使用を強制します</string>
+    <string name="exclamation_mark">感嘆符</string>
+    <string name="reconnectionNeededWarningMessage">設定を適用するには再接続が必要です。</string>
+    <string name="change_server_setup_key_warning">ユーザーデバイスにセットアップキーを使用することは推奨されません。MFA 付きの SSO は、より強固なセキュリティ、適切なユーザーとデバイスの関連付け、定期的な再認証を提供します。</string>
+    <string name="change_server_error_invalid_server_url">URL の形式が無効です</string>
+    <string name="device_code">デバイスコード: %s</string>
+
+    <!-- Profile strings -->
+    <string name="profiles_active">使用中</string>
+    <string name="profiles_add">プロファイルを追加</string>
+    <string name="profiles_switch">切り替え</string>
+    <string name="profiles_logout">ログアウト</string>
+    <string name="profiles_remove">削除</string>
+    <string name="profiles_dialog_add_title">新しいプロファイル</string>
+    <string name="profiles_dialog_add_message">新しいプロファイルの名前を入力してください:</string>
+    <string name="profiles_dialog_add_hint">プロファイル名</string>
+    <string name="profiles_rename">プロファイル名を変更</string>
+    <string name="profiles_dialog_rename_title">プロファイル名を変更</string>
+    <string name="profiles_dialog_rename_message">プロファイル「%s」の新しい名前を入力してください:</string>
+    <string name="profiles_dialog_rename_hint">プロファイル名</string>
+    <string name="profiles_success_renamed">プロファイル名を「%s」に変更しました</string>
+    <string name="profiles_dialog_switch_title">プロファイルの切り替え</string>
+    <string name="profiles_dialog_switch_message">プロファイル「%s」に切り替えますか？\n\n現在の接続は切断されます。</string>
+    <string name="profiles_dialog_logout_title">プロファイルからログアウト</string>
+    <string name="profiles_dialog_logout_message">プロファイル「%s」からログアウトしますか？\n\n再度使用するには再認証が必要になります。</string>
+    <string name="profiles_dialog_remove_title">プロファイルを削除</string>
+    <string name="profiles_dialog_remove_message">プロファイル「%s」を削除してもよろしいですか？\n\nこの操作は取り消せません。</string>
+    <string name="profiles_error_empty_name">プロファイル名は空にできません</string>
+    <string name="profiles_error_already_exists">プロファイル「%s」は既に存在します</string>
+    <string name="profiles_error_cannot_remove_active">使用中のプロファイルは削除できません。先に別のプロファイルに切り替えてください。</string>
+    <string name="profiles_error_cannot_remove_default">デフォルトのプロファイルは削除できません</string>
+    <string name="profiles_success_logged_out">プロファイル「%s」からログアウトしました</string>
+    <string name="profiles_success_removed">プロファイル「%s」を削除しました</string>
+
+    <!-- Language picker -->
+    <string name="settings_language">表示言語</string>
+    <string name="language_system_default">システムのデフォルト</string>
+    <string name="language_picker_announce">言語を%1$sに設定しました</string>
+
+    <!-- Messages previously hardcoded in code, extracted so they can be translated. -->
+    <string name="error_vpn_permission_required">VPN の許可が必要です</string>
+    <string name="about_version_unknown">不明</string>
+    <string name="error_generic">エラー: %s</string>
+    <string name="error_config_path">設定ファイルのパスを取得できませんでした: %s</string>
+    <string name="troubleshoot_key_copied">デバッグバンドルのキーをクリップボードにコピーしました</string>
+    <string name="troubleshoot_bundle_failed">デバッグバンドルを作成できませんでした: %s</string>
+    <string name="settings_no_browser">%s を開けるブラウザアプリがありません</string>
+</resources>

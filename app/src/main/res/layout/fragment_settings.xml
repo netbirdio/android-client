@@ -155,6 +155,55 @@
         <include layout="@layout/list_item_setting_divider" />
 
         <LinearLayout
+            android:id="@+id/row_language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/settings_row_bg"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:minHeight="56dp"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_language"
+                app:tint="@color/nb_orange" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"
+                android:text="@string/settings_language"
+                android:textColor="@color/nb_txt"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/current_language_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="14sp"
+                tools:text="English (US)" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/nb_txt_light" />
+        </LinearLayout>
+
+        <include layout="@layout/list_item_setting_divider" />
+
+        <LinearLayout
             android:id="@+id/row_troubleshoot"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

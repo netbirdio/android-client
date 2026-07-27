@@ -77,14 +77,14 @@ public class TroubleshootFragment extends Fragment {
                     ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData clip = ClipData.newPlainText("Debug bundle key", key);
                     clipboard.setPrimaryClip(clip);
-                    Toast.makeText(activity, "Debug bundle key copied to clipboard", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, getString(R.string.troubleshoot_key_copied), Toast.LENGTH_SHORT).show();
                 });
             } catch (Exception e) {
                 Log.e(LOGTAG, "failed to create debug bundle", e);
                 activity.runOnUiThread(() -> {
                     if (binding == null || !isAdded()) return;
                     binding.buttonDebugBundle.setEnabled(true);
-                    Toast.makeText(activity, "Failed to create debug bundle: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(activity, getString(R.string.troubleshoot_bundle_failed, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
             }
         }).start();

@@ -1,0 +1,210 @@
+<resources>
+    <string name="app_name">NetBird</string>
+    <string name="quick_settings_tile_label">NetBird</string>
+
+    <string name="menu_advanced">Avançado</string>
+    <string name="menu_about">Sobre</string>
+    <string name="menu_change_server">Alterar servidor</string>
+    <string name="menu_profiles">Perfis</string>
+    <string name="menu_troubleshoot">Solução de problemas</string>
+
+    <string name="profile_picker_title">Perfil ativo</string>
+    <string name="profile_picker_add">Adicionar perfil</string>
+    <string name="profile_picker_manage">Gerenciar perfis</string>
+    <string name="profile_picker_show_all">Mostrar todos os perfis (%1$d)</string>
+
+    <string name="bottom_nav_home">Início</string>
+    <string name="bottom_nav_peers">Peers</string>
+    <string name="bottom_nav_networks">Recursos</string>
+    <string name="bottom_nav_settings">Configurações</string>
+
+    <string name="settings_section_connection">Conexão</string>
+    <string name="settings_section_settings">Configurações</string>
+    <string name="settings_section_information">Informações</string>
+    <string name="settings_documentation">Documentação</string>
+
+    <string name="main_status_disconnected">Desconectado</string>
+    <string name="main_status_connecting">Conectando…</string>
+    <string name="main_status_connected">Conectado</string>
+    <string name="main_status_disconnecting">Desconectando…</string>
+    <string name="main_desc_connect">conectar/desconectar</string>
+    <string name="main_desc_logo">Logotipo do NetBird</string>
+    <string name="main_desc_copy">Copiar para a área de transferência</string>
+    <string name="main_copied">Copiado</string>
+    <string name="main_value_empty">–</string>
+
+    <string name="fragment_firstinstall_txt">Por padrão, você se conectará aos servidores em nuvem do NetBird. Você pode usar o menu \"Alterar servidor\" para utilizar outro servidor.</string>
+    <string name="fragment_firstinstall_continue">Continuar</string>
+    <string name="fragment_firstinstall_desc_logo">Logotipo do NetBird</string>
+    <string name="fragment_firstinstall_androidtv_beta">O suporte a Android TV está atualmente em beta. Alguns recursos podem não funcionar como esperado.</string>
+
+
+    <string name="about_version">Versão:&#160;</string>
+    <string name="about_license"><u>Contrato de licença</u></string>
+    <string name="about_privacy_poliy"><u>Política de privacidade</u></string>
+    <string name="about_rights">© 2026 NetBird. Todos os direitos reservados.</string>
+
+    <string name="zero_peers_no_machines">Parece que não há máquinas às quais você possa se conectar…</string>
+    <string name="zero_peers_btn_learn_why">Saiba por quê</string>
+
+    <string name="btn_close">Fechar</string>
+    <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>de</b> <b>%2$d</b> peers conectados]]></string>
+    <string name="peers_hint_search_peers">Buscar peers</string>
+    <string name="peer_filter_all">Todos</string>
+    <string name="peer_filter_idle">Inativo</string>
+    <string name="peer_filter_connecting">Conectando</string>
+    <string name="peer_filter_connected">Conectado</string>
+    <string name="peers_clipboard_copy_ip">Copiar IP</string>
+    <string name="peers_clipboard_copy_ipv6">Copiar IPv6</string>
+    <string name="peers_clipboard_copy_fqdn">Copiar FQDN</string>
+    <string name="peers_desc_filter">Filtro</string>
+
+    <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->
+    <string name="peer_detail_title">Peer</string>
+    <string name="peer_detail_refresh">Atualizar</string>
+    <string name="peer_detail_copy">Copiar</string>
+    <string name="peer_detail_copied">Copiado para a área de transferência</string>
+    <string name="peer_detail_netbird_ip">IP do NetBird</string>
+    <string name="peer_detail_netbird_ipv6">IPv6 do NetBird</string>
+    <string name="peer_detail_connection">Conexão</string>
+    <string name="peer_detail_connection_relayed">Via relay</string>
+    <string name="peer_detail_connection_p2p">P2P</string>
+    <string name="peer_detail_relay_address">Relay</string>
+    <string name="peer_detail_latency">Latência</string>
+    <string name="peer_detail_latency_value">%1$d ms</string>
+    <string name="peer_detail_rosenpass">Rosenpass ativado</string>
+    <string name="peer_detail_transfer">Bytes</string>
+    <string name="peer_detail_bytes_received">Recebidos</string>
+    <string name="peer_detail_bytes_sent">Enviados</string>
+    <string name="peer_detail_status_since">Última atualização da conexão</string>
+    <string name="peer_detail_networks">Recursos</string>
+    <string name="peer_detail_local_ice">ICE local</string>
+    <string name="peer_detail_remote_ice">ICE remoto</string>
+    <string name="peer_detail_ice_with_type">%1$s (%2$s)</string>
+    <string name="peer_detail_public_key">Chave pública</string>
+    <string name="peer_detail_just_now">Agora mesmo</string>
+    <string name="peer_detail_unknown">-</string>
+    <string name="peer_detail_yes">Sim</string>
+    <string name="peer_detail_no">Não</string>
+
+
+    <string name="resources_connected"><![CDATA[<b>%1$d</b> <b>de</b> <b>%2$d</b> recursos conectados]]></string>
+    <string name="networks_hint_search_networks">Buscar recursos</string>
+    <string name="networks_desc_exit_node">nó de saída</string>
+
+    <string name="change_server_title_server">Servidor</string>
+    <string name="change_server_hint">https://example-api.domain.com:443</string>
+    <string name="change_server_setup_key">Adicionar este dispositivo com uma chave de configuração</string>
+    <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
+    <string name="change_server_error_invalid_setup_key">Formato de chave de configuração inválido</string>
+
+    <string name="change_server_btn">Alterar</string>
+    <string name="change_server_verifying">Verificando…</string>
+    <string name="change_server_btn_reset">Usar o servidor do NetBird</string>
+
+    <string name="change_server_alert_title">Alterar servidor</string>
+    <string name="change_server_alert_yes">Sim</string>
+    <string name="change_server_alert_cancel">Cancelar</string>
+    <string name="change_server_alert_desc">Alterar o servidor apagará a configuração local e desconectará este dispositivo da conta atual do NetBird.</string>
+
+    <string name="change_server_success_title">O servidor foi alterado</string>
+    <string name="change_server_success_desc">Clique no botão de conexão para continuar</string>
+    <string name="change_server_success_cloe">OK</string>
+    <string name="change_server_success_icon">Ícone de sucesso</string>
+
+
+    <string name="advanced_section_presharedkey">Chave pré-compartilhada</string>
+    <string name="advanced_section_rosenpass">Rosenpass</string>
+    <string name="advanced_section_appearance">Aparência</string>
+    <string name="advanced_details">Você só se comunicará com peers que usem a mesma chave.</string>
+    <string name="advanced_hint">Adicionar uma chave pré-compartilhada</string>
+    <string name="advanced_save">Salvar</string>
+    <string name="advanced_presharedkey_saved_success">Chave pré-compartilhada salva com sucesso</string>
+    <string name="advanced_presharedkey_save_error">Falha ao salvar a chave pré-compartilhada</string>
+    <string name="advanced_tracelog">Habilitar o nível de log de trace.</string>
+    <string name="troubleshoot_debug_bundle">Enviar pacote de depuração</string>
+    <string name="troubleshoot_anonymize">Anonimizar dados sensíveis</string>
+    <string name="troubleshoot_section_logging">Registro</string>
+    <string name="troubleshoot_section_debug_bundle">Pacote de depuração</string>
+    <string name="advanced_rosenpass">Ativar Rosenpass</string>
+    <string name="advanced_rosenpass_permissive">Ativar o modo permissivo do Rosenpass.</string>
+    <string name="advanced_title_network_security">Rede e segurança</string>
+
+    <string name="advanced_disable_client_routes">Desativar rotas de cliente</string>
+    <string name="advanced_disable_client_routes_desc">Impede que este dispositivo processe rotas de cliente recebidas do serviço de gerenciamento</string>
+    <string name="advanced_disable_server_routes">Desativar rotas de servidor</string>
+    <string name="advanced_disable_server_routes_desc">Impede que este dispositivo atue como roteador para rotas de servidor recebidas do serviço de gerenciamento</string>
+    <string name="advanced_disable_dns">Desativar DNS</string>
+    <string name="advanced_disable_dns_desc">Desativa a configuração de DNS do NetBird neste dispositivo</string>
+    <string name="advanced_disable_firewall">Desativar firewall</string>
+    <string name="advanced_disable_firewall_desc">Desativa o firewall do NetBird</string>
+    <string name="advanced_disable_ipv6">Desativar IPv6</string>
+    <string name="advanced_disable_ipv6_desc">Desativa o endereçamento IPv6 de sobreposição na interface do túnel</string>
+    <string name="advanced_allow_ssh">Ativar SSH</string>
+    <string name="advanced_allow_ssh_desc">Permite conexões SSH a este dispositivo</string>
+    <string name="advanced_block_inbound">Bloquear conexões de entrada</string>
+    <string name="advanced_block_inbound_desc">Bloqueia todas as conexões de entrada para este dispositivo e redes roteadas. Isso substitui quaisquer políticas recebidas do serviço de gerenciamento</string>
+
+
+    <string name="desc_logo">Logotipo do NetBird</string>
+    <string name="desc_exclamation_mark">ponto de exclamação</string>
+    <string name="desc_peers_empty">caixa vazia</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[Você tem um aplicativo de VPN com a opção "Sempre ativa" ligada. Para habilitar o aplicativo NetBird, primeiro acesse as <b>configurações de Rede e Internet</b> → <b>Avançado</b> → verifique o <b>ícone de engrenagem</b> de todos os aplicativos listados nesta página. Desative "Sempre ativa" para os aplicativos que não sejam o NetBird.]]></string>
+
+    <string name="theme_picker_selected">Selecionado</string>
+    <string name="theme_picker_announce">Tema %1$s selecionado</string>
+
+    <string name="advanced_theme_system">Sistema</string>
+    <string name="advanced_theme_title">Modo de tema</string>
+    <string name="advanced_theme_dark">Escuro</string>
+    <string name="advanced_theme_light">Claro</string>
+    <string name="advanced_force_relay_conn">Forçar conexão via relay</string>
+    <string name="advanced_force_relay_conn_desc">Força o uso de relay ao conectar-se a peers</string>
+    <string name="exclamation_mark">ponto de exclamação</string>
+    <string name="reconnectionNeededWarningMessage">Para aplicar a configuração, você precisará reconectar.</string>
+    <string name="change_server_setup_key_warning">Não é recomendado usar chaves de configuração em dispositivos de usuários. SSO com MFA oferece segurança mais forte, associação adequada entre usuário e dispositivo e reautenticação periódica.</string>
+    <string name="change_server_error_invalid_server_url">Formato de URL inválido</string>
+    <string name="device_code">Código do dispositivo: %s</string>
+
+    <!-- Profile strings -->
+    <string name="profiles_active">Ativo</string>
+    <string name="profiles_add">Adicionar perfil</string>
+    <string name="profiles_switch">Alternar</string>
+    <string name="profiles_logout">Sair</string>
+    <string name="profiles_remove">Remover</string>
+    <string name="profiles_dialog_add_title">Novo perfil</string>
+    <string name="profiles_dialog_add_message">Insira um nome para o novo perfil:</string>
+    <string name="profiles_dialog_add_hint">Nome do perfil</string>
+    <string name="profiles_rename">Renomear perfil</string>
+    <string name="profiles_dialog_rename_title">Renomear perfil</string>
+    <string name="profiles_dialog_rename_message">Insira um novo nome para o perfil \"%s\":</string>
+    <string name="profiles_dialog_rename_hint">Nome do perfil</string>
+    <string name="profiles_success_renamed">Perfil renomeado para \"%s\"</string>
+    <string name="profiles_dialog_switch_title">Alternar perfil</string>
+    <string name="profiles_dialog_switch_message">Alternar para o perfil \"%s\"?\n\nIsso desconectará a conexão atual.</string>
+    <string name="profiles_dialog_logout_title">Sair do perfil</string>
+    <string name="profiles_dialog_logout_message">Sair do perfil \"%s\"?\n\nVocê precisará se autenticar novamente para usar este perfil.</string>
+    <string name="profiles_dialog_remove_title">Remover perfil</string>
+    <string name="profiles_dialog_remove_message">Tem certeza de que deseja remover o perfil \"%s\"?\n\nEsta ação não pode ser desfeita.</string>
+    <string name="profiles_error_empty_name">O nome do perfil não pode estar vazio</string>
+    <string name="profiles_error_already_exists">O perfil \"%s\" já existe</string>
+    <string name="profiles_error_cannot_remove_active">Não é possível remover o perfil ativo. Alterne para outro perfil primeiro.</string>
+    <string name="profiles_error_cannot_remove_default">Não é possível remover o perfil padrão</string>
+    <string name="profiles_success_logged_out">Sessão encerrada no perfil \"%s\"</string>
+    <string name="profiles_success_removed">Perfil \"%s\" removido com sucesso</string>
+
+    <!-- Language picker -->
+    <string name="settings_language">Idioma de exibição</string>
+    <string name="language_system_default">Padrão do sistema</string>
+    <string name="language_picker_announce">Idioma definido como %1$s</string>
+
+    <!-- Messages previously hardcoded in code, extracted so they can be translated. -->
+    <string name="error_vpn_permission_required">Permissão de VPN necessária</string>
+    <string name="about_version_unknown">desconhecida</string>
+    <string name="error_generic">Erro: %s</string>
+    <string name="error_config_path">Falha ao obter o caminho da configuração: %s</string>
+    <string name="troubleshoot_key_copied">Chave do pacote de depuração copiada para a área de transferência</string>
+    <string name="troubleshoot_bundle_failed">Falha ao criar o pacote de depuração: %s</string>
+    <string name="settings_no_browser">Nenhum navegador disponível para abrir %s</string>
+</resources>

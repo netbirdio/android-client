@@ -1,0 +1,210 @@
+<resources>
+    <string name="app_name">NetBird</string>
+    <string name="quick_settings_tile_label">NetBird</string>
+
+    <string name="menu_advanced">Дополнительно</string>
+    <string name="menu_about">О программе</string>
+    <string name="menu_change_server">Сменить сервер</string>
+    <string name="menu_profiles">Профили</string>
+    <string name="menu_troubleshoot">Диагностика</string>
+
+    <string name="profile_picker_title">Активный профиль</string>
+    <string name="profile_picker_add">Добавить профиль</string>
+    <string name="profile_picker_manage">Управление профилями</string>
+    <string name="profile_picker_show_all">Показать все профили (%1$d)</string>
+
+    <string name="bottom_nav_home">Главная</string>
+    <string name="bottom_nav_peers">Пиры</string>
+    <string name="bottom_nav_networks">Ресурсы</string>
+    <string name="bottom_nav_settings">Настройки</string>
+
+    <string name="settings_section_connection">Подключение</string>
+    <string name="settings_section_settings">Настройки</string>
+    <string name="settings_section_information">Информация</string>
+    <string name="settings_documentation">Документация</string>
+
+    <string name="main_status_disconnected">Отключено</string>
+    <string name="main_status_connecting">Подключение…</string>
+    <string name="main_status_connected">Подключено</string>
+    <string name="main_status_disconnecting">Отключение…</string>
+    <string name="main_desc_connect">подключение/отключение</string>
+    <string name="main_desc_logo">Логотип NetBird</string>
+    <string name="main_desc_copy">Скопировать в буфер обмена</string>
+    <string name="main_copied">Скопировано</string>
+    <string name="main_value_empty">–</string>
+
+    <string name="fragment_firstinstall_txt">По умолчанию вы подключаетесь к облачным серверам NetBird. Чтобы использовать другой сервер, откройте меню «Сменить сервер».</string>
+    <string name="fragment_firstinstall_continue">Продолжить</string>
+    <string name="fragment_firstinstall_desc_logo">Логотип NetBird</string>
+    <string name="fragment_firstinstall_androidtv_beta">Поддержка Android TV сейчас находится в бета-версии. Некоторые функции могут работать не так, как ожидается.</string>
+
+
+    <string name="about_version">Версия:&#160;</string>
+    <string name="about_license"><u>Лицензионное соглашение</u></string>
+    <string name="about_privacy_poliy"><u>Политика конфиденциальности</u></string>
+    <string name="about_rights">© 2026 NetBird. Все права защищены.</string>
+
+    <string name="zero_peers_no_machines">Похоже, нет машин, к которым можно подключиться…</string>
+    <string name="zero_peers_btn_learn_why">Узнать почему</string>
+
+    <string name="btn_close">Закрыть</string>
+    <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>из</b> <b>%2$d</b> пиров подключено]]></string>
+    <string name="peers_hint_search_peers">Поиск пиров</string>
+    <string name="peer_filter_all">Все</string>
+    <string name="peer_filter_idle">Неактивен</string>
+    <string name="peer_filter_connecting">Подключение</string>
+    <string name="peer_filter_connected">Подключено</string>
+    <string name="peers_clipboard_copy_ip">Копировать IP</string>
+    <string name="peers_clipboard_copy_ipv6">Копировать IPv6</string>
+    <string name="peers_clipboard_copy_fqdn">Копировать FQDN</string>
+    <string name="peers_desc_filter">Фильтр</string>
+
+    <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->
+    <string name="peer_detail_title">Пир</string>
+    <string name="peer_detail_refresh">Обновить</string>
+    <string name="peer_detail_copy">Копировать</string>
+    <string name="peer_detail_copied">Скопировано в буфер обмена</string>
+    <string name="peer_detail_netbird_ip">NetBird IP</string>
+    <string name="peer_detail_netbird_ipv6">NetBird IPv6</string>
+    <string name="peer_detail_connection">Подключение</string>
+    <string name="peer_detail_connection_relayed">Через ретранслятор</string>
+    <string name="peer_detail_connection_p2p">P2P</string>
+    <string name="peer_detail_relay_address">Ретранслятор</string>
+    <string name="peer_detail_latency">Задержка</string>
+    <string name="peer_detail_latency_value">%1$d мс</string>
+    <string name="peer_detail_rosenpass">Rosenpass включён</string>
+    <string name="peer_detail_transfer">Байты</string>
+    <string name="peer_detail_bytes_received">Получено</string>
+    <string name="peer_detail_bytes_sent">Отправлено</string>
+    <string name="peer_detail_status_since">Последнее обновление подключения</string>
+    <string name="peer_detail_networks">Ресурсы</string>
+    <string name="peer_detail_local_ice">Локальный ICE</string>
+    <string name="peer_detail_remote_ice">Удалённый ICE</string>
+    <string name="peer_detail_ice_with_type">%1$s (%2$s)</string>
+    <string name="peer_detail_public_key">Открытый ключ</string>
+    <string name="peer_detail_just_now">Только что</string>
+    <string name="peer_detail_unknown">-</string>
+    <string name="peer_detail_yes">Да</string>
+    <string name="peer_detail_no">Нет</string>
+
+
+    <string name="resources_connected"><![CDATA[<b>%1$d</b> <b>из</b> <b>%2$d</b> ресурсов подключено]]></string>
+    <string name="networks_hint_search_networks">Поиск ресурсов</string>
+    <string name="networks_desc_exit_node">выходной узел</string>
+
+    <string name="change_server_title_server">Сервер</string>
+    <string name="change_server_hint">https://example-api.domain.com:443</string>
+    <string name="change_server_setup_key">Добавить это устройство с помощью ключа установки</string>
+    <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
+    <string name="change_server_error_invalid_setup_key">Неверный формат ключа установки</string>
+
+    <string name="change_server_btn">Изменить</string>
+    <string name="change_server_verifying">Проверка…</string>
+    <string name="change_server_btn_reset">Использовать сервер NetBird</string>
+
+    <string name="change_server_alert_title">Сменить сервер</string>
+    <string name="change_server_alert_yes">Да</string>
+    <string name="change_server_alert_cancel">Отмена</string>
+    <string name="change_server_alert_desc">Смена сервера удалит локальную конфигурацию и отключит это устройство от текущей учётной записи NetBird.</string>
+
+    <string name="change_server_success_title">Сервер изменён</string>
+    <string name="change_server_success_desc">Нажмите кнопку подключения, чтобы продолжить</string>
+    <string name="change_server_success_cloe">ОК</string>
+    <string name="change_server_success_icon">Значок успеха</string>
+
+
+    <string name="advanced_section_presharedkey">Общий ключ</string>
+    <string name="advanced_section_rosenpass">Rosenpass</string>
+    <string name="advanced_section_appearance">Внешний вид</string>
+    <string name="advanced_details">Вы будете обмениваться данными только с пирами, использующими тот же ключ.</string>
+    <string name="advanced_hint">Добавьте общий ключ</string>
+    <string name="advanced_save">Сохранить</string>
+    <string name="advanced_presharedkey_saved_success">Общий ключ успешно сохранён</string>
+    <string name="advanced_presharedkey_save_error">Не удалось сохранить общий ключ</string>
+    <string name="advanced_tracelog">Включить уровень журналирования TRACE.</string>
+    <string name="troubleshoot_debug_bundle">Загрузить отладочный пакет</string>
+    <string name="troubleshoot_anonymize">Анонимизировать конфиденциальные данные</string>
+    <string name="troubleshoot_section_logging">Журналирование</string>
+    <string name="troubleshoot_section_debug_bundle">Отладочный пакет</string>
+    <string name="advanced_rosenpass">Включить Rosenpass</string>
+    <string name="advanced_rosenpass_permissive">Включить разрешающий режим Rosenpass.</string>
+    <string name="advanced_title_network_security">Сеть и безопасность</string>
+
+    <string name="advanced_disable_client_routes">Отключить клиентские маршруты</string>
+    <string name="advanced_disable_client_routes_desc">Запрещает этому устройству обрабатывать клиентские маршруты, полученные от службы управления</string>
+    <string name="advanced_disable_server_routes">Отключить серверные маршруты</string>
+    <string name="advanced_disable_server_routes_desc">Запрещает этому устройству выступать маршрутизатором для серверных маршрутов, полученных от службы управления</string>
+    <string name="advanced_disable_dns">Отключить DNS</string>
+    <string name="advanced_disable_dns_desc">Отключает конфигурацию DNS NetBird на этом устройстве</string>
+    <string name="advanced_disable_firewall">Отключить брандмауэр</string>
+    <string name="advanced_disable_firewall_desc">Отключает брандмауэр NetBird</string>
+    <string name="advanced_disable_ipv6">Отключить IPv6</string>
+    <string name="advanced_disable_ipv6_desc">Отключает оверлейную IPv6-адресацию на туннельном интерфейсе</string>
+    <string name="advanced_allow_ssh">Включить SSH</string>
+    <string name="advanced_allow_ssh_desc">Разрешает SSH-подключения к этому устройству</string>
+    <string name="advanced_block_inbound">Блокировать входящие подключения</string>
+    <string name="advanced_block_inbound_desc">Блокирует все входящие подключения к этому устройству и маршрутизируемым сетям. Это переопределяет любые политики, полученные от службы управления</string>
+
+
+    <string name="desc_logo">Логотип NetBird</string>
+    <string name="desc_exclamation_mark">восклицательный знак</string>
+    <string name="desc_peers_empty">пустая коробка</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[У вас есть VPN-приложение с включённой функцией «Постоянная VPN». Чтобы включить приложение NetBird, сначала откройте <b>настройки «Сеть и интернет»</b> → <b>Дополнительно</b> → проверьте <b>значок шестерёнки</b> у всех перечисленных здесь приложений. Отключите «Постоянную VPN» для всех приложений, кроме NetBird.]]></string>
+
+    <string name="theme_picker_selected">Выбрано</string>
+    <string name="theme_picker_announce">Выбрана тема «%1$s»</string>
+
+    <string name="advanced_theme_system">Системная</string>
+    <string name="advanced_theme_title">Тема оформления</string>
+    <string name="advanced_theme_dark">Тёмная</string>
+    <string name="advanced_theme_light">Светлая</string>
+    <string name="advanced_force_relay_conn">Принудительно использовать ретранслятор</string>
+    <string name="advanced_force_relay_conn_desc">Принудительно использует ретранслятор при подключении к пирам</string>
+    <string name="exclamation_mark">восклицательный знак</string>
+    <string name="reconnectionNeededWarningMessage">Чтобы применить настройку, потребуется переподключиться.</string>
+    <string name="change_server_setup_key_warning">Использовать ключи установки для пользовательских устройств не рекомендуется. SSO с MFA обеспечивает более надёжную защиту, корректную привязку устройства к пользователю и периодическую повторную аутентификацию.</string>
+    <string name="change_server_error_invalid_server_url">Неверный формат URL</string>
+    <string name="device_code">Код устройства: %s</string>
+
+    <!-- Profile strings -->
+    <string name="profiles_active">Активен</string>
+    <string name="profiles_add">Добавить профиль</string>
+    <string name="profiles_switch">Переключить</string>
+    <string name="profiles_logout">Выйти</string>
+    <string name="profiles_remove">Убрать</string>
+    <string name="profiles_dialog_add_title">Новый профиль</string>
+    <string name="profiles_dialog_add_message">Введите имя нового профиля:</string>
+    <string name="profiles_dialog_add_hint">Имя профиля</string>
+    <string name="profiles_rename">Переименовать профиль</string>
+    <string name="profiles_dialog_rename_title">Переименовать профиль</string>
+    <string name="profiles_dialog_rename_message">Введите новое имя для профиля «%s»:</string>
+    <string name="profiles_dialog_rename_hint">Имя профиля</string>
+    <string name="profiles_success_renamed">Профиль переименован в «%s»</string>
+    <string name="profiles_dialog_switch_title">Переключение профиля</string>
+    <string name="profiles_dialog_switch_message">Переключиться на профиль «%s»?\n\nТекущее подключение будет разорвано.</string>
+    <string name="profiles_dialog_logout_title">Выход из профиля</string>
+    <string name="profiles_dialog_logout_message">Выйти из профиля «%s»?\n\nДля использования этого профиля потребуется войти снова.</string>
+    <string name="profiles_dialog_remove_title">Удаление профиля</string>
+    <string name="profiles_dialog_remove_message">Вы действительно хотите удалить профиль «%s»?\n\nЭто действие нельзя отменить.</string>
+    <string name="profiles_error_empty_name">Имя профиля не может быть пустым</string>
+    <string name="profiles_error_already_exists">Профиль «%s» уже существует</string>
+    <string name="profiles_error_cannot_remove_active">Нельзя удалить активный профиль. Сначала переключитесь на другой профиль.</string>
+    <string name="profiles_error_cannot_remove_default">Профиль по умолчанию нельзя удалить</string>
+    <string name="profiles_success_logged_out">Выполнен выход из профиля «%s»</string>
+    <string name="profiles_success_removed">Профиль «%s» успешно удалён</string>
+
+    <!-- Language picker -->
+    <string name="settings_language">Язык интерфейса</string>
+    <string name="language_system_default">Язык системы</string>
+    <string name="language_picker_announce">Выбран язык: %1$s</string>
+
+    <!-- Messages previously hardcoded in code, extracted so they can be translated. -->
+    <string name="error_vpn_permission_required">Требуется разрешение VPN</string>
+    <string name="about_version_unknown">неизвестно</string>
+    <string name="error_generic">Ошибка: %s</string>
+    <string name="error_config_path">Не удалось получить путь к конфигурации: %s</string>
+    <string name="troubleshoot_key_copied">Ключ отладочного пакета скопирован в буфер обмена</string>
+    <string name="troubleshoot_bundle_failed">Не удалось создать отладочный пакет: %s</string>
+    <string name="settings_no_browser">Нет браузера, чтобы открыть %s</string>
+</resources>
