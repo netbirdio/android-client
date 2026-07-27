@@ -31,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -125,6 +126,18 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(bottomNav, navController);
+
+        // Peer detail is a sibling of the tabs rather than a child, so tapping a tab
+        // navigates away without unwinding it. NavigationUI derives the bottom-nav
+        // selection from the current destination, and peer detail matches no nav item,
+        // which strands the bar with nothing highlighted. Clear it on the way out.
+        bottomNav.setOnItemSelectedListener(item -> {
+            NavDestination current = navController.getCurrentDestination();
+            if (current != null && current.getId() == R.id.nav_peer_detail) {
+                navController.popBackStack(R.id.nav_peer_detail, true);
+            }
+            return NavigationUI.onNavDestinationSelected(item, navController);
+        });
 
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             int destId = destination.getId();

@@ -67,6 +67,9 @@ public class PeersFragment extends Fragment {
         model = new ViewModelProvider(this, PeersFragmentViewModel.getFactory(serviceAccessor))
                 .get(PeersFragmentViewModel.class);
         stateListenerRegistry.registerServiceStateListener(model.getStateListener());
+        // Load eagerly: a fresh fragment (e.g. returning to this tab) would otherwise
+        // sit on the zero-peers view until the next peer-change event happens to fire.
+        model.refreshPeers();
 
         boolean isRunningOnTV = false;
         if (getArguments() != null) {

@@ -114,9 +114,13 @@ public class PeerDetailFragment extends Fragment {
 
         pubKey = getArguments() != null ? getArguments().getString(ARG_PUB_KEY, "") : "";
 
+        // Activity-scoped and therefore NOT the instance PeersFragment drives (that one
+        // is fragment-scoped), so this model needs its own event registration and an
+        // eager first load — nothing else ever fills it.
         model = new ViewModelProvider(requireActivity(), PeersFragmentViewModel.getFactory(serviceAccessor))
                 .get(PeersFragmentViewModel.class);
         stateListenerRegistry.registerServiceStateListener(model.getStateListener());
+        model.refreshPeers();
 
         binding.peerDetailRefresh.setOnClickListener(v -> {
             v.animate().rotationBy(360f).setDuration(600).start();
@@ -126,6 +130,12 @@ public class PeerDetailFragment extends Fragment {
         // The peer list keeps streaming while this screen is open, so re-render from
         // each snapshot rather than from a copy taken when the row was tapped.
         model.getUiState().observe(getViewLifecycleOwner(), uiState -> {
+            // An empty list is "not loaded yet" (this model starts blank and fills
+            // asynchronously), not "the peer is gone" — leave only when a non-empty
+            // snapshot no longer contains the peer.
+            if (uiState.getPeers().isEmpty()) {
+                return;
+            }
             Peer peer = findPeer(uiState.getPeers());
             if (peer == null) {
                 // The peer dropped out of the list; nothing left to show.
@@ -158,6 +168,8 @@ public class PeerDetailFragment extends Fragment {
     public void onDestroyView() {
         pollHandler.removeCallbacks(pollTask);
         rendered = null;
+        // Safe to unregister: this is the activity-scoped model's listener, a different
+        // object from the one the fragment-scoped PeersFragment model registered.
         if (model != null && stateListenerRegistry != null) {
             stateListenerRegistry.unregisterServiceStateListener(model.getStateListener());
         }
