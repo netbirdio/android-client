@@ -96,14 +96,14 @@
         android:layout_marginTop="28dp"
         android:fontFamily="@font/inter_variable"
         android:focusable="false"
-        android:text="@string/main_status_disconnected"
         android:textAlignment="center"
         android:textColor="@color/nb_txt"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/btn_connect"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="@string/main_status_disconnected" />
 
     <!-- IP / network address (monospace, emphasized) -->
     <TextView

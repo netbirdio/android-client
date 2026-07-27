@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -108,6 +109,11 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
             }, 200);
         }
 
+        // Seed the disconnected state for the case where the service hasn't reported one yet
+        // (cold start). Registration below replays the real state synchronously when there is
+        // one, so this never reaches the screen on a re-entry into an active connection.
+        setToggle(false, true, R.string.main_status_disconnected);
+
         stateListenerRegistry.registerServiceStateListener(this);
         return root;
     }
@@ -157,8 +163,7 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
     }
 
     private void setStatusText(int resId) {
-        if (textConnStatus == null) return;
-        textConnStatus.post(() -> {
+        runOnUi(() -> {
             if (textConnStatus != null) {
                 textConnStatus.setText(resId);
             }
@@ -166,13 +171,34 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
     }
 
     private void setToggle(boolean checked, boolean enabled, int statusResId) {
-        if (buttonConnect == null) return;
-        buttonConnect.post(() -> {
-            if (buttonConnect == null) return;
-            buttonConnect.setChecked(checked);
-            buttonConnect.setEnabled(enabled);
-            setStatusText(statusResId);
+        runOnUi(() -> {
+            if (buttonConnect != null) {
+                buttonConnect.setChecked(checked);
+                buttonConnect.setEnabled(enabled);
+                // setChecked animates the thumb; on a freshly inflated view that reads as the
+                // toggle sliding into place, so snap it to its final position instead.
+                buttonConnect.jumpDrawablesToCurrentState();
+            }
+            if (textConnStatus != null) {
+                textConnStatus.setText(statusResId);
+            }
         });
+    }
+
+    /**
+     * Applies a view update immediately when we're already on the main thread, and posts it
+     * otherwise. State replayed at listener-registration time arrives on the main thread before
+     * the first draw, so running it inline keeps the stale layout defaults from flashing.
+     */
+    private void runOnUi(Runnable action) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            action.run();
+            return;
+        }
+        View root = binding != null ? binding.getRoot() : null;
+        if (root != null) {
+            root.post(action);
+        }
     }
 
     @Override
@@ -225,7 +251,7 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
         final String fIpv4 = ipv4;
         final String fIpv6 = ipv6;
         final boolean hasIpv4 = !TextUtils.isEmpty(fIpv4);
-        binding.getRoot().post(() -> {
+        runOnUi(() -> {
             if (binding == null) return;
             // Emphasized line shows the hostname (fqdn); muted summary shows the IPv4 address.
             binding.textHostname.setText(fqdn);
