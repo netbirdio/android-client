@@ -59,6 +59,34 @@
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
     <string name="peers_desc_filter">Filter</string>
 
+    <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->
+    <string name="peer_detail_title">Peer</string>
+    <string name="peer_detail_refresh">Refresh</string>
+    <string name="peer_detail_copy">Copy</string>
+    <string name="peer_detail_copied">Copied to clipboard</string>
+    <string name="peer_detail_netbird_ip">NetBird IP</string>
+    <string name="peer_detail_netbird_ipv6">NetBird IPv6</string>
+    <string name="peer_detail_connection">Connection</string>
+    <string name="peer_detail_connection_relayed">Relayed</string>
+    <string name="peer_detail_connection_p2p">P2P</string>
+    <string name="peer_detail_relay_address">Relay</string>
+    <string name="peer_detail_latency">Latency</string>
+    <string name="peer_detail_latency_value">%1$d ms</string>
+    <string name="peer_detail_rosenpass">Rosenpass enabled</string>
+    <string name="peer_detail_transfer">Bytes</string>
+    <string name="peer_detail_bytes_received">Received</string>
+    <string name="peer_detail_bytes_sent">Sent</string>
+    <string name="peer_detail_status_since">Last connection update</string>
+    <string name="peer_detail_networks">Resources</string>
+    <string name="peer_detail_local_ice">Local ICE</string>
+    <string name="peer_detail_remote_ice">Remote ICE</string>
+    <string name="peer_detail_ice_with_type">%1$s (%2$s)</string>
+    <string name="peer_detail_public_key">Public key</string>
+    <string name="peer_detail_just_now">Just now</string>
+    <string name="peer_detail_unknown">-</string>
+    <string name="peer_detail_yes">Yes</string>
+    <string name="peer_detail_no">No</string>
+
 
     <string name="resources_connected"><![CDATA[<b>%1$d</b> <b>of</b> <b>%2$d</b> Resources connected]]></string>
     <string name="networks_hint_search_networks">Search resources</string>

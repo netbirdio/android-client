@@ -29,14 +29,20 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
         CONNECTED,
     }
 
+    public interface OnPeerClickListener {
+        void onPeerClick(Peer peer);
+    }
+
     private final List<Peer> peerList;
     private final List<Peer> filteredPeerList;
+    private final OnPeerClickListener clickListener;
 
     private FilterStatus filterStatus = ALL;
     private String filterQueryString = "";
 
-    public PeersAdapter(List<Peer> peerList) {
+    public PeersAdapter(List<Peer> peerList, OnPeerClickListener clickListener) {
         this.peerList = peerList;
+        this.clickListener = clickListener;
         filteredPeerList = new ArrayList<>(peerList);
         sortPeers();
     }
@@ -52,7 +58,7 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
     @Override
     public void onBindViewHolder(@NonNull PeerViewHolder holder, int position) {
         Peer peer = filteredPeerList.get(position);
-        holder.bind(peer);
+        holder.bind(peer, clickListener);
     }
 
     @Override
@@ -169,7 +175,7 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
             this.binding = binding;
         }
 
-        public void bind(Peer peer) {
+        public void bind(Peer peer, OnPeerClickListener clickListener) {
             binding.status.setText(peer.getStatus().toString());
             String ipDisplay = peer.getIp();
             if (peer.getIpv6() != null && !peer.getIpv6().isEmpty()) {
@@ -183,6 +189,12 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
             } else {
                 binding.verticalLine.setBackgroundResource(R.drawable.peer_status_disconnected); // Red for disconnected
             }
+
+            binding.getRoot().setOnClickListener(v -> {
+                if (clickListener != null) {
+                    clickListener.onPeerClick(peer);
+                }
+            });
 
             // Long press listener
             binding.getRoot().setOnLongClickListener(v -> {

@@ -52,4 +52,9 @@
 
     <color name="profile_background">@color/nb_bg</color>
     <color name="profile_card_background">@color/nb_gray_light</color>
+
+    <!-- Lighter bands so they stay legible against the dark background -->
+    <color name="nb_latency_good">#4ADE80</color>
+    <color name="nb_latency_high">#FACC15</color>
+    <color name="nb_transfer_rx">#38BDF8</color>
 </resources>

@@ -25,6 +25,11 @@
     <color name="nb_txt_light">#7c7c7c</color>
     <color name="nb_button_inactive">#4E4E4E</color>
 
+    <!-- Peer detail: latency bands and transfer direction, matching the desktop app -->
+    <color name="nb_latency_good">#2E9E4F</color>
+    <color name="nb_latency_high">#B7791F</color>
+    <color name="nb_transfer_rx">#2B8FD4</color>
+
     <!-- Chrome surfaces: white in light mode, dark in night mode -->
     <color name="nb_bottom_nav_bg">#FFFFFF</color>
     <color name="nb_chip_bg">#FFFFFF</color>

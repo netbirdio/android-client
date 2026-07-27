@@ -1,5 +1,7 @@
 package io.netbird.client.ui.home;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -7,6 +9,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,8 +22,11 @@ import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.gomobile.android.PeerInfo;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.PeerRoutes;
 
 public class PeersFragmentViewModel extends ViewModel implements PeersStateListener {
+    private static final String TAG = "PeersFragmentViewModel";
+
     private final PeersStateListenerAdapter peersAdapter;
     private final ServiceAccessor serviceAccessor;
 
@@ -64,9 +70,47 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
             }
 
             status = Status.fromLong(peerInfo.getConnStatus());
-            peers.add(new Peer(status, peerInfo.getIP(), peerInfo.getIPv6(), peerInfo.getFQDN()));
+            peers.add(new Peer(
+                    status,
+                    peerInfo.getIP(),
+                    peerInfo.getIPv6(),
+                    peerInfo.getFQDN(),
+                    peerInfo.getPubKey(),
+                    peerInfo.getLatency(),
+                    peerInfo.getLatencyMs(),
+                    peerInfo.getBytesRx(),
+                    peerInfo.getBytesTx(),
+                    peerInfo.getConnStatusUpdate(),
+                    peerInfo.getRelayed(),
+                    peerInfo.getRosenpassEnabled(),
+                    peerInfo.getLastWireguardHandshake(),
+                    peerInfo.getLocalIceCandidateType(),
+                    peerInfo.getRemoteIceCandidateType(),
+                    peerInfo.getLocalIceCandidateEndpoint(),
+                    peerInfo.getRemoteIceCandidateEndpoint(),
+                    getRoutes(peerInfo)));
         }
         return peers;
+    }
+
+    private static List<String> getRoutes(PeerInfo peerInfo) {
+        PeerRoutes peerRoutes = peerInfo.getPeerRoutes();
+        if (peerRoutes == null) {
+            return Collections.emptyList();
+        }
+
+        List<String> routes = new ArrayList<>();
+        for (int i = 0; i < peerRoutes.size(); i++) {
+            try {
+                routes.add(peerRoutes.get(i));
+            } catch (Exception e) {
+                // The list is read back index by index, so a shrinking list mid-read
+                // is the only way this throws; the routes gathered so far still stand.
+                Log.w(TAG, "Failed to read route at index " + i, e);
+                break;
+            }
+        }
+        return routes;
     }
 
     public LiveData<PeersFragmentUiState> getUiState() {
@@ -87,6 +131,15 @@ public class PeersFragmentViewModel extends ViewModel implements PeersStateListe
 
     @Override
     public void onPeersChanged(long totalPeers) {
+        refreshPeers();
+    }
+
+    /**
+     * Re-reads the peer list off the UI thread. Transfer counters and handshake
+     * times only advance when the list is fetched, so the detail screen calls this
+     * to pull fresh numbers without waiting for a peer-list change event.
+     */
+    public void refreshPeers() {
         if (isCleared.get()) {
             return;
         }

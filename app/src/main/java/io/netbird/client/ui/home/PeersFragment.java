@@ -17,6 +17,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -84,7 +85,7 @@ public class PeersFragment extends Fragment {
             ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
         }
 
-        PeersAdapter adapter = new PeersAdapter(peers);
+        PeersAdapter adapter = new PeersAdapter(peers, this::showPeerDetail);
 
         RecyclerView peersRecyclerView = binding.peersRecyclerView;
         peersRecyclerView.setAdapter(adapter);
@@ -156,6 +157,11 @@ public class PeersFragment extends Fragment {
         }
         binding = null;
         super.onDestroyView();
+    }
+
+    private void showPeerDetail(Peer peer) {
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.nav_peer_detail, PeerDetailFragment.argsFor(peer));
     }
 
     private void updatePeersCounter(List<Peer> peers) {
