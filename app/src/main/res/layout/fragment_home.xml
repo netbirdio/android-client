@@ -53,18 +53,22 @@
             app:tint="@color/nb_txt" />
     </LinearLayout>
 
-    <!-- NetBird logo -->
+    <!-- NetBird logo. Head of a packed vertical chain (logo → switch → status →
+         hostname → address rows) centered between the profile chip and the exit
+         node row, so the group can never overlap either. -->
     <ImageView
         android:id="@+id/home_logo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="16dp"
         android:adjustViewBounds="true"
         android:contentDescription="@string/main_desc_logo"
         android:focusable="false"
         android:scaleType="fitCenter"
         android:src="@drawable/nb_logo_full"
         app:layout_constraintTop_toBottomOf="@id/profile_chip"
+        app:layout_constraintBottom_toTopOf="@+id/btn_connect"
+        app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.42" />
@@ -85,6 +89,7 @@
         app:track="@drawable/connect_switch_track"
         app:useMaterialThemeColors="false"
         app:layout_constraintTop_toBottomOf="@id/home_logo"
+        app:layout_constraintBottom_toTopOf="@+id/text_connection_status"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -101,6 +106,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/btn_connect"
+        app:layout_constraintBottom_toTopOf="@+id/text_hostname"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:text="@string/main_status_disconnected" />
@@ -117,6 +123,7 @@
         android:textColor="@color/nb_txt"
         android:textSize="15sp"
         app:layout_constraintTop_toBottomOf="@id/text_connection_status"
+        app:layout_constraintBottom_toTopOf="@+id/network_address_summary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:text="sdk-phone-x86-64.netbird.cloud" />
@@ -139,6 +146,7 @@
         android:visibility="gone"
         tools:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/text_hostname"
+        app:layout_constraintBottom_toTopOf="@+id/info_rows"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -178,6 +186,7 @@
         android:visibility="gone"
         tools:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/network_address_summary"
+        app:layout_constraintBottom_toTopOf="@+id/exit_node_row"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
