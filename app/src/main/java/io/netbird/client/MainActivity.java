@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -116,6 +117,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
         if (isRunningOnTV) {
             Log.i(LOGTAG, "Running on Android TV - optimizing for D-pad navigation");
+        } else {
+            // The phone UX is portrait-only, like the iOS app (which locks
+            // portrait in its project settings). TV stays unlocked: it is
+            // landscape by nature and uses the w960dp navigation-rail layout.
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         if (useDeviceCodeFlow && !isRunningOnTV) {
             Log.i(LOGTAG, "Running on ChromeOS - using device code flow for authentication");
