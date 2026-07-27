@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,11 +27,48 @@
         android:textSize="13sp"
         android:textAllCaps="true" />
 
+    <!-- Capped height so the list is the only part that scrolls: the action rows
+         below stay on screen no matter how many profiles exist. -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/profile_picker_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxHeight="320dp"
         tools:listitem="@layout/list_item_profile_picker" />
+
+    <LinearLayout
+        android:id="@+id/profile_picker_show_all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/sheet_row_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/profile_picker_show_all_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_weight="1"
+            android:textColor="@color/nb_txt"
+            android:textSize="16sp"
+            tools:text="Show all profiles (23)" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_chevron_right"
+            app:tint="@color/nb_txt_light" />
+
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
@@ -49,8 +87,7 @@
         android:minHeight="56dp"
         android:orientation="horizontal"
         android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        android:paddingEnd="20dp">
 
         <ImageView
             android:layout_width="24dp"
@@ -80,8 +117,7 @@
         android:minHeight="56dp"
         android:orientation="horizontal"
         android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        android:paddingEnd="20dp">
 
         <ImageView
             android:layout_width="24dp"

@@ -11,6 +11,7 @@
     <string name="profile_picker_title">Active profile</string>
     <string name="profile_picker_add">Add profile</string>
     <string name="profile_picker_manage">Manage profiles</string>
+    <string name="profile_picker_show_all">Show all profiles (%1$d)</string>
 
     <string name="bottom_nav_home">Home</string>
     <string name="bottom_nav_peers">Peers</string>

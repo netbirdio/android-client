@@ -33,6 +33,7 @@ public class ProfilesFragment extends Fragment {
     private RecyclerView recyclerView;
     private ProfilesAdapter adapter;
     private ProfileManagerWrapper profileManager;
+    private ProfileUsageTracker usageTracker;
     private final List<Profile> profiles = new ArrayList<>();
 
     @Nullable
@@ -42,6 +43,7 @@ public class ProfilesFragment extends Fragment {
 
         // Initialize profile manager
         profileManager = new ProfileManagerWrapper(requireContext());
+        usageTracker = new ProfileUsageTracker(requireContext());
 
         recyclerView = view.findViewById(R.id.recycler_profiles);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -190,6 +192,7 @@ public class ProfilesFragment extends Fragment {
         try {
             // Switch profile (VPN service will be stopped automatically in ProfileManagerWrapper)
             profileManager.switchProfile(profile.getID());
+            usageTracker.markUsed(profile.getID());
 
             loadProfiles();
 
