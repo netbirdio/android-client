@@ -252,4 +252,68 @@
 
     </LinearLayout>
 
+    <!-- Exit node selector, pinned to the bottom like the desktop main view.
+         Only visible while connected and at least one exit node is available. -->
+    <LinearLayout
+        android:id="@+id/exit_node_row"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/info_row_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/exit_node_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/networks_desc_exit_node"
+            android:src="@drawable/exit"
+            app:tint="@color/nb_txt_light" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/exit_node_title"
+                android:textColor="@color/nb_txt"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/exit_node_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/exit_node_none"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="13sp"
+                tools:text="aws-frankfurt" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_drop_down"
+            app:tint="@color/nb_txt_light" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

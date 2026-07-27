@@ -36,6 +36,11 @@ public class Resource {
     }
 
     public boolean isExitNode() {
+        return isExitNodeAddress(address);
+    }
+
+    /** A route whose range covers all traffic (0.0.0.0/0 or ::/0) is an exit node. */
+    public static boolean isExitNodeAddress(String address) {
         return address != null && (address.contains("0.0.0.0/0") || address.contains("::/0"));
     }
 

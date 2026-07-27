@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -26,8 +27,10 @@ import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentHomeBinding;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.tool.RouteChangeListener;
+import io.netbird.gomobile.android.NetworkArray;
 
-public class HomeFragment extends Fragment implements StateListener, ProfilePickerSheet.OnProfileSwitchedListener {
+public class HomeFragment extends Fragment implements StateListener, RouteChangeListener, ProfilePickerSheet.OnProfileSwitchedListener {
 
     private FragmentHomeBinding binding;
     private ServiceAccessor serviceAccessor;
@@ -98,6 +101,12 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
             ProfilePickerSheet sheet = new ProfilePickerSheet();
             sheet.show(getChildFragmentManager(), "ProfilePickerSheet");
         });
+
+        binding.exitNodeRow.setOnClickListener(v -> {
+            ExitNodePickerSheet sheet = new ExitNodePickerSheet();
+            sheet.show(getChildFragmentManager(), "ExitNodePickerSheet");
+        });
+        serviceAccessor.addRouteChangeListener(this);
 
         updateProfileChip();
 
@@ -205,6 +214,9 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
     public void onDestroyView() {
         super.onDestroyView();
         stateListenerRegistry.unregisterServiceStateListener(this);
+        if (serviceAccessor != null) {
+            serviceAccessor.removeRouteChangeListener(this);
+        }
         binding = null;
         buttonConnect = null;
         textConnStatus = null;
@@ -228,6 +240,54 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
     public void onEngineStopped() {
         isConnected = false;
         setToggle(false, true, R.string.main_status_disconnected);
+        updateExitNodeRow();
+    }
+
+    @Override
+    public void onRouteChanged(String routes) {
+        updateExitNodeRow();
+    }
+
+    /**
+     * Shows the exit node row only while connected and at least one exit node is
+     * shared with this peer; the subtitle names the active exit node, if any.
+     */
+    private void updateExitNodeRow() {
+        ServiceAccessor accessor = serviceAccessor;
+        if (accessor == null || binding == null) {
+            return;
+        }
+
+        String activeName = null;
+        boolean hasAny = false;
+        if (isConnected) {
+            NetworkArray networks = accessor.getNetworks();
+            if (networks != null) {
+                for (int i = 0; i < networks.size(); i++) {
+                    var network = networks.get(i);
+                    if (!Resource.isExitNodeAddress(network.getNetwork())) {
+                        continue;
+                    }
+                    hasAny = true;
+                    if (network.getIsSelected()) {
+                        activeName = network.getName();
+                    }
+                }
+            }
+        }
+
+        final boolean show = isConnected && hasAny;
+        final String name = activeName;
+        runOnUi(() -> {
+            Context ctx = getContext();
+            if (binding == null || ctx == null) {
+                return;
+            }
+            binding.exitNodeRow.setVisibility(show ? View.VISIBLE : View.GONE);
+            binding.exitNodeStatus.setText(name != null ? name : getString(R.string.exit_node_none));
+            binding.exitNodeIcon.setColorFilter(ContextCompat.getColor(ctx,
+                    name != null ? R.color.nb_orange : R.color.nb_txt_light));
+        });
     }
 
     @Override
@@ -276,6 +336,7 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
     public void onConnected() {
         isConnected = true;
         setToggle(true, true, R.string.main_status_connected);
+        updateExitNodeRow();
     }
 
     @Override
@@ -287,6 +348,7 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
     public void onDisconnected() {
         isConnected = false;
         setToggle(false, true, R.string.main_status_disconnected);
+        updateExitNodeRow();
     }
 
     @Override
@@ -296,6 +358,11 @@ public class HomeFragment extends Fragment implements StateListener, ProfilePick
 
     @Override
     public void onPeersListChanged(long numberOfPeers) {
-        // peer count badge moved to bottom navigation; intentionally noop here
+        // Peer count badge moved to bottom navigation. This event also fires right
+        // after the network map is applied, unlike onConnected (too early: routes not
+        // yet present) and onRouteChanged (silent for the initial route set, which is
+        // the notifier's baseline) — so it's what makes the exit node row appear on a
+        // fresh connect. Same trigger pair the Networks tab relies on.
+        updateExitNodeRow();
     }
 }

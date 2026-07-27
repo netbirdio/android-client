@@ -102,6 +102,13 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
 
         for (int i = 0; i < networks.size(); i++) {
             var network = networks.get(i);
+
+            // Exit nodes are surfaced through the Home screen picker; keep them
+            // out of the resources list.
+            if (Resource.isExitNodeAddress(network.getNetwork())) {
+                continue;
+            }
+
             var networkDomains = network.getNetworkDomains();
 
             resources.add(new Resource(Status.fromString(network.getStatus()),
