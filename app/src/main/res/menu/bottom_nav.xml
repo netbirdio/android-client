@@ -13,7 +13,7 @@
 
     <item
         android:id="@+id/nav_networks"
-        android:icon="@drawable/ic_nav_networks"
+        android:icon="@drawable/ic_layers"
         android:title="@string/bottom_nav_networks" />
 
     <item
