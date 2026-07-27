@@ -67,4 +67,14 @@
     </style>
 
     <style name="Theme.NetBird.Card" parent="ThemeOverlay.MaterialComponents.Dark" />
+
+    <!-- Dark counterpart of the day-mode dialog theme; without it the light
+         parent would force dark-on-dark text inside dialogs at night. -->
+    <style name="AlertDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="colorPrimary">@color/nb_orange</item>
+        <item name="colorAccent">@color/nb_orange</item>
+        <item name="colorSecondary">@color/nb_orange</item>
+        <item name="android:textColorPrimary">@color/nb_txt</item>
+    </style>
 </resources>

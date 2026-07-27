@@ -20,6 +20,7 @@ import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentSettingsBinding;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.profile.ProfileEditorDialog;
 
 public class SettingsFragment extends Fragment {
 
@@ -44,8 +45,9 @@ public class SettingsFragment extends Fragment {
         binding.rowProfiles.setOnClickListener(v ->
                 navController.navigate(R.id.nav_profiles));
 
-        binding.rowChangeServer.setOnClickListener(v ->
-                navController.navigate(R.id.nav_change_server));
+        // The management server belongs to a profile, so edit the active one
+        // rather than keeping a second, differently-shaped screen for it.
+        binding.rowChangeServer.setOnClickListener(v -> showActiveProfileEditor());
 
         binding.rowAdvanced.setOnClickListener(v ->
                 navController.navigate(R.id.nav_advanced));
@@ -97,6 +99,21 @@ public class SettingsFragment extends Fragment {
             Log.e(LOGTAG, "Failed to read active profile", e);
             binding.activeProfileName.setText("");
         }
+    }
+
+    private void showActiveProfileEditor() {
+        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(requireContext());
+        Profile active;
+        try {
+            active = profileManager.getActiveProfile();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to read active profile", e);
+            Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ProfileEditorDialog.showEdit(requireContext(), profileManager, active,
+                saved -> updateActiveProfileName());
     }
 
     private void setVersionText() {

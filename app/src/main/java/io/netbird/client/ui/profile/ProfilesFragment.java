@@ -5,12 +5,10 @@ import static android.view.View.GONE;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.text.InputFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,10 +30,6 @@ import io.netbird.client.tool.ProfileManagerWrapper;
 public class ProfilesFragment extends Fragment {
     private static final String TAG = "ProfilesFragment";
 
-    // Mirror the Go core's limits: a new profile's name doubles as its on-disk
-    // filename, while a renamed profile only changes its display name.
-    private static final int MAX_PROFILE_ID_LEN = 64;
-    private static final int MAX_PROFILE_NAME_LEN = 128;
     private RecyclerView recyclerView;
     private ProfilesAdapter adapter;
     private ProfileManagerWrapper profileManager;
@@ -61,8 +55,8 @@ public class ProfilesFragment extends Fragment {
             }
 
             @Override
-            public void onRenameProfile(Profile profile) {
-                showRenameDialog(profile);
+            public void onEditProfile(Profile profile) {
+                showEditDialog(profile);
             }
 
             @Override
@@ -93,20 +87,12 @@ public class ProfilesFragment extends Fragment {
     }
 
     interface DialogCallback {
-        // Return true to dismiss dialog.
-        boolean onConfirm(@Nullable String inputText);
+        void onConfirm();
     }
 
+    /** Yes/no confirmation for the switch, logout and remove actions. */
     @SuppressLint("InflateParams")
-    private AlertDialog createDialog(String title, String message, @Nullable String inputHint, DialogCallback callback) {
-        return createDialog(title, message, inputHint, null, MAX_PROFILE_ID_LEN, callback);
-    }
-
-    @SuppressLint("InflateParams")
-    private AlertDialog createDialog(String title, String message, @Nullable String inputHint,
-                                     @Nullable String prefill, int maxLength, DialogCallback callback) {
-        boolean hasInput = inputHint != null;
-
+    private AlertDialog createDialog(String title, String message, DialogCallback callback) {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_simple_edit_text, null);
 
         TextView txtTitle = dialogView.findViewById(R.id.text_title_dialog);
@@ -115,17 +101,7 @@ public class ProfilesFragment extends Fragment {
         TextView txtMessage = dialogView.findViewById(R.id.text_label_dialog);
         txtMessage.setText(message);
 
-        EditText input = dialogView.findViewById(R.id.edit_text_dialog);
-        if (hasInput) {
-            input.setHint(inputHint);
-            input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
-            if (prefill != null) {
-                input.setText(prefill);
-                input.setSelection(prefill.length());
-            }
-        } else {
-            input.setVisibility(GONE);
-        }
+        dialogView.findViewById(R.id.edit_text_dialog).setVisibility(GONE);
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
                 .setView(dialogView)
@@ -133,62 +109,27 @@ public class ProfilesFragment extends Fragment {
 
         dialogView.findViewById(R.id.btn_cancel_dialog).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btn_ok_dialog).setOnClickListener(v -> {
-            String inputText = hasInput ? input.getText().toString().trim() : null;
-            if (callback.onConfirm(inputText)) {
-                dialog.dismiss();
-            }
+            callback.onConfirm();
+            dialog.dismiss();
         });
 
         return dialog;
     }
 
     private void showAddDialog() {
-        createDialog(
-                getString(R.string.profiles_dialog_add_title),
-                getString(R.string.profiles_dialog_add_message),
-                getString(R.string.profiles_dialog_add_hint),
-                profileName -> {
-                    if (profileName == null || profileName.isEmpty()) {
-                        Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-
-                    addProfile(profileName);
-                    return true;
-                }).show();
+        ProfileEditorDialog.showCreate(requireContext(), profileManager, profile -> loadProfiles());
     }
 
-
-    private void showRenameDialog(Profile profile) {
-        createDialog(
-                getString(R.string.profiles_dialog_rename_title),
-                getString(R.string.profiles_dialog_rename_message, profile.getName()),
-                getString(R.string.profiles_dialog_rename_hint),
-                profile.getName(),
-                MAX_PROFILE_NAME_LEN,
-                newName -> {
-                    if (newName == null || newName.isEmpty()) {
-                        Toast.makeText(requireContext(), R.string.profiles_error_empty_name, Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                    if (newName.equals(profile.getName())) {
-                        return true;
-                    }
-
-                    renameProfile(profile, newName);
-                    return true;
-                }).show();
+    private void showEditDialog(Profile profile) {
+        ProfileEditorDialog.showEdit(requireContext(), profileManager, profile,
+                saved -> loadProfiles());
     }
 
     private void showSwitchDialog(Profile profile) {
         createDialog(
                 getString(R.string.profiles_dialog_switch_title),
                 getString(R.string.profiles_dialog_switch_message, profile.getName()),
-                null,
-                ignored -> {
-                    switchProfile(profile);
-                    return true;
-                }
+                () -> switchProfile(profile)
         ).show();
     }
 
@@ -196,11 +137,7 @@ public class ProfilesFragment extends Fragment {
         createDialog(
                 getString(R.string.profiles_dialog_logout_title),
                 getString(R.string.profiles_dialog_logout_message, profile.getName()),
-                null,
-                ignored -> {
-                    logoutProfile(profile);
-                    return true;
-                }
+                () -> logoutProfile(profile)
         ).show();
     }
 
@@ -208,44 +145,8 @@ public class ProfilesFragment extends Fragment {
         createDialog(
                 getString(R.string.profiles_dialog_remove_title),
                 getString(R.string.profiles_dialog_remove_message, profile.getName()),
-                null,
-                ignored -> {
-                    removeProfile(profile);
-                    return true;
-                }
+                () -> removeProfile(profile)
         ).show();
-    }
-
-    private void addProfile(String profileName) {
-        try {
-            profileManager.addProfile(profileName);
-            loadProfiles();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to add profile", e);
-            String errorMsg = e.getMessage();
-            if (errorMsg != null) {
-                Toast.makeText(requireContext(),
-                        "Failed to add profile: " + e.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void renameProfile(Profile profile, String newName) {
-        try {
-            profileManager.renameProfile(profile.getID(), newName);
-
-            Toast.makeText(requireContext(),
-                    getString(R.string.profiles_success_renamed, newName),
-                    Toast.LENGTH_SHORT).show();
-
-            loadProfiles();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to rename profile", e);
-            Toast.makeText(requireContext(),
-                    "Failed to rename profile: " + e.getMessage(),
-                    Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void switchProfile(Profile profile) {

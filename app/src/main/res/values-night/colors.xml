@@ -57,4 +57,12 @@
     <color name="nb_latency_good">#4ADE80</color>
     <color name="nb_latency_high">#FACC15</color>
     <color name="nb_transfer_rx">#38BDF8</color>
+
+    <!-- Segmented control (Cloud / Self-hosted), matching the desktop app -->
+    <color name="nb_segment_track">#101214</color>
+    <color name="nb_segment_track_border">#2C3138</color>
+    <color name="nb_segment_thumb">#3A414B</color>
+
+    <!-- Destructive actions (Remove); lighter so it stays legible on dark -->
+    <color name="nb_danger">#F87171</color>
 </resources>

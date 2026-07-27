@@ -4,7 +4,7 @@
 
     <string name="menu_advanced">詳細設定</string>
     <string name="menu_about">情報</string>
-    <string name="menu_change_server">サーバーを変更</string>
+    <string name="menu_change_server">管理サーバー</string>
     <string name="menu_profiles">プロファイル</string>
     <string name="menu_troubleshoot">トラブルシューティング</string>
 
@@ -33,8 +33,9 @@
     <string name="main_copied">コピーしました</string>
     <string name="main_value_empty">–</string>
 
-    <string name="fragment_firstinstall_txt">デフォルトでは NetBird のクラウドサーバーに接続します。「サーバーを変更」メニューから別のサーバーを使用できます。</string>
     <string name="fragment_firstinstall_continue">続ける</string>
+    <string name="firstinstall_setup_title">NetBird をセットアップ</string>
+    <string name="firstinstall_setup_description">「続ける」をタップして開始するか、独自の NetBird サーバーをお持ちの場合は「セルフホスト」を選択してください。</string>
     <string name="fragment_firstinstall_desc_logo">NetBird ロゴ</string>
     <string name="fragment_firstinstall_androidtv_beta">Android TV のサポートは現在ベータ版です。一部の機能は期待どおりに動作しない場合があります。</string>
 
@@ -92,25 +93,12 @@
     <string name="networks_hint_search_networks">リソースを検索</string>
     <string name="networks_desc_exit_node">出口ノード</string>
 
-    <string name="change_server_title_server">サーバー</string>
-    <string name="change_server_hint">https://example-api.domain.com:443</string>
     <string name="change_server_setup_key">セットアップキーでこのデバイスを追加</string>
     <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
     <string name="change_server_error_invalid_setup_key">セットアップキーの形式が無効です</string>
 
-    <string name="change_server_btn">変更</string>
-    <string name="change_server_verifying">確認中…</string>
-    <string name="change_server_btn_reset">NetBird サーバーを使用</string>
 
-    <string name="change_server_alert_title">サーバーを変更</string>
-    <string name="change_server_alert_yes">はい</string>
-    <string name="change_server_alert_cancel">キャンセル</string>
-    <string name="change_server_alert_desc">サーバーを変更すると、ローカル設定が消去され、このデバイスは現在の NetBird アカウントから切断されます。</string>
 
-    <string name="change_server_success_title">サーバーを変更しました</string>
-    <string name="change_server_success_desc">続行するには接続ボタンをタップしてください</string>
-    <string name="change_server_success_cloe">OK</string>
-    <string name="change_server_success_icon">成功アイコン</string>
 
 
     <string name="advanced_section_presharedkey">事前共有鍵</string>
@@ -164,7 +152,6 @@
     <string name="exclamation_mark">感嘆符</string>
     <string name="reconnectionNeededWarningMessage">設定を適用するには再接続が必要です。</string>
     <string name="change_server_setup_key_warning">ユーザーデバイスにセットアップキーを使用することは推奨されません。MFA 付きの SSO は、より強固なセキュリティ、適切なユーザーとデバイスの関連付け、定期的な再認証を提供します。</string>
-    <string name="change_server_error_invalid_server_url">URL の形式が無効です</string>
     <string name="device_code">デバイスコード: %s</string>
 
     <!-- Profile strings -->
@@ -174,13 +161,19 @@
     <string name="profiles_logout">ログアウト</string>
     <string name="profiles_remove">削除</string>
     <string name="profiles_dialog_add_title">新しいプロファイル</string>
-    <string name="profiles_dialog_add_message">新しいプロファイルの名前を入力してください:</string>
-    <string name="profiles_dialog_add_hint">プロファイル名</string>
-    <string name="profiles_rename">プロファイル名を変更</string>
-    <string name="profiles_dialog_rename_title">プロファイル名を変更</string>
-    <string name="profiles_dialog_rename_message">プロファイル「%s」の新しい名前を入力してください:</string>
-    <string name="profiles_dialog_rename_hint">プロファイル名</string>
-    <string name="profiles_success_renamed">プロファイル名を「%s」に変更しました</string>
+    <string name="profiles_dialog_add_hint">例: 仕事</string>
+    <string name="profiles_dialog_edit_title">プロファイルを編集</string>
+    <string name="profiles_dialog_edit_submit">変更を保存</string>
+    <string name="profiles_dialog_name_label">プロファイル名</string>
+    <string name="profiles_dialog_name_help">分かりやすいプロファイル名を設定してください。</string>
+    <string name="profiles_dialog_server_label">管理サーバー</string>
+    <string name="profiles_dialog_server_help">NetBird Cloud または独自のサーバーを使用します。</string>
+    <string name="profiles_dialog_server_cloud">クラウド</string>
+    <string name="profiles_dialog_server_self_hosted">セルフホスト</string>
+    <string name="profiles_dialog_url_invalid">有効なURLを入力してください（例: https://netbird.selfhosted.com:443）</string>
+    <string name="profiles_dialog_url_unreachable">このサーバーに到達できませんでした。URLを確認するか、正しいことが確実な場合はそのままプロファイルを追加してください。</string>
+    <string name="profiles_dialog_checking">確認中…</string>
+    <string name="profiles_rename">プロファイルを編集</string>
     <string name="profiles_dialog_switch_title">プロファイルの切り替え</string>
     <string name="profiles_dialog_switch_message">プロファイル「%s」に切り替えますか？\n\n現在の接続は切断されます。</string>
     <string name="profiles_dialog_logout_title">プロファイルからログアウト</string>

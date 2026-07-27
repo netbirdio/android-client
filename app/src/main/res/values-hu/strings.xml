@@ -4,7 +4,7 @@
 
     <string name="menu_advanced">Speciális</string>
     <string name="menu_about">Névjegy</string>
-    <string name="menu_change_server">Szerver módosítása</string>
+    <string name="menu_change_server">Felügyeleti szerver</string>
     <string name="menu_profiles">Profilok</string>
     <string name="menu_troubleshoot">Hibaelhárítás</string>
 
@@ -33,8 +33,9 @@
     <string name="main_copied">Másolva</string>
     <string name="main_value_empty">–</string>
 
-    <string name="fragment_firstinstall_txt">Alapértelmezés szerint a NetBird felhőszervereihez csatlakozik. A \"Szerver módosítása\" menüben másik szervert is beállíthat.</string>
     <string name="fragment_firstinstall_continue">Folytatás</string>
+    <string name="firstinstall_setup_title">NetBird beállítása</string>
+    <string name="firstinstall_setup_description">Koppintson a Folytatás gombra a kezdéshez, vagy válassza a „Saját üzemeltetésű” lehetőséget, ha saját NetBird-szervere van.</string>
     <string name="fragment_firstinstall_desc_logo">NetBird logó</string>
     <string name="fragment_firstinstall_androidtv_beta">Az Android TV támogatása jelenleg béta állapotú. Egyes funkciók nem feltétlenül működnek az elvárt módon.</string>
 
@@ -92,25 +93,12 @@
     <string name="networks_hint_search_networks">Erőforrások keresése</string>
     <string name="networks_desc_exit_node">exit node</string>
 
-    <string name="change_server_title_server">Szerver</string>
-    <string name="change_server_hint">https://example-api.domain.com:443</string>
     <string name="change_server_setup_key">Eszköz hozzáadása telepítőkulccsal</string>
     <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
     <string name="change_server_error_invalid_setup_key">Érvénytelen telepítőkulcs-formátum</string>
 
-    <string name="change_server_btn">Módosítás</string>
-    <string name="change_server_verifying">Ellenőrzés…</string>
-    <string name="change_server_btn_reset">NetBird szerver használata</string>
 
-    <string name="change_server_alert_title">Szerver módosítása</string>
-    <string name="change_server_alert_yes">Igen</string>
-    <string name="change_server_alert_cancel">Mégse</string>
-    <string name="change_server_alert_desc">A szerver módosítása törli a helyi konfigurációt, és leválasztja ezt az eszközt a jelenlegi NetBird-fiókról.</string>
 
-    <string name="change_server_success_title">A szerver módosítva</string>
-    <string name="change_server_success_desc">A folytatáshoz kattintson a csatlakozás gombra</string>
-    <string name="change_server_success_cloe">OK</string>
-    <string name="change_server_success_icon">Siker ikon</string>
 
 
     <string name="advanced_section_presharedkey">Pre-shared kulcs</string>
@@ -164,7 +152,6 @@
     <string name="exclamation_mark">felkiáltójel</string>
     <string name="reconnectionNeededWarningMessage">A beállítás alkalmazásához újra kell csatlakoznia.</string>
     <string name="change_server_setup_key_warning">Telepítőkulcsok használata felhasználói eszközökhöz nem ajánlott. Az SSO MFA-val erősebb biztonságot, megfelelő felhasználó–eszköz összerendelést és rendszeres újrahitelesítést nyújt.</string>
-    <string name="change_server_error_invalid_server_url">Érvénytelen URL-formátum</string>
     <string name="device_code">Eszközkód: %s</string>
 
     <!-- Profile strings -->
@@ -174,13 +161,19 @@
     <string name="profiles_logout">Kijelentkezés</string>
     <string name="profiles_remove">Eltávolítás</string>
     <string name="profiles_dialog_add_title">Új profil</string>
-    <string name="profiles_dialog_add_message">Adjon meg egy nevet az új profilnak:</string>
-    <string name="profiles_dialog_add_hint">Profilnév</string>
-    <string name="profiles_rename">Profil átnevezése</string>
-    <string name="profiles_dialog_rename_title">Profil átnevezése</string>
-    <string name="profiles_dialog_rename_message">Adjon meg egy új nevet a(z) \"%s\" profilnak:</string>
-    <string name="profiles_dialog_rename_hint">Profilnév</string>
-    <string name="profiles_success_renamed">Profil átnevezve erre: \"%s\"</string>
+    <string name="profiles_dialog_add_hint">pl. Munka</string>
+    <string name="profiles_dialog_edit_title">Profil szerkesztése</string>
+    <string name="profiles_dialog_edit_submit">Módosítások mentése</string>
+    <string name="profiles_dialog_name_label">Profilnév</string>
+    <string name="profiles_dialog_name_help">Adjon profiljának egy könnyen azonosítható nevet.</string>
+    <string name="profiles_dialog_server_label">Felügyeleti szerver</string>
+    <string name="profiles_dialog_server_help">NetBird Cloud vagy saját kiszolgáló.</string>
+    <string name="profiles_dialog_server_cloud">Felhő</string>
+    <string name="profiles_dialog_server_self_hosted">Saját üzemeltetésű</string>
+    <string name="profiles_dialog_url_invalid">Adjon meg egy érvényes URL-t, pl. https://netbird.selfhosted.com:443</string>
+    <string name="profiles_dialog_url_unreachable">A szerver nem érhető el. Ellenőrizze az URL-t, vagy adja hozzá a profilt, ha biztos benne, hogy helyes.</string>
+    <string name="profiles_dialog_checking">Ellenőrzés…</string>
+    <string name="profiles_rename">Profil szerkesztése</string>
     <string name="profiles_dialog_switch_title">Profilváltás</string>
     <string name="profiles_dialog_switch_message">Váltás a(z) \"%s\" profilra?\n\nEz megszakítja a jelenlegi kapcsolatot.</string>
     <string name="profiles_dialog_logout_title">Kijelentkezés a profilból</string>

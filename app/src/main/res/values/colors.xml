@@ -57,4 +57,12 @@
 
     <color name="profile_background">#F2F2F2</color>
     <color name="profile_card_background">@color/white</color>
+
+    <!-- Segmented control (Cloud / Self-hosted), matching the desktop app -->
+    <color name="nb_segment_track">#E7E7E7</color>
+    <color name="nb_segment_track_border">#DDDDDD</color>
+    <color name="nb_segment_thumb">#FFFFFF</color>
+
+    <!-- Destructive actions (Remove), mirroring the desktop danger variant -->
+    <color name="nb_danger">#DC2626</color>
 </resources>

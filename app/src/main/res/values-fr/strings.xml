@@ -4,7 +4,7 @@
 
     <string name="menu_advanced">Avancé</string>
     <string name="menu_about">À propos</string>
-    <string name="menu_change_server">Changer de serveur</string>
+    <string name="menu_change_server">Serveur de gestion</string>
     <string name="menu_profiles">Profils</string>
     <string name="menu_troubleshoot">Dépannage</string>
 
@@ -33,8 +33,9 @@
     <string name="main_copied">Copié</string>
     <string name="main_value_empty">–</string>
 
-    <string name="fragment_firstinstall_txt">Par défaut, vous vous connecterez aux serveurs cloud de NetBird. Vous pouvez utiliser le menu « Changer de serveur » pour utiliser un autre serveur.</string>
     <string name="fragment_firstinstall_continue">Continuer</string>
+    <string name="firstinstall_setup_title">Configurer NetBird</string>
+    <string name="firstinstall_setup_description">Appuyez sur Continuer pour commencer, ou choisissez Auto-hébergé si vous disposez de votre propre serveur NetBird.</string>
     <string name="fragment_firstinstall_desc_logo">Logo NetBird</string>
     <string name="fragment_firstinstall_androidtv_beta">La prise en charge d’Android TV est actuellement en bêta. Certaines fonctionnalités peuvent ne pas fonctionner comme prévu.</string>
 
@@ -92,25 +93,12 @@
     <string name="networks_hint_search_networks">Rechercher des ressources</string>
     <string name="networks_desc_exit_node">nœud de sortie</string>
 
-    <string name="change_server_title_server">Serveur</string>
-    <string name="change_server_hint">https://example-api.domain.com:443</string>
     <string name="change_server_setup_key">Ajouter cet appareil avec une clé d’installation</string>
     <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
     <string name="change_server_error_invalid_setup_key">Format de clé d’installation invalide</string>
 
-    <string name="change_server_btn">Changer</string>
-    <string name="change_server_verifying">Vérification…</string>
-    <string name="change_server_btn_reset">Utiliser le serveur NetBird</string>
 
-    <string name="change_server_alert_title">Changer de serveur</string>
-    <string name="change_server_alert_yes">Oui</string>
-    <string name="change_server_alert_cancel">Annuler</string>
-    <string name="change_server_alert_desc">Changer de serveur effacera la configuration locale et déconnectera cet appareil du compte NetBird actuel.</string>
 
-    <string name="change_server_success_title">Le serveur a été changé</string>
-    <string name="change_server_success_desc">Cliquez sur le bouton de connexion pour continuer</string>
-    <string name="change_server_success_cloe">OK</string>
-    <string name="change_server_success_icon">Icône de succès</string>
 
 
     <string name="advanced_section_presharedkey">Clé pré-partagée</string>
@@ -164,7 +152,6 @@
     <string name="exclamation_mark">point d’exclamation</string>
     <string name="reconnectionNeededWarningMessage">Pour appliquer le paramètre, vous devrez vous reconnecter.</string>
     <string name="change_server_setup_key_warning">L’utilisation de clés d’installation pour les appareils des utilisateurs n’est pas recommandée. Le SSO avec MFA offre une sécurité renforcée, une association correcte utilisateur-appareil et une réauthentification périodique.</string>
-    <string name="change_server_error_invalid_server_url">Format d’URL invalide</string>
     <string name="device_code">Code de l’appareil : %s</string>
 
     <!-- Profile strings -->
@@ -174,13 +161,19 @@
     <string name="profiles_logout">Se déconnecter</string>
     <string name="profiles_remove">Retirer</string>
     <string name="profiles_dialog_add_title">Nouveau profil</string>
-    <string name="profiles_dialog_add_message">Saisissez un nom pour le nouveau profil :</string>
-    <string name="profiles_dialog_add_hint">Nom du profil</string>
-    <string name="profiles_rename">Renommer le profil</string>
-    <string name="profiles_dialog_rename_title">Renommer le profil</string>
-    <string name="profiles_dialog_rename_message">Saisissez un nouveau nom pour le profil « %s » :</string>
-    <string name="profiles_dialog_rename_hint">Nom du profil</string>
-    <string name="profiles_success_renamed">Profil renommé en « %s »</string>
+    <string name="profiles_dialog_add_hint">ex. travail</string>
+    <string name="profiles_dialog_edit_title">Modifier le profil</string>
+    <string name="profiles_dialog_edit_submit">Enregistrer les modifications</string>
+    <string name="profiles_dialog_name_label">Nom du profil</string>
+    <string name="profiles_dialog_name_help">Choisissez un nom facilement identifiable pour votre profil.</string>
+    <string name="profiles_dialog_server_label">Serveur de gestion</string>
+    <string name="profiles_dialog_server_help">Utilisez NetBird Cloud ou votre propre serveur.</string>
+    <string name="profiles_dialog_server_cloud">Cloud</string>
+    <string name="profiles_dialog_server_self_hosted">Auto-hébergé</string>
+    <string name="profiles_dialog_url_invalid">Veuillez saisir une URL valide, ex. https://netbird.selfhosted.com:443</string>
+    <string name="profiles_dialog_url_unreachable">Impossible de joindre ce serveur. Vérifiez l’URL, ou ajoutez le profil quand même si vous êtes sûr qu’elle est correcte.</string>
+    <string name="profiles_dialog_checking">Vérification…</string>
+    <string name="profiles_rename">Modifier le profil</string>
     <string name="profiles_dialog_switch_title">Changer de profil</string>
     <string name="profiles_dialog_switch_message">Basculer vers le profil « %s » ?\n\nCela déconnectera la connexion actuelle.</string>
     <string name="profiles_dialog_logout_title">Se déconnecter du profil</string>

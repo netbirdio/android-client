@@ -66,8 +66,15 @@
     </style>
     <attr name="nbTabBackground" format="color|reference" />
 
-    <style name="AlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+    <!-- MaterialComponents-based so Material widgets inside custom dialog
+         layouts (switches, buttons) resolve the NetBird palette instead of
+         falling back to the framework's default purple accent. -->
+    <style name="AlertDialogTheme" parent="Theme.MaterialComponents.Light.Dialog.Alert">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="colorPrimary">@color/nb_orange</item>
+        <item name="colorAccent">@color/nb_orange</item>
+        <item name="colorSecondary">@color/nb_orange</item>
+        <item name="android:textColorPrimary">@color/nb_txt</item>
     </style>
 
     <!-- Day-mode definition for Theme.NetBird.Card (mirrors values-night) -->
@@ -90,5 +97,58 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">@color/nb_txt_light</item>
         <item name="android:textSize">13sp</item>
+    </style>
+
+    <!--
+      Button hierarchy shared by the profile dialog and the profile cards,
+      mirroring the desktop app's primary / secondary / danger variants: one
+      filled accent action, quiet outlined and text actions around it, red for
+      destructive ones. The filled accent is reserved for a screen's single
+      main action so a list of cards does not turn into a wall of orange.
+    -->
+    <style name="Widget.NetBird.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="backgroundTint">@color/dialog_btn_primary_bg</item>
+        <item name="cornerRadius">6dp</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <style name="Widget.NetBird.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/dialog_btn_secondary_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="cornerRadius">6dp</item>
+        <item name="rippleColor">@color/nb_orange_15</item>
+        <item name="strokeColor">@color/nb_chip_border</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="Widget.NetBird.Button.Text" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/dialog_btn_secondary_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="cornerRadius">6dp</item>
+    </style>
+
+    <style name="Widget.NetBird.Button.Danger" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/dialog_btn_danger_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="cornerRadius">6dp</item>
+        <item name="rippleColor">@color/nb_danger</item>
     </style>
 </resources>

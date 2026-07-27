@@ -4,7 +4,7 @@
 
     <string name="menu_advanced">Дополнительно</string>
     <string name="menu_about">О программе</string>
-    <string name="menu_change_server">Сменить сервер</string>
+    <string name="menu_change_server">Сервер управления</string>
     <string name="menu_profiles">Профили</string>
     <string name="menu_troubleshoot">Диагностика</string>
 
@@ -33,8 +33,9 @@
     <string name="main_copied">Скопировано</string>
     <string name="main_value_empty">–</string>
 
-    <string name="fragment_firstinstall_txt">По умолчанию вы подключаетесь к облачным серверам NetBird. Чтобы использовать другой сервер, откройте меню «Сменить сервер».</string>
     <string name="fragment_firstinstall_continue">Продолжить</string>
+    <string name="firstinstall_setup_title">Настройка NetBird</string>
+    <string name="firstinstall_setup_description">Нажмите «Продолжить», чтобы начать, или выберите «Собственный сервер», если у вас есть свой сервер NetBird.</string>
     <string name="fragment_firstinstall_desc_logo">Логотип NetBird</string>
     <string name="fragment_firstinstall_androidtv_beta">Поддержка Android TV сейчас находится в бета-версии. Некоторые функции могут работать не так, как ожидается.</string>
 
@@ -92,25 +93,12 @@
     <string name="networks_hint_search_networks">Поиск ресурсов</string>
     <string name="networks_desc_exit_node">выходной узел</string>
 
-    <string name="change_server_title_server">Сервер</string>
-    <string name="change_server_hint">https://example-api.domain.com:443</string>
     <string name="change_server_setup_key">Добавить это устройство с помощью ключа установки</string>
     <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
     <string name="change_server_error_invalid_setup_key">Неверный формат ключа установки</string>
 
-    <string name="change_server_btn">Изменить</string>
-    <string name="change_server_verifying">Проверка…</string>
-    <string name="change_server_btn_reset">Использовать сервер NetBird</string>
 
-    <string name="change_server_alert_title">Сменить сервер</string>
-    <string name="change_server_alert_yes">Да</string>
-    <string name="change_server_alert_cancel">Отмена</string>
-    <string name="change_server_alert_desc">Смена сервера удалит локальную конфигурацию и отключит это устройство от текущей учётной записи NetBird.</string>
 
-    <string name="change_server_success_title">Сервер изменён</string>
-    <string name="change_server_success_desc">Нажмите кнопку подключения, чтобы продолжить</string>
-    <string name="change_server_success_cloe">ОК</string>
-    <string name="change_server_success_icon">Значок успеха</string>
 
 
     <string name="advanced_section_presharedkey">Общий ключ</string>
@@ -164,7 +152,6 @@
     <string name="exclamation_mark">восклицательный знак</string>
     <string name="reconnectionNeededWarningMessage">Чтобы применить настройку, потребуется переподключиться.</string>
     <string name="change_server_setup_key_warning">Использовать ключи установки для пользовательских устройств не рекомендуется. SSO с MFA обеспечивает более надёжную защиту, корректную привязку устройства к пользователю и периодическую повторную аутентификацию.</string>
-    <string name="change_server_error_invalid_server_url">Неверный формат URL</string>
     <string name="device_code">Код устройства: %s</string>
 
     <!-- Profile strings -->
@@ -174,13 +161,19 @@
     <string name="profiles_logout">Выйти</string>
     <string name="profiles_remove">Убрать</string>
     <string name="profiles_dialog_add_title">Новый профиль</string>
-    <string name="profiles_dialog_add_message">Введите имя нового профиля:</string>
-    <string name="profiles_dialog_add_hint">Имя профиля</string>
-    <string name="profiles_rename">Переименовать профиль</string>
-    <string name="profiles_dialog_rename_title">Переименовать профиль</string>
-    <string name="profiles_dialog_rename_message">Введите новое имя для профиля «%s»:</string>
-    <string name="profiles_dialog_rename_hint">Имя профиля</string>
-    <string name="profiles_success_renamed">Профиль переименован в «%s»</string>
+    <string name="profiles_dialog_add_hint">например, работа</string>
+    <string name="profiles_dialog_edit_title">Изменить профиль</string>
+    <string name="profiles_dialog_edit_submit">Сохранить изменения</string>
+    <string name="profiles_dialog_name_label">Имя профиля</string>
+    <string name="profiles_dialog_name_help">Задайте легко узнаваемое имя для профиля.</string>
+    <string name="profiles_dialog_server_label">Сервер управления</string>
+    <string name="profiles_dialog_server_help">Используйте NetBird Cloud или собственный сервер.</string>
+    <string name="profiles_dialog_server_cloud">Cloud</string>
+    <string name="profiles_dialog_server_self_hosted">Собственный сервер</string>
+    <string name="profiles_dialog_url_invalid">Введите корректный URL, например https://netbird.selfhosted.com:443</string>
+    <string name="profiles_dialog_url_unreachable">Не удалось связаться с сервером. Проверьте URL или всё равно добавьте профиль, если уверены, что он правильный.</string>
+    <string name="profiles_dialog_checking">Проверка…</string>
+    <string name="profiles_rename">Изменить профиль</string>
     <string name="profiles_dialog_switch_title">Переключение профиля</string>
     <string name="profiles_dialog_switch_message">Переключиться на профиль «%s»?\n\nТекущее подключение будет разорвано.</string>
     <string name="profiles_dialog_logout_title">Выход из профиля</string>

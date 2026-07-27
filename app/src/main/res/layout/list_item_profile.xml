@@ -63,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:background="@drawable/btn_bg_orange"
+            android:background="@drawable/bg_badge_active"
             android:padding="4dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
@@ -78,54 +78,49 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0" />
 
-        <Button
+        <!-- Switch is what the card is for, so it leads on the left. Logout and
+             Remove are the account-teardown pair: they belong together, sit
+             apart from Switch on the trailing edge, and escalate in weight
+             (quiet text, then destructive red). -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_switch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="4dp"
+            style="@style/Widget.NetBird.Button.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_marginTop="16dp"
+            android:minWidth="0dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:text="@string/profiles_switch"
-            android:textSize="11sp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            app:layout_constraintTop_toBottomOf="@id/icon_profile"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_logout"
-            app:layout_constraintHorizontal_weight="1" />
+            app:layout_constraintTop_toBottomOf="@id/icon_profile" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_logout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginStart="4dp"
+            style="@style/Widget.NetBird.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="4dp"
+            android:minWidth="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             android:text="@string/profiles_logout"
-            android:textSize="11sp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            app:layout_constraintTop_toBottomOf="@id/icon_profile"
-            app:layout_constraintStart_toEndOf="@id/btn_switch"
             app:layout_constraintEnd_toStartOf="@id/btn_remove"
-            app:layout_constraintHorizontal_weight="1" />
+            app:layout_constraintTop_toBottomOf="@id/icon_profile" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_remove"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginStart="4dp"
+            style="@style/Widget.NetBird.Button.Danger"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_marginTop="16dp"
+            android:minWidth="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             android:text="@string/profiles_remove"
-            android:textSize="11sp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            app:layout_constraintTop_toBottomOf="@id/icon_profile"
-            app:layout_constraintStart_toEndOf="@id/btn_logout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_weight="1" />
+            app:layout_constraintTop_toBottomOf="@id/icon_profile" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

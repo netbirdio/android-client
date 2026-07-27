@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.netbird.gomobile.android.ProfileManager;
 import io.netbird.gomobile.android.ProfileArray;
@@ -78,13 +80,28 @@ public class ProfileManagerWrapper {
     }
 
     /**
-     * Creates a new profile
+     * Creates a new profile and returns it.
+     * The gomobile AddProfile call does not return the generated ID, so the new
+     * profile is identified by diffing the profile list before and after.
      */
-    public void addProfile(String profileName) throws Exception {
+    public Profile addProfile(String profileName) throws Exception {
         if (profileName == null || profileName.trim().isEmpty()) {
             throw new IllegalArgumentException("Profile name cannot be empty");
         }
+
+        Set<String> existingIds = new HashSet<>();
+        for (Profile p : listProfiles()) {
+            existingIds.add(p.getID());
+        }
+
         profileManager.addProfile(profileName);
+
+        for (Profile p : listProfiles()) {
+            if (!existingIds.contains(p.getID())) {
+                return p;
+            }
+        }
+        throw new IllegalStateException("Newly created profile not found");
     }
 
     /**
@@ -128,6 +145,13 @@ public class ProfileManagerWrapper {
             throw new IllegalArgumentException("Profile name cannot be empty");
         }
         profileManager.removeProfile(id);
+    }
+
+    /**
+     * Gets the config file path for the given profile
+     */
+    public String getConfigPath(String id) throws Exception {
+        return profileManager.getConfigPath(id);
     }
 
     /**

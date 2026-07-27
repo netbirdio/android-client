@@ -3,12 +3,13 @@ package io.netbird.client.ui.profile;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
 
     public interface ProfileActionListener {
         void onSwitchProfile(Profile profile);
-        void onRenameProfile(Profile profile);
+        void onEditProfile(Profile profile);
         void onLogoutProfile(Profile profile);
         void onRemoveProfile(Profile profile);
     }
@@ -58,9 +59,9 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
         private final TextView textName;
         private final TextView badgeActive;
         private final ImageView btnRename;
-        private final Button btnSwitch;
-        private final Button btnLogout;
-        private final Button btnRemove;
+        private final MaterialButton btnSwitch;
+        private final MaterialButton btnLogout;
+        private final MaterialButton btnRemove;
 
         public ProfileViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -87,11 +88,10 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
 
             // Disable remove for the default profile. Keyed on ID, not name: the
             // name is user-editable and no longer identifies the default profile.
-            boolean isDefault = DEFAULT_PROFILE_ID.equals(profile.getID());
-            btnRemove.setEnabled(!isDefault);
-            btnRemove.setAlpha(isDefault ? 0.5f : 1.0f);
+            // The button's text colour selector already dims the disabled state.
+            btnRemove.setEnabled(!DEFAULT_PROFILE_ID.equals(profile.getID()));
 
-            btnRename.setOnClickListener(v -> listener.onRenameProfile(profile));
+            btnRename.setOnClickListener(v -> listener.onEditProfile(profile));
 
             btnSwitch.setOnClickListener(v -> {
                 if (!profile.isActive()) {

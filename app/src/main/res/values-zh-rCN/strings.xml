@@ -4,7 +4,7 @@
 
     <string name="menu_advanced">高级</string>
     <string name="menu_about">关于</string>
-    <string name="menu_change_server">更改服务器</string>
+    <string name="menu_change_server">管理服务器</string>
     <string name="menu_profiles">配置文件</string>
     <string name="menu_troubleshoot">故障排除</string>
 
@@ -33,8 +33,9 @@
     <string name="main_copied">已复制</string>
     <string name="main_value_empty">–</string>
 
-    <string name="fragment_firstinstall_txt">默认情况下，您将连接到 NetBird 的云服务器。您可以通过“更改服务器”菜单使用其他服务器。</string>
     <string name="fragment_firstinstall_continue">继续</string>
+    <string name="firstinstall_setup_title">设置 NetBird</string>
+    <string name="firstinstall_setup_description">点按“继续”即可开始；如果您有自己的 NetBird 服务器，请选择“自托管”。</string>
     <string name="fragment_firstinstall_desc_logo">NetBird 徽标</string>
     <string name="fragment_firstinstall_androidtv_beta">Android TV 支持目前处于测试阶段。某些功能可能无法按预期工作。</string>
 
@@ -92,25 +93,12 @@
     <string name="networks_hint_search_networks">搜索资源</string>
     <string name="networks_desc_exit_node">出口节点</string>
 
-    <string name="change_server_title_server">服务器</string>
-    <string name="change_server_hint">https://example-api.domain.com:443</string>
     <string name="change_server_setup_key">使用设置密钥添加此设备</string>
     <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
     <string name="change_server_error_invalid_setup_key">设置密钥格式无效</string>
 
-    <string name="change_server_btn">更改</string>
-    <string name="change_server_verifying">正在检查…</string>
-    <string name="change_server_btn_reset">使用 NetBird 服务器</string>
 
-    <string name="change_server_alert_title">更改服务器</string>
-    <string name="change_server_alert_yes">是</string>
-    <string name="change_server_alert_cancel">取消</string>
-    <string name="change_server_alert_desc">更改服务器将清除本地配置，并将此设备与当前 NetBird 账户断开连接。</string>
 
-    <string name="change_server_success_title">服务器已更改</string>
-    <string name="change_server_success_desc">点击连接按钮以继续</string>
-    <string name="change_server_success_cloe">确定</string>
-    <string name="change_server_success_icon">成功图标</string>
 
 
     <string name="advanced_section_presharedkey">预共享密钥</string>
@@ -164,7 +152,6 @@
     <string name="exclamation_mark">感叹号</string>
     <string name="reconnectionNeededWarningMessage">要应用该设置，您需要重新连接。</string>
     <string name="change_server_setup_key_warning">不建议为用户设备使用设置密钥。带 MFA 的 SSO 可提供更强的安全性、正确的用户与设备关联以及定期重新验证。</string>
-    <string name="change_server_error_invalid_server_url">URL 格式无效</string>
     <string name="device_code">设备代码：%s</string>
 
     <!-- Profile strings -->
@@ -174,13 +161,19 @@
     <string name="profiles_logout">退出登录</string>
     <string name="profiles_remove">移除</string>
     <string name="profiles_dialog_add_title">新建配置文件</string>
-    <string name="profiles_dialog_add_message">输入新配置文件的名称：</string>
-    <string name="profiles_dialog_add_hint">配置文件名称</string>
-    <string name="profiles_rename">重命名配置文件</string>
-    <string name="profiles_dialog_rename_title">重命名配置文件</string>
-    <string name="profiles_dialog_rename_message">为配置文件“%s”输入新名称：</string>
-    <string name="profiles_dialog_rename_hint">配置文件名称</string>
-    <string name="profiles_success_renamed">配置文件已重命名为“%s”</string>
+    <string name="profiles_dialog_add_hint">例如：工作</string>
+    <string name="profiles_dialog_edit_title">编辑配置文件</string>
+    <string name="profiles_dialog_edit_submit">保存更改</string>
+    <string name="profiles_dialog_name_label">配置文件名称</string>
+    <string name="profiles_dialog_name_help">为您的配置文件设置一个易于识别的名称。</string>
+    <string name="profiles_dialog_server_label">管理服务器</string>
+    <string name="profiles_dialog_server_help">使用 NetBird Cloud 或您自己的服务器。</string>
+    <string name="profiles_dialog_server_cloud">Cloud</string>
+    <string name="profiles_dialog_server_self_hosted">自托管</string>
+    <string name="profiles_dialog_url_invalid">请输入有效的 URL，例如：https://netbird.selfhosted.com:443</string>
+    <string name="profiles_dialog_url_unreachable">无法连接到此服务器。请检查 URL，如果确认无误，也可以照常添加该配置文件。</string>
+    <string name="profiles_dialog_checking">正在检查…</string>
+    <string name="profiles_rename">编辑配置文件</string>
     <string name="profiles_dialog_switch_title">切换配置文件</string>
     <string name="profiles_dialog_switch_message">切换到配置文件“%s”？\n\n这将断开当前连接。</string>
     <string name="profiles_dialog_logout_title">退出配置文件</string>
