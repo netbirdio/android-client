@@ -94,6 +94,7 @@
 
     <string name="exit_node_title">Exit node</string>
     <string name="exit_node_none">None selected</string>
+    <string name="exit_node_unavailable">No exit nodes available</string>
     <string name="exit_node_picker_none">None</string>
     <string name="exit_node_switch_failed">Failed to switch exit node: %1$s</string>
 

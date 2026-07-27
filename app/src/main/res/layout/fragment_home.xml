@@ -262,7 +262,8 @@
     </LinearLayout>
 
     <!-- Exit node selector, pinned to the bottom like the desktop main view.
-         Only visible while connected and at least one exit node is available. -->
+         Always shown; disabled and dimmed while there is no exit node to pick
+         (disconnected, or none shared with this peer). -->
     <LinearLayout
         android:id="@+id/exit_node_row"
         android:layout_width="0dp"
@@ -270,16 +271,16 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
+        android:alpha="0.5"
         android:background="@drawable/info_row_bg"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
         android:gravity="center_vertical"
         android:minHeight="56dp"
         android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingEnd="8dp"
-        android:visibility="gone"
-        tools:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -311,7 +312,7 @@
                 android:id="@+id/exit_node_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/exit_node_none"
+                android:text="@string/exit_node_unavailable"
                 android:textColor="@color/nb_txt_light"
                 android:textSize="13sp"
                 tools:text="aws-frankfurt" />

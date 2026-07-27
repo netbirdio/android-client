@@ -354,8 +354,9 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     }
 
     /**
-     * Shows the exit node row only while connected and at least one exit node is
-     * shared with this peer; the subtitle names the active exit node, if any.
+     * The exit node row is always on screen; it is enabled only while connected
+     * with at least one exit node shared with this peer, and dimmed otherwise.
+     * The subtitle names the active exit node, if any.
      */
     private void updateExitNodeRow() {
         ServiceAccessor accessor = serviceAccessor;
@@ -381,15 +382,18 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             }
         }
 
-        final boolean show = isConnected && hasAny;
+        final boolean enabled = isConnected && hasAny;
         final String name = activeName;
         runOnUi(() -> {
             Context ctx = getContext();
             if (binding == null || ctx == null) {
                 return;
             }
-            binding.exitNodeRow.setVisibility(show ? View.VISIBLE : View.GONE);
-            binding.exitNodeStatus.setText(name != null ? name : getString(R.string.exit_node_none));
+            binding.exitNodeRow.setEnabled(enabled);
+            binding.exitNodeRow.setAlpha(enabled ? 1f : 0.5f);
+            binding.exitNodeStatus.setText(!enabled
+                    ? getString(R.string.exit_node_unavailable)
+                    : name != null ? name : getString(R.string.exit_node_none));
             binding.exitNodeIcon.setColorFilter(ContextCompat.getColor(ctx,
                     name != null ? R.color.nb_orange : R.color.nb_txt_light));
         });
