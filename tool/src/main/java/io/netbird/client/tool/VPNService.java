@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
 import io.netbird.gomobile.android.ConnectionListener;
+import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.URLOpener;
@@ -26,10 +27,15 @@ public class VPNService extends android.net.VpnService {
     private final static String LOGTAG = "service";
     public static final String INTENT_ACTION_START = "io.netbird.client.intent.action.START_SERVICE";
     public static final String ACTION_STOP_ENGINE = "io.netbird.client.intent.action.STOP_ENGINE";
+    // Launches MainActivity to run the interactive session-extend flow; set
+    // on the persistent notification's "Extend session" action.
+    public static final String ACTION_EXTEND_SESSION = "io.netbird.client.intent.action.EXTEND_SESSION";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
     private final IBinder myBinder = new MyLocalBinder();
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
+    private SessionNotification sessionNotification;
+    private SessionMonitor sessionMonitor;
     private TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
 
@@ -64,6 +70,18 @@ public class VPNService extends android.net.VpnService {
 
         engineRunner = new EngineRunner(this, notifier, tunAdapter, iFaceDiscover, versionName,
                 preferences.isTraceLogEnabled(), Version.isDebuggable(this), profileManager);
+
+        // Session tracking lives here, in the service — the Android analogue
+        // of the desktop daemon — so warnings and the expired notification
+        // work even when no UI is bound (always-on VPN, boot start).
+        // Must be wired before addServiceStateListener below: registration
+        // fires an immediate onStopped/onStarted, which touches the monitor.
+        sessionNotification = new SessionNotification(this);
+        sessionMonitor = new SessionMonitor(engineRunner::status, engineRunner::sessionExpiresAt);
+        engineRunner.setSessionMonitor(sessionMonitor);
+        sessionMonitor.addListener(sessionEventListener);
+        engineRunner.addOnConnectedObserver(() -> sessionNotification.cancel());
+
         engineRunner.addServiceStateListener(serviceStateListener);
 
         // Create network availability listener after the engine runner so we
@@ -196,6 +214,7 @@ public class VPNService extends android.net.VpnService {
 
         public void runEngine(URLOpener urlOpener, boolean isAndroidTV) {
             fgNotification.startForeground();
+            sessionNotification.cancel();
             engineRestarter.cancelPendingRestart();
             engineRunner.run(urlOpener, isAndroidTV);
         }
@@ -231,6 +250,36 @@ public class VPNService extends android.net.VpnService {
 
         public void removeServiceStateListener(ServiceStateListener serviceStateListener) {
             engineRunner.removeServiceStateListener(serviceStateListener);
+        }
+
+        public void addSessionEventListener(SessionEventListener listener) {
+            sessionMonitor.addListener(listener);
+        }
+
+        public void removeSessionEventListener(SessionEventListener listener) {
+            sessionMonitor.removeListener(listener);
+        }
+
+        public void extendAuthSession(URLOpener urlOpener, boolean isAndroidTV, ErrListener resultListener) {
+            engineRunner.extendAuthSession(urlOpener, isAndroidTV, resultListener);
+        }
+
+        public void cancelExtendAuthSession() {
+            engineRunner.cancelExtendAuthSession();
+        }
+
+        public void dismissSessionWarning() {
+            engineRunner.dismissSessionWarning();
+        }
+
+        /** SSO session deadline as unix seconds, or 0 when none is known. */
+        public long sessionExpiresAt() {
+            return engineRunner.sessionExpiresAt();
+        }
+
+        /** True while reconnecting requires an interactive login. */
+        public boolean isLoginRequired() {
+            return sessionMonitor.isLoginRequired();
         }
 
         public void addRouteChangeListener(RouteChangeListener listener) {
@@ -275,20 +324,42 @@ public class VPNService extends android.net.VpnService {
         return false;
     }
 
+    private final SessionEventListener sessionEventListener = new SessionEventListener() {
+        @Override
+        public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
+            sessionNotification.showExpiring(leadMinutes);
+        }
+
+        @Override
+        public void onSessionExpired() {
+            sessionNotification.showExpired();
+        }
+
+        @Override
+        public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
+            fgNotification.updateSessionDeadline(expiresAtUnixSeconds);
+        }
+    };
+
     public ServiceStateListener serviceStateListener = new ServiceStateListener() {
         @Override
         public void onStarted() {
-
+            sessionMonitor.onStateChanged();
         }
 
         @Override
         public void onStopped() {
             fgNotification.stopForeground();
+            sessionMonitor.onStateChanged();
         }
 
         @Override
         public void onError(String msg) {
             fgNotification.stopForeground();
+            // An expired session surfaces here first (the run loop gives up
+            // with PermissionDenied), so sample the status right away instead
+            // of waiting for the monitor's next tick.
+            sessionMonitor.onStateChanged();
         }
     };
 

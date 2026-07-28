@@ -215,5 +215,15 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     public void onPeersListChanged(long var1) {
         postResources();
     }
+
+    @Override
+    public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
+
+    }
+
+    @Override
+    public void onLoginRequired() {
+
+    }
     // endregion
 }

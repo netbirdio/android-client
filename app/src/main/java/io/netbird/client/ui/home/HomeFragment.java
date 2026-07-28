@@ -56,6 +56,26 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private volatile EngineState pendingTarget;
     private final Runnable pendingTimeout = this::expirePendingAction;
 
+    private static final long SESSION_ROW_REFRESH_MS = 60_000;
+
+    private long sessionDeadlineUnixSeconds;
+    // The management server rejected the peer, so reconnecting needs a login.
+    // Outlives the engine (and the app process), so it is reported on bind as
+    // well as when it happens — and it overrides the disconnected label, which
+    // on its own would suggest a plain reconnect is enough.
+    private boolean loginRequired;
+    // Keeps the banner's relative text ("in 45 minutes") fresh while visible.
+    private final Runnable sessionTicker = new Runnable() {
+        @Override
+        public void run() {
+            if (binding == null) {
+                return;
+            }
+            updateSessionRow();
+            binding.getRoot().postDelayed(this, SESSION_ROW_REFRESH_MS);
+        }
+    };
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -107,7 +127,10 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 setToggle(false, false, R.string.main_status_disconnecting);
                 serviceAccessor.switchConnection(false);
             } else {
-                // We're currently disconnected, so connect
+                // We're currently disconnected, so connect. This also clears a
+                // login-required state: the engine start runs the interactive
+                // SSO flow, so no separate sign-in action is needed.
+                loginRequired = false;
                 beginPendingAction(EngineState.CONNECTED);
                 setToggle(true, true, R.string.main_status_connecting);
                 serviceAccessor.switchConnection(true);
@@ -128,6 +151,11 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         binding.exitNodeRow.setOnClickListener(v -> {
             ExitNodePickerSheet sheet = new ExitNodePickerSheet();
             sheet.show(getChildFragmentManager(), "ExitNodePickerSheet");
+        });
+        binding.sessionExpiryRow.setOnClickListener(v -> {
+            if (serviceAccessor != null) {
+                serviceAccessor.extendSession();
+            }
         });
         serviceAccessor.addRouteChangeListener(this);
 
@@ -154,6 +182,24 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     public void onResume() {
         super.onResume();
         updateProfileChip();
+        // Deadline changes arrive via onSessionDeadlineChanged while resumed;
+        // this seeds the value after a (re)bind or a return to the screen.
+        if (serviceAccessor != null) {
+            sessionDeadlineUnixSeconds = serviceAccessor.sessionExpiresAt();
+        }
+        updateSessionRow();
+        if (binding != null) {
+            binding.getRoot().removeCallbacks(sessionTicker);
+            binding.getRoot().postDelayed(sessionTicker, SESSION_ROW_REFRESH_MS);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (binding != null) {
+            binding.getRoot().removeCallbacks(sessionTicker);
+        }
     }
 
     @Override
@@ -270,7 +316,9 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 setToggle(false, false, R.string.main_status_disconnecting);
                 break;
             case DISCONNECTED:
-                setToggle(false, true, R.string.main_status_disconnected);
+                setToggle(false, true, loginRequired
+                        ? R.string.main_status_login_required
+                        : R.string.main_status_disconnected);
                 break;
         }
     }
@@ -328,6 +376,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         }
         if (binding != null) {
             binding.getRoot().removeCallbacks(pendingTimeout);
+            binding.getRoot().removeCallbacks(sessionTicker);
         }
         pendingTarget = null;
         binding = null;
@@ -450,6 +499,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
     @Override
     public void onConnected() {
+        loginRequired = false;
         onEngineState(EngineState.CONNECTED);
         updateExitNodeRow();
     }
@@ -478,5 +528,54 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         // the notifier's baseline) — so it's what makes the exit node row appear on a
         // fresh connect. Same trigger pair the Networks tab relies on.
         updateExitNodeRow();
+    }
+
+    @Override
+    public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
+        sessionDeadlineUnixSeconds = expiresAtUnixSeconds;
+        runOnUi(this::updateSessionRow);
+    }
+
+    @Override
+    public void onLoginRequired() {
+        loginRequired = true;
+        // Paint directly rather than via applyEngineState: this can arrive
+        // while a connect attempt is still latched, and the label has to say
+        // why that attempt is going to fail.
+        if (lastEngineState == EngineState.DISCONNECTED) {
+            setToggle(false, true, R.string.main_status_login_required);
+        }
+    }
+
+    /**
+     * The session banner is shown whenever a deadline is known, with a
+     * coarse relative time (Tailscale-style: minutes under two hours, hours
+     * under two days, days beyond). Tapping it starts the extend flow.
+     */
+    private void updateSessionRow() {
+        if (binding == null) {
+            return;
+        }
+        long deadline = sessionDeadlineUnixSeconds;
+        if (deadline <= 0) {
+            binding.sessionExpiryRow.setVisibility(View.GONE);
+            return;
+        }
+        binding.sessionExpiryText.setText(formatSessionExpiry(deadline));
+        binding.sessionExpiryRow.setVisibility(View.VISIBLE);
+    }
+
+    private String formatSessionExpiry(long deadlineUnixSeconds) {
+        long remainingMinutes = (deadlineUnixSeconds * 1000L - System.currentTimeMillis()) / 60_000;
+        if (remainingMinutes < 1) {
+            return getString(R.string.session_banner_expired);
+        }
+        if (remainingMinutes < 120) {
+            return getString(R.string.session_banner_expires_minutes, remainingMinutes);
+        }
+        if (remainingMinutes < 48 * 60) {
+            return getString(R.string.session_banner_expires_hours, remainingMinutes / 60);
+        }
+        return getString(R.string.session_banner_expires_days, remainingMinutes / (24 * 60));
     }
 }

@@ -261,16 +261,17 @@
 
     </LinearLayout>
 
-    <!-- Exit node selector, pinned to the bottom like the desktop main view.
-         Always shown; disabled and dimmed while there is no exit node to pick
-         (disconnected, or none shared with this peer). -->
+    <!-- Exit node selector, above the session row at the bottom of the screen
+         like the desktop main view. Always shown; disabled and dimmed while
+         there is no exit node to pick (disconnected, or none shared with this
+         peer). -->
     <LinearLayout
         android:id="@+id/exit_node_row"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="12dp"
         android:alpha="0.5"
         android:background="@drawable/info_row_bg"
         android:clickable="true"
@@ -281,9 +282,10 @@
         android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/session_expiry_row"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_goneMarginBottom="20dp">
 
         <ImageView
             android:id="@+id/exit_node_icon"
@@ -323,6 +325,71 @@
             android:layout_height="20dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_arrow_drop_down"
+            app:tint="@color/nb_txt_light" />
+    </LinearLayout>
+
+    <!-- Session expiry row, pinned below the exit node row. Same shape as that
+         row, and hidden until a session deadline is known. The chevron marks it
+         as actionable, matching the other rows; tapping starts the browser
+         re-authentication that extends the session. -->
+    <LinearLayout
+        android:id="@+id/session_expiry_row"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/info_row_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_schedule"
+            app:tint="@color/nb_txt_light" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/session_expiry_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/nb_txt"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                tools:text="Session expires in 2 hours" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/session_banner_hint"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_chevron_right"
             app:tint="@color/nb_txt_light" />
     </LinearLayout>
 

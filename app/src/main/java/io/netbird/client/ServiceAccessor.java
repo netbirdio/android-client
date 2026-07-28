@@ -27,4 +27,10 @@ public interface ServiceAccessor {
     void removeRouteChangeListener(RouteChangeListener listener);
 
     String debugBundle(boolean anonymize) throws Exception;
+
+    /** SSO session deadline as unix seconds; 0 when unknown or not bound. */
+    long sessionExpiresAt();
+
+    /** Starts the interactive SSO flow to extend the session without dropping the tunnel. */
+    void extendSession();
 }

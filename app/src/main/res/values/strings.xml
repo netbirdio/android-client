@@ -27,6 +27,7 @@
     <string name="main_status_connecting">Connecting…</string>
     <string name="main_status_connected">Connected</string>
     <string name="main_status_disconnecting">Disconnecting…</string>
+    <string name="main_status_login_required">Login required</string>
     <string name="main_desc_connect">connect-disconnect</string>
     <string name="main_desc_logo">NetBird logo</string>
     <string name="main_desc_copy">Copy to clipboard</string>
@@ -210,4 +211,15 @@
     <string name="troubleshoot_key_copied">Debug bundle key copied to clipboard</string>
     <string name="troubleshoot_bundle_failed">Failed to create debug bundle: %s</string>
     <string name="settings_no_browser">No browser app available to open %s</string>
+    <string name="session_expiring_title">Session expiring</string>
+    <string name="session_expiring_message">Your login session expires in about %1$d minutes. Extend it now to keep the VPN connected.</string>
+    <string name="session_extend_now">Extend now</string>
+    <string name="session_dismiss">Dismiss</string>
+    <string name="session_extended">Session extended</string>
+    <string name="session_extend_failed">Failed to extend session: %1$s</string>
+    <string name="session_banner_expired">Session expired</string>
+    <string name="session_banner_expires_minutes">Session expires in %1$d minutes</string>
+    <string name="session_banner_expires_hours">Session expires in %1$d hours</string>
+    <string name="session_banner_expires_days">Session expires in %1$d days</string>
+    <string name="session_banner_hint">Tap to extend your session</string>
 </resources>

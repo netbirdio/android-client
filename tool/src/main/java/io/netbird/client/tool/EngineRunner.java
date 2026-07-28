@@ -14,9 +14,11 @@ import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Client;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.DNSList;
+import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.NetworkChangeListener;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.StateChangeListener;
 import io.netbird.gomobile.android.TunAdapter;
 import io.netbird.gomobile.android.URLOpener;
 
@@ -30,6 +32,7 @@ class EngineRunner {
     Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
     private final Set<ServiceStateListener> suppressedServiceStateListeners = ConcurrentHashMap.newKeySet();
     private final Set<Runnable> connectedObservers = ConcurrentHashMap.newKeySet();
+    private volatile SessionMonitor sessionMonitor;
     private final Client goClient;
     private ConnectionListener connectionListener;
 
@@ -49,6 +52,66 @@ class EngineRunner {
                 networkChangeListener);
 
         updateLogLevel(isTraceLogEnabled, isDebuggable);
+
+        // The Go-side subscriptions are client-scoped and survive engine
+        // restarts, so one registration at construction time is enough. The
+        // state signal carries no payload; consumers pull the fresh state via
+        // status() / sessionExpiresAt(). Expiry warnings arrive with their
+        // deadline, timed by the engine's own session watcher.
+        goClient.setStateChangeListener(new StateChangeListener() {
+            @Override
+            public void onStateChanged() {
+                SessionMonitor monitor = sessionMonitor;
+                if (monitor != null) {
+                    monitor.onStateChanged();
+                }
+            }
+
+            @Override
+            public void onSessionExpiring(long expiresAtUnix, long leadMinutes, boolean finalWarning) {
+                SessionMonitor monitor = sessionMonitor;
+                if (monitor != null) {
+                    monitor.onSessionExpiring(expiresAtUnix, leadMinutes, finalWarning);
+                }
+            }
+        });
+    }
+
+    /** Registers the consumer of the Go session notifications. */
+    public void setSessionMonitor(SessionMonitor monitor) {
+        sessionMonitor = monitor;
+    }
+
+    /**
+     * Records the user's dismissal of the first expiry warning, suppressing
+     * the final one for the current deadline.
+     */
+    public void dismissSessionWarning() {
+        goClient.dismissSessionWarning();
+    }
+
+    /** The run loop's status label, e.g. "Connected" or "NeedsLogin". */
+    public String status() {
+        return goClient.status();
+    }
+
+    /** Session deadline as unix seconds, or 0 when none is known. */
+    public long sessionExpiresAt() {
+        return goClient.sessionExpiresAtUnix();
+    }
+
+    /**
+     * Runs the interactive SSO flow and extends the session deadline on the
+     * management server without touching the tunnel. Async; the result
+     * arrives on the listener.
+     */
+    public void extendAuthSession(URLOpener urlOpener, boolean isAndroidTV, ErrListener resultListener) {
+        goClient.extendAuthSession(urlOpener, isAndroidTV, resultListener);
+    }
+
+    /** Aborts an in-flight session extend, leaving the tunnel untouched. */
+    public void cancelExtendAuthSession() {
+        goClient.cancelExtendAuthSession();
     }
 
     public void run(@NotNull URLOpener urlOpener, boolean isAndroidTV) {

@@ -9,19 +9,50 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.VpnService;
 import android.os.Build;
+import android.text.format.DateFormat;
 
 import androidx.core.app.NotificationCompat;
+
+import java.util.Date;
 
 class ForegroundNotification {
     private static final int NOTIFICATION_ID = 102;
 
     private final VpnService service;
+    private boolean foregroundActive;
+    private long sessionExpiresAtUnixSeconds;
 
     public ForegroundNotification(android.net.VpnService vpnService) {
         this.service = vpnService;
     }
 
     public void startForeground() {
+        foregroundActive = true;
+        service.startForeground(NOTIFICATION_ID, buildNotification());
+    }
+
+    public void stopForeground() {
+        foregroundActive = false;
+        service.stopForeground(true);
+    }
+
+    /**
+     * Shows the session deadline (live countdown + "Extend session" action)
+     * on the persistent notification, or reverts to the plain "service is
+     * running" text when the deadline is cleared (0). No-op while the
+     * service is not in the foreground.
+     */
+    public void updateSessionDeadline(long expiresAtUnixSeconds) {
+        this.sessionExpiresAtUnixSeconds = expiresAtUnixSeconds;
+        if (!foregroundActive) {
+            return;
+        }
+        NotificationManager manager =
+                (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(NOTIFICATION_ID, buildNotification());
+    }
+
+    private Notification buildNotification() {
         String channelId = service.getPackageName();
         NotificationChannel channel = new NotificationChannel(
                 channelId,
@@ -40,20 +71,37 @@ class ForegroundNotification {
         }
         PendingIntent pendingIntent = PendingIntent.getActivity(service, 0, notificationIntent, flags);
 
-
-        Notification notification = new NotificationCompat.Builder(service.getApplication(), channelId)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(service.getApplication(), channelId)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setColor(Color.GRAY)
                 .setContentTitle(service.getResources().getString(R.string.service_name))
-                .setContentText(service.getResources().getString(R.string.fg_notification_text))
                 .setContentIntent(pendingIntent)
-                .setAutoCancel(false)  // Keep notification after tap
-                .build();
+                .setAutoCancel(false);  // Keep notification after tap
 
-        service.startForeground(NOTIFICATION_ID, notification);
+        if (sessionExpiresAtUnixSeconds > 0) {
+            long expiresAtMs = sessionExpiresAtUnixSeconds * 1000L;
+            String expiresAt = DateFormat.getTimeFormat(service).format(new Date(expiresAtMs));
+            builder.setContentText(service.getString(R.string.fg_notification_session_text, expiresAt))
+                    // The chronometer renders a system-driven live countdown
+                    // in the header — no periodic re-posting needed.
+                    .setWhen(expiresAtMs)
+                    .setShowWhen(true)
+                    .setUsesChronometer(true)
+                    .setChronometerCountDown(true)
+                    .addAction(0, service.getString(R.string.session_notification_extend), extendIntent());
+        } else {
+            builder.setContentText(service.getResources().getString(R.string.fg_notification_text));
+        }
+
+        return builder.build();
     }
 
-    public void stopForeground() {
-        service.stopForeground(true);
+    private PendingIntent extendIntent() {
+        Intent intent = new Intent();
+        intent.setClassName("io.netbird.client", "io.netbird.client.MainActivity");
+        intent.setAction(VPNService.ACTION_EXTEND_SESSION);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return PendingIntent.getActivity(service, 1, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

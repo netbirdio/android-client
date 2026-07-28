@@ -41,9 +41,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import io.netbird.client.databinding.ActivityMainBinding;
 import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
+import io.netbird.client.tool.SessionEventListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
 import io.netbird.gomobile.android.ConnectionListener;
+import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.URLOpener;
@@ -74,11 +76,23 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     // in onServiceConnected.
     private final List<RouteChangeListener> routeChangeListeners = new ArrayList<>();
     private URLOpener urlOpener;
+    private URLOpener extendUrlOpener;
     private QrCodeDialog qrCodeDialog;
 
     private boolean isSSOFinishedWell = false;
     private boolean isRunningOnTV = false;
     private boolean useDeviceCodeFlow = false;
+
+    private AlertDialog sessionDialog;
+    // Set when the notification's "Extend session" action arrives before the
+    // service binding is up; executed from onServiceConnected.
+    private boolean pendingExtendRequest = false;
+    // Guards the extend flow's cancel path: the SSO surface reports its
+    // dismissal even after a successful login, which must not cancel.
+    private volatile boolean extendInProgress = false;
+    // Set when the user abandoned the extend browser while the service was
+    // unbound; the cancel is issued from onServiceConnected.
+    private boolean pendingExtendCancel = false;
 
     // Last known state for UI updates
     private ConnectionState lastKnownState = ConnectionState.UNKNOWN;
@@ -94,8 +108,34 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             mBinder = (VPNService.MyLocalBinder) binder;
             mBinder.setConnectionStateListener(connectionListener);
             mBinder.addServiceStateListener(serviceStateListener);
+            mBinder.addSessionEventListener(sessionEventListener);
             for (RouteChangeListener listener : routeChangeListeners) {
                 mBinder.addRouteChangeListener(listener);
+            }
+            // The engine can stop while we are unbound — most notably when the
+            // management server expires the session, which tears the engine
+            // down on its own. No connection callback reaches us then, so
+            // lastKnownState would keep replaying a stale "connected" to every
+            // listener that registers after the rebind.
+            if (!mBinder.isRunning() && lastKnownState != ConnectionState.DISCONNECTED) {
+                connectionListener.onDisconnected();
+            }
+
+            // Fragments registered before this binding; replay the
+            // login-required status to them now that it is readable.
+            if (mBinder.isLoginRequired()) {
+                for (StateListener listener : serviceStateListeners) {
+                    listener.onLoginRequired();
+                }
+            }
+
+            if (pendingExtendCancel) {
+                pendingExtendCancel = false;
+                mBinder.cancelExtendAuthSession();
+            }
+            if (pendingExtendRequest) {
+                pendingExtendRequest = false;
+                extendSession();
             }
         }
 
@@ -225,6 +265,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             };
         }
 
+        // CustomTabURLOpener registers an activity-result launcher, which is
+        // only allowed before the activity is STARTED — so the extend flow's
+        // opener must be built here, not lazily at tap time.
+        extendUrlOpener = buildExtendURLOpener();
+
         // VPN permission result launcher
         vpnActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -258,6 +303,26 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             showFirstInstallFragment();
         }
 
+        handleSessionIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleSessionIntent(intent);
+    }
+
+    // The persistent notification's "Extend session" action lands here; the
+    // activity is singleTask, so a running instance gets it via onNewIntent.
+    private void handleSessionIntent(Intent intent) {
+        if (intent == null || !VPNService.ACTION_EXTEND_SESSION.equals(intent.getAction())) {
+            return;
+        }
+        if (mBinder != null) {
+            extendSession();
+        } else {
+            pendingExtendRequest = true;
+        }
     }
 
     @Override
@@ -279,10 +344,16 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         if (urlOpener instanceof CustomTabURLOpener && ((CustomTabURLOpener) urlOpener).isOpened()) {
             return; // Keep service alive for SSO custom tab
         }
+        if (extendInProgress) {
+            // Same reason, for the extend flow's own SSO surface: staying bound
+            // lets its cancel reach the service the moment the user backs out.
+            return;
+        }
 
         if (mBinder != null) {
             mBinder.removeConnectionStateListener();
             mBinder.removeServiceStateListener(serviceStateListener);
+            mBinder.removeSessionEventListener(sessionEventListener);
             unbindService(serviceIPC);
             mBinder = null;
         }
@@ -292,9 +363,15 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     protected  void onDestroy() {
         super.onDestroy();
 
+        // The dialog holds this activity as its context; leaving it up across
+        // a destroy (e.g. rotation, or a kill while the SSO tab is in front)
+        // leaks the window.
+        dismissSessionDialog();
+
         if (mBinder != null) {
             mBinder.removeConnectionStateListener();
             mBinder.removeServiceStateListener(serviceStateListener);
+            mBinder.removeSessionEventListener(sessionEventListener);
             unbindService(serviceIPC);
             mBinder = null;
         }
@@ -447,6 +524,14 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         listener.onPeersListChanged(lastPeersCount);
+
+        // Fragments come up before the service binding, so a login-required
+        // state that is already in effect (the session expired while no UI was
+        // running) would otherwise never reach them: it is a status label, not
+        // an event that repeats.
+        if (mBinder != null && mBinder.isLoginRequired()) {
+            listener.onLoginRequired();
+        }
     }
 
     @Override
@@ -611,4 +696,140 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             });
         }
     };
+
+    private final SessionEventListener sessionEventListener = new SessionEventListener() {
+        @Override
+        public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
+            runOnUiThread(() -> showSessionExpiringDialog(leadMinutes));
+        }
+
+        @Override
+        public void onSessionExpired() {
+            // No dialog: the home screen states it where the connection status
+            // lives, and the connect toggle already runs the interactive login.
+            runOnUiThread(() -> {
+                for (StateListener listener : serviceStateListeners) {
+                    listener.onLoginRequired();
+                }
+            });
+        }
+
+        @Override
+        public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
+            runOnUiThread(() -> {
+                for (StateListener listener : serviceStateListeners) {
+                    listener.onSessionDeadlineChanged(expiresAtUnixSeconds);
+                }
+            });
+        }
+    };
+
+    private void showSessionExpiringDialog(long leadMinutes) {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        dismissSessionDialog();
+        sessionDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.session_expiring_title)
+                .setMessage(getString(R.string.session_expiring_message, leadMinutes))
+                .setPositiveButton(R.string.session_extend_now, (d, w) -> extendSession())
+                .setNegativeButton(R.string.session_dismiss, (d, w) -> {
+                    if (mBinder != null) {
+                        mBinder.dismissSessionWarning();
+                    }
+                })
+                .show();
+    }
+
+    private void dismissSessionDialog() {
+        if (sessionDialog != null && sessionDialog.isShowing()) {
+            sessionDialog.dismiss();
+        }
+        sessionDialog = null;
+    }
+
+    @Override
+    public long sessionExpiresAt() {
+        return mBinder == null ? 0 : mBinder.sessionExpiresAt();
+    }
+
+    @Override
+    public void extendSession() {
+        if (mBinder == null) {
+            return;
+        }
+        extendInProgress = true;
+        mBinder.extendAuthSession(extendUrlOpener, useDeviceCodeFlow, new ErrListener() {
+            @Override
+            public void onSuccess() {
+                extendInProgress = false;
+                runOnUiThread(() -> Toast.makeText(MainActivity.this,
+                        R.string.session_extended, Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onError(Exception e) {
+                extendInProgress = false;
+                runOnUiThread(() -> Toast.makeText(MainActivity.this,
+                        getString(R.string.session_extend_failed, e.getMessage()), Toast.LENGTH_LONG).show());
+            }
+        });
+    }
+
+    // The login urlOpener stops the engine when the SSO surface is dismissed
+    // without success, which also kills its pending PKCE wait. An extend must
+    // keep the tunnel up, so it cancels just the extend flow instead —
+    // otherwise the abandoned wait holds its loopback port and every later
+    // attempt fails to bind.
+    private URLOpener buildExtendURLOpener() {
+        if (!useDeviceCodeFlow) {
+            return new CustomTabURLOpener(this, this::cancelExtendSession);
+        }
+        return new URLOpener() {
+            @Override
+            public void open(String url, String userCode) {
+                runOnUiThread(() -> {
+                    qrCodeDialog = QrCodeDialog.newInstance(url, userCode,
+                            MainActivity.this::cancelExtendSession);
+                    qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+
+                    if (!isRunningOnTV) {
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                        } catch (Exception e) {
+                            Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onLoginSuccess() {
+                extendInProgress = false;
+                runOnUiThread(() -> {
+                    if (qrCodeDialog != null && qrCodeDialog.isVisible()) {
+                        qrCodeDialog.dismiss();
+                        qrCodeDialog = null;
+                    }
+                });
+            }
+        };
+    }
+
+    private void cancelExtendSession() {
+        if (!extendInProgress) {
+            return;
+        }
+        extendInProgress = false;
+        if (mBinder != null) {
+            mBinder.cancelExtendAuthSession();
+            return;
+        }
+        // The SSO round-trip can outlive the binding (the activity stops while
+        // the browser is in front). Dropping the cancel here would leave the Go
+        // flow holding its loopback port until it times out, and every later
+        // attempt would fail with "already in progress" — so defer it to the
+        // next bind instead.
+        pendingExtendCancel = true;
+    }
 }
