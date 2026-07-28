@@ -83,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     private boolean isRunningOnTV = false;
     private boolean useDeviceCodeFlow = false;
 
-    private AlertDialog sessionDialog;
     // Set when the notification's "Extend session" action arrives before the
     // service binding is up; executed from onServiceConnected.
     private boolean pendingExtendRequest = false;
@@ -362,11 +361,6 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     @Override
     protected  void onDestroy() {
         super.onDestroy();
-
-        // The dialog holds this activity as its context; leaving it up across
-        // a destroy (e.g. rotation, or a kill while the SSO tab is in front)
-        // leaks the window.
-        dismissSessionDialog();
 
         if (mBinder != null) {
             mBinder.removeConnectionStateListener();
@@ -700,7 +694,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     private final SessionEventListener sessionEventListener = new SessionEventListener() {
         @Override
         public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
-            runOnUiThread(() -> showSessionExpiringDialog(leadMinutes));
+            // Nothing to do in the UI: the notification carries the warning
+            // from the background, and the home screen's session row states the
+            // deadline continuously with the same extend action. A dialog would
+            // be a third copy of that, and an interruption an event known ten
+            // minutes ahead does not warrant.
         }
 
         @Override
@@ -723,30 +721,6 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             });
         }
     };
-
-    private void showSessionExpiringDialog(long leadMinutes) {
-        if (isFinishing() || isDestroyed()) {
-            return;
-        }
-        dismissSessionDialog();
-        sessionDialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.session_expiring_title)
-                .setMessage(getString(R.string.session_expiring_message, leadMinutes))
-                .setPositiveButton(R.string.session_extend_now, (d, w) -> extendSession())
-                .setNegativeButton(R.string.session_dismiss, (d, w) -> {
-                    if (mBinder != null) {
-                        mBinder.dismissSessionWarning();
-                    }
-                })
-                .show();
-    }
-
-    private void dismissSessionDialog() {
-        if (sessionDialog != null && sessionDialog.isShowing()) {
-            sessionDialog.dismiss();
-        }
-        sessionDialog = null;
-    }
 
     @Override
     public long sessionExpiresAt() {

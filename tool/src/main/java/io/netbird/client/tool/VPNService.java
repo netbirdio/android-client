@@ -268,10 +268,6 @@ public class VPNService extends android.net.VpnService {
             engineRunner.cancelExtendAuthSession();
         }
 
-        public void dismissSessionWarning() {
-            engineRunner.dismissSessionWarning();
-        }
-
         /** SSO session deadline as unix seconds, or 0 when none is known. */
         public long sessionExpiresAt() {
             return engineRunner.sessionExpiresAt();

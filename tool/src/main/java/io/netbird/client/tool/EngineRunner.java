@@ -82,14 +82,6 @@ class EngineRunner {
         sessionMonitor = monitor;
     }
 
-    /**
-     * Records the user's dismissal of the first expiry warning, suppressing
-     * the final one for the current deadline.
-     */
-    public void dismissSessionWarning() {
-        goClient.dismissSessionWarning();
-    }
-
     /** The run loop's status label, e.g. "Connected" or "NeedsLogin". */
     public String status() {
         return goClient.status();

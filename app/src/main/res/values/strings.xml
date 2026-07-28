@@ -211,10 +211,6 @@
     <string name="troubleshoot_key_copied">Debug bundle key copied to clipboard</string>
     <string name="troubleshoot_bundle_failed">Failed to create debug bundle: %s</string>
     <string name="settings_no_browser">No browser app available to open %s</string>
-    <string name="session_expiring_title">Session expiring</string>
-    <string name="session_expiring_message">Your login session expires in about %1$d minutes. Extend it now to keep the VPN connected.</string>
-    <string name="session_extend_now">Extend now</string>
-    <string name="session_dismiss">Dismiss</string>
     <string name="session_extended">Session extended</string>
     <string name="session_extend_failed">Failed to extend session: %1$s</string>
     <string name="session_banner_expired">Session expired</string>
