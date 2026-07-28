@@ -1,0 +1,11 @@
+<resources>
+    <string name="fg_notification_channel_name">NetBird サービス</string>
+    <string name="fg_notification_text">サービスは実行中です</string>
+    <string name="session_notification_channel_name">セッションの有効期限</string>
+    <string name="session_notification_expiring_title">NetBird セッションの有効期限が近づいています</string>
+    <string name="session_notification_expiring_text">セッションは約 %1$d 分後に期限切れになります。アプリを開いて延長してください。</string>
+    <string name="session_notification_expired_title">NetBird セッションの有効期限が切れました</string>
+    <string name="session_notification_expired_text">セッションの有効期限が切れました。アプリを開いて再度ログインしてください。</string>
+    <string name="session_notification_extend">セッションを延長</string>
+    <string name="fg_notification_session_text">セッションの期限: %1$s</string>
+</resources>

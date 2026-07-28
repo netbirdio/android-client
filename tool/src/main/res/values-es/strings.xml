@@ -1,0 +1,11 @@
+<resources>
+    <string name="fg_notification_channel_name">Servicio de NetBird</string>
+    <string name="fg_notification_text">El servicio está en ejecución</string>
+    <string name="session_notification_channel_name">Expiración de sesión</string>
+    <string name="session_notification_expiring_title">La sesión de NetBird está por expirar</string>
+    <string name="session_notification_expiring_text">Tu sesión expira en unos %1$d minutos. Abre la app para extenderla.</string>
+    <string name="session_notification_expired_title">La sesión de NetBird expiró</string>
+    <string name="session_notification_expired_text">Tu sesión ha expirado. Abre la app para iniciar sesión de nuevo.</string>
+    <string name="session_notification_extend">Extender sesión</string>
+    <string name="fg_notification_session_text">La sesión expira a las %1$s</string>
+</resources>

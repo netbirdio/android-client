@@ -1,0 +1,11 @@
+<resources>
+    <string name="fg_notification_channel_name">NetBird szolgáltatás</string>
+    <string name="fg_notification_text">A szolgáltatás fut</string>
+    <string name="session_notification_channel_name">Munkamenet lejárata</string>
+    <string name="session_notification_expiring_title">A NetBird munkamenet hamarosan lejár</string>
+    <string name="session_notification_expiring_text">A munkamenet körülbelül %1$d perc múlva lejár. Nyissa meg az alkalmazást a meghosszabbításhoz.</string>
+    <string name="session_notification_expired_title">A NetBird munkamenet lejárt</string>
+    <string name="session_notification_expired_text">A munkamenet lejárt. Nyissa meg az alkalmazást az újbóli bejelentkezéshez.</string>
+    <string name="session_notification_extend">Munkamenet meghosszabbítása</string>
+    <string name="fg_notification_session_text">A munkamenet lejár: %1$s</string>
+</resources>

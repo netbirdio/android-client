@@ -1,0 +1,11 @@
+<resources>
+    <string name="fg_notification_channel_name">NetBird 服务</string>
+    <string name="fg_notification_text">服务正在运行</string>
+    <string name="session_notification_channel_name">会话过期</string>
+    <string name="session_notification_expiring_title">NetBird 会话即将过期</string>
+    <string name="session_notification_expiring_text">您的会话将在约 %1$d 分钟后过期。打开应用以延长会话。</string>
+    <string name="session_notification_expired_title">NetBird 会话已过期</string>
+    <string name="session_notification_expired_text">您的会话已过期。打开应用以重新登录。</string>
+    <string name="session_notification_extend">延长会话</string>
+    <string name="fg_notification_session_text">会话过期时间：%1$s</string>
+</resources>

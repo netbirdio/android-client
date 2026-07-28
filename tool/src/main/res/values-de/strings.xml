@@ -1,0 +1,11 @@
+<resources>
+    <string name="fg_notification_channel_name">NetBird-Dienst</string>
+    <string name="fg_notification_text">Dienst läuft</string>
+    <string name="session_notification_channel_name">Sitzungsablauf</string>
+    <string name="session_notification_expiring_title">NetBird-Sitzung läuft ab</string>
+    <string name="session_notification_expiring_text">Deine Anmeldesitzung läuft in etwa %1$d Minuten ab. Öffne die App, um sie zu verlängern.</string>
+    <string name="session_notification_expired_title">NetBird-Sitzung abgelaufen</string>
+    <string name="session_notification_expired_text">Deine Anmeldesitzung ist abgelaufen. Öffne die App, um sich erneut anzumelden.</string>
+    <string name="session_notification_extend">Sitzung verlängern</string>
+    <string name="fg_notification_session_text">Sitzung läuft um %1$s ab</string>
+</resources>
