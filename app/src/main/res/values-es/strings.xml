@@ -203,4 +203,27 @@
     <string name="profiles_dialog_url_add_anyway">Añadir de todos modos</string>
     <string name="profiles_dialog_url_save_anyway">Guardar de todos modos</string>
     <string name="fragment_firstinstall_continue_anyway">Continuar de todos modos</string>
+    <string name="main_status_login_required">Inicio de sesión requerido</string>
+    <string name="exit_node_title">Nodo de salida</string>
+    <string name="exit_node_none">Ninguno seleccionado</string>
+    <string name="exit_node_unavailable">No hay nodos de salida disponibles</string>
+    <string name="exit_node_picker_none">Ninguno</string>
+    <string name="exit_node_switch_failed">No se pudo cambiar el nodo de salida: %1$s</string>
+    <string name="session_extended">Sesión extendida</string>
+    <string name="session_extend_failed">No se pudo extender la sesión: %1$s</string>
+    <string name="session_banner_expired">Sesión expirada</string>
+    <string name="session_banner_expires_soon">La sesión expira en menos de un minuto</string>
+    <string name="session_banner_hint">Toca para extender tu sesión</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="one">La sesión expira en %1$d minuto</item>
+        <item quantity="other">La sesión expira en %1$d minutos</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="one">La sesión expira en %1$d hora</item>
+        <item quantity="other">La sesión expira en %1$d horas</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="one">La sesión expira en %1$d día</item>
+        <item quantity="other">La sesión expira en %1$d días</item>
+    </plurals>
 </resources>

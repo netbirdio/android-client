@@ -203,4 +203,24 @@
     <string name="profiles_dialog_url_add_anyway">このまま追加</string>
     <string name="profiles_dialog_url_save_anyway">このまま保存</string>
     <string name="fragment_firstinstall_continue_anyway">このまま続行</string>
+    <string name="main_status_login_required">ログインが必要です</string>
+    <string name="exit_node_title">出口ノード</string>
+    <string name="exit_node_none">未選択</string>
+    <string name="exit_node_unavailable">利用可能な出口ノードがありません</string>
+    <string name="exit_node_picker_none">なし</string>
+    <string name="exit_node_switch_failed">出口ノードの切り替えに失敗しました: %1$s</string>
+    <string name="session_extended">セッションを延長しました</string>
+    <string name="session_extend_failed">セッションの延長に失敗しました: %1$s</string>
+    <string name="session_banner_expired">セッションの有効期限が切れました</string>
+    <string name="session_banner_expires_soon">セッションは1分以内に期限切れになります</string>
+    <string name="session_banner_hint">タップしてセッションを延長</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="other">セッションは %1$d 分後に期限切れになります</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="other">セッションは %1$d 時間後に期限切れになります</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="other">セッションは %1$d 日後に期限切れになります</item>
+    </plurals>
 </resources>

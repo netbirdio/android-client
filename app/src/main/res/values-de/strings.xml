@@ -203,4 +203,27 @@
     <string name="profiles_dialog_url_add_anyway">Trotzdem hinzufügen</string>
     <string name="profiles_dialog_url_save_anyway">Trotzdem speichern</string>
     <string name="fragment_firstinstall_continue_anyway">Trotzdem fortfahren</string>
+    <string name="main_status_login_required">Anmeldung erforderlich</string>
+    <string name="exit_node_title">Exit-Node</string>
+    <string name="exit_node_none">Keiner ausgewählt</string>
+    <string name="exit_node_unavailable">Keine Exit-Nodes verfügbar</string>
+    <string name="exit_node_picker_none">Keiner</string>
+    <string name="exit_node_switch_failed">Exit-Node konnte nicht gewechselt werden: %1$s</string>
+    <string name="session_extended">Sitzung verlängert</string>
+    <string name="session_extend_failed">Sitzung konnte nicht verlängert werden: %1$s</string>
+    <string name="session_banner_expired">Sitzung abgelaufen</string>
+    <string name="session_banner_expires_soon">Sitzung läuft in weniger als einer Minute ab</string>
+    <string name="session_banner_hint">Tippen, um die Sitzung zu verlängern</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="one">Sitzung läuft in %1$d Minute ab</item>
+        <item quantity="other">Sitzung läuft in %1$d Minuten ab</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="one">Sitzung läuft in %1$d Stunde ab</item>
+        <item quantity="other">Sitzung läuft in %1$d Stunden ab</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="one">Sitzung läuft in %1$d Tag ab</item>
+        <item quantity="other">Sitzung läuft in %1$d Tagen ab</item>
+    </plurals>
 </resources>

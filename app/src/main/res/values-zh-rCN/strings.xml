@@ -203,4 +203,24 @@
     <string name="profiles_dialog_url_add_anyway">仍然添加</string>
     <string name="profiles_dialog_url_save_anyway">仍然保存</string>
     <string name="fragment_firstinstall_continue_anyway">仍然继续</string>
+    <string name="main_status_login_required">需要登录</string>
+    <string name="exit_node_title">出口节点</string>
+    <string name="exit_node_none">未选择</string>
+    <string name="exit_node_unavailable">没有可用的出口节点</string>
+    <string name="exit_node_picker_none">无</string>
+    <string name="exit_node_switch_failed">切换出口节点失败：%1$s</string>
+    <string name="session_extended">会话已延长</string>
+    <string name="session_extend_failed">延长会话失败：%1$s</string>
+    <string name="session_banner_expired">会话已过期</string>
+    <string name="session_banner_expires_soon">会话将在不到一分钟后过期</string>
+    <string name="session_banner_hint">点按以延长会话</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="other">会话将在 %1$d 分钟后过期</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="other">会话将在 %1$d 小时后过期</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="other">会话将在 %1$d 天后过期</item>
+    </plurals>
 </resources>

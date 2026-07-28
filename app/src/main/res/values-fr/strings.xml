@@ -203,4 +203,27 @@
     <string name="profiles_dialog_url_add_anyway">Ajouter quand même</string>
     <string name="profiles_dialog_url_save_anyway">Enregistrer quand même</string>
     <string name="fragment_firstinstall_continue_anyway">Continuer quand même</string>
+    <string name="main_status_login_required">Connexion requise</string>
+    <string name="exit_node_title">Nœud de sortie</string>
+    <string name="exit_node_none">Aucun sélectionné</string>
+    <string name="exit_node_unavailable">Aucun nœud de sortie disponible</string>
+    <string name="exit_node_picker_none">Aucun</string>
+    <string name="exit_node_switch_failed">Échec du changement de nœud de sortie : %1$s</string>
+    <string name="session_extended">Session prolongée</string>
+    <string name="session_extend_failed">Échec de la prolongation de la session : %1$s</string>
+    <string name="session_banner_expired">Session expirée</string>
+    <string name="session_banner_expires_soon">La session expire dans moins d\'une minute</string>
+    <string name="session_banner_hint">Appuyez pour prolonger votre session</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="one">La session expire dans %1$d minute</item>
+        <item quantity="other">La session expire dans %1$d minutes</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="one">La session expire dans %1$d heure</item>
+        <item quantity="other">La session expire dans %1$d heures</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="one">La session expire dans %1$d jour</item>
+        <item quantity="other">La session expire dans %1$d jours</item>
+    </plurals>
 </resources>

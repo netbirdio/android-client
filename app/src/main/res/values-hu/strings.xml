@@ -203,4 +203,24 @@
     <string name="profiles_dialog_url_add_anyway">Hozzáadás mindenképp</string>
     <string name="profiles_dialog_url_save_anyway">Mentés mindenképp</string>
     <string name="fragment_firstinstall_continue_anyway">Folytatás mindenképp</string>
+    <string name="main_status_login_required">Bejelentkezés szükséges</string>
+    <string name="exit_node_title">Kilépési csomópont</string>
+    <string name="exit_node_none">Nincs kiválasztva</string>
+    <string name="exit_node_unavailable">Nincs elérhető kilépési csomópont</string>
+    <string name="exit_node_picker_none">Nincs</string>
+    <string name="exit_node_switch_failed">A kilépési csomópont váltása sikertelen: %1$s</string>
+    <string name="session_extended">Munkamenet meghosszabbítva</string>
+    <string name="session_extend_failed">A munkamenet meghosszabbítása sikertelen: %1$s</string>
+    <string name="session_banner_expired">A munkamenet lejárt</string>
+    <string name="session_banner_expires_soon">A munkamenet kevesebb mint egy perc múlva lejár</string>
+    <string name="session_banner_hint">Koppintson a munkamenet meghosszabbításához</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="other">A munkamenet %1$d perc múlva lejár</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="other">A munkamenet %1$d óra múlva lejár</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="other">A munkamenet %1$d nap múlva lejár</item>
+    </plurals>
 </resources>

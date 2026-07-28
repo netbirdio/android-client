@@ -203,4 +203,33 @@
     <string name="profiles_dialog_url_add_anyway">Всё равно добавить</string>
     <string name="profiles_dialog_url_save_anyway">Всё равно сохранить</string>
     <string name="fragment_firstinstall_continue_anyway">Всё равно продолжить</string>
+    <string name="main_status_login_required">Требуется вход</string>
+    <string name="exit_node_title">Выходной узел</string>
+    <string name="exit_node_none">Не выбрано</string>
+    <string name="exit_node_unavailable">Нет доступных выходных узлов</string>
+    <string name="exit_node_picker_none">Нет</string>
+    <string name="exit_node_switch_failed">Не удалось сменить выходной узел: %1$s</string>
+    <string name="session_extended">Сеанс продлён</string>
+    <string name="session_extend_failed">Не удалось продлить сеанс: %1$s</string>
+    <string name="session_banner_expired">Сеанс истёк</string>
+    <string name="session_banner_expires_soon">Сеанс истекает менее чем через минуту</string>
+    <string name="session_banner_hint">Нажмите, чтобы продлить сеанс</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="one">Сеанс истекает через %1$d минуту</item>
+        <item quantity="few">Сеанс истекает через %1$d минуты</item>
+        <item quantity="many">Сеанс истекает через %1$d минут</item>
+        <item quantity="other">Сеанс истекает через %1$d минуты</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="one">Сеанс истекает через %1$d час</item>
+        <item quantity="few">Сеанс истекает через %1$d часа</item>
+        <item quantity="many">Сеанс истекает через %1$d часов</item>
+        <item quantity="other">Сеанс истекает через %1$d часа</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="one">Сеанс истекает через %1$d день</item>
+        <item quantity="few">Сеанс истекает через %1$d дня</item>
+        <item quantity="many">Сеанс истекает через %1$d дней</item>
+        <item quantity="other">Сеанс истекает через %1$d дня</item>
+    </plurals>
 </resources>
