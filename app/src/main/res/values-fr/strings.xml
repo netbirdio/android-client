@@ -200,4 +200,7 @@
     <string name="troubleshoot_key_copied">Clé du lot de diagnostic copiée dans le presse-papiers</string>
     <string name="troubleshoot_bundle_failed">Impossible de créer le lot de diagnostic : %s</string>
     <string name="settings_no_browser">Aucun navigateur disponible pour ouvrir %s</string>
+    <string name="profiles_dialog_url_add_anyway">Ajouter quand même</string>
+    <string name="profiles_dialog_url_save_anyway">Enregistrer quand même</string>
+    <string name="fragment_firstinstall_continue_anyway">Continuer quand même</string>
 </resources>

@@ -96,6 +96,7 @@ public class FirstInstallFragment extends Fragment {
         unreachable = false;
         binding.editTextServerUrl.setError(null);
         binding.textServerUrlWarning.setVisibility(View.GONE);
+        binding.btnContinue.setText(R.string.fragment_firstinstall_continue);
     }
 
     private void onContinue() {
@@ -144,6 +145,9 @@ public class FirstInstallFragment extends Fragment {
                 if (!reachable) {
                     unreachable = true;
                     binding.textServerUrlWarning.setVisibility(View.VISIBLE);
+                    // Make the confirm-on-second-press explicit: the next tap
+                    // skips the probe and continues regardless.
+                    binding.btnContinue.setText(R.string.fragment_firstinstall_continue_anyway);
                     return;
                 }
                 applyServer(targetUrl, key);

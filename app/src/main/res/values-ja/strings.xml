@@ -200,4 +200,7 @@
     <string name="troubleshoot_key_copied">デバッグバンドルのキーをクリップボードにコピーしました</string>
     <string name="troubleshoot_bundle_failed">デバッグバンドルを作成できませんでした: %s</string>
     <string name="settings_no_browser">%s を開けるブラウザアプリがありません</string>
+    <string name="profiles_dialog_url_add_anyway">このまま追加</string>
+    <string name="profiles_dialog_url_save_anyway">このまま保存</string>
+    <string name="fragment_firstinstall_continue_anyway">このまま続行</string>
 </resources>

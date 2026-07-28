@@ -142,6 +142,11 @@ public final class ProfileEditorDialog {
         return isEditing() ? R.string.profiles_dialog_edit_submit : R.string.profiles_add;
     }
 
+    private int anywayLabel() {
+        return isEditing() ? R.string.profiles_dialog_url_save_anyway
+                : R.string.profiles_dialog_url_add_anyway;
+    }
+
     private void onModeChanged(boolean selfHosted) {
         urlInput.setVisibility(selfHosted ? View.VISIBLE : View.GONE);
         resetUrlFeedback();
@@ -185,6 +190,7 @@ public final class ProfileEditorDialog {
         unreachable = false;
         urlInput.setError(null);
         urlWarning.setVisibility(View.GONE);
+        okButton.setText(submitLabel());
     }
 
     private void onSubmit() {
@@ -238,6 +244,9 @@ public final class ProfileEditorDialog {
                 if (!reachable) {
                     unreachable = true;
                     urlWarning.setVisibility(View.VISIBLE);
+                    // Make the confirm-on-second-press explicit: the next tap
+                    // skips the probe and saves regardless.
+                    okButton.setText(anywayLabel());
                     return;
                 }
                 save(name, targetUrl);

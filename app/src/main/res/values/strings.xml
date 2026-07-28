@@ -34,6 +34,7 @@
     <string name="main_value_empty">–</string>
 
     <string name="fragment_firstinstall_continue">Continue</string>
+    <string name="fragment_firstinstall_continue_anyway">Continue anyway</string>
     <string name="firstinstall_setup_title">Set up NetBird</string>
     <string name="firstinstall_setup_description">Tap Continue to get started, or pick Self-hosted if you have your own NetBird server.</string>
     <string name="fragment_firstinstall_desc_logo">NetBird logo</string>
@@ -178,6 +179,8 @@
     <string name="profiles_dialog_server_self_hosted">Self-hosted</string>
     <string name="profiles_dialog_url_invalid">Please enter a valid URL, e.g., https://netbird.selfhosted.com:443</string>
     <string name="profiles_dialog_url_unreachable">Couldn\'t reach this server. Check the URL, or add the profile anyway if you\'re sure it\'s correct.</string>
+    <string name="profiles_dialog_url_add_anyway">Add anyway</string>
+    <string name="profiles_dialog_url_save_anyway">Save anyway</string>
     <string name="profiles_dialog_checking">Checking…</string>
     <string name="profiles_dialog_url_hint" translatable="false">https://netbird.selfhosted.com:443</string>
     <string name="profiles_rename">Edit Profile</string>

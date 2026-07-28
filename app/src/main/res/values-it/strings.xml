@@ -200,4 +200,7 @@
     <string name="troubleshoot_key_copied">Chiave del pacchetto di debug copiata negli appunti</string>
     <string name="troubleshoot_bundle_failed">Impossibile creare il pacchetto di debug: %s</string>
     <string name="settings_no_browser">Nessun browser disponibile per aprire %s</string>
+    <string name="profiles_dialog_url_add_anyway">Aggiungi comunque</string>
+    <string name="profiles_dialog_url_save_anyway">Salva comunque</string>
+    <string name="fragment_firstinstall_continue_anyway">Continua comunque</string>
 </resources>
