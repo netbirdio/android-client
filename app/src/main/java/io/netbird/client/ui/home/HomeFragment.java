@@ -58,6 +58,10 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
     private static final long SESSION_ROW_REFRESH_MS = 60_000;
 
+    private static final long MINUTE_MS = 60_000L;
+    private static final long HOUR_MS = 60 * MINUTE_MS;
+    private static final long DAY_MS = 24 * HOUR_MS;
+
     private long sessionDeadlineUnixSeconds;
     // The management server rejected the peer, so reconnecting needs a login.
     // Outlives the engine (and the app process), so it is reported on bind as
@@ -565,17 +569,36 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         binding.sessionExpiryRow.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Formats the time left before the deadline, matching the desktop tray's
+     * formatSessionRemaining: units round <em>up</em>, so the figure shown is
+     * never more time than the user actually has, and the sub-minute tail gets
+     * its own "less than a minute" wording rather than rounding to "1 minute".
+     */
     private String formatSessionExpiry(long deadlineUnixSeconds) {
-        long remainingMinutes = (deadlineUnixSeconds * 1000L - System.currentTimeMillis()) / 60_000;
-        if (remainingMinutes < 1) {
+        long remainingMillis = deadlineUnixSeconds * 1000L - System.currentTimeMillis();
+        if (remainingMillis <= 0) {
             return getString(R.string.session_banner_expired);
         }
-        if (remainingMinutes < 120) {
-            return getString(R.string.session_banner_expires_minutes, remainingMinutes);
+        if (remainingMillis < MINUTE_MS) {
+            return getString(R.string.session_banner_expires_soon);
         }
-        if (remainingMinutes < 48 * 60) {
-            return getString(R.string.session_banner_expires_hours, remainingMinutes / 60);
+        if (remainingMillis <= 59 * MINUTE_MS) {
+            long minutes = ceilDiv(remainingMillis, MINUTE_MS);
+            return getResources().getQuantityString(
+                    R.plurals.session_banner_expires_minutes, (int) minutes, minutes);
         }
-        return getString(R.string.session_banner_expires_days, remainingMinutes / (24 * 60));
+        if (remainingMillis <= 23 * HOUR_MS) {
+            long hours = ceilDiv(remainingMillis, HOUR_MS);
+            return getResources().getQuantityString(
+                    R.plurals.session_banner_expires_hours, (int) hours, hours);
+        }
+        long days = ceilDiv(remainingMillis, DAY_MS);
+        return getResources().getQuantityString(
+                R.plurals.session_banner_expires_days, (int) days, days);
+    }
+
+    private static long ceilDiv(long value, long unit) {
+        return (value + unit - 1) / unit;
     }
 }
