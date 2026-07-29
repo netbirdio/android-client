@@ -34,8 +34,7 @@
     <string name="main_value_empty">–</string>
 
     <string name="fragment_firstinstall_continue">Weiter</string>
-    <string name="firstinstall_setup_title">NetBird einrichten</string>
-    <string name="firstinstall_setup_description">Tippen Sie auf „Weiter“, um loszulegen, oder wählen Sie „Self-hosted“, wenn Sie einen eigenen NetBird-Server haben.</string>
+    <string name="firstinstall_setup_description">Tippen Sie auf „Weiter“ für NetBird Cloud oder wählen Sie „Self-hosted“ für Ihren eigenen Server</string>
     <string name="fragment_firstinstall_desc_logo">NetBird-Logo</string>
     <string name="fragment_firstinstall_androidtv_beta">Die Unterstützung für Android TV befindet sich derzeit in der Beta. Einige Funktionen funktionieren möglicherweise nicht wie erwartet.</string>
 

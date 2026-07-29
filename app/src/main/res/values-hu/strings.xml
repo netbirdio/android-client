@@ -34,8 +34,7 @@
     <string name="main_value_empty">–</string>
 
     <string name="fragment_firstinstall_continue">Folytatás</string>
-    <string name="firstinstall_setup_title">NetBird beállítása</string>
-    <string name="firstinstall_setup_description">Koppintson a Folytatás gombra a kezdéshez, vagy válassza a „Saját üzemeltetésű” lehetőséget, ha saját NetBird-szervere van.</string>
+    <string name="firstinstall_setup_description">Koppintson a Folytatás gombra a NetBird Cloudhoz, vagy válassza a „Saját üzemeltetésű” lehetőséget a saját szerveréhez</string>
     <string name="fragment_firstinstall_desc_logo">NetBird logó</string>
     <string name="fragment_firstinstall_androidtv_beta">Az Android TV támogatása jelenleg béta állapotú. Egyes funkciók nem feltétlenül működnek az elvárt módon.</string>
 

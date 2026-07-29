@@ -46,21 +46,10 @@
                 android:src="@drawable/nb_logo_full" />
 
             <TextView
-                android:id="@+id/txt_setup_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="@string/firstinstall_setup_title"
-                android:textAlignment="center"
-                android:textColor="@color/nb_txt"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <TextView
                 android:id="@+id/txt_setup_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="20dp"
                 android:text="@string/firstinstall_setup_description"
                 android:textAlignment="center"
                 android:textColor="@color/nb_txt_light"

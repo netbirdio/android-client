@@ -34,8 +34,7 @@
     <string name="main_value_empty">–</string>
 
     <string name="fragment_firstinstall_continue">Продолжить</string>
-    <string name="firstinstall_setup_title">Настройка NetBird</string>
-    <string name="firstinstall_setup_description">Нажмите «Продолжить», чтобы начать, или выберите «Собственный сервер», если у вас есть свой сервер NetBird.</string>
+    <string name="firstinstall_setup_description">Нажмите «Продолжить» для NetBird Cloud или выберите «Собственный сервер», чтобы использовать свой сервер</string>
     <string name="fragment_firstinstall_desc_logo">Логотип NetBird</string>
     <string name="fragment_firstinstall_androidtv_beta">Поддержка Android TV сейчас находится в бета-версии. Некоторые функции могут работать не так, как ожидается.</string>
 

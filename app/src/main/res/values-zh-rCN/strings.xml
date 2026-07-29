@@ -34,8 +34,7 @@
     <string name="main_value_empty">–</string>
 
     <string name="fragment_firstinstall_continue">继续</string>
-    <string name="firstinstall_setup_title">设置 NetBird</string>
-    <string name="firstinstall_setup_description">点按“继续”即可开始；如果您有自己的 NetBird 服务器，请选择“自托管”。</string>
+    <string name="firstinstall_setup_description">点按“继续”以使用 NetBird Cloud；若要使用自己的服务器，请选择“自托管”</string>
     <string name="fragment_firstinstall_desc_logo">NetBird 徽标</string>
     <string name="fragment_firstinstall_androidtv_beta">Android TV 支持目前处于测试阶段。某些功能可能无法按预期工作。</string>
 
