@@ -177,11 +177,11 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
 
         public void bind(Peer peer, OnPeerClickListener clickListener) {
             binding.status.setText(peer.getStatus().toString());
-            String ipDisplay = peer.getIp();
-            if (peer.getIpv6() != null && !peer.getIpv6().isEmpty()) {
-                ipDisplay = ipDisplay + "\n" + peer.getIpv6();
-            }
-            binding.ip.setText(ipDisplay);
+            binding.ip.setText(peer.getIp());
+            String ipv6 = peer.getIpv6();
+            boolean hasIpv6 = ipv6 != null && !ipv6.isEmpty();
+            binding.ipv6.setText(hasIpv6 ? ipv6 : "");
+            binding.ipv6.setVisibility(hasIpv6 ? View.VISIBLE : View.GONE);
             binding.fqdn.setText(peer.getFqdn());
 
             if (peer.getStatus() == Status.CONNECTED) {
