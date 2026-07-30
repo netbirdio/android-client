@@ -20,6 +20,7 @@ import io.netbird.gomobile.android.NetworkChangeListener;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.StateChangeListener;
 import io.netbird.gomobile.android.TunAdapter;
+import io.netbird.gomobile.android.TunSettings;
 import io.netbird.gomobile.android.URLOpener;
 
 class EngineRunner {
@@ -351,6 +352,15 @@ class EngineRunner {
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             notifyError(e);
+        }
+    }
+
+    public TunSettings getTunSettings() {
+        try {
+            return goClient.getTunSettings();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "failed to get TUN settings", e);
+            return null;
         }
     }
 
