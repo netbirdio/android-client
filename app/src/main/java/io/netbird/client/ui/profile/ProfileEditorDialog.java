@@ -290,7 +290,7 @@ public final class ProfileEditorDialog {
 
         dialog.dismiss();
         if (listener != null) {
-            listener.onProfileSaved(new Profile(editing.getID(), name, editing.isActive()));
+            listener.onProfileSaved(new Profile(editing.getID(), name, editing.getEmail(), editing.isActive()));
         }
     }
 

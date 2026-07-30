@@ -57,6 +57,7 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
 
     static class ProfileViewHolder extends RecyclerView.ViewHolder {
         private final TextView textName;
+        private final TextView textEmail;
         private final TextView badgeActive;
         private final ImageView btnRename;
         private final MaterialButton btnSwitch;
@@ -66,6 +67,7 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
         public ProfileViewHolder(@NonNull View itemView) {
             super(itemView);
             textName = itemView.findViewById(R.id.text_profile_name);
+            textEmail = itemView.findViewById(R.id.text_profile_email);
             badgeActive = itemView.findViewById(R.id.badge_active);
             btnRename = itemView.findViewById(R.id.btn_rename);
             btnSwitch = itemView.findViewById(R.id.btn_switch);
@@ -75,6 +77,14 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
 
         public void bind(Profile profile, ProfileActionListener listener) {
             textName.setText(profile.getName());
+
+            String email = profile.getEmail();
+            if (email == null || email.isEmpty()) {
+                textEmail.setVisibility(View.GONE);
+            } else {
+                textEmail.setText(email);
+                textEmail.setVisibility(View.VISIBLE);
+            }
 
             if (profile.isActive()) {
                 badgeActive.setVisibility(View.VISIBLE);

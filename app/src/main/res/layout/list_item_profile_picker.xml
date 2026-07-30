@@ -18,17 +18,36 @@
         android:layout_width="10dp"
         android:layout_height="10dp" />
 
-    <TextView
-        android:id="@+id/profile_picker_name"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="18dp"
         android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="@color/nb_txt"
-        android:textSize="16sp"
-        tools:text="default" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/profile_picker_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/nb_txt"
+            android:textSize="16sp"
+            tools:text="default" />
+
+        <TextView
+            android:id="@+id/profile_picker_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/nb_txt_light"
+            android:textSize="12sp"
+            android:visibility="gone"
+            tools:text="user@example.com"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/profile_picker_check"

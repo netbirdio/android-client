@@ -38,7 +38,7 @@ public class ProfileManagerWrapper {
                 for (int i = 0; i < array.length(); i++) {
                     io.netbird.gomobile.android.Profile p = array.get(i);
                     if (p != null) {
-                        profiles.add(new Profile(p.getID(), p.getName(), p.getIsActive()));
+                        profiles.add(new Profile(p.getID(), p.getName(), p.getEmail(), p.getIsActive()));
                     }
                 }
             }
@@ -57,7 +57,7 @@ public class ProfileManagerWrapper {
             if (p == null)  {
               throw new IllegalStateException("Active profile is unavailable");
             }
-            return new Profile(p.getID(), p.getName(), p.getIsActive());
+            return new Profile(p.getID(), p.getName(), p.getEmail(), p.getIsActive());
         } catch (Exception e) {
             Log.e(TAG, "Failed to get active profile", e);
             throw new IllegalStateException("Failed to get active profile", e);
