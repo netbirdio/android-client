@@ -73,7 +73,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.42" />
 
-    <!-- Connect toggle -->
+    <!-- Connect toggle. saveEnabled is off because the checked state is painted
+         from the engine state replayed on every listener registration; the
+         framework's view-state restore would otherwise re-apply a stale checked
+         value saved before navigating away (e.g. while a previous profile was
+         connected), silently overriding the fresh paint after onCreateView. -->
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/btn_connect"
         android:layout_width="wrap_content"
@@ -81,6 +85,7 @@
         android:layout_marginTop="24dp"
         android:background="@null"
         android:clickable="true"
+        android:saveEnabled="false"
         android:contentDescription="@string/main_desc_connect"
         android:focusable="true"
         android:focusableInTouchMode="false"
