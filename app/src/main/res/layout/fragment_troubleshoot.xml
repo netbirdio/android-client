@@ -99,16 +99,14 @@
             android:paddingTop="12dp"
             android:paddingBottom="12dp">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_debug_bundle"
+                style="@style/Widget.NetBird.Button.Primary"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_bg_orange"
+                android:layout_height="48dp"
                 android:focusable="true"
                 android:focusableInTouchMode="false"
-                android:foreground="@drawable/focus_highlight"
-                android:text="@string/troubleshoot_debug_bundle"
-                android:textAllCaps="false" />
+                android:text="@string/troubleshoot_debug_bundle" />
         </LinearLayout>
 
     </LinearLayout>
