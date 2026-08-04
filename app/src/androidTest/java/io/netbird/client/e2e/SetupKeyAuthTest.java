@@ -1,4 +1,4 @@
-package io.netbird.client;
+package io.netbird.client.e2e;
 
 import android.os.Bundle;
 

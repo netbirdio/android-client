@@ -85,3 +85,88 @@ jobs:
             app/build/reports/tests/
             tool/build/reports/tests/
           retention-days: 3
+
+  # Classic instrumented tests: everything outside io.netbird.client.e2e.
+  # They need no secrets and no external infrastructure, so they can run on
+  # every PR, forks included. The e2e package (production API, setup keys)
+  # runs from the private mobile-e2e repo instead.
+  instrumented-tests:
+    needs: build-debug
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "adopt"
+          cache: "gradle"
+
+      - name: Download AAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: netbird-aar
+          path: gomobile
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: AVD cache
+        id: avd-cache
+        uses: actions/cache@v4
+        with:
+          # ANDROID_HOME is set by the runner image but not visible to
+          # ${{ env.X }} at expression-eval time; hardcoded to the path on
+          # ubuntu-latest.
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+            /usr/local/lib/android/sdk/system-images/android-30/google_apis/x86_64
+          key: avd-api30-google_apis-x86_64-pixel_3a-v1
+
+      - name: Create AVD snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: pixel_3a
+          disk-size: 4096M
+          heap-size: 512M
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Run instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: pixel_3a
+          disk-size: 4096M
+          heap-size: 512M
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: ./gradlew --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notPackage=io.netbird.client.e2e
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumented-test-results
+          path: |
+            app/build/reports/androidTests/
+            tool/build/reports/androidTests/
+          retention-days: 3

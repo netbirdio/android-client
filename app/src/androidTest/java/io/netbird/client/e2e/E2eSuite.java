@@ -1,4 +1,6 @@
-package io.netbird.client;
+package io.netbird.client.e2e;
+
+import io.netbird.client.MainActivity;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
@@ -15,7 +17,7 @@ import org.junit.runners.Suite;
  *
  * <p>Run with:
  * <pre>
- *   -Pandroid.testInstrumentationRunnerArguments.class=io.netbird.client.E2eSuite
+ *   -Pandroid.testInstrumentationRunnerArguments.class=io.netbird.client.e2e.E2eSuite
  * </pre>
  */
 @RunWith(Suite.class)

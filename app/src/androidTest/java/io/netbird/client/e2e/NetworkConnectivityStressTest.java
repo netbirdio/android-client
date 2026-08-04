@@ -1,4 +1,8 @@
-package io.netbird.client;
+package io.netbird.client.e2e;
+
+import io.netbird.client.MainActivity;
+import io.netbird.client.StateListener;
+import io.netbird.client.StateListenerAdapter;
 
 import android.app.Instrumentation;
 import android.app.UiAutomation;
@@ -60,7 +64,7 @@ import static org.junit.Assert.fail;
  * <h3>Run with</h3>
  * <pre>
  * ./gradlew connectedAndroidTest \
- *   -Pandroid.testInstrumentationRunnerArguments.class=io.netbird.client.NetworkConnectivityStressTest
+ *   -Pandroid.testInstrumentationRunnerArguments.class=io.netbird.client.e2e.NetworkConnectivityStressTest
  * </pre>
  */
 @RunWith(AndroidJUnit4.class)

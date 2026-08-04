@@ -1,4 +1,6 @@
-package io.netbird.client;
+package io.netbird.client.e2e;
+
+import io.netbird.client.MainActivity;
 
 import android.app.Activity;
 import android.app.Instrumentation;

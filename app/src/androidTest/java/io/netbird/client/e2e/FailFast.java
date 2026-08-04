@@ -1,4 +1,4 @@
-package io.netbird.client;
+package io.netbird.client.e2e;
 
 import androidx.test.internal.runner.listener.InstrumentationRunListener;
 
