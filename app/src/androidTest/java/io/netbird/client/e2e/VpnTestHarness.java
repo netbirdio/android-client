@@ -131,10 +131,27 @@ final class VpnTestHarness {
                 Log.i(TAG, "Ping to " + target + " succeeded on attempt " + attempt);
                 return true;
             }
+            logJavaResolution(target);
             Thread.sleep(3000);
         }
         Log.w(TAG, "Ping to " + target + " failed after " + attempt + " attempts");
         return false;
+    }
+
+    /**
+     * Log what the app's own resolver says about {@code target}. The shell ping
+     * resolves as the shell uid; this resolves in-process, which is guaranteed
+     * to route through the VPN. Comparing the two in the logcat artifact tells a
+     * DNS-zone problem apart from a which-network-resolved-it problem — and
+     * unlike ping, an exception here carries the resolver's actual error.
+     */
+    private void logJavaResolution(String target) {
+        try {
+            java.net.InetAddress addr = java.net.InetAddress.getByName(target);
+            Log.i(TAG, "InetAddress.getByName(" + target + ") = " + addr.getHostAddress());
+        } catch (Exception e) {
+            Log.i(TAG, "InetAddress.getByName(" + target + ") failed: " + e);
+        }
     }
 
     /** Ping a host (FQDN or IP) once through the tunnel. */
