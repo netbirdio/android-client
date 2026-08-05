@@ -63,10 +63,15 @@ public class PeerConnectivityTest {
     /** Peer reachable without relay (Robot "without relay support" case). */
     private static final String PEER_FQDN_NO_RELAY = "pingtest-pre-relay.netbird.cloud";
 
-    /** Matches the Robot suite's peer-connected window (3 min). */
+    /**
+     * Window for the UI to report Connected. Generous against the observed
+     * few seconds; the slow part is the data plane settling afterwards, which
+     * the 90s probe windows below absorb (Robot allows ~3 min for the whole
+     * peer-ready sequence).
+     */
     private static final long CONNECT_TIMEOUT_SEC = 20;
     /** How long to keep retrying the ping once the engine reports connected. */
-    private static final long PING_TIMEOUT_SEC = 20;
+    private static final long PING_TIMEOUT_SEC = 90;
 
     private VpnTestHarness harness;
     private String profileName;

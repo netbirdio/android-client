@@ -56,10 +56,15 @@ public class DnsResolutionTest {
     private static final String PEER_UNQUALIFIED = "ip-172-20-3-158";
     private static final String EXPECTED_IP = "172.20.3.158";
 
-    /** Matches the Robot suite's peer-connected window (3 min). */
+    /**
+     * Window for the UI to report Connected. Generous against the observed
+     * few seconds; the slow part is the data plane settling afterwards, which
+     * the 90s probe windows below absorb (Robot allows ~3 min for the whole
+     * peer-ready sequence).
+     */
     private static final long CONNECT_TIMEOUT_SEC = 20;
     /** Time budget for DNS to start resolving once the engine is connected. */
-    private static final long RESOLVE_TIMEOUT_SEC = 20;
+    private static final long RESOLVE_TIMEOUT_SEC = 90;
     private VpnTestHarness harness;
     private String profileName;
 

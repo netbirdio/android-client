@@ -49,14 +49,19 @@ public class PortAclTest {
     private static final String PEER_FQDN = "acltest.netbird.cloud";
     private static final int ALLOWED_PORT = 80;
 
-    /** Matches the Robot suite's peer-connected window (3 min). */
+    /**
+     * Window for the UI to report Connected. Generous against the observed
+     * few seconds; the slow part is the data plane settling afterwards, which
+     * the 90s probe windows below absorb (Robot allows ~3 min for the whole
+     * peer-ready sequence).
+     */
     private static final long CONNECT_TIMEOUT_SEC = 20;
     /**
      * Time budget for the allowed port to become reachable once the engine is
      * connected (peer + ACL need a moment to settle). Loosely mirrors the
      * Robot peer-ready/handshake windows.
      */
-    private static final long PORT_TIMEOUT_SEC = 20;
+    private static final long PORT_TIMEOUT_SEC = 90;
     private static final int TCP_CONNECT_TIMEOUT_MS = 3000;
     /**
      * How long to keep trying ICMP before concluding it is blocked. The ACL

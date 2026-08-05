@@ -48,10 +48,15 @@ public class ExitNodeRouteTest {
     /** The exit node's public IP — egress must appear to come from here. */
     private static final String EXIT_NODE_PUBLIC_IP = "3.121.38.77";
 
-    /** Matches the Robot suite's peer-connected window (3 min). */
+    /**
+     * Window for the UI to report Connected. Generous against the observed
+     * few seconds; the slow part is the data plane settling afterwards, which
+     * the 90s probe windows below absorb (Robot allows ~3 min for the whole
+     * peer-ready sequence).
+     */
     private static final long CONNECT_TIMEOUT_SEC = 20;
     /** Time budget for the exit-node route to take effect after connecting. */
-    private static final long EGRESS_TIMEOUT_SEC = 20;
+    private static final long EGRESS_TIMEOUT_SEC = 90;
     private VpnTestHarness harness;
     private String profileName;
 
