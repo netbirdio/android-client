@@ -140,6 +140,10 @@ final class VpnTestHarness {
     /** Ping a host (FQDN or IP) once through the tunnel. */
     boolean pingOnce(String target) {
         String output = shell(String.format("ping -c 1 -W %d %s", PING_W_SEC, target));
+        // The full output goes to logcat — the CI artifact — so a failure shows
+        // exactly what happened: the resolved address in the "PING x (a.b.c.d)"
+        // header, an unknown-host error, or 100% loss to a resolved peer.
+        Log.i(TAG, "ping " + target + " output:\n" + output.trim());
         if (output.contains("1 received") || output.contains("1 packets received")) {
             return true;
         }
@@ -172,6 +176,7 @@ final class VpnTestHarness {
      */
     String resolve(String host) {
         String out = shell("ping -c 1 -W 2 " + host);
+        Log.i(TAG, "resolve " + host + " output:\n" + out.trim());
         Matcher m = PING_RESOLVED_IP.matcher(out);
         return m.find() ? m.group(1) : null;
     }
