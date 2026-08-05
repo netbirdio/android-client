@@ -1,8 +1,6 @@
 package io.netbird.client.e2e;
 
 import io.netbird.client.MainActivity;
-import io.netbird.client.StateListener;
-import io.netbird.client.StateListenerAdapter;
 
 import android.app.Instrumentation;
 import android.app.UiAutomation;
@@ -10,7 +8,10 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,10 +20,10 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Shared machinery for the on-device client e2e tests (the Android port of the
@@ -32,9 +33,9 @@ import java.util.regex.Pattern;
  * <ul>
  *   <li>{@link #grantVpnConsent()} — pre-approve the VPN so the engine starts
  *       without the system consent dialog (headless-friendly)</li>
- *   <li>{@link #connectAndAwait(long)} — start the engine via the app API and
- *       wait for {@code onConnected}, like the Robot {@code Wait For Peer
- *       Ready}</li>
+ *   <li>{@link #connectAndAwait(long)} — flip the Home screen's connect
+ *       toggle and wait for the status text to read Connected, like the Robot
+ *       {@code Wait For Peer Ready}</li>
  *   <li>{@link #waitForPing(String, long)} / {@link #pingOnce(String)} — the
  *       Android equivalent of the Robot {@code Get Ping Command And Regex}
  *       check (ICMP through the tunnel)</li>
@@ -42,22 +43,22 @@ import java.util.regex.Pattern;
  *       {@code Open Connection ... port=N} Telnet check (TCP reachability)</li>
  * </ul>
  *
- * <p>Connecting goes through {@link MainActivity#switchConnection(boolean)} and
- * a {@link StateListener}, not the Lottie connect button, so it is robust to UI
- * timing. Network probes run as shell commands / plain sockets so they observe
- * the tunnel exactly as a user's traffic would.
+ * <p>Connecting is driven from the Home screen's toggle and the wait watches
+ * the on-screen status text — trigger and feedback both go through the same UI
+ * a user sees. Network probes run as shell commands / plain sockets so they
+ * observe the tunnel exactly as a user's traffic would.
  */
 final class VpnTestHarness {
 
+    private static final long UI_TIMEOUT_MS = 5_000;
+
     private static final String TAG = "NBVpnHarness";
 
-    private final MainActivity activity;
     private final UiDevice device;
     private final UiAutomation uiAutomation;
 
     VpnTestHarness(MainActivity activity) {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        this.activity = activity;
         this.device = UiDevice.getInstance(instrumentation);
         this.uiAutomation = instrumentation.getUiAutomation();
     }
@@ -88,33 +89,36 @@ final class VpnTestHarness {
     }
 
     /**
-     * Start the engine via the app's own API and block until a state listener
-     * reports {@code onConnected}, or the timeout elapses.
+     * Connect by tapping the Home screen's connect toggle — the same control a
+     * user flips — and wait for the on-screen status to read "Connected", the
+     * same feedback a user watches. No app internals are touched; the suite
+     * runs on an English locale, so the literal status text is matched.
      *
-     * @return true if the engine reported connected within the timeout
+     * @return true if the status showed Connected within the timeout
      */
     boolean connectAndAwait(long timeoutSec) throws InterruptedException {
-        CountDownLatch connectedLatch = new CountDownLatch(1);
+        UiObject2 homeTab = device.wait(
+                Until.findObject(By.res(LoginFlow.PACKAGE, "nav_home")), UI_TIMEOUT_MS);
+        assertNotNull("nav_home tab must be present", homeTab);
+        homeTab.click();
 
-        // StateListenerAdapter stubs out the callbacks we don't care about, so
-        // this keeps compiling as the interface grows.
-        StateListener listener = new StateListenerAdapter() {
-            @Override public void onConnected() {
-                Log.i(TAG, "Engine reported connected");
-                connectedLatch.countDown();
-            }
-            @Override public void onPeersListChanged(long count) {
-                Log.i(TAG, "Peers list changed: " + count);
-            }
-        };
-
-        activity.runOnUiThread(() -> activity.registerServiceStateListener(listener));
-        try {
-            activity.runOnUiThread(() -> activity.switchConnection(true));
-            return connectedLatch.await(timeoutSec, TimeUnit.SECONDS);
-        } finally {
-            activity.runOnUiThread(() -> activity.unregisterServiceStateListener(listener));
+        UiObject2 toggle = device.wait(
+                Until.findObject(By.res(LoginFlow.PACKAGE, "btn_connect")), UI_TIMEOUT_MS);
+        assertNotNull("btn_connect must be present on the Home screen", toggle);
+        if (!toggle.isChecked()) {
+            Log.i(TAG, "Tapping the connect toggle");
+            toggle.click();
+        } else {
+            Log.i(TAG, "Connect toggle is already on");
         }
+
+        boolean connected = device.wait(
+                Until.hasObject(By.res(LoginFlow.PACKAGE, "text_connection_status")
+                        .text("Connected")),
+                timeoutSec * 1000L);
+        Log.i(TAG, connected ? "Status shows Connected"
+                : "Status did not reach Connected within " + timeoutSec + "s");
+        return connected;
     }
 
     /** Retry {@link #pingOnce(String)} until it succeeds or the timeout elapses. */
