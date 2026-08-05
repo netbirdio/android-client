@@ -42,7 +42,9 @@ runs:
       uses: actions/setup-java@v4
       with:
         java-version: "17"
-        distribution: "adopt"
+        # AdoptOpenJDK became Eclipse Temurin; resolving "adopt" now fails
+        # outright, so the build never gets as far as installing a JDK.
+        distribution: "temurin"
         cache: "gradle"
 
     - name: Install Go
