@@ -219,7 +219,7 @@ public class FirstInstallFragment extends Fragment {
                             : getString(R.string.change_server_error_invalid_setup_key));
                 });
             }
-        }, setupKey, Build.PRODUCT);
+        }, setupKey, Build.MODEL);
     }
 
     private void setBusy(boolean busy) {

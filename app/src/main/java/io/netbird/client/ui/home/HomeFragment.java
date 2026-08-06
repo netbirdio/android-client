@@ -551,11 +551,6 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         }
     }
 
-    /**
-     * The session banner is shown whenever a deadline is known, with a
-     * coarse relative time (Tailscale-style: minutes under two hours, hours
-     * under two days, days beyond). Tapping it starts the extend flow.
-     */
     private void updateSessionRow() {
         if (binding == null) {
             return;
