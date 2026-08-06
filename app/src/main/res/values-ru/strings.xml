@@ -54,6 +54,10 @@
     <string name="peer_filter_idle">Неактивен</string>
     <string name="peer_filter_connecting">Подключение</string>
     <string name="peer_filter_connected">Подключено</string>
+    <string name="peer_status_idle">Неактивен</string>
+    <string name="peer_status_connecting">Подключение</string>
+    <string name="peer_status_connected">Подключено</string>
+    <string name="peer_status_unknown">Неизвестно</string>
     <string name="peers_clipboard_copy_ip">Копировать IP</string>
     <string name="peers_clipboard_copy_ipv6">Копировать IPv6</string>
     <string name="peers_clipboard_copy_fqdn">Копировать FQDN</string>

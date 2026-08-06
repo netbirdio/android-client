@@ -54,6 +54,10 @@
     <string name="peer_filter_idle">空闲</string>
     <string name="peer_filter_connecting">正在连接</string>
     <string name="peer_filter_connected">已连接</string>
+    <string name="peer_status_idle">空闲</string>
+    <string name="peer_status_connecting">正在连接</string>
+    <string name="peer_status_connected">已连接</string>
+    <string name="peer_status_unknown">未知</string>
     <string name="peers_clipboard_copy_ip">复制 IP</string>
     <string name="peers_clipboard_copy_ipv6">复制 IPv6</string>
     <string name="peers_clipboard_copy_fqdn">复制 FQDN</string>

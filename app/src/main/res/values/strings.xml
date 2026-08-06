@@ -56,6 +56,10 @@
     <string name="peer_filter_idle">Idle</string>
     <string name="peer_filter_connecting">Connecting</string>
     <string name="peer_filter_connected">Connected</string>
+    <string name="peer_status_idle">Idle</string>
+    <string name="peer_status_connecting">Connecting</string>
+    <string name="peer_status_connected">Connected</string>
+    <string name="peer_status_unknown">Unknown</string>
     <string name="peers_clipboard_copy_ip">Copy IP</string>
     <string name="peers_clipboard_copy_ipv6">Copy IPv6</string>
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>

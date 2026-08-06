@@ -1,6 +1,9 @@
 package io.netbird.client.ui.home;
 
 
+import androidx.annotation.StringRes;
+
+import io.netbird.client.R;
 import io.netbird.gomobile.android.Android;
 
 import java.util.Locale;
@@ -10,6 +13,21 @@ public enum Status {
    CONNECTING,
    CONNECTED,
    UNKNOWN;
+
+   /** Translated label for display. toString() stays the wire-format value. */
+   @StringRes
+   public int labelRes() {
+      switch (this) {
+         case IDLE:
+            return R.string.peer_status_idle;
+         case CONNECTING:
+            return R.string.peer_status_connecting;
+         case CONNECTED:
+            return R.string.peer_status_connected;
+         default:
+            return R.string.peer_status_unknown;
+      }
+   }
 
    @Override
    public String toString() {

@@ -54,6 +54,10 @@
     <string name="peer_filter_idle">アイドル</string>
     <string name="peer_filter_connecting">接続中</string>
     <string name="peer_filter_connected">接続済み</string>
+    <string name="peer_status_idle">アイドル</string>
+    <string name="peer_status_connecting">接続中</string>
+    <string name="peer_status_connected">接続済み</string>
+    <string name="peer_status_unknown">不明</string>
     <string name="peers_clipboard_copy_ip">IP をコピー</string>
     <string name="peers_clipboard_copy_ipv6">IPv6 をコピー</string>
     <string name="peers_clipboard_copy_fqdn">FQDN をコピー</string>

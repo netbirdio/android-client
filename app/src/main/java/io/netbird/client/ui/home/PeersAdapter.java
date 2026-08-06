@@ -176,7 +176,7 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
         }
 
         public void bind(Peer peer, OnPeerClickListener clickListener) {
-            binding.status.setText(peer.getStatus().toString());
+            binding.status.setText(peer.getStatus().labelRes());
             binding.ip.setText(peer.getIp());
             String ipv6 = peer.getIpv6();
             boolean hasIpv6 = ipv6 != null && !ipv6.isEmpty();
