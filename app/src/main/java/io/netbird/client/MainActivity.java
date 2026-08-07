@@ -302,8 +302,9 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                     }
                 });
 
-        if (PreferenceUI.isFirstLaunch(this)) {
-            PreferenceUI.setFirstLaunchDone(this);
+        // The fragment clears the first-launch flag itself once the user commits
+        // to a server, so leaving the app on the onboarding screen shows it again.
+        if (savedInstanceState == null && PreferenceUI.isFirstLaunch(this)) {
             showFirstInstallFragment();
         }
 

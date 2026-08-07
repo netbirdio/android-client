@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentFirstinstallBinding;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.PreferenceUI;
 import io.netbird.client.ui.server.ManagementServerSwitch;
 import io.netbird.client.ui.server.ManagementUrl;
 import io.netbird.client.ui.server.SetupKeySection;
@@ -66,6 +68,7 @@ public class FirstInstallFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         hideAppBar();
+        finishOnBack();
 
         profileManager = new ProfileManagerWrapper(requireContext());
         serverSwitch = new ManagementServerSwitch(view, this::onModeChanged);
@@ -236,9 +239,27 @@ public class FirstInstallFragment extends Fragment {
     }
 
     private void finish() {
+        PreferenceUI.setFirstLaunchDone(requireContext());
         NavController navController = Navigation.findNavController(
                 requireActivity(), R.id.nav_host_fragment_content_main);
         navController.popBackStack();
+    }
+
+    /**
+     * Back closes the app instead of dismissing the screen. Popping would drop
+     * the user on the home screen with the management server never chosen, and
+     * since the flag is only cleared on continue the onboarding would reappear
+     * on every cold start.
+     */
+    private void finishOnBack() {
+        requireActivity().getOnBackPressedDispatcher().addCallback(
+                getViewLifecycleOwner(),
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        requireActivity().finish();
+                    }
+                });
     }
 
     private void hideAppBar() {
