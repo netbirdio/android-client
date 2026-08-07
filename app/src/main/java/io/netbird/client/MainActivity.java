@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +32,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -151,6 +154,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbar);
+
+        applySystemBarIconContrast();
 
         isRunningOnTV = PlatformUtils.isAndroidTV(this);
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
@@ -329,6 +334,24 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         super.onStart();
         Log.d(LOGTAG, "onStart");
         startService();
+    }
+
+    /**
+     * Targeting API 36 turns on edge-to-edge with no opt-out: android:statusBarColor and
+     * navigationBarColor stop having any effect and the window draws under both bars. The
+     * root layout's fitsSystemWindows padding still keeps content clear of them, so the
+     * bars end up showing windowBackground — light in day mode, dark at night. The icons
+     * drawn on top have to be darkened or lightened to match, or they vanish against it.
+     * Done here rather than in themes.xml because windowLightNavigationBar is API 27+
+     * while minSdk is 26; the compat controller handles that gate itself.
+     */
+    private void applySystemBarIconContrast() {
+        boolean nightMode = (getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        controller.setAppearanceLightStatusBars(!nightMode);
+        controller.setAppearanceLightNavigationBars(!nightMode);
     }
 
     @Override
