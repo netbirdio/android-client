@@ -71,9 +71,10 @@
     <string name="ssh_dialog_username">Username</string>
     <string name="ssh_dialog_username_default">pzoli</string>
     <string name="ssh_dialog_port">Port</string>
-    <string name="ssh_dialog_port_default">22022</string>
+    <string name="ssh_dialog_port_default">22</string>
+    <string name="ssh_dialog_port_default_peer">22022</string>
     <string name="ssh_dialog_password">Password</string>
-    <string name="ssh_dialog_password_optional">Password (optional, classic SSH only)</string>
+    <string name="ssh_password_prompt_title">Password for %1$s</string>
     <string name="ssh_dialog_connect">Connect</string>
     <string name="ssh_dialog_cancel">Cancel</string>
     <string name="menu_ssh">SSH</string>
@@ -81,6 +82,11 @@
     <string name="ssh_sessions_empty">No active SSH sessions.\nTap + to start one.</string>
     <string name="ssh_new_connection_title">New SSH connection</string>
     <string name="ssh_session_close">Close session</string>
+    <string name="ssh_session_reconnect">Reconnect</string>
+    <string name="ssh_session_disconnect">Disconnect</string>
+    <string name="ssh_netbird_not_running">NetBird is not running</string>
+    <string name="ssh_session_close_confirm">Close %1$s and discard its output?</string>
+    <string name="ssh_session_close_confirm_yes">Close</string>
     <string name="peers_desc_filter">Filter</string>
 
     <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->

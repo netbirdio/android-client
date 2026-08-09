@@ -20,9 +20,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
+        android:textColor="@color/nb_txt"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/close_button"
+        app:layout_constraintEnd_toStartOf="@id/toggle_button"
         app:layout_constraintStart_toEndOf="@id/state_indicator"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,11 +32,23 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:textColor="@color/nb_txt_light"
         android:textSize="12sp"
-        android:alpha="0.7"
-        app:layout_constraintEnd_toStartOf="@id/close_button"
+        app:layout_constraintEnd_toStartOf="@id/toggle_button"
         app:layout_constraintStart_toStartOf="@id/session_label"
         app:layout_constraintTop_toBottomOf="@id/session_label" />
+
+    <ImageButton
+        android:id="@+id/toggle_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/ssh_session_disconnect"
+        android:src="@drawable/ic_ssh_disconnect"
+        app:tint="@color/nb_txt"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/close_button"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/close_button"
@@ -43,7 +56,8 @@
         android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/ssh_session_close"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:src="@drawable/ic_ssh_close"
+        app:tint="@color/nb_txt"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

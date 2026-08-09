@@ -7,9 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -110,6 +112,7 @@ public class SshSessionsFragment extends Fragment {
         private final View stateIndicator;
         private final TextView label;
         private final TextView stateText;
+        private final ImageButton toggleButton;
         private final ImageButton closeButton;
 
         SessionVH(@NonNull View itemView) {
@@ -117,6 +120,7 @@ public class SshSessionsFragment extends Fragment {
             stateIndicator = itemView.findViewById(R.id.state_indicator);
             label = itemView.findViewById(R.id.session_label);
             stateText = itemView.findViewById(R.id.session_state);
+            toggleButton = itemView.findViewById(R.id.toggle_button);
             closeButton = itemView.findViewById(R.id.close_button);
         }
 
@@ -126,8 +130,36 @@ public class SshSessionsFragment extends Fragment {
             stateText.setText(stateLine);
             stateIndicator.setBackgroundColor(colorForState(info.state));
 
-            itemView.setOnClickListener(v -> openTerminal(info.id));
-            closeButton.setOnClickListener(v -> SshSessionManager.get().close(info.id));
+            // Only hanging up needs a button of its own: reconnecting is what
+            // tapping a finished row already does, and once there is output to
+            // read the terminal's own bar offers it.
+            boolean dead = info.state == SshSession.State.CLOSED
+                    || info.state == SshSession.State.ERROR;
+            toggleButton.setVisibility(dead ? View.GONE : View.VISIBLE);
+            toggleButton.setOnClickListener(v -> {
+                SshSession target = SshSessionManager.get().get(info.id);
+                if (target != null) {
+                    target.disconnect();
+                }
+            });
+
+            // Reconnect on the spot only when the session left nothing behind.
+            // With output to read, just open it and let its bar offer the redial.
+            itemView.setOnClickListener(v -> {
+                if (dead && !info.hasScrollback) {
+                    reconnectAndOpen(info.id);
+                    return;
+                }
+                openTerminal(info.id);
+            });
+            closeButton.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.ssh_session_close)
+                    .setMessage(getString(R.string.ssh_session_close_confirm,
+                            info.user + "@" + info.host + ":" + info.port))
+                    .setPositiveButton(R.string.ssh_session_close_confirm_yes, (d, w) ->
+                            SshSessionManager.get().close(info.id))
+                    .setNegativeButton(R.string.ssh_dialog_cancel, null)
+                    .show());
         }
 
         private String stateLabel(SshSession.Info info) {
@@ -135,6 +167,7 @@ public class SshSessionsFragment extends Fragment {
             switch (info.state) {
                 case CONNECTING: state = "connecting"; break;
                 case CONNECTED:  state = "connected"; break;
+                case NEEDS_PASSWORD: state = "password required"; break;
                 case CLOSED:     state = "closed"; break;
                 case ERROR:      state = "error"; break;
                 default:         state = info.state.name().toLowerCase(); break;
@@ -142,6 +175,16 @@ public class SshSessionsFragment extends Fragment {
             String suffix = (info.stateMessage == null || info.stateMessage.isEmpty())
                     ? "" : " — " + info.stateMessage;
             return state + suffix;
+        }
+
+        /** Redials and shows the terminal, so the progress is visible as it happens. */
+        private void reconnectAndOpen(String sessionId) {
+            if (!SshSessionManager.get().reconnect(sessionId)) {
+                Toast.makeText(requireContext(), R.string.ssh_netbird_not_running,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            openTerminal(sessionId);
         }
 
         private void openTerminal(String sessionId) {
