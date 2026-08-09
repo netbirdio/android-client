@@ -46,11 +46,14 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
+import io.netbird.client.tool.Profile;
+import io.netbird.client.tool.ProfileManagerWrapper;
 import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.SessionEventListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
+import io.netbird.client.ui.ssh.SshSessionManager;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
@@ -162,6 +165,20 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
         applySystemBarIconContrast();
         applySystemBarInsets();
+
+        SshSessionManager.get().init(this);
+        syncSshSessionProfile();
+        SshSessionManager.get().setClientFactory(new SshSessionManager.ClientFactory() {
+            @Override
+            public SSHClient newClient() {
+                return newSSHClient();
+            }
+
+            @Override
+            public URLOpener urlOpener() {
+                return getSSHURLOpener();
+            }
+        });
 
         isRunningOnTV = PlatformUtils.isAndroidTV(this);
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
@@ -404,6 +421,28 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Profiles are switched and deleted from a fragment, which reports
+        // neither, so re-read the active one whenever we come back into view.
+        syncSshSessionProfile();
+    }
+
+    private void syncSshSessionProfile() {
+        try {
+            ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
+            Set<String> liveIds = new HashSet<>();
+            for (Profile profile : profileManager.listProfiles()) {
+                liveIds.add(profile.getID());
+            }
+            Profile active = profileManager.getActiveProfile();
+            SshSessionManager.get().setProfile(active != null ? active.getID() : null, liveIds);
+        } catch (Exception e) {
+            Log.w(LOGTAG, "Could not sync SSH sessions with the active profile", e);
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         Log.d(LOGTAG, "onStop");
@@ -428,6 +467,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     @Override
     protected  void onDestroy() {
         super.onDestroy();
+
+        SshSessionManager.get().setClientFactory(null);
 
         if (mBinder != null) {
             mBinder.removeConnectionStateListener();
