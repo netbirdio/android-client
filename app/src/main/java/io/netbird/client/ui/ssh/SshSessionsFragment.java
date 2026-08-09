@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -25,6 +26,8 @@ import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentSshSessionsBinding;
 
 public class SshSessionsFragment extends Fragment {
+
+    private static final int MENU_DUPLICATE = 1;
 
     private FragmentSshSessionsBinding binding;
     private final SessionsAdapter adapter = new SessionsAdapter();
@@ -125,7 +128,7 @@ public class SshSessionsFragment extends Fragment {
         }
 
         void bind(SshSession.Info info) {
-            label.setText(info.user + "@" + info.host + ":" + info.port);
+            label.setText(info.label());
             String stateLine = stateLabel(info);
             stateText.setText(stateLine);
             stateIndicator.setBackgroundColor(colorForState(info.state));
@@ -152,10 +155,14 @@ public class SshSessionsFragment extends Fragment {
                 }
                 openTerminal(info.id);
             });
+            itemView.setOnLongClickListener(v -> {
+                showSessionMenu(v, info);
+                return true;
+            });
+
             closeButton.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
                     .setTitle(R.string.ssh_session_close)
-                    .setMessage(getString(R.string.ssh_session_close_confirm,
-                            info.user + "@" + info.host + ":" + info.port))
+                    .setMessage(getString(R.string.ssh_session_close_confirm, info.label()))
                     .setPositiveButton(R.string.ssh_session_close_confirm_yes, (d, w) ->
                             SshSessionManager.get().close(info.id))
                     .setNegativeButton(R.string.ssh_dialog_cancel, null)
@@ -175,6 +182,25 @@ public class SshSessionsFragment extends Fragment {
             String suffix = (info.stateMessage == null || info.stateMessage.isEmpty())
                     ? "" : " — " + info.stateMessage;
             return state + suffix;
+        }
+
+        private void showSessionMenu(View anchor, SshSession.Info info) {
+            PopupMenu popup = new PopupMenu(anchor.getContext(), anchor);
+            popup.getMenu().add(0, MENU_DUPLICATE, 0, R.string.ssh_session_duplicate);
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() != MENU_DUPLICATE) {
+                    return false;
+                }
+                SshSession copy = SshSessionManager.get().duplicate(info.id);
+                if (copy == null) {
+                    Toast.makeText(requireContext(), R.string.ssh_netbird_not_running,
+                            Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                openTerminal(copy.getId());
+                return true;
+            });
+            popup.show();
         }
 
         /** Redials and shows the terminal, so the progress is visible as it happens. */

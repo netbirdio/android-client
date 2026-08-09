@@ -20,6 +20,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:textColor="@color/nb_txt"
         android:textSize="16sp"
         android:textStyle="bold"

@@ -84,6 +84,7 @@
     <string name="ssh_session_close">Close session</string>
     <string name="ssh_session_reconnect">Reconnect</string>
     <string name="ssh_session_disconnect">Disconnect</string>
+    <string name="ssh_session_duplicate">Duplicate session</string>
     <string name="ssh_netbird_not_running">NetBird is not running</string>
     <string name="ssh_session_close_confirm">Close %1$s and discard its output?</string>
     <string name="ssh_session_close_confirm_yes">Close</string>

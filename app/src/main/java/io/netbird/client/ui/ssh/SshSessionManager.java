@@ -124,6 +124,30 @@ public class SshSessionManager {
         return session;
     }
 
+    /**
+     * Opens a second session to the same target, connecting it right away.
+     * The password is not carried over: it lives only in the session that was
+     * asked for it, so a server wanting one prompts again.
+     *
+     * @return the new session, or null when NetBird is not running
+     */
+    @Nullable
+    public synchronized SshSession duplicate(@NonNull String id) {
+        SshSession source = sessions.get(id);
+        ClientFactory factory = clientFactory;
+        if (source == null || factory == null) {
+            return null;
+        }
+        SSHClient client = factory.newClient();
+        if (client == null) {
+            return null;
+        }
+        SshSession copy = create(client, source.getHost(), source.getPort(), source.getUser(),
+                "", factory.urlOpener());
+        copy.connectAsync(source.getCols(), source.getRows());
+        return copy;
+    }
+
     @Nullable
     public synchronized SshSession get(@NonNull String id) {
         return sessions.get(id);

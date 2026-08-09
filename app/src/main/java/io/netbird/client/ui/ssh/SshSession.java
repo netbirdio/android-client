@@ -5,7 +5,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.netbird.gomobile.android.SSHClient;
@@ -340,28 +342,52 @@ public class SshSession {
         public final String stateMessage;
         /** False when there is no output worth reading before reconnecting. */
         public final boolean hasScrollback;
+        /** 1-based position among sessions to the same target; 0 when alone. */
+        public final int ordinal;
 
-        Info(SshSession s) {
+        Info(SshSession s, int ordinal) {
             this.id = s.id;
             this.host = s.host;
             this.port = s.port;
             this.user = s.user;
             this.state = s.state;
             this.stateMessage = s.stateMessage;
+            this.ordinal = ordinal;
             synchronized (s.bufferLock) {
                 this.hasScrollback = s.bufferLen > 0;
             }
         }
+
+        public String label() {
+            String target = user + "@" + host + ":" + port;
+            // Leading, like tmux: the target is long enough to get truncated on
+            // a narrow row, which would drop the very part that disambiguates.
+            return ordinal > 0 ? "#" + ordinal + "  " + target : target;
+        }
     }
 
-    public Info snapshot() {
-        return new Info(this);
-    }
-
+    /**
+     * Numbers the sessions sharing a target, so parallel ones to the same host
+     * can be told apart. A target with only one session gets no number, since
+     * there is nothing to distinguish it from.
+     */
     static List<Info> snapshot(List<SshSession> sessions) {
+        Map<String, Integer> totals = new HashMap<>();
+        for (SshSession s : sessions) {
+            String target = s.getDisplayLabel();
+            totals.put(target, totals.getOrDefault(target, 0) + 1);
+        }
+
+        Map<String, Integer> seen = new HashMap<>();
         List<Info> out = new ArrayList<>(sessions.size());
         for (SshSession s : sessions) {
-            out.add(s.snapshot());
+            String target = s.getDisplayLabel();
+            int ordinal = 0;
+            if (totals.get(target) > 1) {
+                ordinal = seen.getOrDefault(target, 0) + 1;
+                seen.put(target, ordinal);
+            }
+            out.add(new Info(s, ordinal));
         }
         return out;
     }
