@@ -27,7 +27,12 @@ public class SshSession {
     private static final String LOGTAG = "SshSession";
     private static final int MAX_SCROLLBACK = 256 * 1024;
 
-    public enum State { CONNECTING, CONNECTED, CLOSED, ERROR }
+    /** NEEDS_PASSWORD is a pause, not a failure: it waits for the UI to call
+     *  {@link #retryWithPassword}. */
+    public enum State { CONNECTING, CONNECTED, NEEDS_PASSWORD, CLOSED, ERROR }
+
+    /** Marker the Go binding puts in the error when a password would help. */
+    private static final String PASSWORD_REQUIRED_MARKER = "netbird-ssh-password-required";
 
     public interface Listener {
         void onScrollback(byte[] data);
@@ -39,9 +44,10 @@ public class SshSession {
     private final String host;
     private final int port;
     private final String user;
-    private final String password;
+    /** Not final: filled in later when the server turns out to want one. */
+    private volatile String password;
 
-    private final SSHClient client;
+    private volatile SSHClient client;
     private final List<Listener> listeners = new CopyOnWriteArrayList<>();
 
     private final Object bufferLock = new Object();
@@ -52,6 +58,10 @@ public class SshSession {
     private volatile State state = State.CONNECTING;
     private volatile String stateMessage = "";
     private volatile boolean sessionStarted = false;
+    /** Sticky, unlike sessionStarted: a reconnect must not read as a first connect. */
+    private volatile boolean everConnected = false;
+    /** Passwords tried so far, to tell a first prompt from a rejected one. */
+    private volatile int passwordAttempts = 0;
 
     private int lastCols = 80;
     private int lastRows = 24;
@@ -63,11 +73,27 @@ public class SshSession {
         this.port = port;
         this.user = user;
         this.password = password;
-        this.client = client;
-        this.client.setListener(new BridgeListener());
-        if (urlOpener != null) {
-            this.client.setURLOpener(urlOpener);
+        if (client != null) {
+            bindClient(client, urlOpener);
         }
+    }
+
+    /** Restored from disk: no client until a reconnect supplies one. */
+    SshSession(String id, String host, int port, String user) {
+        this(id, host, port, user, "", null, null);
+        this.state = State.CLOSED;
+    }
+
+    void bindClient(@NonNull SSHClient client, URLOpener urlOpener) {
+        this.client = client;
+        client.setListener(new BridgeListener());
+        if (urlOpener != null) {
+            client.setURLOpener(urlOpener);
+        }
+    }
+
+    boolean hasClient() {
+        return client != null;
     }
 
     public String getId() { return id; }
@@ -77,6 +103,7 @@ public class SshSession {
     public State getState() { return state; }
     public String getStateMessage() { return stateMessage; }
     public boolean isSessionStarted() { return sessionStarted; }
+    public boolean hasEverConnected() { return everConnected; }
 
     public String getDisplayLabel() {
         return user + "@" + host + ":" + port;
@@ -86,16 +113,49 @@ public class SshSession {
     void connectAsync(int cols, int rows) {
         this.lastCols = cols;
         this.lastRows = rows;
+        SSHClient target = client;
+        if (target == null) {
+            setState(State.ERROR, "NetBird is not running");
+            return;
+        }
         new Thread(() -> {
             try {
-                client.connect(host, port, user, password);
-                client.startSession(cols, rows);
+                target.connect(host, port, user, password);
+                target.startSession(cols, rows);
                 sessionStarted = true;
             } catch (Exception e) {
-                Log.w(LOGTAG, "ssh connect failed: " + e.getMessage());
-                setState(State.ERROR, e.getMessage() != null ? e.getMessage() : "connect failed");
+                String message = e.getMessage() != null ? e.getMessage() : "connect failed";
+                if (message.contains(PASSWORD_REQUIRED_MARKER)) {
+                    // The marker on a retry means the password was wrong.
+                    boolean afterAttempt = passwordAttempts > 0;
+                    Log.d(LOGTAG, afterAttempt
+                            ? "ssh: password rejected, asking again"
+                            : "ssh: server wants a password");
+                    setState(State.NEEDS_PASSWORD, afterAttempt ? "Wrong password" : "");
+                    return;
+                }
+                Log.w(LOGTAG, "ssh connect failed: " + message);
+                setState(State.ERROR, message);
             }
         }, "ssh-session-" + id).start();
+    }
+
+    /**
+     * Retries the connection with a password the user supplied after the
+     * session landed in {@link State#NEEDS_PASSWORD}. Can be called repeatedly:
+     * a rejected password puts the session back into that state, so the user
+     * gets further attempts as with any ssh client.
+     */
+    void retryWithPassword(@NonNull String password) {
+        this.password = password;
+        passwordAttempts++;
+        setState(State.CONNECTING, "");
+        connectAsync(lastCols, lastRows);
+    }
+
+    /** Gives up on a session waiting for a password. */
+    void cancelPasswordPrompt() {
+        setState(State.CLOSED, "cancelled");
     }
 
     public void attach(@NonNull Listener listener) {
@@ -137,6 +197,40 @@ public class SshSession {
 
     public int getCols() { return lastCols; }
     public int getRows() { return lastRows; }
+
+    /** True while the session is finished but still reconnectable. */
+    public boolean isReconnectable() {
+        return state == State.CLOSED || state == State.ERROR;
+    }
+
+    /** Dials again, reusing this session so the scrollback survives. The
+     *  password is kept: a server that wanted one before will want it again. */
+    public void reconnect() {
+        if (!isReconnectable()) {
+            return;
+        }
+        if (client != null) {
+            client.reset();
+        }
+        sessionStarted = false;
+        passwordAttempts = 0;
+        setState(State.CONNECTING, "");
+        connectAsync(lastCols, lastRows);
+    }
+
+    /** Ends the connection but keeps the session listed for a reconnect. */
+    public void disconnect() {
+        if (isReconnectable()) {
+            return;
+        }
+        try {
+            client.close();
+        } catch (Exception e) {
+            Log.d(LOGTAG, "disconnect failed: " + e.getMessage());
+        }
+        sessionStarted = false;
+        setState(State.CLOSED, "disconnected");
+    }
 
     public void close() {
         try {
@@ -202,7 +296,10 @@ public class SshSession {
     private final class BridgeListener implements SSHTerminalListener {
         @Override
         public void onConnected() {
+            // Set after the listeners run, so they can still tell this apart
+            // from a reconnect and leave the scrollback alone.
             setState(State.CONNECTED, "");
+            everConnected = true;
         }
 
         @Override
@@ -241,6 +338,8 @@ public class SshSession {
         public final String user;
         public final State state;
         public final String stateMessage;
+        /** False when there is no output worth reading before reconnecting. */
+        public final boolean hasScrollback;
 
         Info(SshSession s) {
             this.id = s.id;
@@ -249,6 +348,9 @@ public class SshSession {
             this.user = s.user;
             this.state = s.state;
             this.stateMessage = s.stateMessage;
+            synchronized (s.bufferLock) {
+                this.hasScrollback = s.bufferLen > 0;
+            }
         }
     }
 

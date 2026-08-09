@@ -5,22 +5,28 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentSshTerminalBinding;
 import io.netbird.gomobile.android.SSHClient;
@@ -42,6 +48,7 @@ public class SSHTerminalFragment extends Fragment {
     private ServiceAccessor serviceAccessor;
     private SshSession session;
     private SessionListener sessionListener;
+    private AlertDialog passwordDialog;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private boolean ctrlArmed = false;
@@ -97,6 +104,10 @@ public class SSHTerminalFragment extends Fragment {
         if (session != null && sessionListener != null) {
             session.detach(sessionListener);
         }
+        if (passwordDialog != null) {
+            passwordDialog.dismiss();
+            passwordDialog = null;
+        }
         sessionListener = null;
         session = null;
         terminalReady = false;
@@ -114,6 +125,11 @@ public class SSHTerminalFragment extends Fragment {
     }
 
     private void wireKeyBar() {
+        binding.reconnectButton.setOnClickListener(v -> {
+            if (session != null && !SshSessionManager.get().reconnect(session.getId())) {
+                printStatus("NetBird is not running");
+            }
+        });
         binding.keyEsc.setOnClickListener(v -> sendBytes(new byte[]{0x1b}));
         binding.keyTab.setOnClickListener(v -> sendBytes(new byte[]{0x09}));
         binding.keyUp.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'A'}));
@@ -251,7 +267,7 @@ public class SSHTerminalFragment extends Fragment {
         }
 
         String host = requireString(ARG_HOST, "");
-        int port = requireInt(ARG_PORT, 22022);
+        int port = requireInt(ARG_PORT, 22);
         String user = requireString(ARG_USER, "pzoli");
         String password = requireString(ARG_PASSWORD, "");
 
@@ -263,7 +279,6 @@ public class SSHTerminalFragment extends Fragment {
         URLOpener urlOpener = serviceAccessor.getSSHURLOpener();
         SshSession created = manager.create(client, host, port, user, password, urlOpener);
         attachToSession(created);
-        printStatus("Connecting to " + user + "@" + host + ":" + port + " ...");
         created.connectAsync(cols, rows);
     }
 
@@ -271,6 +286,86 @@ public class SSHTerminalFragment extends Fragment {
         this.session = s;
         sessionListener = new SessionListener();
         s.attach(sessionListener);
+    }
+
+    /** Called from session callbacks on a background thread. */
+    private void showReconnectBar(boolean visible, String message) {
+        mainHandler.post(() -> {
+            if (binding == null) {
+                return;
+            }
+            binding.reconnectBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+            if (visible && message != null) {
+                binding.reconnectMessage.setText(message);
+            }
+        });
+    }
+
+    /**
+     * Asks for a password once the server has told us the NetBird key is not
+     * enough. Reached from a session callback on a background thread, so the
+     * dialog is posted to the main thread; the fragment may also be detached by
+     * then, hence the isAdded check.
+     */
+    private void promptForPassword(String message) {
+        mainHandler.post(() -> {
+            if (!isAdded() || session == null) {
+                return;
+            }
+            // The state is replayed on attach, so avoid stacking dialogs.
+            if (passwordDialog != null && passwordDialog.isShowing()) {
+                return;
+            }
+            boolean rejected = message != null && !message.isEmpty();
+            printStatus(rejected ? message : "Password required");
+
+            // setSingleLine resets the input type, so it must come first or the
+            // password would be shown in the clear.
+            EditText input = new EditText(requireContext());
+            input.setSingleLine(true);
+            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            input.setHint(R.string.ssh_dialog_password);
+
+            // An EditText passed to setView sits flush against the dialog edges.
+            float density = getResources().getDisplayMetrics().density;
+            LinearLayout container = new LinearLayout(requireContext());
+            container.setOrientation(LinearLayout.VERTICAL);
+            container.setPadding((int) (density * 24), (int) (density * 8),
+                    (int) (density * 24), (int) (density * 8));
+            container.addView(input, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+            SshSession target = session;
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
+                    .setTitle(getString(R.string.ssh_password_prompt_title, target.getDisplayLabel()))
+                    .setView(container)
+                    .setPositiveButton(R.string.ssh_dialog_connect, (d, w) ->
+                            target.retryWithPassword(input.getText().toString()))
+                    // Cancelling ends the session; otherwise it would be parked
+                    // in NEEDS_PASSWORD with no way forward.
+                    .setNegativeButton(R.string.ssh_dialog_cancel, (d, w) ->
+                            target.cancelPasswordPrompt())
+                    .setCancelable(false);
+            if (rejected) {
+                builder.setMessage(message);
+            }
+            AlertDialog dialog = builder.create();
+
+            // Enter submits, as pressing Connect would.
+            input.setImeOptions(EditorInfo.IME_ACTION_GO);
+            input.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId != EditorInfo.IME_ACTION_GO) {
+                    return false;
+                }
+                target.retryWithPassword(input.getText().toString());
+                dialog.dismiss();
+                return true;
+            });
+
+            dialog.show();
+            passwordDialog = dialog;
+        });
     }
 
     private final class SessionListener implements SshSession.Listener {
@@ -288,17 +383,38 @@ public class SSHTerminalFragment extends Fragment {
         @Override
         public void onStateChange(SshSession.State state, String message) {
             switch (state) {
-                case CONNECTED:
-                    if (terminalReady) {
-                        printStatus("Connected");
+                case CONNECTING:
+                    // A reconnect starts here rather than in the create path,
+                    // so this is the only notice the user gets for it.
+                    if (session != null) {
+                        printStatus("Connecting to " + session.getDisplayLabel() + " ...");
                     }
+                    showReconnectBar(false, null);
                     break;
-                case CLOSED:
-                    printStatus("Session closed" + (message == null || message.isEmpty() ? "" : ": " + message));
+                case CONNECTED:
+                    // Drop the connect chatter so the prompt starts clean, but
+                    // only on the very first connect: a reconnect keeps the
+                    // earlier output so it stays scrollable, and a re-attach
+                    // would otherwise wipe the history it just restored.
+                    if (terminalReady && session != null && !session.hasEverConnected()) {
+                        clearTerminal();
+                    }
+                    showReconnectBar(false, null);
                     break;
+                case NEEDS_PASSWORD:
+                    promptForPassword(message);
+                    break;
+                case CLOSED: {
+                    String text = "Session closed"
+                            + (message == null || message.isEmpty() ? "" : ": " + message);
+                    printStatus(text);
+                    showReconnectBar(true, text);
+                    break;
+                }
                 case ERROR:
                     Log.w(LOGTAG, "session error: " + message);
                     printStatus("Error: " + message);
+                    showReconnectBar(true, "Error: " + message);
                     break;
                 default:
                     break;
