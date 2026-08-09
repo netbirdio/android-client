@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -16,13 +17,17 @@ import androidx.navigation.Navigation;
 import io.netbird.client.R;
 
 /**
- * Reusable dialog that prompts for SSH connection parameters and navigates to
- * {@link SSHTerminalFragment} which creates the underlying session. The Go
- * client auto-detects the server type (NetBird-SSH with/without JWT, or a
- * regular OpenSSH) so the dialog only asks for host/user/port and an optional
- * password used as a fallback for regular SSH servers.
+ * Prompts for SSH connection parameters and navigates to
+ * {@link SSHTerminalFragment}, which creates the session. No password is asked
+ * for here: the Go client detects the server type and picks the auth, and only
+ * a server that refuses everything else makes the terminal prompt for one.
  */
 public final class SshConnectDialog {
+
+    /** Port a NetBird peer's built-in SSH server listens on. */
+    private static final int PEER_SSH_PORT = 22022;
+    /** Port an ordinary SSH server listens on. */
+    private static final int DEFAULT_SSH_PORT = 22;
 
     private SshConnectDialog() {}
 
@@ -40,67 +45,87 @@ public final class SshConnectDialog {
         EditText hostInput = null;
         if (prefillHost == null) {
             hostInput = new EditText(context);
+            hostInput.setSingleLine(true);
             hostInput.setInputType(InputType.TYPE_CLASS_TEXT);
+            hostInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
             hostInput.setHint(R.string.ssh_dialog_host);
             container.addView(hostInput, layoutWithMargin(marginV));
         }
         final EditText hostField = hostInput;
 
         EditText userInput = new EditText(context);
+        userInput.setSingleLine(true);
         userInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        userInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         userInput.setHint(R.string.ssh_dialog_username);
         userInput.setText(R.string.ssh_dialog_username_default);
         userInput.setSelection(userInput.getText().length());
         container.addView(userInput, layoutWithMargin(marginV));
 
+        // A prefilled host is a NetBird peer, which runs its SSH server on
+        // 22022; a host typed by hand is an ordinary server on 22.
         EditText portInput = new EditText(context);
         portInput.setInputType(InputType.TYPE_CLASS_NUMBER);
         portInput.setHint(R.string.ssh_dialog_port);
-        portInput.setText(R.string.ssh_dialog_port_default);
+        portInput.setText(prefillHost != null
+                ? R.string.ssh_dialog_port_default_peer
+                : R.string.ssh_dialog_port_default);
         container.addView(portInput, layoutWithMargin(marginV));
-
-        EditText passwordInput = new EditText(context);
-        passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        passwordInput.setHint(R.string.ssh_dialog_password_optional);
-        container.addView(passwordInput, layoutWithMargin(marginV));
 
         NavController navController = resolveNavController(context);
 
         String title = dialogTitle != null ? dialogTitle
                 : context.getString(R.string.ssh_new_connection_title);
 
-        new AlertDialog.Builder(context)
+        AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setView(container)
-                .setPositiveButton(R.string.ssh_dialog_connect, (d, w) -> {
-                    if (navController == null) {
-                        return;
-                    }
-                    String host = prefillHost != null
-                            ? prefillHost
-                            : (hostField != null ? hostField.getText().toString().trim() : "");
-                    if (host.isEmpty()) {
-                        return;
-                    }
-                    String user = userInput.getText().toString().trim();
-                    if (user.isEmpty()) {
-                        user = "pzoli";
-                    }
-                    int port;
-                    try {
-                        port = Integer.parseInt(portInput.getText().toString().trim());
-                    } catch (NumberFormatException e) {
-                        port = 22022;
-                    }
-                    Bundle args = new Bundle();
-                    args.putString(SSHTerminalFragment.ARG_HOST, host);
-                    args.putInt(SSHTerminalFragment.ARG_PORT, port);
-                    args.putString(SSHTerminalFragment.ARG_USER, user);
-                    args.putString(SSHTerminalFragment.ARG_PASSWORD, passwordInput.getText().toString());
-                    navController.navigate(R.id.nav_ssh_terminal, args);
-                })
+                .setPositiveButton(R.string.ssh_dialog_connect, (d, w) ->
+                        connect(navController, prefillHost, hostField, userInput, portInput))
                 .setNegativeButton(R.string.ssh_dialog_cancel, null)
-                .show();
+                .create();
+
+        // Enter on the last field connects, as pressing the button would.
+        portInput.setImeOptions(EditorInfo.IME_ACTION_GO);
+        portInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId != EditorInfo.IME_ACTION_GO) {
+                return false;
+            }
+            connect(navController, prefillHost, hostField, userInput, portInput);
+            dialog.dismiss();
+            return true;
+        });
+
+        dialog.show();
+    }
+
+    private static void connect(NavController navController, @Nullable String prefillHost,
+                                @Nullable EditText hostField, EditText userInput,
+                                EditText portInput) {
+        if (navController == null) {
+            return;
+        }
+        String host = prefillHost != null
+                ? prefillHost
+                : (hostField != null ? hostField.getText().toString().trim() : "");
+        if (host.isEmpty()) {
+            return;
+        }
+        String user = userInput.getText().toString().trim();
+        if (user.isEmpty()) {
+            user = "pzoli";
+        }
+        int port;
+        try {
+            port = Integer.parseInt(portInput.getText().toString().trim());
+        } catch (NumberFormatException e) {
+            port = prefillHost != null ? PEER_SSH_PORT : DEFAULT_SSH_PORT;
+        }
+        Bundle args = new Bundle();
+        args.putString(SSHTerminalFragment.ARG_HOST, host);
+        args.putInt(SSHTerminalFragment.ARG_PORT, port);
+        args.putString(SSHTerminalFragment.ARG_USER, user);
+        navController.navigate(R.id.nav_ssh_terminal, args);
     }
 
     private static LinearLayout.LayoutParams layoutWithMargin(int marginV) {

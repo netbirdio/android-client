@@ -88,7 +88,7 @@
         <argument
             android:name="port"
             app:argType="integer"
-            android:defaultValue="22022" />
+            android:defaultValue="22" />
         <argument
             android:name="user"
             app:argType="string"
