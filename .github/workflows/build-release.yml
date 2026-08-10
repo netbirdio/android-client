@@ -7,6 +7,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: android-version-code-lock
+  cancel-in-progress: false
+
 jobs:
   build-release:
     runs-on: ubuntu-latest

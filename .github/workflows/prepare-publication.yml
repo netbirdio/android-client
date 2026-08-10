@@ -1,0 +1,69 @@
+name: prepare publication
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: android-version-code-lock
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: android-release
+    env:
+      NETBIRD_UPLOAD_KEY_ALIAS: ${{ secrets.NETBIRD_UPLOAD_KEY_ALIAS }}
+      NETBIRD_UPLOAD_KEY_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_KEY_PASSWORD }}
+      NETBIRD_UPLOAD_STORE_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_STORE_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Get version name
+        id: version
+        run: |
+          SHORT_GIT_SHA=$(git rev-parse --short HEAD)
+          echo "version_name=ci-${SHORT_GIT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute version code
+        id: version_code
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_runs=$(gh api "repos/${{ github.repository }}/actions/workflows/build-release.yml/runs?per_page=1" --jq '.total_count' 2>/dev/null || echo 0)
+          publication_runs=$(gh api "repos/${{ github.repository }}/actions/workflows/prepare-publication.yml/runs?per_page=1" --jq '.total_count' 2>/dev/null || echo 0)
+          version_code=$((release_runs + publication_runs + 40))
+          echo "Release runs: $release_runs, publication runs: $publication_runs -> version_code=$version_code"
+          echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
+
+      - name: Write google-services.json
+        run: |
+          echo "${{ secrets.GOOGLE_JSON }}" | base64 -d > app/google-services.json
+
+      - name: Write keystore file
+        run: |
+          echo "${{ secrets.GPLAY_KEYSTORE }}" | base64 -d > gplay.keystore
+          echo "NETBIRD_UPLOAD_STORE_FILE=$GITHUB_WORKSPACE/gplay.keystore" >> "$GITHUB_ENV"
+
+      - name: Build Android
+        id: build
+        uses: ./.github/actions/build-android
+        with:
+          version_name: ${{ steps.version.outputs.version_name }}
+          version_code: ${{ steps.version_code.outputs.version_code }}
+          build_type: release
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prepare-publication-${{ steps.version.outputs.version_name }}
+          path: |
+            ${{ steps.build.outputs.apk_path }}
+            ${{ steps.build.outputs.bundle_path }}
+          retention-days: 14
