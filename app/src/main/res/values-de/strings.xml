@@ -25,6 +25,7 @@
 
     <string name="main_status_disconnected">Nicht verbunden</string>
     <string name="main_status_connecting">Wird verbunden…</string>
+    <string name="main_status_no_network">Kein Netzwerk verfügbar</string>
     <string name="main_status_connected">Verbunden</string>
     <string name="main_status_disconnecting">Wird getrennt…</string>
     <string name="main_desc_connect">Verbinden/Trennen</string>

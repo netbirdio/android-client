@@ -25,6 +25,7 @@
 
     <string name="main_status_disconnected">Отключено</string>
     <string name="main_status_connecting">Подключение…</string>
+    <string name="main_status_no_network">Сеть недоступна</string>
     <string name="main_status_connected">Подключено</string>
     <string name="main_status_disconnecting">Отключение…</string>
     <string name="main_desc_connect">подключение/отключение</string>
