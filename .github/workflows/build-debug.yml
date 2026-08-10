@@ -123,7 +123,10 @@ jobs:
           disk-size: 4096M
           heap-size: 512M
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest --no-daemon -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest
+          # The e2e package needs a setup key for a live account, which only the
+          # private mobile-e2e repo holds, so it is excluded here along with the
+          # long-running stress test.
+          script: ./gradlew connectedDebugAndroidTest --no-daemon -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest -Pandroid.testInstrumentationRunnerArguments.notPackage=io.netbird.client.e2e
 
       - name: Upload test results
         if: always()
