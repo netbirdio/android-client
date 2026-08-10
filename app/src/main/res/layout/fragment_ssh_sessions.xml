@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="80dp" />
+        android:paddingBottom="@dimen/fab_content_inset" />
 
     <TextView
         android:id="@+id/empty_view"
@@ -28,8 +28,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="@dimen/fab_margin"
         android:contentDescription="@string/ssh_new_connection_title"
-        android:src="@android:drawable/ic_input_add" />
+        android:src="@drawable/add_24px"
+        app:backgroundTint="@color/nb_orange"
+        app:tint="@android:color/white"
+        app:elevation="0dp"
+        app:hoveredFocusedTranslationZ="0dp"
+        app:pressedTranslationZ="0dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
