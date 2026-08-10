@@ -327,7 +327,9 @@ class EngineRunner {
         String cacheDir = context.getCacheDir().getAbsolutePath();
         var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
         try {
-            return goClient.debugBundle(platformFiles, anonymize);
+            // The strict level stays unused until the troubleshoot screen
+            // grows an option for it.
+            return goClient.debugBundle(platformFiles, anonymize, Android.AnonymizeLevelDefault);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             throw e;
