@@ -33,7 +33,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -157,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         setSupportActionBar(binding.toolbar);
 
         applySystemBarIconContrast();
+        applySystemBarInsets();
 
         isRunningOnTV = PlatformUtils.isAndroidTV(this);
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
@@ -356,6 +360,25 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                 WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         controller.setAppearanceLightStatusBars(!nightMode);
         controller.setAppearanceLightNavigationBars(!nightMode);
+    }
+
+    /**
+     * Splits the system bar insets between the two views that have to paint behind them.
+     * A single fitsSystemWindows on the root cannot do this: it pads all four edges at
+     * once, so the root's own background ends up in the navigation bar strip and the
+     * bottom navigation stops short of the screen edge — visible as a mismatched band
+     * under the tabs, since the root is nb_bg while the tabs are nb_bottom_nav_bg. Taking
+     * the insets here instead lets the top padding hold the status bar off the toolbar
+     * while the bottom navigation extends its own background down past the gesture or
+     * 3-button bar.
+     */
+    private void applySystemBarInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (view, windowInsets) -> {
+            Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            view.setPadding(bars.left, bars.top, bars.right, 0);
+            binding.bottomNav.setPadding(0, 0, 0, bars.bottom);
+            return windowInsets;
+        });
     }
 
     // A theme switch from the settings screen re-runs configuration, not onCreate,
