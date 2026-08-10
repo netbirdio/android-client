@@ -30,6 +30,7 @@ import com.google.android.material.navigation.NavigationBarView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
@@ -338,13 +339,15 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     /**
-     * Targeting API 36 turns on edge-to-edge with no opt-out: android:statusBarColor and
-     * navigationBarColor stop having any effect and the window draws under both bars. The
-     * root layout's fitsSystemWindows padding still keeps content clear of them, so the
-     * bars end up showing windowBackground — light in day mode, dark at night. The icons
-     * drawn on top have to be darkened or lightened to match, or they vanish against it.
-     * Done here rather than in themes.xml because windowLightNavigationBar is API 27+
-     * while minSdk is 26; the compat controller handles that gate itself.
+     * Targeting API 36 turns on edge-to-edge with no opt-out: the window draws under both
+     * system bars. The root layout's fitsSystemWindows padding keeps content clear of them
+     * and its nb_bg background paints the strip behind them, so the icons drawn on top have
+     * to be darkened or lightened to match, or they vanish against it. Do not rely on the
+     * window background alone: some devices keep FORCE_DRAW_STATUS_BAR_BACKGROUND set, and
+     * with no android:statusBarColor the system fills the strip with its default black —
+     * which is why the theme still sets that colour for the platforms where it applies.
+     * The contrast is set here rather than in themes.xml because windowLightNavigationBar
+     * is API 27+ while minSdk is 26; the compat controller handles that gate itself.
      */
     private void applySystemBarIconContrast() {
         boolean nightMode = (getResources().getConfiguration().uiMode
@@ -353,6 +356,14 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                 WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         controller.setAppearanceLightStatusBars(!nightMode);
         controller.setAppearanceLightNavigationBars(!nightMode);
+    }
+
+    // A theme switch from the settings screen re-runs configuration, not onCreate,
+    // so the bar icons have to be re-tinted for the new mode here as well.
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        applySystemBarIconContrast();
     }
 
     @Override

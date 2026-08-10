@@ -13,6 +13,8 @@
         <!-- Default background color -->
         <item name="android:windowBackground">@color/nb_bg</item>
 
+        <item name="android:statusBarColor">@color/nb_bg</item>
+
         <item name="android:textColor">@color/nb_txt</item>
 
 
