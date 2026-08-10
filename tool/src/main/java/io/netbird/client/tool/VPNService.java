@@ -88,7 +88,8 @@ public class VPNService extends android.net.VpnService {
         // Create network availability listener after the engine runner so we
         // can gate notifications on the engine actually being up; this avoids
         // acting on Android's initial onAvailable burst during cold start.
-        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(engineRunner::isRunning);
+        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(
+                engineRunner::isRunning, engineRunner::setNetworkAvailable);
 
         engineRestarter = new EngineRestarter(engineRunner);
         networkAvailabilityListener.subscribe(engineRestarter);
@@ -97,6 +98,10 @@ public class VPNService extends android.net.VpnService {
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
         networkChangeDetector.subscribe(networkAvailabilityListener);
         networkChangeDetector.registerNetworkCallback();
+        // Push the initial connectivity state into the Go client: transition
+        // events alone would leave it stuck at the online default when the
+        // service starts while the device has no network (e.g. airplane mode).
+        engineRunner.setNetworkAvailable(networkChangeDetector.hasInternetConnectivity());
 
         // Register broadcast receiver for stopping engine (e.g., during profile switch)
         stopEngineReceiver = new android.content.BroadcastReceiver() {

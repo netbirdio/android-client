@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.netbird.client.tool.networks.NetworkToggleListener;
+import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 
 /**
@@ -118,17 +119,25 @@ class EngineRestarter implements NetworkToggleListener {
                 handler.removeCallbacks(timeoutCallback);  // Cancel timeout
                 engineRunner.removeServiceStateListener(this);
                 currentListener = null;
-                // Restore the original listener so the FilteringConnectionListener
-                // wrapper does not accumulate across restart cycles.
-                if (filteringListener != null && savedListener != null) {
-                    engineRunner.setConnectionListener(savedListener);
-                }
+                // Deliberately leave the filtering wrapper installed: onStarted
+                // fires before goClient.run(), so the new engine's replayed
+                // Disconnected is still to come and swapping the wrapper out
+                // here would let it through. The wrapper disarms itself on the
+                // new engine's first non-disconnect state, and the next restart
+                // unwraps it, so it neither suppresses anything afterwards nor
+                // accumulates.
                 unsuppressAll(suppressedHolder.getAndSet(null));
             }
 
             @Override
             public void onStopped() {
                 Log.d(LOGTAG, "engine is stopped, restarting...");
+                // The old engine's run() has returned, so every callback from
+                // here on belongs to the new one. Only now may the filter treat
+                // a non-disconnect state as proof that the restart is over.
+                if (filteringListener != null) {
+                    filteringListener.expectNewEngine();
+                }
                 engineRunner.runWithoutAuth();
             }
 
@@ -217,13 +226,20 @@ class EngineRestarter implements NetworkToggleListener {
      * during a restart. Disconnects from the old engine's teardown — and the
      * default-state replay the Go notifier sends to a listener attached
      * before the new engine's ClientStart() — would otherwise flash the UI
-     * to Disconnected. The wrapper is replaced with the original listener on
-     * successful restart (or has its filter disabled via allowAll on error /
-     * timeout), so it never lives past a single restart cycle.
+     * to Disconnected.
+     *
+     * <p>The filter disarms itself on the first non-disconnect state reported
+     * <em>after</em> expectNewEngine, which the restart calls from onStopped.
+     * Neither half of that condition is sufficient alone: onStarted fires
+     * before goClient.run(), so releasing on it would still let the new
+     * engine's replayed Disconnected through, while state alone cannot tell the
+     * new engine's Connecting from the one the old engine emits as it is torn
+     * down. The restart timeout is the backstop if no state ever arrives.</p>
      */
     private static final class FilteringConnectionListener implements ConnectionListener {
         final ConnectionListener delegate;
         private volatile boolean dropDisconnects = true;
+        private volatile boolean newEngineExpected = false;
 
         FilteringConnectionListener(ConnectionListener delegate) {
             this.delegate = delegate;
@@ -233,8 +249,27 @@ class EngineRestarter implements NetworkToggleListener {
             dropDisconnects = false;
         }
 
+        /**
+         * Marks the old engine as fully stopped. Until this is called a
+         * non-disconnect state proves nothing, because the old engine emits
+         * Connecting on its way out: tearing it down drops its management and
+         * signal links, and the Go notifier recomputes the state from those.
+         */
+        void expectNewEngine() {
+            newEngineExpected = true;
+        }
+
+        private void release(String trigger) {
+            if (!newEngineExpected || !dropDisconnects) {
+                return;
+            }
+            dropDisconnects = false;
+            Log.d(LOGTAG, "restart filter released by " + trigger);
+        }
+
         @Override
         public void onConnecting() {
+            release("onConnecting");
             try {
                 delegate.onConnecting();
             } catch (Exception e) {
@@ -244,10 +279,32 @@ class EngineRestarter implements NetworkToggleListener {
 
         @Override
         public void onConnected() {
+            release("onConnected");
             try {
                 delegate.onConnected();
             } catch (Exception e) {
                 Log.w(LOGTAG, "delegate onConnected failed: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onStateChanged(long state) {
+            // mirror the per-state filtering: disconnect-flavored states are
+            // suppressed during the restart window
+            if (state == Android.ClientStateDisconnected || state == Android.ClientStateDisconnecting) {
+                if (dropDisconnects) {
+                    Log.d(LOGTAG, "filtered onStateChanged(" + state + ") during restart");
+                    return;
+                }
+            } else {
+                // Connecting, Connected or NoNetwork — ends the restart window
+                // once the old engine is known to be gone.
+                release("onStateChanged(" + state + ")");
+            }
+            try {
+                delegate.onStateChanged(state);
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onStateChanged failed: " + e.getMessage());
             }
         }
 

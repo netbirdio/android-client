@@ -107,6 +107,14 @@ class EngineRunner {
         goClient.cancelExtendAuthSession();
     }
 
+    // setNetworkAvailable forwards OS connectivity state to the Go client,
+    // which suspends its reconnect loops while no network is available. The
+    // Go-side state is process-global, so it may be called regardless of
+    // whether the engine is running.
+    public void setNetworkAvailable(boolean available) {
+        goClient.setNetworkAvailable(available);
+    }
+
     public void run(@NotNull URLOpener urlOpener, boolean isAndroidTV) {
         runClient(urlOpener, isAndroidTV);
     }
@@ -211,15 +219,29 @@ class EngineRunner {
             this.connectedObservers = connectedObservers;
         }
 
-        @Override public void onConnecting() { delegate.onConnecting(); }
+        @Override public void onStateChanged(long state) {
+            Log.d(LOGTAG, "FROM GO: onStateChanged(" + state + ")");
+            delegate.onStateChanged(state);
+        }
+        @Override public void onConnecting() {
+            Log.d(LOGTAG, "FROM GO: onConnecting()");
+            delegate.onConnecting();
+        }
         @Override public void onConnected() {
+            Log.d(LOGTAG, "FROM GO: onConnected()");
             delegate.onConnected();
             for (Runnable obs : connectedObservers) {
                 try { obs.run(); } catch (Exception e) { Log.w(LOGTAG, "connected observer failed", e); }
             }
         }
-        @Override public void onDisconnecting() { delegate.onDisconnecting(); }
-        @Override public void onDisconnected() { delegate.onDisconnected(); }
+        @Override public void onDisconnecting() {
+            Log.d(LOGTAG, "FROM GO: onDisconnecting()");
+            delegate.onDisconnecting();
+        }
+        @Override public void onDisconnected() {
+            Log.d(LOGTAG, "FROM GO: onDisconnected()");
+            delegate.onDisconnected();
+        }
         @Override public void onAddressChanged(String f, String i) { delegate.onAddressChanged(f, i); }
         @Override public void onPeersListChanged(long n) { delegate.onPeersListChanged(n); }
     }
@@ -230,7 +252,12 @@ class EngineRunner {
     }
 
     synchronized ConnectionListener getConnectionListener() {
-        return connectionListener;
+        // Return the raw listener, not the ObservingConnectionListener wrapper.
+        // Callers (EngineRestarter) decorate what they get here and hand it back
+        // to setConnectionListener, which wraps again; handing out the wrapper
+        // would nest a second Observing inside the decorator, duplicating every
+        // callback and stacking further on each failed restart.
+        return unwrap(connectionListener);
     }
 
     /**

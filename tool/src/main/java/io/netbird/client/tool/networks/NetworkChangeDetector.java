@@ -7,10 +7,16 @@ import android.net.NetworkRequest;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Consumer;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkChangeDetector {
     private static final String LOGTAG = NetworkChangeDetector.class.getSimpleName();
+    // Transport we do not classify (e.g. ethernet, bluetooth tethering); such
+    // networks still count as internet connectivity.
+    private static final int TYPE_UNCLASSIFIED = -1;
+
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
     private ConnectivityManager.NetworkCallback defaultNetworkCallback;
@@ -18,39 +24,57 @@ public class NetworkChangeDetector {
     private boolean defaultNetworkCallbackActive = false;
     private final Object networkCallbackLock = new Object();
 
+    // Networks currently matching the registered request (internet-capable,
+    // non-VPN), keyed by the Network object so onLost can be resolved even
+    // though the lost network's capabilities are no longer queryable.
+    private final Map<Network, Integer> availableNetworks = new ConcurrentHashMap<>();
+    private final Object internetStateLock = new Object();
+    private boolean internetAvailable = true;
+
     public NetworkChangeDetector(ConnectivityManager connectivityManager) {
         this.connectivityManager = connectivityManager;
         initNetworkCallback();
         initDefaultNetworkCallback();
     }
 
-    private void checkNetworkCapabilities(Network network, Consumer<Integer> operation) {
+    private int classifyTransport(Network network) {
         var capabilities = connectivityManager.getNetworkCapabilities(network);
-        if (capabilities == null) return;
+        if (capabilities == null) return TYPE_UNCLASSIFIED;
 
         Log.d(LOGTAG, String.format("Network %s has capabilities: %s", network, capabilities));
 
         if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-            operation.accept(Constants.NetworkType.WIFI);
-        } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-            operation.accept(Constants.NetworkType.MOBILE);
+            return Constants.NetworkType.WIFI;
         }
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            return Constants.NetworkType.MOBILE;
+        }
+        return TYPE_UNCLASSIFIED;
     }
 
     private void initNetworkCallback() {
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
+                int type = classifyTransport(network);
+                availableNetworks.put(network, type);
+
                 NetworkAvailabilityListener localListener = listener;
-                if (localListener == null) return;
-                checkNetworkCapabilities(network, localListener::onNetworkAvailable);
+                if (localListener != null && type != TYPE_UNCLASSIFIED) {
+                    localListener.onNetworkAvailable(type);
+                }
+                updateInternetAvailability();
             }
 
             @Override
             public void onLost(@NonNull Network network) {
+                Integer type = availableNetworks.remove(network);
+
                 NetworkAvailabilityListener localListener = listener;
-                if (localListener == null) return;
-                checkNetworkCapabilities(network, localListener::onNetworkLost);
+                if (localListener != null && type != null && type != TYPE_UNCLASSIFIED) {
+                    localListener.onNetworkLost(type);
+                }
+                updateInternetAvailability();
             }
 
             @Override
@@ -60,6 +84,29 @@ public class NetworkChangeDetector {
                 Log.d(LOGTAG, String.format("Network %s had their capabilities changed: %s", network, networkCapabilities));
             }
         };
+    }
+
+    // updateInternetAvailability notifies the listener when the device
+    // transitions between having some internet-capable network and none.
+    private void updateInternetAvailability() {
+        boolean available = !availableNetworks.isEmpty();
+        synchronized (internetStateLock) {
+            if (available == internetAvailable) {
+                return;
+            }
+            internetAvailable = available;
+        }
+        Log.i(LOGTAG, "internet availability changed: " + available);
+        NetworkAvailabilityListener localListener = listener;
+        if (localListener != null) {
+            localListener.onInternetAvailabilityChanged(available);
+        }
+    }
+
+    public boolean hasInternetConnectivity() {
+        synchronized (internetStateLock) {
+            return internetAvailable;
+        }
     }
 
     private void initDefaultNetworkCallback() {
@@ -102,6 +149,13 @@ public class NetworkChangeDetector {
     }
 
     public void registerNetworkCallback() {
+        // Seed the availability state before callbacks arrive: when the device
+        // starts with no connectivity at all (e.g. airplane mode), no
+        // onAvailable ever fires, so the initial value must already be correct.
+        synchronized (internetStateLock) {
+            internetAvailable = connectivityManager.getActiveNetwork() != null;
+        }
+
         NetworkRequest.Builder builder = new NetworkRequest.Builder();
         builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         connectivityManager.registerNetworkCallback(builder.build(), networkCallback);
@@ -125,6 +179,7 @@ public class NetworkChangeDetector {
                 Log.e(LOGTAG, "failed to unregister default network callback", e);
             }
         }
+        availableNetworks.clear();
     }
 
     public void subscribe(NetworkAvailabilityListener listener) {

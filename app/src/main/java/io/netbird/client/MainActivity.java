@@ -51,6 +51,7 @@ import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.SessionEventListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
+import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
@@ -67,7 +68,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         CONNECTED,
         CONNECTING,
         DISCONNECTING,
-        DISCONNECTED
+        DISCONNECTED,
+        NO_NETWORK
     }
     private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
@@ -569,6 +571,9 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             case DISCONNECTED:
                 listener.onDisconnected();
                 break;
+            case NO_NETWORK:
+                listener.onNoNetwork();
+                break;
         }
 
         if (lastFqdn != null && lastIp != null) {
@@ -669,7 +674,30 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         alertDialog.show();
     }
 
+    /** Maps a gomobile ClientState value to a readable name for logging. */
+    private static String stateName(long state) {
+        if (state == Android.ClientStateDisconnected) return "Disconnected";
+        if (state == Android.ClientStateConnected) return "Connected";
+        if (state == Android.ClientStateConnecting) return "Connecting";
+        if (state == Android.ClientStateDisconnecting) return "Disconnecting";
+        if (state == Android.ClientStateNoNetwork) return "NoNetwork";
+        return "Unknown";
+    }
+
     ConnectionListener connectionListener = new ConnectionListener() {
+        @Override
+        public void onStateChanged(long state) {
+            Log.d(LOGTAG, "GO CALLBACK onStateChanged(" + state + " = " + stateName(state) + ")");
+            // Legacy per-state callbacks drive the existing states; only the
+            // states delivered exclusively through this callback are handled.
+            if (state == Android.ClientStateNoNetwork) {
+                lastKnownState = ConnectionState.NO_NETWORK;
+                for (StateListener listener : serviceStateListeners) {
+                    listener.onNoNetwork();
+                }
+            }
+        }
+
         @Override
         public synchronized void onAddressChanged(String fqdn, String ip) {
             lastFqdn = fqdn;
@@ -681,6 +709,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         public void onConnected() {
+            Log.d(LOGTAG, "GO CALLBACK onConnected()");
             lastKnownState = ConnectionState.CONNECTED;
 
             isSSOFinishedWell = true;
@@ -690,6 +719,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         public void onConnecting() {
+            Log.d(LOGTAG, "GO CALLBACK onConnecting()");
             lastKnownState = ConnectionState.CONNECTING;
 
             isSSOFinishedWell = true;
@@ -699,6 +729,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         public void onDisconnecting() {
+            Log.d(LOGTAG, "GO CALLBACK onDisconnecting()");
             lastKnownState = ConnectionState.DISCONNECTING;
 
             for (StateListener listener : serviceStateListeners) {
@@ -707,6 +738,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         public void onDisconnected() {
+            Log.d(LOGTAG, "GO CALLBACK onDisconnected()");
             lastKnownState = ConnectionState.DISCONNECTED;
 
             isSSOFinishedWell = false;

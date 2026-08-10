@@ -35,6 +35,8 @@ import io.netbird.gomobile.android.NetworkArray;
 
 public class HomeFragment extends Fragment implements StateListener, RouteChangeListener, ProfilePickerSheet.OnProfileSwitchedListener {
 
+    private static final String LOGTAG = "HomeFragment";
+
     private FragmentHomeBinding binding;
     private ServiceAccessor serviceAccessor;
     private StateListenerRegistry stateListenerRegistry;
@@ -53,7 +55,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
      */
     private ObjectAnimator disabledPulse;
 
-    private enum EngineState { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED }
+    private enum EngineState { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED, NO_NETWORK }
 
     private static final long PENDING_ACTION_TIMEOUT_MS = 7_000;
 
@@ -263,7 +265,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             Profile activeProfile = profileManager.getActiveProfile();
             binding.profileChipText.setText(activeProfile != null ? activeProfile.getName() : "");
         } catch (Exception e) {
-            Log.e("HomeFragment", "Failed to read active profile", e);
+            Log.e(LOGTAG, "Failed to read active profile", e);
             binding.profileChipText.setText("");
         }
     }
@@ -290,6 +292,8 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     }
 
     private void setToggle(boolean checked, boolean enabled, int statusResId) {
+        Log.d(LOGTAG, "UI paint requested: status=" + statusResName(statusResId)
+                + " toggle=" + checked + " enabled=" + enabled);
         runOnUi(() -> {
             if (buttonConnect != null) {
                 // setChecked animates the thumb; on a freshly inflated view that reads as the
@@ -307,6 +311,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             }
             if (textConnStatus != null) {
                 textConnStatus.setText(statusResId);
+                Log.d(LOGTAG, "UI painted: status=\"" + textConnStatus.getText() + "\"");
             }
         });
     }
@@ -347,10 +352,25 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         }
     }
 
+    /**
+     * Resource entry name for the status label, so the log names the string
+     * without touching the fragment's context off the UI thread.
+     */
+    private String statusResName(int statusResId) {
+        try {
+            return getResources().getResourceEntryName(statusResId);
+        } catch (Exception e) {
+            return String.valueOf(statusResId);
+        }
+    }
+
     private void onEngineState(EngineState state) {
+        Log.d(LOGTAG, "UI state received: " + state + " (previous=" + lastEngineState
+                + ", pendingTarget=" + pendingTarget + ")");
         lastEngineState = state;
         isConnected = state == EngineState.CONNECTED;
         if (shouldSuppressPaint(state)) {
+            Log.d(LOGTAG, "UI paint SUPPRESSED for " + state + " (pendingTarget=" + pendingTarget + ")");
             return;
         }
         applyEngineState(state);
@@ -375,7 +395,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             return state != EngineState.DISCONNECTING;
         }
         // target == CONNECTED
-        if (state == EngineState.CONNECTING) {
+        if (state == EngineState.CONNECTING || state == EngineState.NO_NETWORK) {
             // Same-direction progress: let it paint.
             return false;
         }
@@ -393,6 +413,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private void applyEngineState(EngineState state) {
         switch (state) {
             case CONNECTING:
+            case NO_NETWORK:
             case DISCONNECTING:
                 paintTransition(state);
                 break;
@@ -412,6 +433,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private boolean isTransitioning() {
         return pendingTarget != null
                 || lastEngineState == EngineState.CONNECTING
+                || lastEngineState == EngineState.NO_NETWORK
                 || lastEngineState == EngineState.DISCONNECTING;
     }
 
@@ -423,6 +445,8 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private void paintTransition(EngineState state) {
         if (state == EngineState.CONNECTING) {
             setToggle(true, canForceCancel, R.string.main_status_connecting);
+        } else if (state == EngineState.NO_NETWORK) {
+            setToggle(true, canForceCancel, R.string.main_status_no_network);
         } else {
             setToggle(false, canForceCancel, R.string.main_status_disconnecting);
         }
@@ -667,6 +691,11 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     @Override
     public void onConnecting() {
         onEngineState(EngineState.CONNECTING);
+    }
+
+    @Override
+    public void onNoNetwork() {
+        onEngineState(EngineState.NO_NETWORK);
     }
 
     @Override
