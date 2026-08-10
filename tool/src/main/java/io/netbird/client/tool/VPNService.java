@@ -44,7 +44,7 @@ public class VPNService extends android.net.VpnService {
 
     private NetworkChangeDetector networkChangeDetector;
     private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
-    private EngineRestarter engineRestarter;
+    private NetworkSwitchNotifier networkSwitchNotifier;
     private android.content.BroadcastReceiver stopEngineReceiver;
 
     @Override
@@ -91,8 +91,8 @@ public class VPNService extends android.net.VpnService {
         networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(
                 engineRunner::isRunning, engineRunner::setNetworkAvailable);
 
-        engineRestarter = new EngineRestarter(engineRunner);
-        networkAvailabilityListener.subscribe(engineRestarter);
+        networkSwitchNotifier = new NetworkSwitchNotifier(engineRunner);
+        networkAvailabilityListener.subscribe(networkSwitchNotifier);
 
         networkChangeDetector = new NetworkChangeDetector(
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
@@ -109,7 +109,7 @@ public class VPNService extends android.net.VpnService {
             public void onReceive(Context context, Intent intent) {
                 if (ACTION_STOP_ENGINE.equals(intent.getAction())) {
                     Log.d(LOGTAG, "Received stop engine broadcast");
-                    engineRestarter.cancelPendingRestart();
+                    networkSwitchNotifier.cancelPendingAction();
                     if (engineRunner != null) {
                         engineRunner.stop();
                     }
@@ -134,7 +134,7 @@ public class VPNService extends android.net.VpnService {
 
         if (INTENT_ALWAYS_ON_START.equals(intent.getAction())) {
             fgNotification.startForeground();
-            engineRestarter.cancelPendingRestart();
+            networkSwitchNotifier.cancelPendingAction();
             engineRunner.runWithoutAuth();
         }
         if (INTENT_ACTION_START.equals(intent.getAction())) {
@@ -175,7 +175,7 @@ public class VPNService extends android.net.VpnService {
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
-        engineRestarter.cleanup();
+        networkSwitchNotifier.cleanup();
 
         engineRunner.stop();
         stopForeground(true);
@@ -193,7 +193,7 @@ public class VPNService extends android.net.VpnService {
     @Override
     public void onRevoke() {
         Log.d(LOGTAG, "VPN permission on revoke");
-        engineRestarter.cancelPendingRestart();
+        networkSwitchNotifier.cancelPendingAction();
         if (engineRunner != null) {
             engineRunner.stop();
             stopForeground(true);
@@ -221,12 +221,12 @@ public class VPNService extends android.net.VpnService {
         public void runEngine(URLOpener urlOpener, boolean isAndroidTV) {
             fgNotification.startForeground();
             sessionNotification.cancel();
-            engineRestarter.cancelPendingRestart();
+            networkSwitchNotifier.cancelPendingAction();
             engineRunner.run(urlOpener, isAndroidTV);
         }
 
         public void stopEngine() {
-            engineRestarter.cancelPendingRestart();
+            networkSwitchNotifier.cancelPendingAction();
             engineRunner.stop();
         }
 

@@ -31,7 +31,6 @@ class EngineRunner {
     private final ProfileManagerWrapper profileManager;
     private boolean engineIsRunning = false;
     Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
-    private final Set<ServiceStateListener> suppressedServiceStateListeners = ConcurrentHashMap.newKeySet();
     private final Set<Runnable> connectedObservers = ConcurrentHashMap.newKeySet();
     private volatile SessionMonitor sessionMonitor;
     private final Client goClient;
@@ -115,6 +114,16 @@ class EngineRunner {
         goClient.setNetworkAvailable(available);
     }
 
+    // notifyNetworkChange tells the Go client the OS switched networks (e.g.
+    // cellular to WiFi). The Go side cuts the management, signal and relay
+    // connections, whose sockets are bound to the old network, so their
+    // reconnect loops redial immediately on the new one. Unlike an engine
+    // restart this keeps the TUN device, the WireGuard config and the peer
+    // state untouched.
+    public void notifyNetworkChange() {
+        goClient.notifyNetworkChange();
+    }
+
     public void run(@NotNull URLOpener urlOpener, boolean isAndroidTV) {
         runClient(urlOpener, isAndroidTV);
     }
@@ -192,26 +201,13 @@ class EngineRunner {
     }
 
     public synchronized void setConnectionListener(ConnectionListener listener) {
-        // Unwrap any previous ObservingConnectionListener to avoid stacking
-        // wrappers across repeated set/get cycles (e.g. EngineRestarter snapshots
-        // the current listener and re-installs it after wrapping its own filter
-        // around it).
-        ConnectionListener raw = unwrap(listener);
-        ConnectionListener wrapped = raw == null ? null : new ObservingConnectionListener(raw, connectedObservers);
+        ConnectionListener wrapped = listener == null ? null : new ObservingConnectionListener(listener, connectedObservers);
         this.connectionListener = wrapped;
         goClient.setConnectionListener(wrapped);
     }
 
-    private static ConnectionListener unwrap(ConnectionListener listener) {
-        ConnectionListener current = listener;
-        while (current instanceof ObservingConnectionListener) {
-            current = ((ObservingConnectionListener) current).delegate;
-        }
-        return current;
-    }
-
     private static final class ObservingConnectionListener implements ConnectionListener {
-        final ConnectionListener delegate;
+        private final ConnectionListener delegate;
         private final java.util.Set<Runnable> connectedObservers;
 
         ObservingConnectionListener(ConnectionListener delegate, java.util.Set<Runnable> connectedObservers) {
@@ -251,19 +247,11 @@ class EngineRunner {
         goClient.removeConnectionListener();
     }
 
-    synchronized ConnectionListener getConnectionListener() {
-        // Return the raw listener, not the ObservingConnectionListener wrapper.
-        // Callers (EngineRestarter) decorate what they get here and hand it back
-        // to setConnectionListener, which wraps again; handing out the wrapper
-        // would nest a second Observing inside the decorator, duplicating every
-        // callback and stacking further on each failed restart.
-        return unwrap(connectionListener);
-    }
-
     /**
      * Registers a callback that fires every time the engine reports
-     * OnConnected. EngineRestarter uses this to cancel a pending restart
-     * when the Go core has already reconnected on its own.
+     * OnConnected. NetworkSwitchNotifier uses this to cancel a pending
+     * network change action when the Go core has already reconnected on
+     * its own.
      */
     public void addOnConnectedObserver(Runnable observer) {
         connectedObservers.add(observer);
@@ -282,46 +270,8 @@ class EngineRunner {
         serviceStateListeners.add(serviceStateListener);
     }
 
-    /**
-     * Atomically adds a listener if and only if the engine is currently running.
-     * Does NOT fire immediate callbacks like addServiceStateListener does.
-     *
-     * @return true if listener was registered (engine was running), false otherwise
-     */
-    public synchronized boolean addServiceStateListenerForRestart(ServiceStateListener listener) {
-        if (!engineIsRunning) {
-            return false;  // Engine not running, can't restart
-        }
-        // Add listener without firing immediate callback
-        serviceStateListeners.add(listener);
-        return true;
-    }
-
     public synchronized void removeServiceStateListener(ServiceStateListener serviceStateListener) {
         serviceStateListeners.remove(serviceStateListener);
-        suppressedServiceStateListeners.remove(serviceStateListener);
-    }
-
-    /**
-     * Marks a listener as suppressed: it will not receive onStarted / onStopped
-     * notifications until {@link #unsuppressServiceStateListener} is called.
-     * Used by EngineRestarter to hide the engine teardown from external UI
-     * listeners during a restart.
-     */
-    public synchronized void suppressServiceStateListener(ServiceStateListener listener) {
-        suppressedServiceStateListeners.add(listener);
-    }
-
-    public synchronized void unsuppressServiceStateListener(ServiceStateListener listener) {
-        suppressedServiceStateListeners.remove(listener);
-    }
-
-    public synchronized java.util.List<ServiceStateListener> snapshotExternalListeners(ServiceStateListener exclude) {
-        java.util.List<ServiceStateListener> out = new java.util.ArrayList<>();
-        for (ServiceStateListener s : serviceStateListeners) {
-            if (s != exclude) out.add(s);
-        }
-        return out;
     }
 
     public synchronized void stop() {
@@ -349,9 +299,6 @@ class EngineRunner {
 
     private synchronized void notifyServiceStateListeners(boolean engineIsRunning) {
         for (ServiceStateListener s : serviceStateListeners) {
-            if (suppressedServiceStateListeners.contains(s)) {
-                continue;
-            }
             if (engineIsRunning) {
                 s.onStarted();
             } else {
