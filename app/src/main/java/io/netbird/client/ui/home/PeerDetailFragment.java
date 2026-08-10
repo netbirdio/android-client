@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -387,20 +388,14 @@ public class PeerDetailFragment extends Fragment {
             return timestamp;
         }
 
-        long seconds = Math.max(0, (System.currentTimeMillis() - parsed.getTime()) / 1000);
-        if (seconds < 1) {
+        long now = System.currentTimeMillis();
+        long elapsed = Math.max(0, now - parsed.getTime());
+        if (elapsed < DateUtils.MINUTE_IN_MILLIS) {
             return getString(R.string.peer_detail_just_now);
         }
-        if (seconds < 60) {
-            return seconds + "s ago";
-        }
-        if (seconds < 3600) {
-            return (seconds / 60) + "m ago";
-        }
-        if (seconds < 86400) {
-            return (seconds / 3600) + "h ago";
-        }
-        return (seconds / 86400) + "d ago";
+        // DateUtils localizes the unit and the "ago" wording for every locale we ship.
+        return DateUtils.getRelativeTimeSpanString(parsed.getTime(), now,
+                DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString();
     }
 
     private void copyToClipboard(String label, String text) {

@@ -54,6 +54,10 @@
     <string name="peer_filter_idle">Tétlen</string>
     <string name="peer_filter_connecting">Csatlakozás</string>
     <string name="peer_filter_connected">Csatlakozva</string>
+    <string name="peer_status_idle">Tétlen</string>
+    <string name="peer_status_connecting">Csatlakozás</string>
+    <string name="peer_status_connected">Csatlakozva</string>
+    <string name="peer_status_unknown">Ismeretlen</string>
     <string name="peers_clipboard_copy_ip">IP másolása</string>
     <string name="peers_clipboard_copy_ipv6">IPv6 másolása</string>
     <string name="peers_clipboard_copy_fqdn">FQDN másolása</string>

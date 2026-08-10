@@ -395,7 +395,7 @@ public final class ProfileEditorDialog {
                     showSetupKeyError(e.getMessage());
                 });
             }
-        }, key, Build.PRODUCT);
+        }, key, Build.MODEL);
     }
 
     private void showSetupKeyError(String message) {

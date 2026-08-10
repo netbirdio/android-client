@@ -48,6 +48,14 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
     private static final long PENDING_ACTION_TIMEOUT_MS = 7_000;
 
+    // The desktop switch's FORCE_TOGGLE_DELAY_MS equivalent: a transition that
+    // has been running at least this long re-enables the toggle, and a tap then
+    // force-cancels it (disconnect) instead of leaving the user stuck watching
+    // an endless "Connecting…". Shorter than the desktop's 7s on purpose: on
+    // mobile a stuck connect is common (flaky network, abandoned SSO tab), so
+    // the way out has to open quickly.
+    private static final long FORCE_CANCEL_DELAY_MS = 2_000;
+
     // Action latch, mirroring the desktop MainConnectionStatusSwitch: while a tap
     // is in flight, engine reports that contradict its target (e.g. the transient
     // Connecting emitted during teardown before the engine-side Disconnecting
@@ -55,6 +63,13 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private volatile EngineState lastEngineState = EngineState.DISCONNECTED;
     private volatile EngineState pendingTarget;
     private final Runnable pendingTimeout = this::expirePendingAction;
+
+    // Force-cancel window, armed while a transition is painted (see the desktop
+    // switch's canForceCancel). While the window is closed the toggle is disabled;
+    // once it opens the toggle re-enables so the transition can be aborted.
+    private boolean canForceCancel;
+    private boolean forceCancelArmed;
+    private final Runnable forceCancelOpen = this::openForceCancelWindow;
 
     private static final long SESSION_ROW_REFRESH_MS = 60_000;
 
@@ -125,10 +140,26 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 return;
             }
 
+            if (isTransitioning()) {
+                // Mid-transition the toggle is only enabled once the force-cancel
+                // window opened (desktop behavior): a tap then aborts the stuck
+                // transition rather than being read from the switch position.
+                if (canForceCancel) {
+                    forceDisconnect();
+                } else {
+                    // Unreachable via touch (the toggle is disabled until the
+                    // window opens); undo the tap's flip just in case.
+                    boolean towardOn = pendingTarget == EngineState.CONNECTED
+                            || lastEngineState == EngineState.CONNECTING;
+                    paintTransition(towardOn ? EngineState.CONNECTING : EngineState.DISCONNECTING);
+                }
+                return;
+            }
+
             if (isConnected) {
                 // We're currently connected, so disconnect
                 beginPendingAction(EngineState.DISCONNECTED);
-                setToggle(false, false, R.string.main_status_disconnecting);
+                paintTransition(EngineState.DISCONNECTING);
                 serviceAccessor.switchConnection(false);
             } else {
                 // We're currently disconnected, so connect. This also clears a
@@ -136,7 +167,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 // SSO flow, so no separate sign-in action is needed.
                 loginRequired = false;
                 beginPendingAction(EngineState.CONNECTED);
-                setToggle(true, true, R.string.main_status_connecting);
+                paintTransition(EngineState.CONNECTING);
                 serviceAccessor.switchConnection(true);
             }
         });
@@ -311,19 +342,86 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private void applyEngineState(EngineState state) {
         switch (state) {
             case CONNECTING:
-                setToggle(true, false, R.string.main_status_connecting);
+            case DISCONNECTING:
+                paintTransition(state);
                 break;
             case CONNECTED:
+                closeForceCancelWindow();
                 setToggle(true, true, R.string.main_status_connected);
                 break;
-            case DISCONNECTING:
-                setToggle(false, false, R.string.main_status_disconnecting);
-                break;
             case DISCONNECTED:
+                closeForceCancelWindow();
                 setToggle(false, true, loginRequired
                         ? R.string.main_status_login_required
                         : R.string.main_status_disconnected);
                 break;
+        }
+    }
+
+    private boolean isTransitioning() {
+        return pendingTarget != null
+                || lastEngineState == EngineState.CONNECTING
+                || lastEngineState == EngineState.DISCONNECTING;
+    }
+
+    /**
+     * Paints an in-flight transition. The toggle is disabled until the
+     * force-cancel window opens, and enabled again afterwards so a stuck
+     * transition can still be aborted (see {@link #forceDisconnect()}).
+     */
+    private void paintTransition(EngineState state) {
+        if (state == EngineState.CONNECTING) {
+            setToggle(true, canForceCancel, R.string.main_status_connecting);
+        } else {
+            setToggle(false, canForceCancel, R.string.main_status_disconnecting);
+        }
+        armForceCancel();
+    }
+
+    /**
+     * Aborts a transition that outlived the force-cancel delay: stop the engine,
+     * whatever it was doing. Stopping also cancels a connect that is parked on
+     * an interactive login the user abandoned. Restarts the force-cancel window,
+     * so even a stuck disconnect keeps offering the tap again after the delay.
+     */
+    private void forceDisconnect() {
+        closeForceCancelWindow();
+        beginPendingAction(EngineState.DISCONNECTED);
+        paintTransition(EngineState.DISCONNECTING);
+        serviceAccessor.switchConnection(false);
+    }
+
+    private void armForceCancel() {
+        if (forceCancelArmed || canForceCancel) {
+            return;
+        }
+        View root = binding != null ? binding.getRoot() : null;
+        if (root == null) {
+            return;
+        }
+        forceCancelArmed = true;
+        root.postDelayed(forceCancelOpen, FORCE_CANCEL_DELAY_MS);
+    }
+
+    private void openForceCancelWindow() {
+        forceCancelArmed = false;
+        if (!isTransitioning()) {
+            // Settled while a suppressed repaint kept the timer alive; the
+            // settled paint has already reset the toggle.
+            return;
+        }
+        canForceCancel = true;
+        if (buttonConnect != null) {
+            buttonConnect.setEnabled(true);
+        }
+    }
+
+    private void closeForceCancelWindow() {
+        canForceCancel = false;
+        forceCancelArmed = false;
+        View root = binding != null ? binding.getRoot() : null;
+        if (root != null) {
+            root.removeCallbacks(forceCancelOpen);
         }
     }
 
@@ -380,9 +478,12 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         }
         if (binding != null) {
             binding.getRoot().removeCallbacks(pendingTimeout);
+            binding.getRoot().removeCallbacks(forceCancelOpen);
             binding.getRoot().removeCallbacks(sessionTicker);
         }
         pendingTarget = null;
+        canForceCancel = false;
+        forceCancelArmed = false;
         binding = null;
         buttonConnect = null;
         textConnStatus = null;
@@ -551,11 +652,6 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         }
     }
 
-    /**
-     * The session banner is shown whenever a deadline is known, with a
-     * coarse relative time (Tailscale-style: minutes under two hours, hours
-     * under two days, days beyond). Tapping it starts the extend flow.
-     */
     private void updateSessionRow() {
         if (binding == null) {
             return;

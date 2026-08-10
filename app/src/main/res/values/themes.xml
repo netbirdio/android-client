@@ -10,9 +10,6 @@
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/black</item>
 
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/nb_gray_dark</item>
-
         <!-- Default background color -->
         <item name="android:windowBackground">@color/nb_bg</item>
 

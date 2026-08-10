@@ -54,6 +54,10 @@
     <string name="peer_filter_idle">Inactivo</string>
     <string name="peer_filter_connecting">Conectando</string>
     <string name="peer_filter_connected">Conectado</string>
+    <string name="peer_status_idle">Inactivo</string>
+    <string name="peer_status_connecting">Conectando</string>
+    <string name="peer_status_connected">Conectado</string>
+    <string name="peer_status_unknown">Desconocido</string>
     <string name="peers_clipboard_copy_ip">Copiar IP</string>
     <string name="peers_clipboard_copy_ipv6">Copiar IPv6</string>
     <string name="peers_clipboard_copy_fqdn">Copiar FQDN</string>
