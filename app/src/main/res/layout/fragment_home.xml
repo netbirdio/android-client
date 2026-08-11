@@ -54,8 +54,10 @@
     </LinearLayout>
 
     <!-- NetBird logo. Head of a packed vertical chain (logo → switch → status →
-         hostname → address rows) centered between the profile chip and the exit
-         node row, so the group can never overlap either. -->
+         hostname → address summary) centered between the profile chip and the
+         exit node row, so the group can never overlap either. The expandable
+         info rows are deliberately outside the chain: including them would grow
+         the packed group and re-center the whole block every time they open. -->
     <ImageView
         android:id="@+id/home_logo"
         android:layout_width="0dp"
@@ -151,7 +153,7 @@
         android:visibility="gone"
         tools:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/text_hostname"
-        app:layout_constraintBottom_toTopOf="@+id/info_rows"
+        app:layout_constraintBottom_toTopOf="@+id/exit_node_row"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -176,13 +178,15 @@
             app:tint="@color/nb_txt_light" />
     </LinearLayout>
 
-    <!-- Info rows: IP address + secondary value. Hidden until the summary above is tapped. -->
+    <!-- Info rows: IP address + secondary value. Hidden until the summary above
+         is tapped. Anchored to the summary with no bottom constraint, so opening
+         them expands downwards instead of re-centering the chain above. -->
     <LinearLayout
         android:id="@+id/info_rows"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="20dp"
         android:background="@drawable/info_row_bg"
         android:divider="@drawable/info_row_divider"
@@ -191,7 +195,6 @@
         android:visibility="gone"
         tools:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/network_address_summary"
-        app:layout_constraintBottom_toTopOf="@+id/exit_node_row"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
