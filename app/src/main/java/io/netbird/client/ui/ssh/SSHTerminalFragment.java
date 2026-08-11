@@ -1,7 +1,10 @@
 package io.netbird.client.ui.ssh;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,6 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
@@ -19,12 +24,21 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+
+import com.google.android.material.button.MaterialButton;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
@@ -54,6 +68,7 @@ public class SSHTerminalFragment extends Fragment {
     private boolean ctrlArmed = false;
     private boolean altArmed = false;
     private boolean terminalReady = false;
+    private int previousSoftInputMode;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -96,7 +111,54 @@ public class SSHTerminalFragment extends Fragment {
 
         webView.loadUrl("file:///android_asset/terminal/index.html");
 
+        applyImeInsets();
         wireKeyBar();
+    }
+
+    /**
+     * Keeps the keyboard from covering the terminal, which needs two different
+     * mechanisms depending on the platform the app is running on.
+     *
+     * The manifest asks for adjustPan, which slides the whole window up and
+     * carries the key bar off screen. Up to API 34 that mode is honoured, so the
+     * fragment asks for adjustResize instead while it is on screen and the
+     * window shrinks around the keyboard. From API 35 edge-to-edge is enforced,
+     * the soft input mode is ignored and the keyboard just draws over the
+     * window; there the IME inset below is what frees the covered area.
+     *
+     * Either way the fragment root ends up shorter, so the weighted WebView
+     * shrinks, xterm refits and reports the smaller row count to the SSH
+     * session, and the key bar comes to rest above the keyboard.
+     */
+    private void applyImeInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            int ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+            // With adjustResize the window is already short enough, so adding the
+            // IME height again would leave a gap the size of the keyboard.
+            int bottom = ime;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                int navBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+                bottom = ime > 0 ? 0 : navBar;
+            }
+            v.setPadding(0, 0, 0, bottom);
+            return insets;
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Window window = requireActivity().getWindow();
+        previousSoftInputMode = window.getAttributes().softInputMode;
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
+
+    @Override
+    public void onStop() {
+        // adjustPan is what the rest of the app expects; leaving adjustResize on
+        // would change how every other screen reacts to the keyboard.
+        requireActivity().getWindow().setSoftInputMode(previousSoftInputMode);
+        super.onStop();
     }
 
     @Override
@@ -136,6 +198,21 @@ public class SSHTerminalFragment extends Fragment {
         binding.keyDown.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'B'}));
         binding.keyRight.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'C'}));
         binding.keyLeft.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'D'}));
+
+        // The three most common control codes get their own key: arming Ctrl and
+        // then hitting a letter needs the soft keyboard to deliver that letter,
+        // which it does not always do.
+        binding.keyCtrlC.setOnClickListener(v -> sendBytes(new byte[]{0x03}));
+        binding.keyCtrlD.setOnClickListener(v -> sendBytes(new byte[]{0x04}));
+        binding.keyCtrlZ.setOnClickListener(v -> sendBytes(new byte[]{0x1a}));
+
+        // Characters that a phone keyboard buries behind a symbol page.
+        binding.keyPipe.setOnClickListener(v -> sendBytes(new byte[]{'|'}));
+        binding.keyTilde.setOnClickListener(v -> sendBytes(new byte[]{'~'}));
+        binding.keySlash.setOnClickListener(v -> sendBytes(new byte[]{'/'}));
+        binding.keyDash.setOnClickListener(v -> sendBytes(new byte[]{'-'}));
+        binding.keyUnderscore.setOnClickListener(v -> sendBytes(new byte[]{'_'}));
+
         binding.keyCtrl.setOnClickListener(v -> {
             ctrlArmed = !ctrlArmed;
             updateModifierStyle(binding.keyCtrl, ctrlArmed);
@@ -144,10 +221,77 @@ public class SSHTerminalFragment extends Fragment {
             altArmed = !altArmed;
             updateModifierStyle(binding.keyAlt, altArmed);
         });
+
+        binding.keyCopy.setOnClickListener(v -> copySelection());
+        binding.keyPaste.setOnClickListener(v -> pasteClipboard());
     }
 
     private void updateModifierStyle(Button btn, boolean armed) {
         btn.setAlpha(armed ? 1f : 0.6f);
+    }
+
+    /**
+     * Copies the terminal selection to the clipboard. evaluateJavascript hands
+     * back a JSON value rather than a bare string, so the result has to be
+     * unquoted before use.
+     */
+    private void copySelection() {
+        if (binding == null) {
+            return;
+        }
+        binding.terminalWebView.evaluateJavascript(
+                "window.getTerminalSelection ? window.getTerminalSelection() : ''", value -> {
+                    String text = decodeJsString(value);
+                    if (text.isEmpty()) {
+                        toast(R.string.ssh_copy_no_selection);
+                        return;
+                    }
+                    ClipboardManager cm = (ClipboardManager)
+                            requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (cm != null) {
+                        cm.setPrimaryClip(ClipData.newPlainText("netbird-ssh", text));
+                        toast(R.string.ssh_copy_done);
+                    }
+                });
+    }
+
+    /**
+     * Sends the clipboard text through xterm's paste path so bracketed paste is
+     * honoured when the remote program asked for it.
+     */
+    private void pasteClipboard() {
+        ClipboardManager cm = (ClipboardManager)
+                requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if (cm == null || !cm.hasPrimaryClip() || cm.getPrimaryClip() == null
+                || cm.getPrimaryClip().getItemCount() == 0) {
+            toast(R.string.ssh_paste_empty);
+            return;
+        }
+        CharSequence text = cm.getPrimaryClip().getItemAt(0).coerceToText(requireContext());
+        if (text == null || text.length() == 0) {
+            toast(R.string.ssh_paste_empty);
+            return;
+        }
+        postToTerminal("window.pasteText(" + JSONObject.quote(text.toString()) + ");");
+    }
+
+    private static String decodeJsString(String jsonValue) {
+        if (jsonValue == null || jsonValue.isEmpty() || "null".equals(jsonValue)) {
+            return "";
+        }
+        try {
+            // A bare JSON string is not valid top-level JSON for JSONObject, so
+            // wrap it in an array to reuse the platform parser.
+            return new JSONArray("[" + jsonValue + "]").optString(0, "");
+        } catch (JSONException e) {
+            return "";
+        }
+    }
+
+    private void toast(int resId) {
+        if (isAdded()) {
+            Toast.makeText(requireContext(), resId, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void sendBytes(byte[] data) {
@@ -317,40 +461,60 @@ public class SSHTerminalFragment extends Fragment {
                 return;
             }
             boolean rejected = message != null && !message.isEmpty();
-            printStatus(rejected ? message : "Password required");
+            // Only a rejection is worth a terminal line, since it stays readable
+            // in the scrollback afterwards. The plain request needs none: the
+            // dialog on screen already says it.
+            if (rejected) {
+                printStatus(message);
+            }
 
+            SshSession target = session;
+
+            // The shared dialog layout carries the rounded background the app's
+            // AlertDialogTheme expects: that theme makes the window transparent,
+            // so a stock AlertDialog built without a custom view has no visible
+            // body at all.
+            View dialogView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.dialog_simple_edit_text, null);
+
+            TextView title = dialogView.findViewById(R.id.text_title_dialog);
+            title.setText(R.string.ssh_password_prompt_title);
+
+            // The title says what is being asked, so this line only has to name
+            // the target: an explanatory sentence in front of it pushes
+            // user@host:port onto a second line. A rejection replaces it,
+            // because the reason matters more than repeating the target.
+            TextView label = dialogView.findViewById(R.id.text_label_dialog);
+            label.setText(rejected ? message : target.getDisplayLabel());
+
+            EditText input = dialogView.findViewById(R.id.edit_text_dialog);
             // setSingleLine resets the input type, so it must come first or the
             // password would be shown in the clear.
-            EditText input = new EditText(requireContext());
             input.setSingleLine(true);
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             input.setHint(R.string.ssh_dialog_password);
 
-            // An EditText passed to setView sits flush against the dialog edges.
-            float density = getResources().getDisplayMetrics().density;
-            LinearLayout container = new LinearLayout(requireContext());
-            container.setOrientation(LinearLayout.VERTICAL);
-            container.setPadding((int) (density * 24), (int) (density * 8),
-                    (int) (density * 24), (int) (density * 8));
-            container.addView(input, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            MaterialButton connect = dialogView.findViewById(R.id.btn_ok_dialog);
+            MaterialButton cancel = dialogView.findViewById(R.id.btn_cancel_dialog);
+            connect.setText(R.string.ssh_dialog_connect);
+            cancel.setText(R.string.ssh_dialog_cancel);
 
-            SshSession target = session;
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
-                    .setTitle(getString(R.string.ssh_password_prompt_title, target.getDisplayLabel()))
-                    .setView(container)
-                    .setPositiveButton(R.string.ssh_dialog_connect, (d, w) ->
-                            target.retryWithPassword(input.getText().toString()))
-                    // Cancelling ends the session; otherwise it would be parked
-                    // in NEEDS_PASSWORD with no way forward.
-                    .setNegativeButton(R.string.ssh_dialog_cancel, (d, w) ->
-                            target.cancelPasswordPrompt())
-                    .setCancelable(false);
-            if (rejected) {
-                builder.setMessage(message);
-            }
-            AlertDialog dialog = builder.create();
+            AlertDialog dialog = new AlertDialog.Builder(
+                    requireContext(), R.style.AlertDialogTheme)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create();
+
+            connect.setOnClickListener(v -> {
+                target.retryWithPassword(input.getText().toString());
+                dialog.dismiss();
+            });
+            // Cancelling ends the session; otherwise it would be parked in
+            // NEEDS_PASSWORD with no way forward.
+            cancel.setOnClickListener(v -> {
+                target.cancelPasswordPrompt();
+                dialog.dismiss();
+            });
 
             // Enter submits, as pressing Connect would.
             input.setImeOptions(EditorInfo.IME_ACTION_GO);

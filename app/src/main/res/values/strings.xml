@@ -74,7 +74,7 @@
     <string name="ssh_dialog_port_default">22</string>
     <string name="ssh_dialog_port_default_peer">22022</string>
     <string name="ssh_dialog_password">Password</string>
-    <string name="ssh_password_prompt_title">Password for %1$s</string>
+    <string name="ssh_password_prompt_title">Password required</string>
     <string name="ssh_dialog_connect">Connect</string>
     <string name="ssh_dialog_cancel">Cancel</string>
     <string name="menu_ssh">SSH</string>
@@ -88,6 +88,11 @@
     <string name="ssh_netbird_not_running">NetBird is not running</string>
     <string name="ssh_session_close_confirm">Close %1$s and discard its output?</string>
     <string name="ssh_session_close_confirm_yes">Close</string>
+    <string name="ssh_key_copy">Copy</string>
+    <string name="ssh_key_paste">Paste</string>
+    <string name="ssh_copy_no_selection">Select text in the terminal first</string>
+    <string name="ssh_copy_done">Copied to clipboard</string>
+    <string name="ssh_paste_empty">Clipboard is empty</string>
     <string name="peers_desc_filter">Filter</string>
 
     <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->
