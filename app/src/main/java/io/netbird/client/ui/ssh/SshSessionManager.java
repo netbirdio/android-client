@@ -148,6 +148,36 @@ public class SshSessionManager {
         return copy;
     }
 
+    /**
+     * Changes where a stored session points. The details are final on a session
+     * and a live connection belongs to the old target anyway, so the entry is
+     * rebuilt: the old one is closed and replaced under the same id, which keeps
+     * its place in the list and its stored entry rather than appending a second
+     * one. The scrollback goes with it, since it came from a different host.
+     *
+     * <p>Left disconnected on purpose. Reconnecting here would dial before the
+     * user has seen whether the new details are right, and the list already
+     * offers a reconnect.
+     *
+     * @return false when the session is gone
+     */
+    public synchronized boolean edit(@NonNull String id, @NonNull String host, int port,
+                                     @NonNull String user) {
+        SshSession existing = sessions.get(id);
+        if (existing == null) {
+            return false;
+        }
+        existing.detach(stateChangeRefresher);
+        existing.close();
+
+        SshSession replacement = new SshSession(id, host, port, user);
+        sessions.put(id, replacement);
+        replacement.attach(stateChangeRefresher);
+        persist();
+        publish();
+        return true;
+    }
+
     @Nullable
     public synchronized SshSession get(@NonNull String id) {
         return sessions.get(id);

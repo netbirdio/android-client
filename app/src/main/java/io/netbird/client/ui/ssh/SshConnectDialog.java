@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,8 +37,45 @@ public final class SshConnectDialog {
 
     private SshConnectDialog() {}
 
+    /**
+     * Edits a stored session in place instead of opening a new one. The host is
+     * editable here even for a peer session, which is the point: the saved entry
+     * is what is being corrected.
+     *
+     * @param onSaved run with the edited details when the user confirms
+     */
+    public static void showEditor(Context context, @NonNull String host, int port,
+                                  @NonNull String user, @NonNull OnEdited onSaved) {
+        show(context, null, context.getString(R.string.ssh_session_edit),
+                new Prefill(host, port, user), onSaved);
+    }
+
+    /** Details confirmed in the editor. */
+    public interface OnEdited {
+        void onEdited(String host, int port, String user);
+    }
+
+    /** Values an editor starts from; null when opening a fresh connection. */
+    private static final class Prefill {
+        final String host;
+        final int port;
+        final String user;
+
+        Prefill(String host, int port, String user) {
+            this.host = host;
+            this.port = port;
+            this.user = user;
+        }
+    }
+
     public static void show(Context context, @Nullable String prefillHost,
                             @Nullable String dialogTitle) {
+        show(context, prefillHost, dialogTitle, null, null);
+    }
+
+    private static void show(Context context, @Nullable String prefillHost,
+                             @Nullable String dialogTitle, @Nullable Prefill prefill,
+                             @Nullable OnEdited onSaved) {
         // bg_rounded_nb_bg has a 28dp corner radius, so the body needs padding
         // wide enough that the first and last child clear the rounding. The
         // field padding goes with the bordered background set in styleField.
@@ -54,6 +92,9 @@ public final class SshConnectDialog {
         // float over whatever is behind the dialog.
         container.setBackgroundResource(R.drawable.bg_rounded_nb_bg);
 
+        // The host field is hidden only when connecting to a peer, whose address
+        // is fixed. An editor always shows it: correcting the address is half of
+        // what it is for.
         EditText hostInput = null;
         if (prefillHost == null) {
             hostInput = new EditText(context);
@@ -61,6 +102,9 @@ public final class SshConnectDialog {
             hostInput.setInputType(InputType.TYPE_CLASS_TEXT);
             hostInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
             hostInput.setHint(R.string.ssh_dialog_host);
+            if (prefill != null) {
+                hostInput.setText(prefill.host);
+            }
             styleField(hostInput, fieldPad);
             container.addView(hostInput, layoutWithMargin(marginV));
         }
@@ -71,9 +115,10 @@ public final class SshConnectDialog {
         userInput.setInputType(InputType.TYPE_CLASS_TEXT);
         userInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         userInput.setHint(R.string.ssh_dialog_username);
-        // Prefilled with whatever was used last, so a repeat connection is one
-        // tap. Left empty on a fresh install rather than guessing a name.
-        userInput.setText(SshSessionStore.lastUser(context));
+        // An editor starts from the session's own name; otherwise prefill with
+        // whatever was used last, so a repeat connection is one tap. Left empty
+        // on a fresh install rather than guessing a name.
+        userInput.setText(prefill != null ? prefill.user : SshSessionStore.lastUser(context));
         userInput.setSelection(userInput.getText().length());
         styleField(userInput, fieldPad);
         container.addView(userInput, layoutWithMargin(marginV));
@@ -83,9 +128,13 @@ public final class SshConnectDialog {
         EditText portInput = new EditText(context);
         portInput.setInputType(InputType.TYPE_CLASS_NUMBER);
         portInput.setHint(R.string.ssh_dialog_port);
-        portInput.setText(prefillHost != null
-                ? R.string.ssh_dialog_port_default_peer
-                : R.string.ssh_dialog_port_default);
+        if (prefill != null) {
+            portInput.setText(String.valueOf(prefill.port));
+        } else {
+            portInput.setText(prefillHost != null
+                    ? R.string.ssh_dialog_port_default_peer
+                    : R.string.ssh_dialog_port_default);
+        }
         styleField(portInput, fieldPad);
         container.addView(portInput, layoutWithMargin(marginV));
 
@@ -108,35 +157,77 @@ public final class SshConnectDialog {
         buttonRow.setOrientation(LinearLayout.HORIZONTAL);
         buttonRow.setGravity(Gravity.END);
         MaterialButton cancelButton = textButton(context, R.string.ssh_dialog_cancel);
-        MaterialButton connectButton = textButton(context, R.string.ssh_dialog_connect);
+        MaterialButton confirmButton = textButton(context, onSaved != null
+                ? R.string.ssh_dialog_save
+                : R.string.ssh_dialog_connect);
         buttonRow.addView(cancelButton);
-        buttonRow.addView(connectButton);
+        buttonRow.addView(confirmButton);
         container.addView(buttonRow, layoutWithMargin(marginV));
 
         AlertDialog dialog = new AlertDialog.Builder(context, R.style.AlertDialogTheme)
                 .setView(container)
                 .create();
 
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
-        connectButton.setOnClickListener(v -> {
+        Runnable confirm = () -> {
+            if (onSaved != null) {
+                if (saveEdit(hostField, userInput, portInput, onSaved)) {
+                    dialog.dismiss();
+                }
+                return;
+            }
             if (connect(navController, prefillHost, hostField, userInput, portInput)) {
                 dialog.dismiss();
             }
-        });
+        };
 
-        // Enter on the last field connects, as pressing the button would.
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        confirmButton.setOnClickListener(v -> confirm.run());
+
+        // Enter on the last field confirms, as pressing the button would.
         portInput.setImeOptions(EditorInfo.IME_ACTION_GO);
         portInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId != EditorInfo.IME_ACTION_GO) {
                 return false;
             }
-            if (connect(navController, prefillHost, hostField, userInput, portInput)) {
-                dialog.dismiss();
-            }
+            confirm.run();
             return true;
         });
 
         dialog.show();
+    }
+
+    /**
+     * Hands the edited details back to the caller, which owns the stored
+     * session. Applies the same validation as a fresh connection, so an editor
+     * cannot save a session that could never be dialled.
+     *
+     * @return false when a required field is empty
+     */
+    private static boolean saveEdit(@Nullable EditText hostField, EditText userInput,
+                                    EditText portInput, OnEdited onSaved) {
+        String host = hostField != null ? hostField.getText().toString().trim() : "";
+        if (host.isEmpty()) {
+            if (hostField != null) {
+                hostField.setError(hostField.getContext()
+                        .getString(R.string.ssh_dialog_host_required));
+            }
+            return false;
+        }
+        String user = userInput.getText().toString().trim();
+        if (user.isEmpty()) {
+            userInput.setError(userInput.getContext()
+                    .getString(R.string.ssh_dialog_username_required));
+            return false;
+        }
+        int port;
+        try {
+            port = Integer.parseInt(portInput.getText().toString().trim());
+        } catch (NumberFormatException e) {
+            port = DEFAULT_SSH_PORT;
+        }
+        SshSessionStore.setLastUser(userInput.getContext(), user);
+        onSaved.onEdited(host, port, user);
+        return true;
     }
 
     /**

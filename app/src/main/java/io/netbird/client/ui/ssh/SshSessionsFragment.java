@@ -28,6 +28,7 @@ import io.netbird.client.databinding.FragmentSshSessionsBinding;
 public class SshSessionsFragment extends Fragment {
 
     private static final int MENU_DUPLICATE = 1;
+    private static final int MENU_EDIT = 2;
 
     private FragmentSshSessionsBinding binding;
     private final SessionsAdapter adapter = new SessionsAdapter();
@@ -186,21 +187,42 @@ public class SshSessionsFragment extends Fragment {
 
         private void showSessionMenu(View anchor, SshSession.Info info) {
             PopupMenu popup = new PopupMenu(anchor.getContext(), anchor);
-            popup.getMenu().add(0, MENU_DUPLICATE, 0, R.string.ssh_session_duplicate);
+            popup.getMenu().add(0, MENU_EDIT, 0, R.string.ssh_session_edit);
+            popup.getMenu().add(0, MENU_DUPLICATE, 1, R.string.ssh_session_duplicate);
             popup.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() != MENU_DUPLICATE) {
-                    return false;
+                switch (item.getItemId()) {
+                    case MENU_EDIT:
+                        editSession(info);
+                        return true;
+                    case MENU_DUPLICATE:
+                        SshSession copy = SshSessionManager.get().duplicate(info.id);
+                        if (copy == null) {
+                            Toast.makeText(requireContext(), R.string.ssh_netbird_not_running,
+                                    Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
+                        openTerminal(copy.getId());
+                        return true;
+                    default:
+                        return false;
                 }
-                SshSession copy = SshSessionManager.get().duplicate(info.id);
-                if (copy == null) {
-                    Toast.makeText(requireContext(), R.string.ssh_netbird_not_running,
-                            Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                openTerminal(copy.getId());
-                return true;
             });
             popup.show();
+        }
+
+        /**
+         * Retargets a stored session. Editing drops the connection, since it
+         * belonged to the old address, so the list shows the entry closed and
+         * ready to redial.
+         */
+        private void editSession(SshSession.Info info) {
+            SshConnectDialog.showEditor(requireContext(), info.host, info.port, info.user,
+                    (host, port, user) -> {
+                        if (!SshSessionManager.get().edit(info.id, host, port, user)) {
+                            Toast.makeText(requireContext(), R.string.ssh_session_edit_gone,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
 
         /** Redials and shows the terminal, so the progress is visible as it happens. */

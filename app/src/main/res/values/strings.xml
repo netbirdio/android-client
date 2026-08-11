@@ -77,6 +77,7 @@
     <string name="ssh_dialog_password">Password</string>
     <string name="ssh_password_prompt_title">Password required</string>
     <string name="ssh_dialog_connect">Connect</string>
+    <string name="ssh_dialog_save">Save</string>
     <string name="ssh_dialog_cancel">Cancel</string>
     <string name="menu_ssh">SSH</string>
     <string name="ssh_sessions_title">SSH Sessions</string>
@@ -86,6 +87,8 @@
     <string name="ssh_session_reconnect">Reconnect</string>
     <string name="ssh_session_disconnect">Disconnect</string>
     <string name="ssh_session_duplicate">Duplicate session</string>
+    <string name="ssh_session_edit">Edit session</string>
+    <string name="ssh_session_edit_gone">That session is no longer open</string>
     <string name="ssh_netbird_not_running">NetBird is not running</string>
     <string name="ssh_session_close_confirm">Close %1$s and discard its output?</string>
     <string name="ssh_session_close_confirm_yes">Close</string>
