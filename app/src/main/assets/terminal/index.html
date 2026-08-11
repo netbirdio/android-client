@@ -19,7 +19,9 @@
     box-sizing: border-box;
     padding: 6px;
   }
+  /* xterm 6 draws its own scrollbar element instead of using the native one. */
   .xterm-viewport::-webkit-scrollbar { width: 0; }
+  .xterm .xterm-scrollable-element > .scrollbar { display: none; }
 </style>
 </head>
 <body>
