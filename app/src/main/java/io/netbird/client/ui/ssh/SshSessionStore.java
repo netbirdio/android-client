@@ -2,6 +2,7 @@ package io.netbird.client.ui.ssh;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -9,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +28,11 @@ import java.util.Set;
  */
 final class SshSessionStore {
 
+    private static final String LOGTAG = "SshSessionStore";
+
     private static final String PREFS = "ssh_sessions";
+    /** Subdirectory under filesDir holding one known-hosts file per profile. */
+    private static final String KNOWN_HOSTS_DIR = "ssh_known_hosts";
     /** Key is this plus the profile ID; the suffix is what pruning matches on. */
     private static final String KEY_PREFIX = "sessions_by_profile.";
     /**
@@ -57,14 +63,29 @@ final class SshSessionStore {
     }
 
     private final SharedPreferences prefs;
+    private final File knownHostsDir;
 
     SshSessionStore(@NonNull Context context) {
-        prefs = context.getApplicationContext()
-                .getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        Context app = context.getApplicationContext();
+        prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        knownHostsDir = new File(app.getFilesDir(), KNOWN_HOSTS_DIR);
     }
 
     private static String key(String profileId) {
         return KEY_PREFIX + profileId;
+    }
+
+    /**
+     * Absolute path of the per-profile known-hosts file, creating the parent
+     * directory on demand. The host keys a user trusts under one profile must
+     * not verify a host reached through another, since an overlay IP is a
+     * different machine per profile.
+     */
+    String knownHostsPath(@NonNull String profileId) {
+        if (!knownHostsDir.exists() && !knownHostsDir.mkdirs()) {
+            Log.w(LOGTAG, "could not create known-hosts dir: " + knownHostsDir);
+        }
+        return new File(knownHostsDir, profileId).getAbsolutePath();
     }
 
     /**
@@ -136,7 +157,9 @@ final class SshSessionStore {
     /**
      * Drops the lists of profiles that no longer exist. Called with the live
      * profile IDs, so a deleted profile leaves nothing behind even though
-     * deletion happens elsewhere and sends no notification.
+     * deletion happens elsewhere and sends no notification. The known-hosts
+     * file goes too: its trusted keys would otherwise outlive the profile and
+     * silently apply to a future profile that reused the same ID.
      */
     void pruneDeletedProfiles(@NonNull Set<String> liveProfileIds) {
         SharedPreferences.Editor editor = null;
@@ -154,6 +177,15 @@ final class SshSessionStore {
         }
         if (editor != null) {
             editor.apply();
+        }
+
+        File[] knownHostsFiles = knownHostsDir.listFiles();
+        if (knownHostsFiles != null) {
+            for (File file : knownHostsFiles) {
+                if (!liveProfileIds.contains(file.getName()) && !file.delete()) {
+                    Log.w(LOGTAG, "could not delete known-hosts file: " + file);
+                }
+            }
         }
     }
 }

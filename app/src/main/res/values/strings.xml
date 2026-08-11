@@ -79,6 +79,9 @@
     <string name="ssh_dialog_connect">Connect</string>
     <string name="ssh_dialog_save">Save</string>
     <string name="ssh_dialog_cancel">Cancel</string>
+    <string name="ssh_hostkey_prompt_title">Unknown host key</string>
+    <string name="ssh_hostkey_prompt_message">The server %1$s is not yet trusted. Verify its fingerprint before connecting:</string>
+    <string name="ssh_hostkey_trust">Trust</string>
     <string name="menu_ssh">SSH</string>
     <string name="ssh_sessions_title">SSH Sessions</string>
     <string name="ssh_sessions_empty">No active SSH sessions.\nTap + to start one.</string>

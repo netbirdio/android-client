@@ -1,6 +1,7 @@
 package io.netbird.client.ui.ssh;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.SSHClient;
 import io.netbird.gomobile.android.URLOpener;
 
@@ -25,6 +27,8 @@ import io.netbird.gomobile.android.URLOpener;
  * Exposes {@link LiveData} of session snapshots for UI lists.
  */
 public class SshSessionManager {
+
+    private static final String LOGTAG = "SshSessionManager";
 
     private static final SshSessionManager INSTANCE = new SshSessionManager();
 
@@ -102,11 +106,20 @@ public class SshSessionManager {
         if (store != null && profileId != null) {
             for (SshSessionStore.Entry entry : store.load(profileId)) {
                 SshSession session = new SshSession(entry.id, entry.host, entry.port, entry.user);
+                applyKnownHostsPath(session);
                 sessions.put(entry.id, session);
                 session.attach(stateChangeRefresher);
             }
         }
         publish();
+    }
+
+    /** Points a session's regular-server host-key checks at the active
+     *  profile's store, so a trusted key never crosses profiles. */
+    private void applyKnownHostsPath(@NonNull SshSession session) {
+        if (store != null && activeProfileId != null) {
+            session.setKnownHostsPath(store.knownHostsPath(activeProfileId));
+        }
     }
 
     public synchronized SshSession create(@NonNull SSHClient client,
@@ -117,6 +130,7 @@ public class SshSessionManager {
                                           @Nullable URLOpener urlOpener) {
         String id = UUID.randomUUID().toString();
         SshSession session = new SshSession(id, host, port, user, password, client, urlOpener);
+        applyKnownHostsPath(session);
         sessions.put(id, session);
         persist();
         publish();
@@ -171,6 +185,7 @@ public class SshSessionManager {
         existing.close();
 
         SshSession replacement = new SshSession(id, host, port, user);
+        applyKnownHostsPath(replacement);
         sessions.put(id, replacement);
         replacement.attach(stateChangeRefresher);
         persist();
@@ -192,9 +207,31 @@ public class SshSessionManager {
         if (session != null) {
             session.detach(stateChangeRefresher);
             session.close();
+            forgetHostKeyIfUnused(session.getHost(), session.getPort());
         }
         persist();
         publish();
+    }
+
+    /**
+     * Drops the host's trusted key once no session targets it anymore, so a
+     * deleted host does not leave a trusted key behind. A host still used by
+     * another session keeps its key, so that session is not re-prompted.
+     */
+    private void forgetHostKeyIfUnused(@NonNull String host, int port) {
+        if (store == null || activeProfileId == null) {
+            return;
+        }
+        for (SshSession other : sessions.values()) {
+            if (other.getHost().equals(host) && other.getPort() == port) {
+                return;
+            }
+        }
+        try {
+            Android.removeKnownHost(store.knownHostsPath(activeProfileId), host, port);
+        } catch (Exception e) {
+            Log.w(LOGTAG, "could not remove host key for " + host + ":" + port, e);
+        }
     }
 
     public synchronized void closeAll() {

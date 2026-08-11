@@ -29,12 +29,16 @@ public class SshSession {
     private static final String LOGTAG = "SshSession";
     private static final int MAX_SCROLLBACK = 256 * 1024;
 
-    /** NEEDS_PASSWORD is a pause, not a failure: it waits for the UI to call
-     *  {@link #retryWithPassword}. */
-    public enum State { CONNECTING, CONNECTED, NEEDS_PASSWORD, CLOSED, ERROR }
+    /** NEEDS_PASSWORD and NEEDS_HOSTKEY_CONFIRM are pauses, not failures: each
+     *  waits for the UI to call the matching retry. */
+    public enum State { CONNECTING, CONNECTED, NEEDS_PASSWORD, NEEDS_HOSTKEY_CONFIRM, CLOSED, ERROR }
 
     /** Marker the Go binding puts in the error when a password would help. */
     private static final String PASSWORD_REQUIRED_MARKER = "netbird-ssh-password-required";
+    /** Marker the Go binding puts in the error, followed by ":" and the
+     *  presented SHA256 fingerprint, when a regular server's host key is not
+     *  yet trusted. */
+    private static final String HOSTKEY_UNKNOWN_MARKER = "netbird-ssh-hostkey-unknown";
 
     public interface Listener {
         void onScrollback(byte[] data);
@@ -50,6 +54,8 @@ public class SshSession {
     private volatile String password;
 
     private volatile SSHClient client;
+    /** Per-profile TOFU host-key store for regular servers; null until set. */
+    private volatile String knownHostsPath;
     private final List<Listener> listeners = new CopyOnWriteArrayList<>();
 
     private final Object bufferLock = new Object();
@@ -91,6 +97,19 @@ public class SshSession {
         client.setListener(new BridgeListener());
         if (urlOpener != null) {
             client.setURLOpener(urlOpener);
+        }
+        if (knownHostsPath != null) {
+            client.setKnownHostsPath(knownHostsPath);
+        }
+    }
+
+    /** Points a regular server's host-key verification at the profile's store.
+     *  Applied to every client this session binds, including reconnects. */
+    void setKnownHostsPath(String path) {
+        this.knownHostsPath = path;
+        SSHClient current = client;
+        if (current != null && path != null) {
+            current.setKnownHostsPath(path);
         }
     }
 
@@ -136,6 +155,12 @@ public class SshSession {
                     setState(State.NEEDS_PASSWORD, afterAttempt ? "Wrong password" : "");
                     return;
                 }
+                String fingerprint = hostKeyFingerprint(message);
+                if (fingerprint != null) {
+                    Log.d(LOGTAG, "ssh: unknown host key, asking to confirm");
+                    setState(State.NEEDS_HOSTKEY_CONFIRM, fingerprint);
+                    return;
+                }
                 Log.w(LOGTAG, "ssh connect failed: " + message);
                 setState(State.ERROR, message);
             }
@@ -157,6 +182,44 @@ public class SshSession {
 
     /** Gives up on a session waiting for a password. */
     void cancelPasswordPrompt() {
+        setState(State.CLOSED, "cancelled");
+    }
+
+    /**
+     * Pulls the SHA256 fingerprint out of the host-key marker, or returns null
+     * when the error is not that marker. The Go side formats it as
+     * "{@value #HOSTKEY_UNKNOWN_MARKER}:SHA256:...".
+     */
+    private static String hostKeyFingerprint(String message) {
+        int marker = message.indexOf(HOSTKEY_UNKNOWN_MARKER);
+        if (marker < 0) {
+            return null;
+        }
+        int colon = message.indexOf(':', marker);
+        if (colon < 0) {
+            return null;
+        }
+        String fingerprint = message.substring(colon + 1).trim();
+        return fingerprint.isEmpty() ? null : fingerprint;
+    }
+
+    /**
+     * Retries after the user confirmed the host-key fingerprint shown while the
+     * session was in {@link State#NEEDS_HOSTKEY_CONFIRM}. The confirmed
+     * fingerprint is handed to the client so it trusts exactly that key and
+     * persists it; a key that changed since the prompt makes the retry fail.
+     */
+    void retryWithHostKeyTrust(@NonNull String fingerprint) {
+        SSHClient target = client;
+        if (target != null) {
+            target.trustHostKey(fingerprint);
+        }
+        setState(State.CONNECTING, "");
+        connectAsync(lastCols, lastRows);
+    }
+
+    /** Gives up on a session waiting for host-key confirmation. */
+    void cancelHostKeyPrompt() {
         setState(State.CLOSED, "cancelled");
     }
 

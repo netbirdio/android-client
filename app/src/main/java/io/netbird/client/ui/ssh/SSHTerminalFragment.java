@@ -64,6 +64,7 @@ public class SSHTerminalFragment extends Fragment {
     private SshSession session;
     private SessionListener sessionListener;
     private AlertDialog passwordDialog;
+    private AlertDialog hostKeyDialog;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private boolean ctrlArmed = false;
@@ -182,6 +183,10 @@ public class SSHTerminalFragment extends Fragment {
         if (passwordDialog != null) {
             passwordDialog.dismiss();
             passwordDialog = null;
+        }
+        if (hostKeyDialog != null) {
+            hostKeyDialog.dismiss();
+            hostKeyDialog = null;
         }
         sessionListener = null;
         session = null;
@@ -563,6 +568,68 @@ public class SSHTerminalFragment extends Fragment {
         });
     }
 
+    /**
+     * Shows the presented host-key fingerprint for a regular server and, on
+     * confirmation, retries with it trusted. Reached from a session callback on
+     * a background thread, so it is posted to the main thread and guarded with
+     * isAdded like the password prompt.
+     */
+    private void promptForHostKey(String fingerprint) {
+        mainHandler.post(() -> {
+            if (!isAdded() || session == null) {
+                return;
+            }
+            if (hostKeyDialog != null && hostKeyDialog.isShowing()) {
+                return;
+            }
+
+            SshSession target = session;
+
+            View dialogView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.dialog_simple_edit_text, null);
+
+            TextView title = dialogView.findViewById(R.id.text_title_dialog);
+            title.setText(R.string.ssh_hostkey_prompt_title);
+
+            TextView label = dialogView.findViewById(R.id.text_label_dialog);
+            label.setText(getString(R.string.ssh_hostkey_prompt_message, target.getDisplayLabel()));
+
+            // The fingerprint sits in the input field, read-only: it keeps the
+            // dialog's rounded style and lets the user select and copy the value
+            // to compare it out of band, while the field's own focus is off so no
+            // keyboard pops up.
+            EditText input = dialogView.findViewById(R.id.edit_text_dialog);
+            input.setText(fingerprint);
+            input.setKeyListener(null);
+            input.setFocusable(false);
+            input.setFocusableInTouchMode(false);
+            input.setTextIsSelectable(true);
+
+            MaterialButton confirm = dialogView.findViewById(R.id.btn_ok_dialog);
+            MaterialButton cancel = dialogView.findViewById(R.id.btn_cancel_dialog);
+            confirm.setText(R.string.ssh_hostkey_trust);
+            cancel.setText(R.string.ssh_dialog_cancel);
+
+            AlertDialog dialog = new AlertDialog.Builder(
+                    requireContext(), R.style.AlertDialogTheme)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create();
+
+            confirm.setOnClickListener(v -> {
+                target.retryWithHostKeyTrust(fingerprint);
+                dialog.dismiss();
+            });
+            cancel.setOnClickListener(v -> {
+                target.cancelHostKeyPrompt();
+                dialog.dismiss();
+            });
+
+            dialog.show();
+            hostKeyDialog = dialog;
+        });
+    }
+
     private final class SessionListener implements SshSession.Listener {
         @Override
         public void onScrollback(byte[] data) {
@@ -598,6 +665,9 @@ public class SSHTerminalFragment extends Fragment {
                     break;
                 case NEEDS_PASSWORD:
                     promptForPassword(message);
+                    break;
+                case NEEDS_HOSTKEY_CONFIRM:
+                    promptForHostKey(message);
                     break;
                 case CLOSED: {
                     String text = "Session closed"
