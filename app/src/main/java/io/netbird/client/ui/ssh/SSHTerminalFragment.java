@@ -412,11 +412,17 @@ public class SSHTerminalFragment extends Fragment {
 
         String host = requireString(ARG_HOST, "");
         int port = requireInt(ARG_PORT, 22);
-        String user = requireString(ARG_USER, "pzoli");
+        String user = requireString(ARG_USER, "");
         String password = requireString(ARG_PASSWORD, "");
 
         if (host.isEmpty()) {
             printStatus("Missing host");
+            return;
+        }
+        // The connect dialog will not navigate without one, so an empty name
+        // means the arguments were built elsewhere and are incomplete.
+        if (user.isEmpty()) {
+            printStatus("Missing user");
             return;
         }
 

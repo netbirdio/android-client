@@ -92,7 +92,7 @@
         <argument
             android:name="user"
             app:argType="string"
-            android:defaultValue="pzoli" />
+            android:defaultValue="" />
         <argument
             android:name="mode"
             app:argType="string"

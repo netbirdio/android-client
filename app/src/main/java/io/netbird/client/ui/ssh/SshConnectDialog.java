@@ -71,7 +71,9 @@ public final class SshConnectDialog {
         userInput.setInputType(InputType.TYPE_CLASS_TEXT);
         userInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         userInput.setHint(R.string.ssh_dialog_username);
-        userInput.setText(R.string.ssh_dialog_username_default);
+        // Prefilled with whatever was used last, so a repeat connection is one
+        // tap. Left empty on a fresh install rather than guessing a name.
+        userInput.setText(SshSessionStore.lastUser(context));
         userInput.setSelection(userInput.getText().length());
         styleField(userInput, fieldPad);
         container.addView(userInput, layoutWithMargin(marginV));
@@ -117,8 +119,9 @@ public final class SshConnectDialog {
 
         cancelButton.setOnClickListener(v -> dialog.dismiss());
         connectButton.setOnClickListener(v -> {
-            connect(navController, prefillHost, hostField, userInput, portInput);
-            dialog.dismiss();
+            if (connect(navController, prefillHost, hostField, userInput, portInput)) {
+                dialog.dismiss();
+            }
         });
 
         // Enter on the last field connects, as pressing the button would.
@@ -127,29 +130,42 @@ public final class SshConnectDialog {
             if (actionId != EditorInfo.IME_ACTION_GO) {
                 return false;
             }
-            connect(navController, prefillHost, hostField, userInput, portInput);
-            dialog.dismiss();
+            if (connect(navController, prefillHost, hostField, userInput, portInput)) {
+                dialog.dismiss();
+            }
             return true;
         });
 
         dialog.show();
     }
 
-    private static void connect(NavController navController, @Nullable String prefillHost,
-                                @Nullable EditText hostField, EditText userInput,
-                                EditText portInput) {
+    /**
+     * @return false when a required field is empty, so the caller can leave the
+     *         dialog open instead of dismissing it and losing what was typed.
+     */
+    private static boolean connect(NavController navController, @Nullable String prefillHost,
+                                   @Nullable EditText hostField, EditText userInput,
+                                   EditText portInput) {
         if (navController == null) {
-            return;
+            return false;
         }
         String host = prefillHost != null
                 ? prefillHost
                 : (hostField != null ? hostField.getText().toString().trim() : "");
         if (host.isEmpty()) {
-            return;
+            if (hostField != null) {
+                hostField.setError(hostField.getContext()
+                        .getString(R.string.ssh_dialog_host_required));
+            }
+            return false;
         }
         String user = userInput.getText().toString().trim();
         if (user.isEmpty()) {
-            user = "pzoli";
+            // No default to fall back on: the login name is the remote account,
+            // and guessing one only produces a confusing auth failure.
+            userInput.setError(userInput.getContext()
+                    .getString(R.string.ssh_dialog_username_required));
+            return false;
         }
         int port;
         try {
@@ -157,11 +173,13 @@ public final class SshConnectDialog {
         } catch (NumberFormatException e) {
             port = prefillHost != null ? PEER_SSH_PORT : DEFAULT_SSH_PORT;
         }
+        SshSessionStore.setLastUser(userInput.getContext(), user);
         Bundle args = new Bundle();
         args.putString(SSHTerminalFragment.ARG_HOST, host);
         args.putInt(SSHTerminalFragment.ARG_PORT, port);
         args.putString(SSHTerminalFragment.ARG_USER, user);
         navController.navigate(R.id.nav_ssh_terminal, args);
+        return true;
     }
 
     /** Matches the borderless orange buttons the XML dialog layouts use. */

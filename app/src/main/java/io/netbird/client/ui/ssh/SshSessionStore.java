@@ -29,6 +29,11 @@ final class SshSessionStore {
     private static final String PREFS = "ssh_sessions";
     /** Key is this plus the profile ID; the suffix is what pruning matches on. */
     private static final String KEY_PREFIX = "sessions_by_profile.";
+    /**
+     * Not per profile: the login name belongs to whoever holds the phone, and
+     * the same account is typically used whichever profile is active.
+     */
+    private static final String KEY_LAST_USER = "last_ssh_user";
     private static final int MAX_ENTRIES = 50;
 
     private static final String FIELD_ID = "id";
@@ -60,6 +65,25 @@ final class SshSessionStore {
 
     private static String key(String profileId) {
         return KEY_PREFIX + profileId;
+    }
+
+    /**
+     * The login name last connected with, or an empty string on a fresh install.
+     * Static because the connect dialog needs it before any store instance
+     * exists, and it is not tied to a profile.
+     */
+    static String lastUser(@NonNull Context context) {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getString(KEY_LAST_USER, "");
+    }
+
+    /** Remembers a login name so the next connect dialog can offer it. */
+    static void setLastUser(@NonNull Context context, @NonNull String user) {
+        if (user.isEmpty()) {
+            return;
+        }
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit().putString(KEY_LAST_USER, user).apply();
     }
 
     List<Entry> load(@NonNull String profileId) {

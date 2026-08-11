@@ -69,7 +69,8 @@
     <string name="ssh_dialog_title">SSH to %1$s</string>
     <string name="ssh_dialog_host">Host (IP or FQDN)</string>
     <string name="ssh_dialog_username">Username</string>
-    <string name="ssh_dialog_username_default">pzoli</string>
+    <string name="ssh_dialog_username_required">Enter a username</string>
+    <string name="ssh_dialog_host_required">Enter a host</string>
     <string name="ssh_dialog_port">Port</string>
     <string name="ssh_dialog_port_default">22</string>
     <string name="ssh_dialog_port_default_peer">22022</string>
