@@ -179,8 +179,11 @@
     </LinearLayout>
 
     <!-- Info rows: IP address + secondary value. Hidden until the summary above
-         is tapped. Anchored to the summary with no bottom constraint, so opening
-         them expands downwards instead of re-centering the chain above. -->
+         is tapped. Outside the packed chain above on purpose: as a chain link it
+         would grow the group and re-center it on every expand. The bottom
+         constraint plus constrainedHeight only caps the rows against the exit
+         node row on a short screen; it cannot feed back into the chain, because
+         no chain link points at this view. -->
     <LinearLayout
         android:id="@+id/info_rows"
         android:layout_width="0dp"
@@ -194,7 +197,10 @@
         android:showDividers="middle"
         android:visibility="gone"
         tools:visibility="visible"
+        app:layout_constrainedHeight="true"
         app:layout_constraintTop_toBottomOf="@id/network_address_summary"
+        app:layout_constraintBottom_toTopOf="@+id/exit_node_row"
+        app:layout_constraintVertical_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
