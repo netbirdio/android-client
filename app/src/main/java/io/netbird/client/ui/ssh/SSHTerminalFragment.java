@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -69,6 +70,7 @@ public class SSHTerminalFragment extends Fragment {
     private boolean altArmed = false;
     private boolean terminalReady = false;
     private int previousSoftInputMode;
+    private int previousOrientation;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -151,6 +153,14 @@ public class SSHTerminalFragment extends Fragment {
         Window window = requireActivity().getWindow();
         previousSoftInputMode = window.getAttributes().softInputMode;
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+        // The rest of the app is portrait-only, but a terminal earns landscape:
+        // it roughly doubles the column count, which is what long command lines
+        // and full-screen programs need. The session outlives the rotation
+        // because it belongs to the manager, not to this fragment, and replays
+        // its scrollback when the recreated view attaches.
+        previousOrientation = requireActivity().getRequestedOrientation();
+        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
     }
 
     @Override
@@ -158,6 +168,9 @@ public class SSHTerminalFragment extends Fragment {
         // adjustPan is what the rest of the app expects; leaving adjustResize on
         // would change how every other screen reacts to the keyboard.
         requireActivity().getWindow().setSoftInputMode(previousSoftInputMode);
+        // Likewise the orientation lock: leaving it open would let every other
+        // screen rotate into a layout that was never designed for it.
+        requireActivity().setRequestedOrientation(previousOrientation);
         super.onStop();
     }
 
@@ -388,6 +401,10 @@ public class SSHTerminalFragment extends Fragment {
         terminalReady = true;
         SshSessionManager manager = SshSessionManager.get();
 
+        // A rotation recreates the view with the arguments it was opened with, so
+        // the id of a session created here is written back into them. Without
+        // that, a fragment opened with host arguments would dial a second
+        // session to the same target every time the screen turned.
         String existingId = requireString(ARG_SESSION_ID, "");
         if (!existingId.isEmpty()) {
             SshSession existing = manager.get(existingId);
@@ -428,6 +445,14 @@ public class SSHTerminalFragment extends Fragment {
 
         URLOpener urlOpener = serviceAccessor.getSSHURLOpener();
         SshSession created = manager.create(client, host, port, user, password, urlOpener);
+        // Recorded so a recreated view re-attaches to this session instead of
+        // creating another one, and the password is dropped now that it has been
+        // handed over.
+        Bundle args = getArguments();
+        if (args != null) {
+            args.putString(ARG_SESSION_ID, created.getId());
+            args.remove(ARG_PASSWORD);
+        }
         attachToSession(created);
         created.connectAsync(cols, rows);
     }
