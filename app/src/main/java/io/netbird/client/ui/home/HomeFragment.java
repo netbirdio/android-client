@@ -1,5 +1,7 @@
 package io.netbird.client.ui.home;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -10,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.PathInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,9 +47,20 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private SwitchMaterial buttonConnect;
     private boolean isConnected;
 
+    /**
+     * Pulses the toggle while it is disabled, matching the desktop client. Held so it can
+     * be cancelled: an infinite animator outlives the view it animates.
+     */
+    private ObjectAnimator disabledPulse;
+
     private enum EngineState { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED }
 
     private static final long PENDING_ACTION_TIMEOUT_MS = 7_000;
+
+    // Desktop pulses the disabled toggle between full and half opacity on a two-second
+    // cycle. REVERSE plays the fade out and back, so one leg is half that cycle.
+    private static final float DISABLED_ALPHA = 0.5f;
+    private static final long DISABLED_PULSE_LEG_MS = 1_000;
 
     // The desktop switch's FORCE_TOGGLE_DELAY_MS equivalent: a transition that
     // has been running at least this long re-enables the toggle, and a tap then
@@ -289,11 +303,48 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 if (changed) {
                     buttonConnect.jumpDrawablesToCurrentState();
                 }
+                paintEnabledState(enabled);
             }
             if (textConnStatus != null) {
                 textConnStatus.setText(statusResId);
             }
         });
+    }
+
+    /**
+     * Shows that the toggle cannot be tapped, the way the desktop client does: it fades the
+     * whole switch and pulses it while disabled. The track and thumb drawables carry no
+     * disabled state of their own, and useMaterialThemeColors is off, so without this the
+     * switch looks identical whether or not it accepts a tap.
+     */
+    private void paintEnabledState(boolean enabled) {
+        if (buttonConnect == null) {
+            return;
+        }
+        if (enabled) {
+            stopDisabledPulse();
+            buttonConnect.setAlpha(1f);
+            return;
+        }
+        if (disabledPulse != null && disabledPulse.isRunning()) {
+            return;
+        }
+        // Animating alpha rather than swapping colours keeps the orange "connecting" fill
+        // visible through the fade, as on desktop, where the pulse overrides the flat
+        // disabled opacity for the whole transition.
+        disabledPulse = ObjectAnimator.ofFloat(buttonConnect, View.ALPHA, 1f, DISABLED_ALPHA);
+        disabledPulse.setDuration(DISABLED_PULSE_LEG_MS);
+        disabledPulse.setRepeatCount(ValueAnimator.INFINITE);
+        disabledPulse.setRepeatMode(ValueAnimator.REVERSE);
+        disabledPulse.setInterpolator(new PathInterpolator(0.4f, 0f, 0.6f, 1f));
+        disabledPulse.start();
+    }
+
+    private void stopDisabledPulse() {
+        if (disabledPulse != null) {
+            disabledPulse.cancel();
+            disabledPulse = null;
+        }
     }
 
     private void onEngineState(EngineState state) {
@@ -413,6 +464,9 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         canForceCancel = true;
         if (buttonConnect != null) {
             buttonConnect.setEnabled(true);
+            // The transition is still running, but the toggle now accepts a tap to abort it,
+            // so it must stop looking disabled even though no state repaint follows.
+            paintEnabledState(true);
         }
     }
 
@@ -481,6 +535,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             binding.getRoot().removeCallbacks(forceCancelOpen);
             binding.getRoot().removeCallbacks(sessionTicker);
         }
+        stopDisabledPulse();
         pendingTarget = null;
         canForceCancel = false;
         forceCancelArmed = false;
