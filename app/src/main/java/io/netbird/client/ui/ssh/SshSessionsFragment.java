@@ -122,6 +122,9 @@ public class SshSessionsFragment extends Fragment {
         SessionVH(@NonNull View itemView) {
             super(itemView);
             stateIndicator = itemView.findViewById(R.id.state_indicator);
+            // Inflated rows share one constant-state drawable, so tinting without
+            // mutating would repaint every other row's bar too.
+            stateIndicator.setBackground(stateIndicator.getBackground().mutate());
             label = itemView.findViewById(R.id.session_label);
             stateText = itemView.findViewById(R.id.session_state);
             toggleButton = itemView.findViewById(R.id.toggle_button);
@@ -132,7 +135,9 @@ public class SshSessionsFragment extends Fragment {
             label.setText(info.label());
             String stateLine = stateLabel(info);
             stateText.setText(stateLine);
-            stateIndicator.setBackgroundColor(colorForState(info.state));
+            // Tint rather than recolour: setBackgroundColor would drop the shape
+            // and leave a square bar next to the peer list's rounded one.
+            stateIndicator.getBackground().setTint(colorForState(info.state));
 
             // Only hanging up needs a button of its own: reconnecting is what
             // tapping a finished row already does, and once there is output to
@@ -173,12 +178,19 @@ public class SshSessionsFragment extends Fragment {
         private String stateLabel(SshSession.Info info) {
             String state;
             switch (info.state) {
-                case CONNECTING: state = "connecting"; break;
-                case CONNECTED:  state = "connected"; break;
-                case NEEDS_PASSWORD: state = "password required"; break;
-                case CLOSED:     state = "closed"; break;
-                case ERROR:      state = "error"; break;
-                default:         state = info.state.name().toLowerCase(); break;
+                case CONNECTING: state = getString(R.string.ssh_state_connecting); break;
+                case CONNECTED:  state = getString(R.string.ssh_state_connected); break;
+                case NEEDS_PASSWORD:
+                    state = getString(R.string.ssh_state_password_required);
+                    break;
+                case CLOSED:     state = getString(R.string.ssh_state_closed); break;
+                case ERROR:      state = getString(R.string.ssh_state_error); break;
+                default:         state = info.state.name(); break;
+            }
+            // A password prompt carries an internal marker rather than a message
+            // meant for reading, and the label already says what is needed.
+            if (info.state == SshSession.State.NEEDS_PASSWORD) {
+                return state;
             }
             String suffix = (info.stateMessage == null || info.stateMessage.isEmpty())
                     ? "" : " — " + info.stateMessage;
