@@ -241,13 +241,15 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             }
             bottomNav.setVisibility(View.VISIBLE);
 
-            // Most top-level destinations (Home, Peers, Networks, Settings) don't need a
-            // toolbar — bottom nav already identifies the screen. Sub-screens keep the
-            // toolbar with title + Up arrow. SSH sessions is the exception among the
-            // tabs: its list runs to the top of the screen, and without a title bar to
-            // anchor it the first row reads as cut off rather than as the start of a list.
+            // Home, Peers and Networks don't need a toolbar — bottom nav already
+            // identifies the screen. Sub-screens keep the toolbar with title + Up
+            // arrow. SSH sessions and Settings are the exceptions among the tabs:
+            // both are lists that run to the top of the screen, and without a title
+            // bar to anchor them the first row reads as cut off rather than as the
+            // start of a list.
             boolean hideToolbar = topLevelDestinations.contains(destId)
-                    && destId != R.id.nav_ssh_sessions;
+                    && destId != R.id.nav_ssh_sessions
+                    && destId != R.id.nav_settings;
             setToolbarVisible(!hideToolbar);
 
             if (destId == R.id.nav_home) {
