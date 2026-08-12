@@ -71,6 +71,18 @@ public class SshSessionManager {
     }
 
     /**
+     * Drops a factory on the way out, unless a newer one replaced it already.
+     * A recreated activity starts before the old one is destroyed, so the old
+     * instance would otherwise clear the factory its successor just registered
+     * and leave every connect attempt reporting that NetBird is not running.
+     */
+    public synchronized void clearClientFactory(@NonNull ClientFactory factory) {
+        if (clientFactory == factory) {
+            clientFactory = null;
+        }
+    }
+
+    /**
      * Reconnects a session, attaching a client first if it lacks one, which is
      * the case for every entry restored from disk.
      */
@@ -281,7 +293,12 @@ public class SshSessionManager {
         return sessionsLiveData;
     }
 
-    private void publish() {
+    /**
+     * Snapshots the list for the UI. Synchronized because state changes arrive on
+     * the gomobile callback and connect threads, and the map they would read is
+     * being mutated by add, remove and profile switches on other threads.
+     */
+    private synchronized void publish() {
         sessionsLiveData.postValue(SshSession.snapshot(new ArrayList<>(sessions.values())));
     }
 

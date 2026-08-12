@@ -118,11 +118,14 @@ final class SshSessionStore {
             for (int i = 0; i < array.length(); i++) {
                 JSONObject o = array.getJSONObject(i);
                 String host = o.optString(FIELD_HOST, "");
-                if (host.isEmpty()) {
+                String id = o.optString(FIELD_ID, "");
+                // The id keys the session map, so a blank one would collide with
+                // every other blank entry and drop all but the last silently.
+                if (host.isEmpty() || id.isEmpty()) {
                     continue;
                 }
                 entries.add(new Entry(
-                        o.optString(FIELD_ID, ""),
+                        id,
                         host,
                         o.optInt(FIELD_PORT, 22),
                         o.optString(FIELD_USER, "")));

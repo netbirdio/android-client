@@ -72,10 +72,13 @@ public class SSHTerminalFragment extends Fragment {
     private boolean terminalReady = false;
     private int previousSoftInputMode;
     private int previousOrientation;
+    /** Outlives the view, so session callbacks can still resolve strings. */
+    private Context appContext;
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        appContext = context.getApplicationContext();
         if (context instanceof ServiceAccessor) {
             serviceAccessor = (ServiceAccessor) context;
         } else {
@@ -212,7 +215,7 @@ public class SSHTerminalFragment extends Fragment {
     private void wireKeyBar() {
         binding.reconnectButton.setOnClickListener(v -> {
             if (session != null && !SshSessionManager.get().reconnect(session.getId())) {
-                printStatus("NetBird is not running");
+                printStatus(getString(R.string.ssh_netbird_not_running));
             }
         });
         binding.keyEsc.setOnClickListener(v -> sendBytes(new byte[]{0x1b}));
@@ -264,6 +267,11 @@ public class SSHTerminalFragment extends Fragment {
         }
         binding.terminalWebView.evaluateJavascript(
                 "window.getTerminalSelection ? window.getTerminalSelection() : ''", value -> {
+                    // The result arrives asynchronously, so the screen may be gone
+                    // by now and there is no context left to copy into.
+                    if (!isAdded()) {
+                        return;
+                    }
                     String text = decodeJsString(value);
                     if (text.isEmpty()) {
                         toast(R.string.ssh_copy_no_selection);
@@ -317,6 +325,24 @@ public class SSHTerminalFragment extends Fragment {
         }
     }
 
+    /**
+     * Resolves a string for session callbacks, which arrive on a background
+     * thread and can outlive the view. Falls back to the application context so a
+     * late status line still reads in the user's language rather than crashing.
+     */
+    private String string(int resId, Object... args) {
+        Context context = getContext();
+        if (context == null) {
+            context = appContext;
+        }
+        if (context == null) {
+            return "";
+        }
+        return args.length == 0
+                ? context.getString(resId)
+                : context.getString(resId, args);
+    }
+
     private void sendBytes(byte[] data) {
         if (session == null) {
             return;
@@ -328,9 +354,25 @@ public class SSHTerminalFragment extends Fragment {
             System.arraycopy(payload, 0, withAlt, 1, payload.length);
             payload = withAlt;
             altArmed = false;
-            updateModifierStyle(binding.keyAlt, false);
+            disarmModifier(ModifierKey.ALT);
         }
         session.write(payload);
+    }
+
+    private enum ModifierKey { ALT, CTRL }
+
+    /**
+     * Clears a modifier key's armed styling. Input arrives on the WebView
+     * JavaScript thread, so the view write has to be posted to the main thread,
+     * and the binding can be gone by the time it runs.
+     */
+    private void disarmModifier(ModifierKey key) {
+        mainHandler.post(() -> {
+            if (binding == null) {
+                return;
+            }
+            updateModifierStyle(key == ModifierKey.ALT ? binding.keyAlt : binding.keyCtrl, false);
+        });
     }
 
     private void postToTerminal(String script) {
@@ -355,8 +397,9 @@ public class SSHTerminalFragment extends Fragment {
     }
 
     private void printStatus(String text) {
-        String escaped = text.replace("\\", "\\\\").replace("'", "\\'");
-        postToTerminal("window.printStatus('" + escaped + "');");
+        // Server errors arrive with newlines in them, which a hand-rolled escape
+        // turns into a broken statement that drops the status line entirely.
+        postToTerminal("window.printStatus(" + JSONObject.quote(text) + ");");
     }
 
     private String requireString(String key, String fallback) {
@@ -394,7 +437,7 @@ public class SSHTerminalFragment extends Fragment {
                     payload = new byte[]{(byte) (b - 'A' + 1)};
                 }
                 ctrlArmed = false;
-                mainHandler.post(() -> updateModifierStyle(binding.keyCtrl, false));
+                disarmModifier(ModifierKey.CTRL);
             }
             sendBytes(payload);
         }
@@ -419,7 +462,7 @@ public class SSHTerminalFragment extends Fragment {
         if (!existingId.isEmpty()) {
             SshSession existing = manager.get(existingId);
             if (existing == null) {
-                printStatus("Session not found (it may have been closed).");
+                printStatus(getString(R.string.ssh_status_session_gone));
                 return;
             }
             attachToSession(existing);
@@ -428,12 +471,12 @@ public class SSHTerminalFragment extends Fragment {
         }
 
         if (serviceAccessor == null) {
-            printStatus("VPN service not connected");
+            printStatus(getString(R.string.ssh_status_service_not_connected));
             return;
         }
         SSHClient client = serviceAccessor.newSSHClient();
         if (client == null) {
-            printStatus("NetBird is not running");
+            printStatus(getString(R.string.ssh_netbird_not_running));
             return;
         }
 
@@ -443,13 +486,13 @@ public class SSHTerminalFragment extends Fragment {
         String password = requireString(ARG_PASSWORD, "");
 
         if (host.isEmpty()) {
-            printStatus("Missing host");
+            printStatus(getString(R.string.ssh_status_missing_host));
             return;
         }
         // The connect dialog will not navigate without one, so an empty name
         // means the arguments were built elsewhere and are incomplete.
         if (user.isEmpty()) {
-            printStatus("Missing user");
+            printStatus(getString(R.string.ssh_status_missing_user));
             return;
         }
 
@@ -468,6 +511,11 @@ public class SSHTerminalFragment extends Fragment {
     }
 
     private void attachToSession(SshSession s) {
+        // onReady can fire more than once for one fragment, and a listener left
+        // attached would keep feeding a view that has moved on.
+        if (session != null && sessionListener != null) {
+            session.detach(sessionListener);
+        }
         this.session = s;
         sessionListener = new SessionListener();
         s.attach(sessionListener);
@@ -506,7 +554,7 @@ public class SSHTerminalFragment extends Fragment {
             // in the scrollback afterwards. The plain request needs none: the
             // dialog on screen already says it.
             if (rejected) {
-                printStatus(message);
+                printStatus(string(R.string.ssh_status_wrong_password));
             }
 
             SshSession target = session;
@@ -654,7 +702,8 @@ public class SSHTerminalFragment extends Fragment {
                     // A reconnect starts here rather than in the create path,
                     // so this is the only notice the user gets for it.
                     if (session != null) {
-                        printStatus("Connecting to " + session.getDisplayLabel() + " ...");
+                        printStatus(string(R.string.ssh_status_connecting,
+                                session.getDisplayLabel()));
                     }
                     showReconnectBar(false, null);
                     break;
@@ -675,17 +724,20 @@ public class SSHTerminalFragment extends Fragment {
                     promptForHostKey(message);
                     break;
                 case CLOSED: {
-                    String text = "Session closed"
-                            + (message == null || message.isEmpty() ? "" : ": " + message);
+                    String text = message == null || message.isEmpty()
+                            ? string(R.string.ssh_status_session_closed)
+                            : string(R.string.ssh_status_session_closed_reason, message);
                     printStatus(text);
                     showReconnectBar(true, text);
                     break;
                 }
-                case ERROR:
+                case ERROR: {
                     Log.w(LOGTAG, "session error: " + message);
-                    printStatus("Error: " + message);
-                    showReconnectBar(true, "Error: " + message);
+                    String text = string(R.string.ssh_status_error, message);
+                    printStatus(text);
+                    showReconnectBar(true, text);
                     break;
+                }
                 default:
                     break;
             }

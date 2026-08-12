@@ -35,6 +35,8 @@ public class SshSession {
 
     /** Marker the Go binding puts in the error when a password would help. */
     private static final String PASSWORD_REQUIRED_MARKER = "netbird-ssh-password-required";
+    /** Marks a password prompt as following a rejection rather than a first ask. */
+    private static final String REJECTED = "rejected";
     /** Marker the Go binding puts in the error, followed by ":" and the
      *  presented SHA256 fingerprint, when a regular server's host key is not
      *  yet trusted. */
@@ -145,6 +147,9 @@ public class SshSession {
         this.lastRows = rows;
         SSHClient target = client;
         if (target == null) {
+            // Reachable only if a client went missing between the manager's check
+            // and here, so it reads like the engine errors beside it: untranslated,
+            // since those come from the Go layer with no resources to draw on.
             setState(State.ERROR, "NetBird is not running");
             return;
         }
@@ -153,6 +158,9 @@ public class SshSession {
                 target.connect(host, port, user, password);
                 target.startSession(cols, rows);
                 sessionStarted = true;
+                // The password that got us here was accepted, so a later prompt in
+                // this session is a fresh ask rather than a rejected retry.
+                passwordAttempts = 0;
             } catch (Exception e) {
                 String message = e.getMessage() != null ? e.getMessage() : "connect failed";
                 if (message.contains(PASSWORD_REQUIRED_MARKER)) {
@@ -161,7 +169,9 @@ public class SshSession {
                     Log.d(LOGTAG, afterAttempt
                             ? "ssh: password rejected, asking again"
                             : "ssh: server wants a password");
-                    setState(State.NEEDS_PASSWORD, afterAttempt ? "Wrong password" : "");
+                    // A non-empty message marks the retry case; the wording it
+                    // turns into belongs to the view, which has the resources.
+                    setState(State.NEEDS_PASSWORD, afterAttempt ? REJECTED : "");
                     return;
                 }
                 String fingerprint = hostKeyFingerprint(message);

@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
     private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
+    private SshSessionManager.ClientFactory sshClientFactory;
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
         SshSessionManager.get().init(this);
         syncSshSessionProfile();
-        SshSessionManager.get().setClientFactory(new SshSessionManager.ClientFactory() {
+        sshClientFactory = new SshSessionManager.ClientFactory() {
             @Override
             public SSHClient newClient() {
                 return newSSHClient();
@@ -183,7 +184,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             public boolean canConnect() {
                 return isEngineRunning();
             }
-        });
+        };
+        SshSessionManager.get().setClientFactory(sshClientFactory);
 
         isRunningOnTV = PlatformUtils.isAndroidTV(this);
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
@@ -479,7 +481,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     protected  void onDestroy() {
         super.onDestroy();
 
-        SshSessionManager.get().setClientFactory(null);
+        if (sshClientFactory != null) {
+            SshSessionManager.get().clearClientFactory(sshClientFactory);
+            sshClientFactory = null;
+        }
 
         if (mBinder != null) {
             mBinder.removeConnectionStateListener();
