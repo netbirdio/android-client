@@ -87,11 +87,11 @@
 
     <ImageButton
         android:id="@+id/ssh_button"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:background="@drawable/focus_highlight"
         android:contentDescription="@string/peers_action_ssh"
-        android:padding="6dp"
+        android:padding="13dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_nav_ssh"
         app:tint="@color/nb_orange"

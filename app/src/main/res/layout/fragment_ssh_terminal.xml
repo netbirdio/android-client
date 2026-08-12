@@ -100,6 +100,7 @@
 
             <Button
                 android:id="@+id/key_ctrl_c"
+                android:contentDescription="@string/ssh_key_desc_ctrl_c"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -110,6 +111,7 @@
 
             <Button
                 android:id="@+id/key_ctrl_d"
+                android:contentDescription="@string/ssh_key_desc_ctrl_d"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -120,6 +122,7 @@
 
             <Button
                 android:id="@+id/key_ctrl_z"
+                android:contentDescription="@string/ssh_key_desc_ctrl_z"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -130,6 +133,7 @@
 
             <Button
                 android:id="@+id/key_up"
+                android:contentDescription="@string/ssh_key_desc_arrow_up"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -140,6 +144,7 @@
 
             <Button
                 android:id="@+id/key_down"
+                android:contentDescription="@string/ssh_key_desc_arrow_down"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -150,6 +155,7 @@
 
             <Button
                 android:id="@+id/key_left"
+                android:contentDescription="@string/ssh_key_desc_arrow_left"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -160,6 +166,7 @@
 
             <Button
                 android:id="@+id/key_right"
+                android:contentDescription="@string/ssh_key_desc_arrow_right"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -170,6 +177,7 @@
 
             <Button
                 android:id="@+id/key_pipe"
+                android:contentDescription="@string/ssh_key_desc_pipe"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -180,6 +188,7 @@
 
             <Button
                 android:id="@+id/key_tilde"
+                android:contentDescription="@string/ssh_key_desc_tilde"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -190,6 +199,7 @@
 
             <Button
                 android:id="@+id/key_slash"
+                android:contentDescription="@string/ssh_key_desc_slash"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -200,6 +210,7 @@
 
             <Button
                 android:id="@+id/key_dash"
+                android:contentDescription="@string/ssh_key_desc_dash"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -210,6 +221,7 @@
 
             <Button
                 android:id="@+id/key_underscore"
+                android:contentDescription="@string/ssh_key_desc_underscore"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

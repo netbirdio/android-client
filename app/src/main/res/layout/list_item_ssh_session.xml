@@ -8,27 +8,30 @@
     android:foreground="?attr/selectableItemBackground"
     android:padding="16dp">
 
+    <!-- Spans the label block rather than the parent: a match_constraint height
+         inside a wrap_content parent is ambiguous and can resolve to zero, which
+         would make the state bar vanish. -->
     <View
         android:id="@+id/state_indicator"
-        android:layout_width="8dp"
+        android:layout_width="5dp"
         android:layout_height="0dp"
-        android:background="#4caf50"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@drawable/ssh_session_state"
+        app:layout_constraintBottom_toBottomOf="@id/session_state"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@id/session_label" />
 
     <TextView
         android:id="@+id/session_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="17dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/nb_txt"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/toggle_button"
-        app:layout_constraintStart_toEndOf="@id/state_indicator"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
