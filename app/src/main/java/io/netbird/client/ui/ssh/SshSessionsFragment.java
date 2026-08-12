@@ -162,9 +162,9 @@ public class SshSessionsFragment extends Fragment {
             });
 
             closeButton.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.ssh_session_close)
-                    .setMessage(getString(R.string.ssh_session_close_confirm, info.label()))
-                    .setPositiveButton(R.string.ssh_session_close_confirm_yes, (d, w) ->
+                    .setTitle(R.string.ssh_session_delete)
+                    .setMessage(getString(R.string.ssh_session_delete_confirm, info.label()))
+                    .setPositiveButton(R.string.ssh_session_delete_confirm_yes, (d, w) ->
                             SshSessionManager.get().close(info.id))
                     .setNegativeButton(R.string.ssh_dialog_cancel, null)
                     .show());

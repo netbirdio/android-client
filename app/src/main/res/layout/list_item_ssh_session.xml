@@ -59,7 +59,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/ssh_session_close"
+        android:contentDescription="@string/ssh_session_delete"
         android:src="@drawable/ic_ssh_close"
         app:tint="@color/nb_txt"
         app:layout_constraintBottom_toBottomOf="parent"
