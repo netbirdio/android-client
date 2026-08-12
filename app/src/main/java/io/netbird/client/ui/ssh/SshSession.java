@@ -103,6 +103,15 @@ public class SshSession {
         }
     }
 
+    /** Re-points a kept client at a live URL opener, since the one it holds may
+     *  belong to an activity that is already gone. */
+    void setURLOpener(URLOpener urlOpener) {
+        SSHClient current = client;
+        if (current != null && urlOpener != null) {
+            current.setURLOpener(urlOpener);
+        }
+    }
+
     /** Points a regular server's host-key verification at the profile's store.
      *  Applied to every client this session binds, including reconnects. */
     void setKnownHostsPath(String path) {

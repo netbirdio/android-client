@@ -305,6 +305,12 @@ public class VPNService extends android.net.VpnService {
         }
 
         public SSHClient newSSHClient() {
+            // An SSH session dials through the tunnel, so a client is worthless
+            // until the engine runs. Refusing one here surfaces the problem where
+            // the user asked to connect, rather than inside the terminal.
+            if (!engineRunner.isRunning()) {
+                return null;
+            }
             return engineRunner.newSSHClient();
         }
     }

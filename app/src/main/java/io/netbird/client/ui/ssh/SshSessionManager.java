@@ -48,6 +48,19 @@ public class SshSessionManager {
     public interface ClientFactory {
         @Nullable SSHClient newClient();
         @Nullable URLOpener urlOpener();
+
+        /** Whether the engine is up, so a client would have a tunnel to dial through. */
+        boolean canConnect();
+    }
+
+    /**
+     * Reports whether a connect attempt can get anywhere. An SSH session dials
+     * through the tunnel, so without the engine every attempt fails, and the
+     * caller can say so before opening a terminal that cannot work.
+     */
+    public synchronized boolean canConnect() {
+        ClientFactory factory = clientFactory;
+        return factory != null && factory.canConnect();
     }
 
     private SshSessionManager() {}
@@ -66,13 +79,28 @@ public class SshSessionManager {
         if (session == null) {
             return false;
         }
+        // A session that already dialed keeps its client across an engine stop,
+        // so the client alone says nothing about whether a redial can work.
+        if (!canConnect()) {
+            return false;
+        }
+        ClientFactory factory = clientFactory;
+        if (factory == null) {
+            return false;
+        }
         if (!session.hasClient()) {
-            ClientFactory factory = clientFactory;
-            SSHClient client = factory != null ? factory.newClient() : null;
+            SSHClient client = factory.newClient();
             if (client == null) {
                 return false;
             }
             session.bindClient(client, factory.urlOpener());
+        } else {
+            // The opener belongs to the activity that created it, and a kept
+            // client still points at the one from the previous connect. That
+            // activity may be gone, leaving its result launcher unregistered, so
+            // the JWT flow would report it is waiting for a browser that never
+            // opens. Re-point the client at the current opener instead.
+            session.setURLOpener(factory.urlOpener());
         }
         session.reconnect();
         return true;

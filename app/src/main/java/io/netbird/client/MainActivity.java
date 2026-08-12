@@ -178,6 +178,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             public URLOpener urlOpener() {
                 return getSSHURLOpener();
             }
+
+            @Override
+            public boolean canConnect() {
+                return isEngineRunning();
+            }
         });
 
         isRunningOnTV = PlatformUtils.isAndroidTV(this);
@@ -581,6 +586,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             return null;
         }
         return mBinder.newSSHClient();
+    }
+
+    private boolean isEngineRunning() {
+        return mBinder != null && mBinder.isRunning();
     }
 
     private CustomTabURLOpener sshUrlOpener;
