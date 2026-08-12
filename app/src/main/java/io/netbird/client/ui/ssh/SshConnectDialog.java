@@ -34,6 +34,9 @@ public final class SshConnectDialog {
     private static final int PEER_SSH_PORT = 22022;
     /** Port an ordinary SSH server listens on. */
     private static final int DEFAULT_SSH_PORT = 22;
+    private static final int MAX_PORT = 65535;
+    /** Returned once the port field has been marked with an error. */
+    private static final int PORT_INVALID = -1;
 
     private SshConnectDialog() {}
 
@@ -219,15 +222,34 @@ public final class SshConnectDialog {
                     .getString(R.string.ssh_dialog_username_required));
             return false;
         }
-        int port;
-        try {
-            port = Integer.parseInt(portInput.getText().toString().trim());
-        } catch (NumberFormatException e) {
-            port = DEFAULT_SSH_PORT;
+        int port = readPort(portInput, DEFAULT_SSH_PORT);
+        if (port == PORT_INVALID) {
+            return false;
         }
         SshSessionStore.setLastUser(userInput.getContext(), user);
         onSaved.onEdited(host, port, user);
         return true;
+    }
+
+    /**
+     * Reads the port field, falling back to the default when it is blank or not a
+     * number. A number outside the valid range is a typo worth reporting rather
+     * than replacing, since dialling it can only fail.
+     *
+     * @return the port, or {@link #PORT_INVALID} once the field carries an error
+     */
+    private static int readPort(EditText portInput, int fallback) {
+        int port;
+        try {
+            port = Integer.parseInt(portInput.getText().toString().trim());
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+        if (port < 1 || port > MAX_PORT) {
+            portInput.setError(portInput.getContext().getString(R.string.ssh_dialog_port_invalid));
+            return PORT_INVALID;
+        }
+        return port;
     }
 
     /**
@@ -258,11 +280,9 @@ public final class SshConnectDialog {
                     .getString(R.string.ssh_dialog_username_required));
             return false;
         }
-        int port;
-        try {
-            port = Integer.parseInt(portInput.getText().toString().trim());
-        } catch (NumberFormatException e) {
-            port = prefillHost != null ? PEER_SSH_PORT : DEFAULT_SSH_PORT;
+        int port = readPort(portInput, prefillHost != null ? PEER_SSH_PORT : DEFAULT_SSH_PORT);
+        if (port == PORT_INVALID) {
+            return false;
         }
         SshSessionStore.setLastUser(userInput.getContext(), user);
         Bundle args = new Bundle();
