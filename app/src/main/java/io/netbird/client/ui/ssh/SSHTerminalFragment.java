@@ -132,17 +132,22 @@ public class SSHTerminalFragment extends Fragment {
      * Either way the fragment root ends up shorter, so the weighted WebView
      * shrinks, xterm refits and reports the smaller row count to the SSH
      * session, and the key bar comes to rest above the keyboard.
+     *
+     * With the keyboard down the navigation bar takes over: edge-to-edge lets
+     * the window extend under it, so without its inset a three-button bar sits
+     * on top of the key bar.
      */
     private void applyImeInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
             int ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
-            // With adjustResize the window is already short enough, so adding the
-            // IME height again would leave a gap the size of the keyboard.
-            int bottom = ime;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                int navBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-                bottom = ime > 0 ? 0 : navBar;
-            }
+            int navBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            // An open keyboard covers the navigation bar, and its inset already
+            // spans that area, so the two never add up. With adjustResize the
+            // window is short enough on its own, so the IME height would leave a
+            // gap the size of the keyboard.
+            int bottom = ime > 0
+                    ? (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM ? 0 : ime)
+                    : navBar;
             v.setPadding(0, 0, 0, bottom);
             return insets;
         });
