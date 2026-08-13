@@ -122,7 +122,6 @@ public class VPNService extends android.net.VpnService {
             public void onReceive(Context context, Intent intent) {
                 if (ACTION_STOP_ENGINE.equals(intent.getAction())) {
                     Log.d(LOGTAG, "Received stop engine broadcast");
-                    networkSwitchNotifier.cancelPendingAction();
                     if (engineRunner != null) {
                         engineRunner.stop();
                     }
@@ -153,7 +152,6 @@ public class VPNService extends android.net.VpnService {
                     ? currentState()
                     : ForegroundNotification.State.CONNECTING);
             fgNotification.startForeground();
-            networkSwitchNotifier.cancelPendingAction();
             engineRunner.runWithoutAuth();
         }
         if (INTENT_ACTION_START.equals(intent.getAction())) {
@@ -199,7 +197,6 @@ public class VPNService extends android.net.VpnService {
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
-        networkSwitchNotifier.cleanup();
 
         engineRunner.stop();
         stopForeground(true);
@@ -217,7 +214,6 @@ public class VPNService extends android.net.VpnService {
     @Override
     public void onRevoke() {
         Log.d(LOGTAG, "VPN permission on revoke");
-        networkSwitchNotifier.cancelPendingAction();
         if (engineRunner != null) {
             engineRunner.stop();
             stopForeground(true);
@@ -246,12 +242,10 @@ public class VPNService extends android.net.VpnService {
             fgNotification.setState(ForegroundNotification.State.CONNECTING);
             fgNotification.startForeground();
             sessionNotification.cancel();
-            networkSwitchNotifier.cancelPendingAction();
             engineRunner.run(urlOpener, isAndroidTV);
         }
 
         public void stopEngine() {
-            networkSwitchNotifier.cancelPendingAction();
             engineRunner.stop();
         }
 

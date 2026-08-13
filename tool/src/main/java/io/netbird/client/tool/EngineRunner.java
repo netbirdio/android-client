@@ -315,18 +315,9 @@ class EngineRunner {
         setConnectionListener(null);
     }
 
-    /**
-     * Registers a callback that fires every time the engine reports
-     * OnConnected. NetworkSwitchNotifier uses this to cancel a pending
-     * network change action when the Go core has already reconnected on
-     * its own.
-     */
+    /** Registers a callback that fires every time the engine reports OnConnected. */
     public void addOnConnectedObserver(Runnable observer) {
         connectedObservers.add(observer);
-    }
-
-    public void removeOnConnectedObserver(Runnable observer) {
-        connectedObservers.remove(observer);
     }
 
     public synchronized void addServiceStateListener(ServiceStateListener serviceStateListener) {
