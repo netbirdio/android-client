@@ -32,6 +32,7 @@ class EngineRunner {
     private boolean engineIsRunning = false;
     Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
     private final Set<Runnable> connectedObservers = ConcurrentHashMap.newKeySet();
+    private final Set<ConnectionListener> connectionObservers = ConcurrentHashMap.newKeySet();
     private volatile SessionMonitor sessionMonitor;
     private final Client goClient;
     private ConnectionListener connectionListener;
@@ -201,27 +202,81 @@ class EngineRunner {
     }
 
     public synchronized void setConnectionListener(ConnectionListener listener) {
-        ConnectionListener wrapped = listener == null ? null : new ObservingConnectionListener(listener, connectedObservers);
+        // Unwrap first: a null listener still gets wrapped (around a no-op) so
+        // the service's own observers keep receiving events, which means the
+        // wrapper can otherwise be handed back to us and stack on itself.
+        ConnectionListener raw = unwrap(listener);
+        ConnectionListener wrapped = raw == null
+                ? new ObservingConnectionListener(NO_OP_CONNECTION_LISTENER, connectedObservers, connectionObservers)
+                : new ObservingConnectionListener(raw, connectedObservers, connectionObservers);
         this.connectionListener = wrapped;
         goClient.setConnectionListener(wrapped);
+    }
+
+    /**
+     * Keeps the connection callbacks flowing while no UI is bound, so the
+     * service's own observers (the status-bar icon) still track the tunnel
+     * during always-on / boot starts.
+     */
+    private static final ConnectionListener NO_OP_CONNECTION_LISTENER = new ConnectionListener() {
+        @Override public void onStateChanged(long state) {}
+        @Override public void onConnecting() {}
+        @Override public void onConnected() {}
+        @Override public void onDisconnecting() {}
+        @Override public void onDisconnected() {}
+        @Override public void onAddressChanged(String f, String i) {}
+        @Override public void onPeersListChanged(long n) {}
+    };
+
+    /**
+     * Registers a service-owned observer of the tunnel's connection phase.
+     * Unlike the app's ConnectionListener this survives the UI unbinding, so
+     * it stays accurate for always-on VPN and boot starts.
+     */
+    public synchronized void addConnectionObserver(ConnectionListener observer) {
+        connectionObservers.add(observer);
+        // Make sure the Go core has a listener installed even before any UI
+        // binds, otherwise the observer would never be called.
+        if (connectionListener == null) {
+            setConnectionListener(null);
+        }
+    }
+
+    private static ConnectionListener unwrap(ConnectionListener listener) {
+        ConnectionListener current = listener;
+        while (current instanceof ObservingConnectionListener) {
+            current = ((ObservingConnectionListener) current).delegate;
+        }
+        return current;
     }
 
     private static final class ObservingConnectionListener implements ConnectionListener {
         private final ConnectionListener delegate;
         private final java.util.Set<Runnable> connectedObservers;
+        private final java.util.Set<ConnectionListener> connectionObservers;
 
-        ObservingConnectionListener(ConnectionListener delegate, java.util.Set<Runnable> connectedObservers) {
+        ObservingConnectionListener(ConnectionListener delegate, java.util.Set<Runnable> connectedObservers,
+                                    java.util.Set<ConnectionListener> connectionObservers) {
             this.delegate = delegate;
             this.connectedObservers = connectedObservers;
+            this.connectionObservers = connectionObservers;
+        }
+
+        private void fanOut(java.util.function.Consumer<ConnectionListener> call) {
+            for (ConnectionListener obs : connectionObservers) {
+                try { call.accept(obs); } catch (Exception e) { Log.w(LOGTAG, "connection observer failed", e); }
+            }
         }
 
         @Override public void onStateChanged(long state) {
             Log.d(LOGTAG, "FROM GO: onStateChanged(" + state + ")");
             delegate.onStateChanged(state);
+            fanOut(obs -> obs.onStateChanged(state));
         }
         @Override public void onConnecting() {
             Log.d(LOGTAG, "FROM GO: onConnecting()");
             delegate.onConnecting();
+            fanOut(ConnectionListener::onConnecting);
         }
         @Override public void onConnected() {
             Log.d(LOGTAG, "FROM GO: onConnected()");
@@ -229,22 +284,35 @@ class EngineRunner {
             for (Runnable obs : connectedObservers) {
                 try { obs.run(); } catch (Exception e) { Log.w(LOGTAG, "connected observer failed", e); }
             }
+            fanOut(ConnectionListener::onConnected);
         }
         @Override public void onDisconnecting() {
             Log.d(LOGTAG, "FROM GO: onDisconnecting()");
             delegate.onDisconnecting();
+            fanOut(ConnectionListener::onDisconnecting);
         }
         @Override public void onDisconnected() {
             Log.d(LOGTAG, "FROM GO: onDisconnected()");
             delegate.onDisconnected();
+            fanOut(ConnectionListener::onDisconnected);
         }
         @Override public void onAddressChanged(String f, String i) { delegate.onAddressChanged(f, i); }
         @Override public void onPeersListChanged(long n) { delegate.onPeersListChanged(n); }
     }
 
+    /**
+     * Detaches the UI's connection listener. The service's own observers are
+     * kept subscribed: dropping the Go-side listener entirely would freeze the
+     * status-bar icon for as long as no activity is bound, which is exactly
+     * when the notification is the only status the user can see.
+     */
     public synchronized void removeStatusListener() {
-        this.connectionListener = null;
-        goClient.removeConnectionListener();
+        if (connectionObservers.isEmpty()) {
+            this.connectionListener = null;
+            goClient.removeConnectionListener();
+            return;
+        }
+        setConnectionListener(null);
     }
 
     /**

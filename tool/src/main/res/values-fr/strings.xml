@@ -1,6 +1,11 @@
 <resources>
     <string name="fg_notification_channel_name">Service NetBird</string>
-    <string name="fg_notification_text">Le service est actif</string>
+    <string name="fg_notification_connected">Connecté</string>
+    <string name="fg_notification_connecting">Connexion…</string>
+    <string name="fg_notification_disconnected">Déconnecté</string>
+    <string name="fg_notification_no_network">Aucun réseau disponible</string>
+    <string name="fg_notification_needs_login">Connexion requise</string>
+    <string name="fg_notification_error">Erreur</string>
     <string name="session_notification_channel_name">Expiration de session</string>
     <string name="session_notification_expiring_title">La session NetBird va expirer</string>
     <string name="session_notification_expiring_text">Votre session expire dans environ %1$d minutes. Ouvrez l\'application pour la prolonger.</string>

@@ -1,6 +1,11 @@
 <resources>
     <string name="fg_notification_channel_name">NetBird-Dienst</string>
-    <string name="fg_notification_text">Dienst läuft</string>
+    <string name="fg_notification_connected">Verbunden</string>
+    <string name="fg_notification_connecting">Wird verbunden…</string>
+    <string name="fg_notification_disconnected">Nicht verbunden</string>
+    <string name="fg_notification_no_network">Kein Netzwerk verfügbar</string>
+    <string name="fg_notification_needs_login">Anmeldung erforderlich</string>
+    <string name="fg_notification_error">Fehler</string>
     <string name="session_notification_channel_name">Sitzungsablauf</string>
     <string name="session_notification_expiring_title">NetBird-Sitzung läuft ab</string>
     <string name="session_notification_expiring_text">Deine Anmeldesitzung läuft in etwa %1$d Minuten ab. Öffne die App, um sie zu verlängern.</string>
