@@ -281,34 +281,38 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             urlOpener = new URLOpener() {
                 @Override
                 public void open(String url, String userCode) {
-                    qrCodeDialog = QrCodeDialog.newInstance(url, userCode, () -> {
-                        if (isSSOFinishedWell) {
-                            return;
-                        }
-                        if (mBinder == null) {
-                            return;
-                        }
-                        mBinder.stopEngine();
-                    });
-                    qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+                    runOnUiThread(() -> {
+                        qrCodeDialog = QrCodeDialog.newInstance(url, userCode, () -> {
+                            if (isSSOFinishedWell) {
+                                return;
+                            }
+                            if (mBinder == null) {
+                                return;
+                            }
+                            mBinder.stopEngine();
+                        });
+                        qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
 
-                    if (!isRunningOnTV) {
-                        try {
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                            startActivity(browserIntent);
-                        } catch (Exception e) {
-                            Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
+                        if (!isRunningOnTV) {
+                            try {
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(browserIntent);
+                            } catch (Exception e) {
+                                Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
+                            }
                         }
-                    }
+                    });
                 }
 
                 @Override
                 public void onLoginSuccess() {
                     Log.d(LOGTAG, "onLoginSuccess fired for device code flow.");
-                    if (qrCodeDialog != null && qrCodeDialog.isVisible()) {
-                        qrCodeDialog.dismiss();
-                        qrCodeDialog = null;
-                    }
+                    runOnUiThread(() -> {
+                        if (qrCodeDialog != null && qrCodeDialog.isVisible()) {
+                            qrCodeDialog.dismiss();
+                            qrCodeDialog = null;
+                        }
+                    });
                 }
             };
         }
