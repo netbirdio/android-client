@@ -236,7 +236,7 @@
     <string name="ssh_dialog_port">端口</string>
     <string name="ssh_dialog_port_invalid">请输入 1 到 65535 之间的端口</string>
     <string name="ssh_dialog_port_default">22</string>
-    <string name="ssh_dialog_port_default_peer">22022</string>
+    <string name="ssh_dialog_port_default_peer">22</string>
     <string name="ssh_dialog_password">密码</string>
     <string name="ssh_password_prompt_title">需要密码</string>
     <string name="ssh_dialog_connect">连接</string>

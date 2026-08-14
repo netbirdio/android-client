@@ -239,7 +239,7 @@
     <string name="ssh_dialog_port">Port</string>
     <string name="ssh_dialog_port_invalid">Saisissez un port entre 1 et 65535</string>
     <string name="ssh_dialog_port_default">22</string>
-    <string name="ssh_dialog_port_default_peer">22022</string>
+    <string name="ssh_dialog_port_default_peer">22</string>
     <string name="ssh_dialog_password">Mot de passe</string>
     <string name="ssh_password_prompt_title">Mot de passe requis</string>
     <string name="ssh_dialog_connect">Se connecter</string>

@@ -237,7 +237,7 @@
     <string name="ssh_dialog_port">ポート</string>
     <string name="ssh_dialog_port_invalid">1〜65535 のポートを入力してください</string>
     <string name="ssh_dialog_port_default">22</string>
-    <string name="ssh_dialog_port_default_peer">22022</string>
+    <string name="ssh_dialog_port_default_peer">22</string>
     <string name="ssh_dialog_password">パスワード</string>
     <string name="ssh_password_prompt_title">パスワードが必要です</string>
     <string name="ssh_dialog_connect">接続</string>

@@ -236,7 +236,7 @@
     <string name="ssh_dialog_port">Port</string>
     <string name="ssh_dialog_port_invalid">Adjon meg egy portot 1 és 65535 között</string>
     <string name="ssh_dialog_port_default">22</string>
-    <string name="ssh_dialog_port_default_peer">22022</string>
+    <string name="ssh_dialog_port_default_peer">22</string>
     <string name="ssh_dialog_password">Jelszó</string>
     <string name="ssh_password_prompt_title">Jelszó szükséges</string>
     <string name="ssh_dialog_connect">Csatlakozás</string>

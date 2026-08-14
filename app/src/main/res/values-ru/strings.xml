@@ -245,7 +245,7 @@
     <string name="ssh_dialog_port">Порт</string>
     <string name="ssh_dialog_port_invalid">Введите порт от 1 до 65535</string>
     <string name="ssh_dialog_port_default">22</string>
-    <string name="ssh_dialog_port_default_peer">22022</string>
+    <string name="ssh_dialog_port_default_peer">22</string>
     <string name="ssh_dialog_password">Пароль</string>
     <string name="ssh_password_prompt_title">Требуется пароль</string>
     <string name="ssh_dialog_connect">Подключиться</string>

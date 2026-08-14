@@ -31,7 +31,7 @@ import io.netbird.client.R;
 public final class SshConnectDialog {
 
     /** Port a NetBird peer's built-in SSH server listens on. */
-    private static final int PEER_SSH_PORT = 22022;
+    private static final int PEER_SSH_PORT = 22;
     /** Port an ordinary SSH server listens on. */
     private static final int DEFAULT_SSH_PORT = 22;
     private static final int MAX_PORT = 65535;
