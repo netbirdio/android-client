@@ -25,11 +25,16 @@ jobs:
         with:
           submodules: recursive
 
+      # Reaches the management server as the peer's ui_version and is shown on
+      # the app's about screen, so it has to say at a glance that this build was
+      # signed and handed out rather than released. build-debug.yml already
+      # claims the ci- prefix, and sharing it would make an unsigned PR build
+      # and a signed hand-out indistinguishable in the peer list.
       - name: Get version name
         id: version
         run: |
           SHORT_GIT_SHA=$(git rev-parse --short HEAD)
-          echo "version_name=ci-${SHORT_GIT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "version_name=snapshot-${SHORT_GIT_SHA}" >> "$GITHUB_OUTPUT"
 
       # Must stay identical to the Compute version code step in the sibling
       # workflow. build-release.yml and build-snapshot.yml feed the same Play
@@ -69,7 +74,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: snapshot-artifacts-${{ steps.version.outputs.version_name }}
+          name: ${{ steps.version.outputs.version_name }}
           path: |
             ${{ steps.build.outputs.apk_path }}
             ${{ steps.build.outputs.bundle_path }}
