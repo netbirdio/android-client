@@ -55,9 +55,12 @@
 
     <!-- NetBird logo. Head of a packed vertical chain (logo → switch → status →
          hostname → address summary) centered between the profile chip and the
-         exit node row, so the group can never overlap either. The expandable
-         info rows are deliberately outside the chain: including them would grow
-         the packed group and re-center the whole block every time they open. -->
+         exit node row, so the group can never overlap either. The hostname and
+         address summary hold their height even when empty (minHeight, and
+         INVISIBLE rather than GONE) so the block stays put when connecting fills
+         them in. The expandable info rows are deliberately outside the chain:
+         including them would grow the packed group and re-center the whole block
+         every time they open. -->
     <ImageView
         android:id="@+id/home_logo"
         android:layout_width="0dp"
@@ -126,6 +129,8 @@
         android:layout_marginTop="20dp"
         android:fontFamily="@font/jetbrains_mono_variable"
         android:focusable="false"
+        android:gravity="center"
+        android:minHeight="20dp"
         android:textAlignment="center"
         android:textColor="@color/nb_txt"
         android:textSize="15sp"
@@ -142,15 +147,15 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:background="@drawable/focus_highlight"
-        android:clickable="true"
-        android:focusable="true"
+        android:clickable="false"
+        android:focusable="false"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="8dp"
         android:paddingTop="4dp"
         android:paddingEnd="8dp"
         android:paddingBottom="4dp"
-        android:visibility="gone"
+        android:visibility="invisible"
         tools:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/text_hostname"
         app:layout_constraintBottom_toTopOf="@+id/exit_node_row"
@@ -178,11 +183,22 @@
             app:tint="@color/nb_txt_light" />
     </LinearLayout>
 
+    <!-- Top edge of the bottom row stack. Resolves to the session expiry row when
+         one is shown and the exit node row otherwise, giving the expandable info
+         rows a cap that follows whichever row is currently topmost. A barrier
+         ignores GONE views, so it collapses to the exit node row on its own. -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/bottom_rows_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="exit_node_row,session_expiry_row" />
+
     <!-- Info rows: IP address + secondary value. Hidden until the summary above
          is tapped. Outside the packed chain above on purpose: as a chain link it
          would grow the group and re-center it on every expand. The bottom
-         constraint plus constrainedHeight only caps the rows against the exit
-         node row on a short screen; it cannot feed back into the chain, because
+         constraint plus constrainedHeight only caps the rows against the bottom
+         row stack on a short screen; it cannot feed back into the chain, because
          no chain link points at this view. -->
     <LinearLayout
         android:id="@+id/info_rows"
@@ -199,7 +215,7 @@
         tools:visibility="visible"
         app:layout_constrainedHeight="true"
         app:layout_constraintTop_toBottomOf="@id/network_address_summary"
-        app:layout_constraintBottom_toTopOf="@+id/exit_node_row"
+        app:layout_constraintBottom_toTopOf="@id/bottom_rows_barrier"
         app:layout_constraintVertical_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -275,17 +291,19 @@
 
     </LinearLayout>
 
-    <!-- Exit node selector, above the session row at the bottom of the screen
-         like the desktop main view. Always shown; disabled and dimmed while
-         there is no exit node to pick (disconnected, or none shared with this
-         peer). -->
+    <!-- Exit node selector, pinned to the bottom of the screen like the desktop
+         main view. Always shown; disabled and dimmed while there is no exit node
+         to pick (disconnected, or none shared with this peer). Its bottom anchor
+         is the parent, not the session row, so it never moves: the centered
+         block above ends its chain here, and an anchor that shifted when the
+         session row appeared would drag that whole block up with it. -->
     <LinearLayout
         android:id="@+id/exit_node_row"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="20dp"
         android:alpha="0.5"
         android:background="@drawable/info_row_bg"
         android:clickable="true"
@@ -296,10 +314,9 @@
         android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingEnd="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/session_expiry_row"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_goneMarginBottom="20dp">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:id="@+id/exit_node_icon"
@@ -342,9 +359,11 @@
             app:tint="@color/nb_txt_light" />
     </LinearLayout>
 
-    <!-- Session expiry row, pinned below the exit node row. Same shape as that
-         row, and hidden until a session deadline is known. The chevron marks it
-         as actionable, matching the other rows; tapping starts the browser
+    <!-- Session expiry row, stacked directly above the exit node row. Same shape
+         as that row, and hidden until a session deadline is known. It grows
+         upwards from the fixed exit node row rather than pushing it, so showing
+         it leaves everything below untouched. The chevron marks it as
+         actionable, matching the other rows; tapping starts the browser
          re-authentication that extends the session. -->
     <LinearLayout
         android:id="@+id/session_expiry_row"
@@ -352,7 +371,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="12dp"
         android:background="@drawable/info_row_bg"
         android:clickable="true"
         android:focusable="true"
@@ -363,7 +382,7 @@
         android:paddingEnd="8dp"
         android:visibility="gone"
         tools:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/exit_node_row"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
