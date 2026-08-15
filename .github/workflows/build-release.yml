@@ -52,13 +52,32 @@ jobs:
       # code the other already used. The concurrency group above keeps the two
       # from computing at once. Renaming either workflow file resets the count
       # GitHub keeps for it, which would send version codes backwards.
+      #
+      # A 404 means the workflow has never run and is not on the default branch
+      # yet, which is a true zero. Any other failure aborts the build: falling
+      # back to zero would mint a version code below already-published ones.
       - name: Compute version code
         id: version_code
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          release_runs=$(gh api "repos/${{ github.repository }}/actions/workflows/build-release.yml/runs?per_page=1" --jq '.total_count' 2>/dev/null || echo 0)
-          snapshot_runs=$(gh api "repos/${{ github.repository }}/actions/workflows/build-snapshot.yml/runs?per_page=1" --jq '.total_count' 2>/dev/null || echo 0)
+          count_runs() {
+            local runs
+            if runs=$(gh api "repos/${{ github.repository }}/actions/workflows/$1/runs?per_page=1" --jq '.total_count' 2>gh_err.txt); then
+              if ! [[ "$runs" =~ ^[0-9]+$ ]]; then
+                echo "::error::unexpected run count for $1: '$runs'" >&2
+                return 1
+              fi
+              echo "$runs"
+            elif grep -q 'HTTP 404' gh_err.txt; then
+              echo 0
+            else
+              echo "::error::failed to fetch run count for $1: $(cat gh_err.txt)" >&2
+              return 1
+            fi
+          }
+          release_runs=$(count_runs build-release.yml)
+          snapshot_runs=$(count_runs build-snapshot.yml)
           version_code=$((release_runs + snapshot_runs + 40))
           echo "Release runs: $release_runs, snapshot runs: $snapshot_runs -> version_code=$version_code"
           echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
