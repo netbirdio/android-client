@@ -45,20 +45,22 @@ jobs:
           echo "${{ secrets.GPLAY_KEYSTORE }}" | base64 -d > gplay.keystore
           echo "NETBIRD_UPLOAD_STORE_FILE=$GITHUB_WORKSPACE/gplay.keystore" >> $GITHUB_ENV
 
-      # Must stay identical to the same step in prepare-publication.yml: both
-      # workflows produce APKs for the same Play Store listing, so they have to
-      # draw from one shared counter. github.run_number counts only this
-      # workflow's own runs, which would hand out a code an ad-hoc build already
-      # used. The concurrency group above keeps the two from computing at once.
+      # Must stay identical to the Compute version code step in the sibling
+      # workflow. build-release.yml and build-snapshot.yml feed the same Play
+      # Store listing, so they have to draw from one shared counter; a
+      # github.run_number sees only its own workflow's runs and would hand out a
+      # code the other already used. The concurrency group above keeps the two
+      # from computing at once. Renaming either workflow file resets the count
+      # GitHub keeps for it, which would send version codes backwards.
       - name: Compute version code
         id: version_code
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           release_runs=$(gh api "repos/${{ github.repository }}/actions/workflows/build-release.yml/runs?per_page=1" --jq '.total_count' 2>/dev/null || echo 0)
-          publication_runs=$(gh api "repos/${{ github.repository }}/actions/workflows/prepare-publication.yml/runs?per_page=1" --jq '.total_count' 2>/dev/null || echo 0)
-          version_code=$((release_runs + publication_runs + 40))
-          echo "Release runs: $release_runs, publication runs: $publication_runs -> version_code=$version_code"
+          snapshot_runs=$(gh api "repos/${{ github.repository }}/actions/workflows/build-snapshot.yml/runs?per_page=1" --jq '.total_count' 2>/dev/null || echo 0)
+          version_code=$((release_runs + snapshot_runs + 40))
+          echo "Release runs: $release_runs, snapshot runs: $snapshot_runs -> version_code=$version_code"
           echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
 
       - name: Build Android
