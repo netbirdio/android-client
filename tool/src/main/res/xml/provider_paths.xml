@@ -3,4 +3,7 @@
     <cache-path
         name="logcat"
         path="logcat" />
+    <files-path
+        name="filedrop"
+        path="filedrop/" />
 </paths>

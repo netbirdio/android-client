@@ -67,6 +67,18 @@
         tools:layout="@layout/fragment_firstinstall" />
 
     <fragment
+        android:id="@+id/nav_files"
+        android:name="io.netbird.client.ui.files.FileDropFragment"
+        android:label="@string/file_drop_title"
+        tools:layout="@layout/fragment_file_drop" />
+
+    <fragment
+        android:id="@+id/nav_file_sharing"
+        android:name="io.netbird.client.ui.files.FileSharingFragment"
+        android:label="@string/file_sharing_title"
+        tools:layout="@layout/fragment_file_sharing" />
+
+    <fragment
         android:id="@+id/nav_ssh_sessions"
         android:name="io.netbird.client.ui.ssh.SshSessionsFragment"
         android:label="@string/ssh_sessions_title"

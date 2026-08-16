@@ -49,6 +49,9 @@ public class SettingsFragment extends Fragment {
         // rather than keeping a second, differently-shaped screen for it.
         binding.rowChangeServer.setOnClickListener(v -> showActiveProfileEditor());
 
+        binding.rowFileSharing.setOnClickListener(v ->
+                navController.navigate(R.id.nav_file_sharing));
+
         binding.rowAdvanced.setOnClickListener(v ->
                 navController.navigate(R.id.nav_advanced));
 

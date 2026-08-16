@@ -15,6 +15,7 @@ import io.netbird.gomobile.android.Client;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.DNSList;
 import io.netbird.gomobile.android.ErrListener;
+import io.netbird.gomobile.android.FileDrop;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.NetworkChangeListener;
 import io.netbird.gomobile.android.PeerInfoArray;
@@ -348,6 +349,16 @@ class EngineRunner {
 
     public SSHClient newSSHClient() {
         return Android.newSSHClient(goClient);
+    }
+
+    /**
+     * File drop handle of the active profile. Unlike an SSH client this stays
+     * useful with the engine down: history and settings are readable offline,
+     * and only sending needs the tunnel. The Go side caches it per profile and
+     * swaps it on a profile switch, so callers must not hold on to one.
+     */
+    public FileDrop fileDrop() throws Exception {
+        return goClient.fileDrop(context.getFilesDir().getPath());
     }
 
     public void renewTUN(int fd) {

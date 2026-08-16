@@ -16,6 +16,7 @@
     <string name="bottom_nav_home">Главная</string>
     <string name="bottom_nav_peers">Пиры</string>
     <string name="bottom_nav_networks">Ресурсы</string>
+    <string name="bottom_nav_files">Файлы</string>
     <string name="bottom_nav_ssh">SSH</string>
     <string name="bottom_nav_settings">Настройки</string>
 
