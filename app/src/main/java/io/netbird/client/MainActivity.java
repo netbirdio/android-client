@@ -448,12 +448,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     private void syncSshSessionProfile() {
         try {
             ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
-            Set<String> liveIds = new HashSet<>();
-            for (Profile profile : profileManager.listProfiles()) {
-                liveIds.add(profile.getID());
-            }
             Profile active = profileManager.getActiveProfile();
-            SshSessionManager.get().setProfile(active != null ? active.getID() : null, liveIds);
+            SshSessionManager.get().setProfile(active != null ? active.getID() : null);
         } catch (Exception e) {
             Log.w(LOGTAG, "Could not sync SSH sessions with the active profile", e);
         }

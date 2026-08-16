@@ -57,7 +57,8 @@ public class SshSession {
 
     private volatile SSHClient client;
     /** Per-profile TOFU host-key store for regular servers; null until set. */
-    private volatile String knownHostsPath;
+    private volatile String knownHostsConfigDir;
+    private volatile String knownHostsProfileId;
     private final List<Listener> listeners = new CopyOnWriteArrayList<>();
 
     private final Object bufferLock = new Object();
@@ -100,8 +101,8 @@ public class SshSession {
         if (urlOpener != null) {
             client.setURLOpener(urlOpener);
         }
-        if (knownHostsPath != null) {
-            client.setKnownHostsPath(knownHostsPath);
+        if (knownHostsConfigDir != null && knownHostsProfileId != null) {
+            client.setKnownHostsStore(knownHostsConfigDir, knownHostsProfileId);
         }
     }
 
@@ -116,11 +117,12 @@ public class SshSession {
 
     /** Points a regular server's host-key verification at the profile's store.
      *  Applied to every client this session binds, including reconnects. */
-    void setKnownHostsPath(String path) {
-        this.knownHostsPath = path;
+    void setKnownHostsStore(String configDir, String profileId) {
+        this.knownHostsConfigDir = configDir;
+        this.knownHostsProfileId = profileId;
         SSHClient current = client;
-        if (current != null && path != null) {
-            current.setKnownHostsPath(path);
+        if (current != null && configDir != null && profileId != null) {
+            current.setKnownHostsStore(configDir, profileId);
         }
     }
 

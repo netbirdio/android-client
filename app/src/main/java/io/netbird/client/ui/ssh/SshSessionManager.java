@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import io.netbird.gomobile.android.Android;
@@ -128,16 +127,11 @@ public class SshSessionManager {
     /**
      * Points the list at a profile, loading its stored sessions. Switching
      * closes whatever is live: the tunnel goes down with the old profile, and
-     * an overlay IP means a different host under the new one.
-     *
-     * @param liveProfileIds every profile that still exists, so lists left by
-     *                       deleted ones are discarded
+     * an overlay IP means a different host under the new one. A deleted
+     * profile needs no cleanup here: its stored list lives in the Go profile
+     * manager's preferences, which are deleted together with the profile.
      */
-    public synchronized void setProfile(@Nullable String profileId,
-                                        @NonNull Set<String> liveProfileIds) {
-        if (store != null) {
-            store.pruneDeletedProfiles(liveProfileIds);
-        }
+    public synchronized void setProfile(@Nullable String profileId) {
         if (profileId != null && profileId.equals(activeProfileId)) {
             return;
         }
@@ -146,7 +140,7 @@ public class SshSessionManager {
         if (store != null && profileId != null) {
             for (SshSessionStore.Entry entry : store.load(profileId)) {
                 SshSession session = new SshSession(entry.id, entry.host, entry.port, entry.user);
-                applyKnownHostsPath(session);
+                applyKnownHostsStore(session);
                 sessions.put(entry.id, session);
                 session.attach(stateChangeRefresher);
             }
@@ -156,9 +150,9 @@ public class SshSessionManager {
 
     /** Points a session's regular-server host-key checks at the active
      *  profile's store, so a trusted key never crosses profiles. */
-    private void applyKnownHostsPath(@NonNull SshSession session) {
+    private void applyKnownHostsStore(@NonNull SshSession session) {
         if (store != null && activeProfileId != null) {
-            session.setKnownHostsPath(store.knownHostsPath(activeProfileId));
+            session.setKnownHostsStore(store.configDir(), activeProfileId);
         }
     }
 
@@ -170,7 +164,7 @@ public class SshSessionManager {
                                           @Nullable URLOpener urlOpener) {
         String id = UUID.randomUUID().toString();
         SshSession session = new SshSession(id, host, port, user, password, client, urlOpener);
-        applyKnownHostsPath(session);
+        applyKnownHostsStore(session);
         sessions.put(id, session);
         persist();
         publish();
@@ -225,7 +219,7 @@ public class SshSessionManager {
         existing.close();
 
         SshSession replacement = new SshSession(id, host, port, user);
-        applyKnownHostsPath(replacement);
+        applyKnownHostsStore(replacement);
         sessions.put(id, replacement);
         replacement.attach(stateChangeRefresher);
         persist();
@@ -268,7 +262,7 @@ public class SshSessionManager {
             }
         }
         try {
-            Android.removeKnownHost(store.knownHostsPath(activeProfileId), host, port);
+            Android.removeKnownHost(store.configDir(), activeProfileId, host, port);
         } catch (Exception e) {
             Log.w(LOGTAG, "could not remove host key for " + host + ":" + port, e);
         }
