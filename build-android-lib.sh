@@ -1,15 +1,27 @@
 #!/bin/bash
 # Script to build NetBird mobile bindings using gomobile
 # Usage: ./script.sh [version]
-# - If a version is provided, it will be used (with leading 'v' stripped if present).
-# - If no version is provided:
-#     * Uses the latest Git tag if available (with leading 'v' stripped if present).
-#     * Otherwise, defaults to "dev-<short-hash>".
-# - When running in GitHub Actions, uses "ci-<short-hash>" instead of "dev-<short-hash>".
+#
+# Version resolution (first match wins):
+#   1. explicit argument            -> the argument ('v' prefix stripped)
+#   2. local build (any HEAD)       -> dev-<sha>
+#   3. CI, HEAD on a release tag    -> that tag, e.g. 0.77.0
+#   4. CI, commits on top of a tag  -> 0.77.0+<sha>
+#   5. CI, no reachable tag         -> ci-<sha>
+#
+# The base tag is the last stable release tag (vX.Y.Z, no pre-release) found
+# walking back HEAD's ancestry in the netbird submodule — the last tag on this
+# branch, not the newest tag in the repository. <sha> is the submodule commit.
 
 set -euo pipefail
 
 app_path=$(pwd)
+
+# Stable release tags only ("v" + digits, no pre-release suffix): a pre-release
+# base such as "0.75.0-rc.2" would land in SemVer pre-release position, which
+# the management server compares differently from a plain release.
+readonly RELEASE_TAG_MATCH='v[0-9]*'
+readonly RELEASE_TAG_EXCLUDE='*-*'
 
 # Normalize semantic versions to drop a leading 'v' (e.g., v1.2.3 -> 1.2.3).
 # Only strips if the string starts with 'v' followed by a digit, so it won't affect
@@ -22,33 +34,44 @@ normalize_version() {
   echo "$ver"
 }
 
+describe_release_tag() {
+  git describe --tags "$@" --match "$RELEASE_TAG_MATCH" --exclude "$RELEASE_TAG_EXCLUDE" 2>/dev/null || true
+}
+
 get_version() {
   if [ -n "${1:-}" ]; then
     normalize_version "$1"
     return
   fi
 
-  # Try to get an exact tag
-  local tag
-  tag=$(git describe --tags --exact-match 2>/dev/null || true)
+  local short_hash
+  short_hash=$(git rev-parse --short HEAD)
 
+  if [ "${GITHUB_ACTIONS:-}" != "true" ]; then
+    echo "dev-$short_hash"
+    return
+  fi
+
+  local tag
+  tag=$(describe_release_tag --exact-match)
   if [ -n "$tag" ]; then
     normalize_version "$tag"
     return
   fi
 
-  # Fallback to "<prefix>-<short-hash>"
-  local short_hash
-  short_hash=$(git rev-parse --short HEAD)
-
-  local new_version
-  if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
-    new_version="ci-$short_hash"
-  else
-    new_version="dev-$short_hash"
+  # Walks HEAD's ancestry, so this is the last release tag on this branch,
+  # not the most recently created tag in the repository.
+  tag=$(describe_release_tag --abbrev=0)
+  if [ -n "$tag" ]; then
+    echo "$(normalize_version "$tag")+$short_hash"
+    return
   fi
 
-  echo "$new_version"
+  echo "WARNING: no release tag reachable from HEAD; using ci-$short_hash" >&2
+  if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+    echo "WARNING: the submodule is a shallow clone; the tag lookup needs full history" >&2
+  fi
+  echo "ci-$short_hash"
 }
 
 cd netbird
