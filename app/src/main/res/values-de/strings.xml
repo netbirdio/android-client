@@ -18,6 +18,7 @@
     <string name="bottom_nav_networks">Ressourcen</string>
     <string name="bottom_nav_files">Dateien</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">Apps</string>
     <string name="bottom_nav_settings">Einstellungen</string>
 
     <string name="settings_section_connection">Verbindung</string>

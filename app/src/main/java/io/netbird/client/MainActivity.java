@@ -213,14 +213,13 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
         NavigationBarView bottomNav = (NavigationBarView) binding.bottomNav;
 
-        // All five bottom-nav destinations are top-level — no Up arrow on those.
+        // All four bottom-nav destinations are top-level — no Up arrow on those.
         // BottomNavigationView rejects a sixth item outright, so anything beyond
         // these lives under Settings and keeps its Up arrow.
         final Set<Integer> topLevelDestinations = new HashSet<>();
         topLevelDestinations.add(R.id.nav_home);
         topLevelDestinations.add(R.id.nav_peers);
-        topLevelDestinations.add(R.id.nav_files);
-        topLevelDestinations.add(R.id.nav_ssh_sessions);
+        topLevelDestinations.add(R.id.nav_apps);
         topLevelDestinations.add(R.id.nav_settings);
         mAppBarConfiguration = new AppBarConfiguration.Builder(topLevelDestinations).build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
@@ -255,14 +254,13 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             }
             bottomNav.setVisibility(View.VISIBLE);
 
-            // Home, Peers and Networks don't need a toolbar — bottom nav already
-            // identifies the screen. Sub-screens keep the toolbar with title + Up
-            // arrow. SSH sessions and Settings are the exceptions among the tabs:
-            // both are lists that run to the top of the screen, and without a title
-            // bar to anchor them the first row reads as cut off rather than as the
-            // start of a list.
+            // Home, Peers and Apps don't need a toolbar — bottom nav already
+            // identifies the screen, and Apps carries its own segmented control at
+            // the top. Sub-screens keep the toolbar with title + Up arrow. Settings
+            // is the exception among the tabs: it is a list that runs to the top of
+            // the screen, and without a title bar to anchor it the first row reads
+            // as cut off rather than as the start of a list.
             boolean hideToolbar = topLevelDestinations.contains(destId)
-                    && destId != R.id.nav_ssh_sessions
                     && destId != R.id.nav_settings;
             setToolbarVisible(!hideToolbar);
 

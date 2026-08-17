@@ -17,6 +17,7 @@
     <string name="bottom_nav_peers">Peers</string>
     <string name="bottom_nav_networks">Resources</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">Apps</string>
     <string name="bottom_nav_settings">Settings</string>
 
     <string name="settings_section_connection">Connection</string>

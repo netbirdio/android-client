@@ -12,14 +12,9 @@
         android:title="@string/bottom_nav_peers" />
 
     <item
-        android:id="@+id/nav_files"
-        android:icon="@drawable/ic_menu_files"
-        android:title="@string/bottom_nav_files" />
-
-    <item
-        android:id="@+id/nav_ssh_sessions"
-        android:icon="@drawable/ic_nav_ssh"
-        android:title="@string/bottom_nav_ssh" />
+        android:id="@+id/nav_apps"
+        android:icon="@drawable/ic_nav_apps"
+        android:title="@string/bottom_nav_apps" />
 
     <item
         android:id="@+id/nav_settings"

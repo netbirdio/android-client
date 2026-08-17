@@ -15,7 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -248,7 +248,11 @@ public class SshSessionsFragment extends Fragment {
         }
 
         private void openTerminal(String sessionId) {
-            NavController nav = NavHostFragment.findNavController(SshSessionsFragment.this);
+            // Activity-scoped rather than NavHostFragment.findNavController: this
+            // list is hosted inside the Apps screen, so it is not a direct child
+            // of the nav host and the fragment-local lookup would fail.
+            NavController nav = Navigation.findNavController(requireActivity(),
+                    R.id.nav_host_fragment_content_main);
             Bundle args = new Bundle();
             args.putString(SSHTerminalFragment.ARG_SESSION_ID, sessionId);
             nav.navigate(R.id.nav_ssh_terminal, args);

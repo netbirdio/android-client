@@ -18,6 +18,7 @@
     <string name="bottom_nav_networks">资源</string>
     <string name="bottom_nav_files">文件</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">应用</string>
     <string name="bottom_nav_settings">设置</string>
 
     <string name="settings_section_connection">连接</string>

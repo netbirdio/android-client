@@ -18,6 +18,7 @@
     <string name="bottom_nav_networks">リソース</string>
     <string name="bottom_nav_files">ファイル</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">アプリ</string>
     <string name="bottom_nav_settings">設定</string>
 
     <string name="settings_section_connection">接続</string>

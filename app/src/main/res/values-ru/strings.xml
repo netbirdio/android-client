@@ -18,6 +18,7 @@
     <string name="bottom_nav_networks">Ресурсы</string>
     <string name="bottom_nav_files">Файлы</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">Приложения</string>
     <string name="bottom_nav_settings">Настройки</string>
 
     <string name="settings_section_connection">Подключение</string>
