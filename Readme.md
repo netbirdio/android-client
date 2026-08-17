@@ -35,9 +35,9 @@ The NetBird Android client allows connections from mobile devices running Androi
 ## Screenshots
 
 <p align="center">
-  <img src="https://github.com/netbirdio/android-client/assets/7756831/31fea824-9604-4e6a-a6ed-78cb526b6066" alt="menu" width="250" style="margin-right: 10px;"/>
-  <img src="https://github.com/netbirdio/android-client/assets/7756831/97b3bf1b-6e70-4f25-b5ab-e62b3337f10d" alt="peer-overview" width="250" style="margin-right: 10px;"/>
-  <img src="https://github.com/netbirdio/android-client/assets/7756831/d3ce7c74-aa1e-4be0-ba0c-4761432171e4" alt="mainscreen" width="250"/>
+  <img src="docs/screenshots/mainscreen.png" alt="mainscreen" width="250" style="margin-right: 10px;"/>
+  <img src="docs/screenshots/peer-overview.png" alt="peer-overview" width="250" style="margin-right: 10px;"/>
+  <img src="docs/screenshots/peer-detail.png" alt="peer-detail" width="250"/>
 </p>
 
 ## Install

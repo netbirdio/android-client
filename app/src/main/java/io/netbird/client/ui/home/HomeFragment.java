@@ -672,7 +672,12 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             binding.textSecondaryValue.setText(hasIpv6 ? fIpv6 : "");
             binding.secondaryValueRow.setVisibility(hasIpv6 ? View.VISIBLE : View.GONE);
             // Only show the muted address summary (with chevron) when we have an address.
-            binding.networkAddressSummary.setVisibility(hasIpv4 ? View.VISIBLE : View.GONE);
+            // INVISIBLE, not GONE: the row keeps its slot in the packed chain so the
+            // whole centered block doesn't jump up the moment an address arrives.
+            binding.networkAddressSummary.setVisibility(hasIpv4 ? View.VISIBLE : View.INVISIBLE);
+            // An INVISIBLE view still takes taps and focus, so mute both while it's a placeholder.
+            binding.networkAddressSummary.setClickable(hasIpv4);
+            binding.networkAddressSummary.setFocusable(hasIpv4);
             // Without an address there's nothing to expand: collapse the info rows and reset the chevron.
             if (!hasIpv4) {
                 binding.infoRows.setVisibility(View.GONE);
