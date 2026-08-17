@@ -74,13 +74,51 @@ get_version() {
   echo "ci-$short_hash"
 }
 
+# gomobile bind shells out to gobind, and gobind is the tool that actually
+# generates the Java bindings and the JNI glue. Its own suggestion for a missing
+# gobind is `gomobile init`, which installs it from @latest — that would let the
+# generator float even though the driver is pinned, changing the generated API
+# without a commit here. So both tools are held to the revision go.mod names:
+# the module version embedded in each binary (go version -m) is compared to
+# that pin, and a missing or diverging tool is reinstalled at the pin.
+#
+# GOBIN is prepended to PATH so the binary this function verified or installed
+# is the one `gomobile bind` (and its PATH lookup of gobind) actually runs,
+# even when another copy sits earlier on the caller's PATH.
+#
+# Must run inside the submodule: the pinned version comes from its go.mod.
+ensure_gomobile_tools() {
+  local want
+  want=$(go list -m -f '{{.Version}}' golang.org/x/mobile)
+
+  local gobin
+  gobin=$(go env GOBIN)
+  [ -n "$gobin" ] || gobin="$(go env GOPATH)/bin"
+  export PATH="$gobin:$PATH"
+
+  local tool path have
+  for tool in gomobile gobind; do
+    have=""
+    if path=$(command -v "$tool"); then
+      # `|| true`: go version fails on binaries without build info, and set -e
+      # would abort instead of letting the reinstall below repair the tool.
+      have=$(go version -m "$path" 2>/dev/null \
+        | awk '$1 == "mod" && $2 == "golang.org/x/mobile" {print $3}') || true
+    fi
+    if [ "$have" != "$want" ]; then
+      echo "Installing $tool at the go.mod pin $want (found: ${have:-none})"
+      go install "golang.org/x/mobile/cmd/$tool@$want"
+    fi
+  done
+}
+
 cd netbird
 
 # Get version using the function
 version=$(get_version "${1:-}")
 echo "Using version: $version"
 
-gomobile init
+ensure_gomobile_tools
 
 CGO_ENABLED=0 gomobile bind \
   -o "$app_path/gomobile/netbird.aar" \
