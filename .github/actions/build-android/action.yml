@@ -60,8 +60,19 @@ runs:
       uses: actions/setup-go@v5
       with:
         go-version-file: "netbird/go.mod"
+        cache-dependency-path: "netbird/go.sum"
+
+    - name: Cache Android NDK
+      id: ndk-cache
+      uses: actions/cache@v4
+      with:
+        # ANDROID_HOME is set by the runner image but not visible to ${{ env.X }}
+        # in composite actions; the ubuntu-latest image pins it to this path.
+        path: /usr/local/lib/android/sdk/ndk/23.1.7779620
+        key: ndk-23.1.7779620
 
     - name: Setup NDK
+      if: steps.ndk-cache.outputs.cache-hit != 'true'
       shell: bash
       run: ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.1.7779620"
 
