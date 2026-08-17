@@ -78,25 +78,38 @@ get_version() {
 # generates the Java bindings and the JNI glue. Its own suggestion for a missing
 # gobind is `gomobile init`, which installs it from @latest — that would let the
 # generator float even though the driver is pinned, changing the generated API
-# without a commit here. So both are installed up front at the revision go.mod
-# names, and this only checks that they are there.
+# without a commit here. So both tools are held to the revision go.mod names:
+# the module version embedded in each binary (go version -m) is compared to
+# that pin, and a missing or diverging tool is reinstalled at the pin.
 #
-# Must run inside the submodule: the version quoted below comes from its go.mod.
-check_gomobile_tools() {
-  local missing=""
-  command -v gomobile >/dev/null || missing="gomobile"
-  command -v gobind >/dev/null || missing="${missing:+$missing }gobind"
-  # Explicit 0: a bare return would propagate the test's exit status and set -e
-  # would abort the build on the success path.
-  [ -n "$missing" ] || return 0
+# GOBIN is prepended to PATH so the binary this function verified or installed
+# is the one `gomobile bind` (and its PATH lookup of gobind) actually runs,
+# even when another copy sits earlier on the caller's PATH.
+#
+# Must run inside the submodule: the pinned version comes from its go.mod.
+ensure_gomobile_tools() {
+  local want
+  want=$(go list -m -f '{{.Version}}' golang.org/x/mobile)
 
-  echo "ERROR: not on PATH: $missing" >&2
-  echo "Install both at the pinned revision, do not run 'gomobile init':" >&2
-  local version
-  version=$(go list -m -f '{{.Version}}' golang.org/x/mobile)
-  echo "  go install golang.org/x/mobile/cmd/gomobile@$version" >&2
-  echo "  go install golang.org/x/mobile/cmd/gobind@$version" >&2
-  exit 1
+  local gobin
+  gobin=$(go env GOBIN)
+  [ -n "$gobin" ] || gobin="$(go env GOPATH)/bin"
+  export PATH="$gobin:$PATH"
+
+  local tool path have
+  for tool in gomobile gobind; do
+    have=""
+    if path=$(command -v "$tool"); then
+      # `|| true`: go version fails on binaries without build info, and set -e
+      # would abort instead of letting the reinstall below repair the tool.
+      have=$(go version -m "$path" 2>/dev/null \
+        | awk '$1 == "mod" && $2 == "golang.org/x/mobile" {print $3}') || true
+    fi
+    if [ "$have" != "$want" ]; then
+      echo "Installing $tool at the go.mod pin $want (found: ${have:-none})"
+      go install "golang.org/x/mobile/cmd/$tool@$want"
+    fi
+  done
 }
 
 cd netbird
@@ -105,7 +118,7 @@ cd netbird
 version=$(get_version "${1:-}")
 echo "Using version: $version"
 
-check_gomobile_tools
+ensure_gomobile_tools
 
 CGO_ENABLED=0 gomobile bind \
   -o "$app_path/gomobile/netbird.aar" \
