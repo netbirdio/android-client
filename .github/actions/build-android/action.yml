@@ -67,9 +67,46 @@ runs:
       shell: bash
       run: echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620" >> $GITHUB_ENV
 
-    - name: Install gomobile
+    # gomobile bind shells out to gobind, and gobind is the tool that actually
+    # generates the Java bindings and the JNI glue. Caching and installing only
+    # gomobile left gobind to `gomobile init`, which pulls it from @latest: the
+    # driver was pinned while the generator floated, so the generated API could
+    # change without a commit here. Taking the revision from the go.mod the
+    # submodule already carries keeps the two from drifting apart, and lets the
+    # cache key follow a submodule bump on its own.
+    - name: Resolve the gomobile revision
+      id: gomobile-version
       shell: bash
-      run: go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20251113184115-a159579294ab
+      run: |
+        set -euo pipefail
+        version=$(cd netbird && go list -m -f '{{.Version}}' golang.org/x/mobile)
+        if [ -z "$version" ]; then
+          echo "::error::could not resolve the golang.org/x/mobile version from netbird/go.mod"
+          exit 1
+        fi
+        echo "Using gomobile and gobind at $version"
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+
+    # The key has to name both tools, not just the revision: entries saved by
+    # the earlier gomobile-only step hold no gobind, so reusing that key would
+    # hit the cache, skip the install and leave the build without a generator.
+    - name: Cache gomobile and gobind
+      id: gomobile-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/go/bin/gomobile
+          ~/go/bin/gobind
+        key: gomobile-gobind-${{ steps.gomobile-version.outputs.version }}
+
+    - name: Install gomobile and gobind
+      if: steps.gomobile-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        version='${{ steps.gomobile-version.outputs.version }}'
+        go install "golang.org/x/mobile/cmd/gomobile@$version"
+        go install "golang.org/x/mobile/cmd/gobind@$version"
 
     - name: Build NetBird Go library
       shell: bash
