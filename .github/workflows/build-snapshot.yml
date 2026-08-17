@@ -1,12 +1,10 @@
-name: build release
+name: build snapshot
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  # Needed to read the run counts the version code is derived from.
+  contents: read
   actions: read
 
 concurrency:
@@ -14,36 +12,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-release:
+  build-snapshot:
     runs-on: ubuntu-latest
     environment: android-release
     env:
       NETBIRD_UPLOAD_KEY_ALIAS: ${{ secrets.NETBIRD_UPLOAD_KEY_ALIAS }}
       NETBIRD_UPLOAD_KEY_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_KEY_PASSWORD }}
       NETBIRD_UPLOAD_STORE_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_STORE_PASSWORD }}
-    outputs:
-      apk_path: ${{ steps.build.outputs.apk_path }}
-      bundle_path: ${{ steps.build.outputs.bundle_path }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Get version
+      # Reaches the management server as the peer's ui_version and is shown on
+      # the app's about screen, so it has to say at a glance that this build was
+      # signed and handed out rather than released. build-debug.yml already
+      # claims the ci- prefix, and sharing it would make an unsigned PR build
+      # and a signed hand-out indistinguishable in the peer list.
+      - name: Get version name
         id: version
         run: |
-          TAG_NAME=${{ github.event.release.tag_name }}
-          echo "version_name=$TAG_NAME" >> $GITHUB_OUTPUT
-
-      - name: Write google-services.json
-        run: |
-          echo "${{ secrets.GOOGLE_JSON }}" | base64 -d > app/google-services.json
-
-      - name: Write keystore file
-        run: |
-          echo "${{ secrets.GPLAY_KEYSTORE }}" | base64 -d > gplay.keystore
-          echo "NETBIRD_UPLOAD_STORE_FILE=$GITHUB_WORKSPACE/gplay.keystore" >> $GITHUB_ENV
+          SHORT_GIT_SHA=$(git rev-parse --short HEAD)
+          echo "version_name=snapshot-${SHORT_GIT_SHA}" >> "$GITHUB_OUTPUT"
 
       # Must stay identical to the Compute version code step in the sibling
       # workflow. build-release.yml and build-snapshot.yml feed the same Play
@@ -82,6 +73,15 @@ jobs:
           echo "Release runs: $release_runs, snapshot runs: $snapshot_runs -> version_code=$version_code"
           echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
 
+      - name: Write google-services.json
+        run: |
+          echo "${{ secrets.GOOGLE_JSON }}" | base64 -d > app/google-services.json
+
+      - name: Write keystore file
+        run: |
+          echo "${{ secrets.GPLAY_KEYSTORE }}" | base64 -d > gplay.keystore
+          echo "NETBIRD_UPLOAD_STORE_FILE=$GITHUB_WORKSPACE/gplay.keystore" >> "$GITHUB_ENV"
+
       - name: Build Android
         id: build
         uses: ./.github/actions/build-android
@@ -90,10 +90,11 @@ jobs:
           version_code: ${{ steps.version_code.outputs.version_code }}
           build_type: release
 
-      - name: Upload files to existing release
-        uses: softprops/action-gh-release@v1
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: |
+          name: ${{ steps.version.outputs.version_name }}
+          path: |
             ${{ steps.build.outputs.apk_path }}
             ${{ steps.build.outputs.bundle_path }}
-          tag_name: ${{ github.event.release.tag_name }}
+          retention-days: 14
