@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:paddingStart="16dp"
-    android:paddingTop="14dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="14dp">
+    android:layout_marginBottom="20dp"
+    android:background="@color/nb_gray_bg"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="false"
+    android:foreground="@drawable/focus_highlight"
+    android:padding="16dp">
 
     <ImageView
         android:id="@+id/transfer_direction"
@@ -16,53 +19,62 @@
         android:contentDescription="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
 
     <TextView
         android:id="@+id/transfer_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/nb_txt"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/transfer_time"
+        android:textSize="14sp"
+        tools:text="quarterly-report-2026-final.pdf"
+        app:layout_constraintEnd_toStartOf="@id/transfer_status"
         app:layout_constraintStart_toEndOf="@id/transfer_direction"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/transfer_subtitle"
+        android:id="@+id/transfer_peer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/nb_txt_light"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toStartOf="@id/transfer_time"
+        android:textSize="14sp"
+        tools:text="from office-mini.netbird.selfhosted"
+        app:layout_constraintEnd_toStartOf="@id/transfer_status"
         app:layout_constraintStart_toStartOf="@id/transfer_label"
         app:layout_constraintTop_toBottomOf="@id/transfer_label" />
 
     <TextView
-        android:id="@+id/transfer_time"
+        android:id="@+id/transfer_meta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="14sp"
+        tools:text="14:32 · 214 MB"
+        app:layout_constraintEnd_toStartOf="@id/transfer_status"
+        app:layout_constraintStart_toStartOf="@id/transfer_label"
+        app:layout_constraintTop_toBottomOf="@id/transfer_peer" />
+
+    <TextView
+        android:id="@+id/transfer_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:textColor="@color/nb_txt_light"
-        android:textSize="12sp"
+        android:textSize="14sp"
+        tools:text="Received"
+        tools:textColor="@color/nb_latency_good"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="14dp"
-        android:background="@color/nb_gray_border"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/transfer_subtitle" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

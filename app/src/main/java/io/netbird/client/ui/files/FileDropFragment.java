@@ -283,12 +283,21 @@ public class FileDropFragment extends Fragment {
         return getString(R.string.file_drop_state_progress, percent);
     }
 
-    /** Only a refusal or a failure is coloured; the rest reads as plain log. */
+    /**
+     * Colours only what the eye should catch scanning the outcome column, as on
+     * the desktop: a refusal or failure in red, a completed send in green.
+     * Everything else, a received file and a transfer in flight included, stays
+     * neutral so the exceptions stand out.
+     */
     private int outcomeColor(FileDropManager.Transfer transfer) {
         long state = transfer.state();
         int color = R.color.nb_txt_light;
-        if (state == Android.FileDropStateDeclined || state == Android.FileDropStateFailed) {
+        if (transfer.isUnreachable()
+                || state == Android.FileDropStateDeclined
+                || state == Android.FileDropStateFailed) {
             color = R.color.nb_danger;
+        } else if (state == Android.FileDropStateCompleted && transfer.outgoing()) {
+            color = R.color.nb_latency_good;
         }
         return ContextCompat.getColor(requireContext(), color);
     }
@@ -430,24 +439,26 @@ public class FileDropFragment extends Fragment {
                     transfer.outgoing() ? R.color.nb_orange : R.color.nb_latency_good));
 
             binding.transferLabel.setText(title(transfer));
-            binding.transferSubtitle.setText(subtitle(transfer));
-            binding.transferSubtitle.setTextColor(outcomeColor(transfer));
-            // A received snippet is worth copying, not opening, so the trailing
-            // slot carries the action instead of the timestamp; the plan shows
-            // the same swap.
+            binding.transferPeer.setText(getString(transfer.outgoing()
+                            ? R.string.file_drop_direction_sent
+                            : R.string.file_drop_direction_received,
+                    transfer.peerName()));
+            binding.transferMeta.setText(meta(transfer));
+
+            // A received snippet is worth copying, not opening, so the status
+            // slot carries the action instead of the outcome.
             boolean copyable = transfer.isText() && !transfer.outgoing();
             if (copyable) {
-                binding.transferTime.setText(R.string.file_drop_copy);
-                binding.transferTime.setTextColor(
+                binding.transferStatus.setText(R.string.file_drop_copy);
+                binding.transferStatus.setTextColor(
                         ContextCompat.getColor(requireContext(), R.color.nb_orange));
-                binding.transferTime.setOnClickListener(v -> copy(transfer));
+                binding.transferStatus.setOnClickListener(v -> copy(transfer));
             } else {
-                binding.transferTime.setText(timeLabel(transfer.createdAtMillis()));
-                binding.transferTime.setTextColor(
-                        ContextCompat.getColor(requireContext(), R.color.nb_txt_light));
-                binding.transferTime.setOnClickListener(null);
+                binding.transferStatus.setText(outcomeLabel(transfer));
+                binding.transferStatus.setTextColor(outcomeColor(transfer));
+                binding.transferStatus.setOnClickListener(null);
             }
-            binding.transferTime.setClickable(copyable);
+            binding.transferStatus.setClickable(copyable);
 
             boolean openable = !transfer.outgoing()
                     && transfer.state() == Android.FileDropStateCompleted
@@ -461,17 +472,14 @@ public class FileDropFragment extends Fragment {
             });
         }
 
-        /** "from office-mini · 214 MB · Received", as on the plan's row. */
-        private String subtitle(FileDropManager.Transfer transfer) {
-            StringBuilder text = new StringBuilder(getString(transfer.outgoing()
-                            ? R.string.file_drop_direction_sent
-                            : R.string.file_drop_direction_received,
-                    transfer.peerName()));
-
-            if (!transfer.isText()) {
-                text.append(" · ").append(formatSize(transfer.totalSize()));
+        /** "14:32 · 214 MB". A text snippet has no size worth stating. */
+        private String meta(FileDropManager.Transfer transfer) {
+            String time = timeLabel(transfer.createdAtMillis());
+            if (transfer.isText()) {
+                return time;
             }
-            return text.append(" · ").append(outcomeLabel(transfer)).toString();
+            String size = formatSize(transfer.totalSize());
+            return time.isEmpty() ? size : time + " · " + size;
         }
     }
 
