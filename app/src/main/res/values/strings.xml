@@ -323,10 +323,10 @@
     <string name="file_drop_state_transferring">Transferring</string>
     <string name="file_drop_state_completed">Completed</string>
     <string name="file_drop_state_declined">Declined</string>
-    <string name="file_drop_state_expired">Expired</string>
+    <string name="file_drop_state_expired">No response</string>
     <string name="file_drop_state_cancelled">Cancelled</string>
     <string name="file_drop_state_failed">Failed</string>
-    <string name="file_drop_state_unreachable">Peer cannot receive files</string>
+    <string name="file_drop_state_unreachable">Declined</string>
     <string name="file_drop_direction_sent">to %1$s</string>
     <string name="file_drop_direction_received">from %1$s</string>
     <string name="file_drop_state_sent">Sent</string>
