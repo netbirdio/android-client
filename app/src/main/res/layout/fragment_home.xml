@@ -124,12 +124,16 @@
     <!-- IP / network address (monospace, emphasized) -->
     <TextView
         android:id="@+id/text_hostname"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:ellipsize="end"
         android:fontFamily="@font/jetbrains_mono_variable"
         android:focusable="false"
         android:gravity="center"
+        android:maxLines="1"
         android:minHeight="20dp"
         android:textAlignment="center"
         android:textColor="@color/nb_txt"
