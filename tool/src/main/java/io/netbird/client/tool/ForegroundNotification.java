@@ -9,11 +9,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.VpnService;
 import android.os.Build;
-import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 
 import androidx.core.app.NotificationCompat;
-
-import java.util.Date;
 
 class ForegroundNotification {
     private static final int NOTIFICATION_ID = 102;
@@ -131,7 +129,11 @@ class ForegroundNotification {
             builder.setContentText(service.getResources().getString(statusText()));
         } else if (sessionExpiresAtUnixSeconds > 0) {
             long expiresAtMs = sessionExpiresAtUnixSeconds * 1000L;
-            String expiresAt = DateFormat.getTimeFormat(service).format(new Date(expiresAtMs));
+            // Always day + time ("today, 9:15 PM" / "tomorrow, 9:15 AM"), so a
+            // deadline past midnight cannot be misread as today's clock time.
+            // DateUtils localizes the day wording for every locale we ship.
+            String expiresAt = DateUtils.getRelativeDateTimeString(service, expiresAtMs,
+                    DateUtils.DAY_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0).toString();
             builder.setContentText(service.getString(R.string.fg_notification_session_text, expiresAt))
                     // The chronometer renders a system-driven live countdown
                     // in the header — no periodic re-posting needed.

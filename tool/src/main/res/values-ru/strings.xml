@@ -12,5 +12,5 @@
     <string name="session_notification_expired_title">Сеанс NetBird истёк</string>
     <string name="session_notification_expired_text">Ваш сеанс истёк. Откройте приложение, чтобы войти снова.</string>
     <string name="session_notification_extend">Продлить сеанс</string>
-    <string name="fg_notification_session_text">Сеанс истекает в %1$s</string>
+    <string name="fg_notification_session_text">Сеанс истекает: %1$s</string>
 </resources>

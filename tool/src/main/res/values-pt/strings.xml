@@ -12,5 +12,5 @@
     <string name="session_notification_expired_title">Sessão do NetBird expirada</string>
     <string name="session_notification_expired_text">Sua sessão expirou. Abra o app para entrar novamente.</string>
     <string name="session_notification_extend">Estender sessão</string>
-    <string name="fg_notification_session_text">A sessão expira às %1$s</string>
+    <string name="fg_notification_session_text">A sessão expira: %1$s</string>
 </resources>

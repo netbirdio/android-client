@@ -8,7 +8,7 @@
     <string name="session_notification_expired_title">NetBird session expired</string>
     <string name="session_notification_expired_text">Your login session has expired. Open the app to sign in again.</string>
     <string name="session_notification_extend">Extend session</string>
-    <string name="fg_notification_session_text">Session expires at %1$s</string>
+    <string name="fg_notification_session_text">Session expires: %1$s</string>
     <string name="fg_notification_connecting">Connecting…</string>
     <string name="fg_notification_disconnected">Disconnected</string>
     <string name="fg_notification_no_network">No network available</string>
