@@ -12,7 +12,6 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
     private final Consumer<Boolean> internetAvailabilityConsumer;
     private NetworkToggleListener listener;
     private volatile int lastDefaultType = UNKNOWN_NETWORK_TYPE;
-    private volatile int currentTransport = UNKNOWN_NETWORK_TYPE;
 
     public ConcreteNetworkAvailabilityListener() {
         this(() -> true, available -> {});
@@ -40,16 +39,12 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
     @Override
     public void onNetworkAvailable(@Constants.NetworkType int networkType) {
         boolean isNew = availableNetworkTypes.put(networkType, true) == null;
-        if (!isNew) {
-            return;
-        }
-        // Only notify when the new transport displaces the current one by
-        // priority (WiFi > cellular). The default-network callback does not
-        // fire for these while the VPN is the default.
-        if (currentTransport == UNKNOWN_NETWORK_TYPE) {
-            currentTransport = networkType;
-        } else if (isHigherPriority(networkType, currentTransport)) {
-            currentTransport = networkType;
+        // A new transport appearing (e.g. WiFi coming up while cellular is
+        // already up) is a seamless handover candidate. The default-network
+        // callback does not fire for these while the VPN is the default, so
+        // the per-network onAvailable is the only signal we get. Notify the
+        // Go core so it can reset peer connections onto the new transport.
+        if (isNew && availableNetworkTypes.size() > 1 && networkType == Constants.NetworkType.WIFI) {
             notifyListener();
         }
     }
@@ -57,9 +52,6 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
     @Override
     public void onNetworkLost(@Constants.NetworkType int networkType) {
         availableNetworkTypes.remove(networkType);
-        if (networkType == currentTransport) {
-            currentTransport = highestAvailableTransport();
-        }
     }
 
     @Override
@@ -98,27 +90,5 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
 
     public void unsubscribe() {
         this.listener = null;
-    }
-
-    // WiFi > cellular > unknown
-    private static boolean isHigherPriority(@Constants.NetworkType int candidate, int current) {
-        if (candidate == Constants.NetworkType.WIFI) {
-            return current != Constants.NetworkType.WIFI;
-        }
-        if (candidate == Constants.NetworkType.MOBILE) {
-            return current != Constants.NetworkType.WIFI
-                    && current != Constants.NetworkType.MOBILE;
-        }
-        return false;
-    }
-
-    private int highestAvailableTransport() {
-        if (availableNetworkTypes.containsKey(Constants.NetworkType.WIFI)) {
-            return Constants.NetworkType.WIFI;
-        }
-        if (availableNetworkTypes.containsKey(Constants.NetworkType.MOBILE)) {
-            return Constants.NetworkType.MOBILE;
-        }
-        return UNKNOWN_NETWORK_TYPE;
     }
 }
