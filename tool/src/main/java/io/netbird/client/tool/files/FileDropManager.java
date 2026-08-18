@@ -15,6 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.FileDrop;
@@ -37,6 +40,12 @@ public class FileDropManager {
     private static final String LOGTAG = "FileDropManager";
 
     private static final FileDropManager INSTANCE = new FileDropManager();
+
+    /**
+     * How often a live transfer is re-read. Matches the desktop UI, which polls
+     * the same list at one second while a transfer is running.
+     */
+    private static final long POLL_INTERVAL_MS = 1000;
 
     /** Supplies the file drop handle, which only the bound service can open. */
     public interface HandleFactory {
@@ -156,6 +165,10 @@ public class FileDropManager {
     // Staged copies of outgoing files, keyed by transfer id; see send().
     private final Map<String, List<ContentFileSource>> staged = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    // Go reports state changes but not progress, so a live transfer has to be
+    // polled; see POLL_INTERVAL_MS and scheduleNextPoll.
+    private final ScheduledExecutorService poller = Executors.newSingleThreadScheduledExecutor();
+    private final AtomicBoolean pollPending = new AtomicBoolean();
 
     private volatile List<Transfer> transfers = Collections.emptyList();
     private HandleFactory handleFactory;
@@ -190,7 +203,11 @@ public class FileDropManager {
      */
     public void addTransfersListener(@NonNull TransfersListener listener) {
         transfersListeners.add(listener);
-        listener.onTransfers(transfers);
+        List<Transfer> current = transfers;
+        listener.onTransfers(current);
+        // The first listener to arrive during a live transfer has to restart the
+        // poll chain: it stops itself whenever no one is listening.
+        scheduleNextPoll(current);
     }
 
     public void removeTransfersListener(@NonNull TransfersListener listener) {
@@ -242,6 +259,46 @@ public class FileDropManager {
         for (TransfersListener listener : transfersListeners) {
             listener.onTransfers(list);
         }
+        scheduleNextPoll(list);
+    }
+
+    /**
+     * Keeps the list refreshing while something is still moving. Go emits events
+     * for the offer and for the outcome, but never for progress, so without this
+     * a running transfer would sit at whatever the last event left behind.
+     * <p>
+     * The poll chains off publish() rather than running on a fixed schedule: it
+     * starts itself when a live transfer appears and stops as soon as the last
+     * one settles, or when no screen is left to show it.
+     */
+    private void scheduleNextPoll(List<Transfer> list) {
+        if (transfersListeners.isEmpty() || !hasLive(list)) {
+            return;
+        }
+        // One poll in flight at a time: several events landing together would
+        // otherwise each start their own chain.
+        if (!pollPending.compareAndSet(false, true)) {
+            return;
+        }
+
+        try {
+            poller.schedule(() -> {
+                pollPending.set(false);
+                refresh();
+            }, POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            pollPending.set(false);
+            Log.w(LOGTAG, "file drop poller rejected the refresh", e);
+        }
+    }
+
+    private static boolean hasLive(List<Transfer> list) {
+        for (Transfer transfer : list) {
+            if (!transfer.isTerminal()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
