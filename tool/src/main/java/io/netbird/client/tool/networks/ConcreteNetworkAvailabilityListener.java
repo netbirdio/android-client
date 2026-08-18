@@ -38,7 +38,15 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
 
     @Override
     public void onNetworkAvailable(@Constants.NetworkType int networkType) {
-        availableNetworkTypes.put(networkType, true);
+        boolean isNew = availableNetworkTypes.put(networkType, true) == null;
+        // A new transport appearing (e.g. WiFi coming up while cellular is
+        // already up) is a seamless handover candidate. The default-network
+        // callback does not fire for these while the VPN is the default, so
+        // the per-network onAvailable is the only signal we get. Notify the
+        // Go core so it can reset peer connections onto the new transport.
+        if (isNew && availableNetworkTypes.size() > 1) {
+            notifyListener();
+        }
     }
 
     @Override
