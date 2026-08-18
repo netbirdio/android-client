@@ -308,6 +308,8 @@
     <string name="file_drop_share_state_waiting">Waiting…</string>
     <string name="file_drop_share_state_sent">✓ Sent</string>
     <string name="file_drop_share_sending">Sending to %1$s</string>
+    <string name="file_drop_share_stop_confirm">Stop sending to this peer?</string>
+    <string name="file_drop_share_stop">Stop</string>
     <string name="file_drop_share_failed">Could not send: %1$s</string>
     <string name="file_drop_title">Files</string>
     <string name="file_drop_empty">No transfers yet</string>

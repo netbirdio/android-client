@@ -1,5 +1,6 @@
 package io.netbird.client.ui.files;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -33,6 +35,8 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+
+import com.google.android.material.button.MaterialButton;
 
 import io.netbird.client.R;
 import io.netbird.client.databinding.ActivityShareTargetBinding;
@@ -340,6 +344,13 @@ public class ShareTargetActivity extends AppCompatActivity {
                 }
             }
 
+            // Same order as the main peer list: connected peers first, then by
+            // name, so the same peer sits in the same place on both screens.
+            targets.sort((a, b) -> {
+                int byStatus = Boolean.compare(b.connected, a.connected);
+                return byStatus != 0 ? byStatus : a.name.compareToIgnoreCase(b.name);
+            });
+
             runOnUiThread(() -> {
                 allTargets.clear();
                 allTargets.addAll(targets);
@@ -468,6 +479,14 @@ public class ShareTargetActivity extends AppCompatActivity {
             SendState before = target.state;
             String detailBefore = target.detail;
 
+            // A cancel can also come from elsewhere, the Files tab included.
+            // Either way the row goes back to being pickable rather than
+            // reporting a failure it did not have.
+            if (mine != null && mine.state() == Android.FileDropStateCancelled) {
+                reset(target);
+                continue;
+            }
+
             if (mine != null && mine.isTerminal()) {
                 target.state = terminalStateOf(mine);
                 target.detail = null;
@@ -500,6 +519,56 @@ public class ShareTargetActivity extends AppCompatActivity {
             }
         }
         return null;
+    }
+
+    /**
+     * Asks before killing a send in flight. Long press is easy enough to hit by
+     * accident on a list whose rows are meant to be tapped, and the bytes are
+     * already on their way, so the prompt is the safeguard.
+     */
+    @SuppressLint("InflateParams")
+    private void confirmStop(PeerTarget target) {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_simple_edit_text, null);
+
+        ((TextView) view.findViewById(R.id.text_title_dialog)).setText(target.name);
+        ((TextView) view.findViewById(R.id.text_label_dialog))
+                .setText(R.string.file_drop_share_stop_confirm);
+        view.findViewById(R.id.edit_text_dialog).setVisibility(View.GONE);
+
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogTheme)
+                .setView(view)
+                .create();
+
+        MaterialButton confirm = view.findViewById(R.id.btn_ok_dialog);
+        confirm.setText(R.string.file_drop_share_stop);
+        confirm.setOnClickListener(v -> {
+            stop(target);
+            dialog.dismiss();
+        });
+        view.findViewById(R.id.btn_cancel_dialog).setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    /**
+     * Aborts this row's transfer and hands the row back untouched, so the same
+     * files can be sent again to the same peer. Anything the transfer staged is
+     * released by the manager once Go reports it cancelled.
+     */
+    private void stop(PeerTarget target) {
+        if (target.transferId != null) {
+            FileDropManager.get().cancel(target.transferId);
+        }
+        reset(target);
+    }
+
+    /** Returns a row to its untouched, pickable state. */
+    private void reset(PeerTarget target) {
+        target.transferId = null;
+        target.state = SendState.IDLE;
+        target.progress = 0;
+        target.detail = null;
+        adapter.refresh(target);
     }
 
     private void toastAndFinish(String message) {
@@ -587,6 +656,17 @@ public class ShareTargetActivity extends AppCompatActivity {
             boolean tappable = target.state == SendState.IDLE;
             holder.itemView.setOnClickListener(tappable ? v -> onPick.accept(target) : null);
             holder.itemView.setClickable(tappable);
+
+            // Stopping is a long press rather than a button: tap already means
+            // send here, and a second meaning for it would put a 500 MB upload
+            // one stray finger away from being killed.
+            boolean stoppable = target.state == SendState.WAITING
+                    || target.state == SendState.SENDING;
+            holder.itemView.setOnLongClickListener(stoppable ? v -> {
+                confirmStop(target);
+                return true;
+            } : null);
+            holder.itemView.setLongClickable(stoppable);
         }
 
         /** IP, plus the reason a row cannot be sent to, or why it stopped. */
