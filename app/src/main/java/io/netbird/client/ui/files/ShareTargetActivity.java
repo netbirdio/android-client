@@ -137,16 +137,17 @@ public class ShareTargetActivity extends AppCompatActivity {
     }
 
     /**
-     * Keeps the title clear of the status bar and the cancel button clear of the
+     * Keeps the header clear of the status bar and the last row clear of the
      * navigation bar. Mirrors MainActivity: the root takes the top inset, the
-     * bottom one goes to the trailing control so the list can still scroll under
-     * it.
+     * bottom one becomes list padding so the rows can still scroll under the
+     * navigation bar instead of stopping short of it.
      */
     private void applySystemBarInsets() {
+        int listBottom = getResources().getDimensionPixelSize(R.dimen.share_list_bottom_padding);
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (view, windowInsets) -> {
             Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             view.setPadding(bars.left, bars.top, bars.right, 0);
-            binding.btnCancelDialog.setPadding(0, 0, 0, bars.bottom);
+            binding.peerList.setPadding(0, 0, 0, listBottom + bars.bottom);
             return windowInsets;
         });
     }
@@ -462,38 +463,43 @@ public class ShareTargetActivity extends AppCompatActivity {
                 continue;
             }
 
-            if (target.transferId == null) {
-                // The send has not reported its id yet; the row stays waiting.
-                continue;
-            }
-
-            FileDropManager.Transfer mine = null;
-            for (FileDropManager.Transfer t : transfers) {
-                if (t.id().equals(target.transferId)) {
-                    mine = t;
-                    break;
-                }
-            }
-            if (mine == null) {
-                continue;
-            }
+            FileDropManager.Transfer mine = find(transfers, target.transferId);
 
             SendState before = target.state;
             String detailBefore = target.detail;
 
-            if (mine.isTerminal()) {
+            if (mine != null && mine.isTerminal()) {
                 target.state = terminalStateOf(mine);
                 target.detail = null;
-            } else if (mine.isRunning() && mine.totalSize() > 0) {
+            } else if (mine != null && mine.isRunning() && mine.totalSize() > 0) {
                 target.state = SendState.SENDING;
                 target.progress = (int) (mine.transferred() * 100 / mine.totalSize());
             }
 
+            // A row in flight is redrawn on every update even when nothing about
+            // it changed: the item animator's cross-fade is what makes it pulse,
+            // which is the only sign of life a row has while it waits for the
+            // peer to answer and nothing is moving yet.
             if (target.state != before || !java.util.Objects.equals(target.detail, detailBefore)
-                    || target.state == SendState.SENDING) {
+                    || target.state == SendState.SENDING || target.state == SendState.WAITING) {
                 adapter.refresh(target);
             }
         }
+    }
+
+    /** The transfer this row started, or null while its id is still unknown. */
+    @Nullable
+    private static FileDropManager.Transfer find(List<FileDropManager.Transfer> transfers,
+                                                 @Nullable String transferId) {
+        if (transferId == null) {
+            return null;
+        }
+        for (FileDropManager.Transfer transfer : transfers) {
+            if (transfer.id().equals(transferId)) {
+                return transfer;
+            }
+        }
+        return null;
     }
 
     private void toastAndFinish(String message) {
@@ -588,7 +594,10 @@ public class ShareTargetActivity extends AppCompatActivity {
             if (target.state == SendState.FAILED && target.detail != null) {
                 return target.detail;
             }
-            if (target.connected) {
+            // Idle is what a row looks like before it is picked. Once a send is
+            // under way the transfer's own packets have woken the peer, so the
+            // label would be stale, and the send state to the right says more.
+            if (target.connected || target.state != SendState.IDLE) {
                 return target.ip;
             }
             return target.ip + " · " + getString(R.string.peer_status_idle);

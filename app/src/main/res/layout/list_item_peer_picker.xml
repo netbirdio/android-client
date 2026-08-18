@@ -4,21 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:paddingStart="20dp"
-    android:paddingTop="14dp"
-    android:paddingEnd="20dp"
-    android:paddingBottom="14dp">
+    android:layout_marginBottom="20dp"
+    android:background="@color/nb_gray_bg"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="false"
+    android:foreground="@drawable/focus_highlight"
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/peer_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/nb_txt"
-        android:textSize="15sp"
-        android:textStyle="bold"
+        android:textSize="14sp"
         app:layout_constraintEnd_toStartOf="@id/peer_state"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -28,39 +30,43 @@
         android:id="@+id/peer_ip"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:ellipsize="end"
-        android:maxLines="1"
+        android:layout_marginEnd="16dp"
+        app:layout_goneMarginEnd="0dp"
+        android:ellipsize="middle"
+        android:singleLine="true"
         android:textColor="@color/nb_txt_light"
-        android:textSize="13sp"
-        app:layout_constraintEnd_toStartOf="@id/peer_state"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/peer_progress"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/peer_name"
-        tools:text="100.72.116.70 · Connected" />
+        tools:text="100.72.116.70 · Idle" />
 
+    <!-- The outcome shares the first line with the peer name and the bar shares
+         the second with the address, so a send in flight keeps the row at the
+         same two lines as an idle one. -->
     <TextView
         android:id="@+id/peer_state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:textColor="@color/nb_orange"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@id/peer_name"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Waiting…" />
+        tools:text="Sending 7%" />
 
     <ProgressBar
         android:id="@+id/peer_progress"
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_width="96dp"
+        android:layout_height="6dp"
+        android:layout_marginStart="16dp"
         android:max="100"
         android:progressTint="@color/nb_orange"
         android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/peer_ip"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/peer_state" />
+        app:layout_constraintStart_toEndOf="@id/peer_ip" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
