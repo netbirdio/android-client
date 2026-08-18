@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#000000"
+    tools:context=".ui.ssh.SSHTerminalFragment">
+
+    <WebView
+        android:id="@+id/terminal_web_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/reconnect_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#2a2118"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="10dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/reconnect_message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="#e6e6e6"
+            android:textSize="14sp"
+            tools:text="Session closed" />
+
+        <Button
+            android:id="@+id/reconnect_button"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ssh_session_reconnect"
+            android:textColor="@color/nb_orange" />
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1a1a1a"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/key_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <Button
+                android:id="@+id/key_esc"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="Esc"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_tab"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="Tab"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_ctrl"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="Ctrl"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_alt"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="Alt"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_ctrl_c"
+                android:contentDescription="@string/ssh_key_desc_ctrl_c"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="^C"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_ctrl_d"
+                android:contentDescription="@string/ssh_key_desc_ctrl_d"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="^D"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_ctrl_z"
+                android:contentDescription="@string/ssh_key_desc_ctrl_z"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:minWidth="48dp"
+                android:text="^Z"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_up"
+                android:contentDescription="@string/ssh_key_desc_arrow_up"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="↑"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_down"
+                android:contentDescription="@string/ssh_key_desc_arrow_down"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="↓"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_left"
+                android:contentDescription="@string/ssh_key_desc_arrow_left"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="←"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_right"
+                android:contentDescription="@string/ssh_key_desc_arrow_right"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:minWidth="48dp"
+                android:text="→"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_pipe"
+                android:contentDescription="@string/ssh_key_desc_pipe"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="|"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_tilde"
+                android:contentDescription="@string/ssh_key_desc_tilde"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="~"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_slash"
+                android:contentDescription="@string/ssh_key_desc_slash"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="/"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_dash"
+                android:contentDescription="@string/ssh_key_desc_dash"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="-"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_underscore"
+                android:contentDescription="@string/ssh_key_desc_underscore"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:minWidth="48dp"
+                android:text="_"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_copy"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minWidth="48dp"
+                android:text="@string/ssh_key_copy"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/key_paste"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:text="@string/ssh_key_paste"
+                android:textAllCaps="false" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+</LinearLayout>

@@ -65,4 +65,41 @@
         android:name="io.netbird.client.ui.fistinstall.FirstInstallFragment"
         android:label="FirstInstall"
         tools:layout="@layout/fragment_firstinstall" />
+
+    <fragment
+        android:id="@+id/nav_ssh_sessions"
+        android:name="io.netbird.client.ui.ssh.SshSessionsFragment"
+        android:label="@string/ssh_sessions_title"
+        tools:layout="@layout/fragment_ssh_sessions" />
+
+    <fragment
+        android:id="@+id/nav_ssh_terminal"
+        android:name="io.netbird.client.ui.ssh.SSHTerminalFragment"
+        android:label="@string/ssh_terminal_title"
+        tools:layout="@layout/fragment_ssh_terminal">
+        <argument
+            android:name="sessionId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="host"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="port"
+            app:argType="integer"
+            android:defaultValue="22" />
+        <argument
+            android:name="user"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="mode"
+            app:argType="string"
+            android:defaultValue="netbird" />
+        <argument
+            android:name="password"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
 </navigation>

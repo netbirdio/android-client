@@ -20,6 +20,7 @@ import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.SSHClient;
 import io.netbird.gomobile.android.TunSettings;
 import io.netbird.gomobile.android.URLOpener;
 
@@ -301,6 +302,16 @@ public class VPNService extends android.net.VpnService {
 
         public void deselectRoute(String route) throws Exception {
             engineRunner.deselectRoute(route);
+        }
+
+        public SSHClient newSSHClient() {
+            // An SSH session dials through the tunnel, so a client is worthless
+            // until the engine runs. Refusing one here surfaces the problem where
+            // the user asked to connect, rather than inside the terminal.
+            if (!engineRunner.isRunning()) {
+                return null;
+            }
+            return engineRunner.newSSHClient();
         }
     }
 

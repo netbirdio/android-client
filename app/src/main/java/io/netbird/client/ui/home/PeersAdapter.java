@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
+import io.netbird.client.ui.ssh.SshConnectDialog;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -140,6 +142,9 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
             } else if (id == R.id.copy_ipv6) {
                 copyToClipboard(view.getContext(), "IPv6 Address", peer.getIpv6());
                 return true;
+            } else if (id == R.id.ssh_connect) {
+                promptSSHUser(view, peer);
+                return true;
             }
             return false;
         });
@@ -151,6 +156,12 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
+    }
+
+    private static void promptSSHUser(View anchor, Peer peer) {
+        Context context = anchor.getContext();
+        SshConnectDialog.show(context, peer.getIp(),
+                context.getString(R.string.ssh_dialog_title, peer.getFqdn()));
     }
 
     private void sortPeers() {
@@ -189,6 +200,8 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
             } else {
                 binding.verticalLine.setBackgroundResource(R.drawable.peer_status_disconnected); // Red for disconnected
             }
+
+            binding.sshButton.setOnClickListener(v -> promptSSHUser(v, peer));
 
             binding.getRoot().setOnClickListener(v -> {
                 if (clickListener != null) {
