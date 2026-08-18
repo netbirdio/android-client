@@ -7,5 +7,18 @@
     <string name="session_notification_expired_title">NetBird-Sitzung abgelaufen</string>
     <string name="session_notification_expired_text">Deine Anmeldesitzung ist abgelaufen. Öffne die App, um sich erneut anzumelden.</string>
     <string name="session_notification_extend">Sitzung verlängern</string>
-    <string name="fg_notification_session_text">Sitzung läuft um %1$s ab</string>
+    <string name="fg_notification_session_expired">Sitzung abgelaufen</string>
+    <string name="fg_notification_session_expires_soon">Sitzung läuft in weniger als einer Minute ab</string>
+    <plurals name="fg_notification_session_expires_minutes">
+        <item quantity="one">Sitzung läuft in %1$d Minute ab</item>
+        <item quantity="other">Sitzung läuft in %1$d Minuten ab</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_hours">
+        <item quantity="one">Sitzung läuft in %1$d Stunde ab</item>
+        <item quantity="other">Sitzung läuft in %1$d Stunden ab</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_days">
+        <item quantity="one">Sitzung läuft in %1$d Tag ab</item>
+        <item quantity="other">Sitzung läuft in %1$d Tagen ab</item>
+    </plurals>
 </resources>

@@ -7,5 +7,18 @@
     <string name="session_notification_expired_title">Sessão do NetBird expirada</string>
     <string name="session_notification_expired_text">Sua sessão expirou. Abra o app para entrar novamente.</string>
     <string name="session_notification_extend">Estender sessão</string>
-    <string name="fg_notification_session_text">A sessão expira às %1$s</string>
+    <string name="fg_notification_session_expired">Sessão expirada</string>
+    <string name="fg_notification_session_expires_soon">A sessão expira em menos de um minuto</string>
+    <plurals name="fg_notification_session_expires_minutes">
+        <item quantity="one">A sessão expira em %1$d minuto</item>
+        <item quantity="other">A sessão expira em %1$d minutos</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_hours">
+        <item quantity="one">A sessão expira em %1$d hora</item>
+        <item quantity="other">A sessão expira em %1$d horas</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_days">
+        <item quantity="one">A sessão expira em %1$d dia</item>
+        <item quantity="other">A sessão expira em %1$d dias</item>
+    </plurals>
 </resources>

@@ -7,5 +7,15 @@
     <string name="session_notification_expired_title">NetBird セッションの有効期限が切れました</string>
     <string name="session_notification_expired_text">セッションの有効期限が切れました。アプリを開いて再度ログインしてください。</string>
     <string name="session_notification_extend">セッションを延長</string>
-    <string name="fg_notification_session_text">セッションの期限: %1$s</string>
+    <string name="fg_notification_session_expired">セッションの有効期限が切れました</string>
+    <string name="fg_notification_session_expires_soon">セッションは1分以内に期限切れになります</string>
+    <plurals name="fg_notification_session_expires_minutes">
+        <item quantity="other">セッションは %1$d 分後に期限切れになります</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_hours">
+        <item quantity="other">セッションは %1$d 時間後に期限切れになります</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_days">
+        <item quantity="other">セッションは %1$d 日後に期限切れになります</item>
+    </plurals>
 </resources>
