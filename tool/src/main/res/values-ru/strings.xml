@@ -7,5 +7,24 @@
     <string name="session_notification_expired_title">Сеанс NetBird истёк</string>
     <string name="session_notification_expired_text">Ваш сеанс истёк. Откройте приложение, чтобы войти снова.</string>
     <string name="session_notification_extend">Продлить сеанс</string>
-    <string name="fg_notification_session_text">Сеанс истекает в %1$s</string>
+    <string name="fg_notification_session_expired">Сеанс истёк</string>
+    <string name="fg_notification_session_expires_soon">Сеанс истекает менее чем через минуту</string>
+    <plurals name="fg_notification_session_expires_minutes">
+        <item quantity="one">Сеанс истекает через %1$d минуту</item>
+        <item quantity="few">Сеанс истекает через %1$d минуты</item>
+        <item quantity="many">Сеанс истекает через %1$d минут</item>
+        <item quantity="other">Сеанс истекает через %1$d минуты</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_hours">
+        <item quantity="one">Сеанс истекает через %1$d час</item>
+        <item quantity="few">Сеанс истекает через %1$d часа</item>
+        <item quantity="many">Сеанс истекает через %1$d часов</item>
+        <item quantity="other">Сеанс истекает через %1$d часа</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_days">
+        <item quantity="one">Сеанс истекает через %1$d день</item>
+        <item quantity="few">Сеанс истекает через %1$d дня</item>
+        <item quantity="many">Сеанс истекает через %1$d дней</item>
+        <item quantity="other">Сеанс истекает через %1$d дня</item>
+    </plurals>
 </resources>

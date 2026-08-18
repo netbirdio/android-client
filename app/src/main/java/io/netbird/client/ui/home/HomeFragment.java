@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.PathInterpolator;
+import android.widget.ImageButton;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +38,8 @@ import io.netbird.gomobile.android.NetworkArray;
 public class HomeFragment extends Fragment implements StateListener, RouteChangeListener, ProfilePickerSheet.OnProfileSwitchedListener {
 
     private FragmentHomeBinding binding;
+    // Set only while the addresses are floating; see toggleInfoRows.
+    private PopupWindow addressPopup;
     private ServiceAccessor serviceAccessor;
     private StateListenerRegistry stateListenerRegistry;
 
@@ -268,11 +272,109 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         }
     }
 
+    /**
+     * Opens the addresses, inline when there is room for them and as a floating
+     * panel when there is not. A short screen, a large system font or the
+     * session expiry card can each leave the gap under the summary too small,
+     * and the rows would be squeezed into it rather than pushing anything aside.
+     */
     private void toggleInfoRows() {
         if (binding == null) return;
+
+        if (addressPopup != null) {
+            addressPopup.dismiss();
+            return;
+        }
+
         boolean expand = binding.infoRows.getVisibility() != View.VISIBLE;
-        binding.infoRows.setVisibility(expand ? View.VISIBLE : View.GONE);
-        binding.infoRowsChevron.animate().rotation(expand ? 180f : 0f).setDuration(150).start();
+        if (!expand) {
+            binding.infoRows.setVisibility(View.GONE);
+            rotateChevron(false);
+            return;
+        }
+
+        if (infoRowsFit()) {
+            binding.infoRows.setVisibility(View.VISIBLE);
+        } else {
+            showAddressPopup();
+        }
+        rotateChevron(true);
+    }
+
+    private void rotateChevron(boolean open) {
+        binding.infoRowsChevron.animate().rotation(open ? 180f : 0f).setDuration(150).start();
+    }
+
+    /**
+     * Whether the inline rows would fit in the gap the layout leaves them. Their
+     * height is measured rather than assumed: it follows the system font size,
+     * and the second row only exists when the peer has an IPv6 address.
+     */
+    private boolean infoRowsFit() {
+        View below = binding.sessionExpiryRow.getVisibility() == View.VISIBLE
+                ? binding.sessionExpiryRow
+                : binding.exitNodeRow;
+
+        ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) binding.infoRows.getLayoutParams();
+        int available = below.getTop() - binding.networkAddressSummary.getBottom()
+                - params.topMargin - params.bottomMargin;
+        if (available <= 0) {
+            return false;
+        }
+
+        int width = binding.getRoot().getWidth() - params.leftMargin - params.rightMargin;
+        binding.infoRows.measure(
+                View.MeasureSpec.makeMeasureSpec(Math.max(width, 0), View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+
+        return binding.infoRows.getMeasuredHeight() <= available;
+    }
+
+    /**
+     * The same two rows, floated under the summary. Drawn over the cards below
+     * rather than between them, so nothing on the screen has to move or go away
+     * to make room.
+     */
+    private void showAddressPopup() {
+        View content = LayoutInflater.from(requireContext())
+                .inflate(R.layout.popup_home_addresses, (ViewGroup) binding.getRoot(), false);
+
+        TextView ip = content.findViewById(R.id.popup_ip_value);
+        ip.setText(binding.textIpAddress.getText());
+        ImageButton copyIp = content.findViewById(R.id.popup_ip_copy);
+        copyIp.setOnClickListener(v -> copyToClipboard(ip.getText()));
+
+        View secondaryRow = content.findViewById(R.id.popup_secondary_row);
+        boolean hasSecondary = binding.secondaryValueRow.getVisibility() == View.VISIBLE;
+        secondaryRow.setVisibility(hasSecondary ? View.VISIBLE : View.GONE);
+        if (hasSecondary) {
+            TextView secondary = content.findViewById(R.id.popup_secondary_value);
+            secondary.setText(binding.textSecondaryValue.getText());
+            ImageButton copySecondary = content.findViewById(R.id.popup_secondary_copy);
+            copySecondary.setOnClickListener(v -> copyToClipboard(secondary.getText()));
+        }
+
+        ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) binding.infoRows.getLayoutParams();
+        int width = binding.getRoot().getWidth() - params.leftMargin - params.rightMargin;
+
+        PopupWindow popup = new PopupWindow(content, width, ViewGroup.LayoutParams.WRAP_CONTENT,
+                true);
+        popup.setElevation(getResources().getDimension(R.dimen.address_popup_elevation));
+        popup.setOnDismissListener(() -> {
+            addressPopup = null;
+            if (binding != null) {
+                rotateChevron(false);
+            }
+        });
+
+        addressPopup = popup;
+        // Anchored on the summary, and pulled back to the layout's own margin so
+        // the panel lines up with the cards underneath it rather than with the
+        // centred summary it hangs from.
+        int offsetX = params.leftMargin - binding.networkAddressSummary.getLeft();
+        popup.showAsDropDown(binding.networkAddressSummary, offsetX, params.topMargin);
     }
 
     private void copyToClipboard(CharSequence value) {
@@ -535,6 +637,10 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             binding.getRoot().removeCallbacks(forceCancelOpen);
             binding.getRoot().removeCallbacks(sessionTicker);
         }
+        if (addressPopup != null) {
+            addressPopup.dismiss();
+            addressPopup = null;
+        }
         stopDisabledPulse();
         pendingTarget = null;
         canForceCancel = false;
@@ -648,11 +754,19 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             binding.textSecondaryValue.setText(hasIpv6 ? fIpv6 : "");
             binding.secondaryValueRow.setVisibility(hasIpv6 ? View.VISIBLE : View.GONE);
             // Only show the muted address summary (with chevron) when we have an address.
-            binding.networkAddressSummary.setVisibility(hasIpv4 ? View.VISIBLE : View.GONE);
+            // INVISIBLE, not GONE: the row keeps its slot in the packed chain so the
+            // whole centered block doesn't jump up the moment an address arrives.
+            binding.networkAddressSummary.setVisibility(hasIpv4 ? View.VISIBLE : View.INVISIBLE);
+            // An INVISIBLE view still takes taps and focus, so mute both while it's a placeholder.
+            binding.networkAddressSummary.setClickable(hasIpv4);
+            binding.networkAddressSummary.setFocusable(hasIpv4);
             // Without an address there's nothing to expand: collapse the info rows and reset the chevron.
             if (!hasIpv4) {
                 binding.infoRows.setVisibility(View.GONE);
                 binding.infoRowsChevron.setRotation(0f);
+                if (addressPopup != null) {
+                    addressPopup.dismiss();
+                }
             }
         });
     }

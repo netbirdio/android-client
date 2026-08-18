@@ -11,4 +11,6 @@
     <!-- List bottom padding on screens with a FAB: the button (56dp), its margin
          (16dp) and a gap so the last card clears it. -->
     <dimen name="fab_content_inset">88dp</dimen>
+    <!-- Lifts the floating address panel over the cards it covers. -->
+    <dimen name="address_popup_elevation">8dp</dimen>
 </resources>
