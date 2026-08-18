@@ -316,7 +316,8 @@
     <string name="file_drop_no_results">No matching transfers</string>
     <string name="file_drop_search_hint">Search by file or peer</string>
     <string name="file_drop_delete_confirm">Remove this transfer from the list?</string>
-    <string name="file_drop_delete_confirm_live">This transfer is still running. Cancel it and remove it from the list?</string>
+    <string name="file_drop_stop_confirm">Stop this transfer? It stays in the list so you can remove it afterwards.</string>
+    <string name="file_drop_stop">Stop</string>
     <string name="file_drop_mode_title">Receiving files</string>
     <string name="file_drop_mode_off">Off</string>
     <string name="file_drop_mode_ask">Ask every time</string>
@@ -334,6 +335,7 @@
     <string name="file_drop_state_sent">Sent</string>
     <string name="file_drop_state_received">Received</string>
     <string name="file_drop_state_progress">Sending %1$d%%</string>
+    <string name="file_drop_state_progress_incoming">Receiving %1$d%%</string>
     <string name="file_drop_group_today">Today</string>
     <string name="file_drop_group_yesterday">Yesterday</string>
     <string name="file_drop_group_earlier">Earlier</string>

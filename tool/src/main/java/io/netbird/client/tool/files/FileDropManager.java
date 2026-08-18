@@ -42,10 +42,12 @@ public class FileDropManager {
     private static final FileDropManager INSTANCE = new FileDropManager();
 
     /**
-     * How often a live transfer is re-read. Matches the desktop UI, which polls
-     * the same list at one second while a transfer is running.
+     * How often a live transfer is re-read on top of the events Go sends. Go
+     * reports progress as an event of its own, so this is only the safety net
+     * for an update that never arrives — a listener lost across a profile
+     * switch, say — and can stay well below the desktop's one second poll.
      */
-    private static final long POLL_INTERVAL_MS = 1000;
+    private static final long POLL_INTERVAL_MS = 3000;
 
     /** Supplies the file drop handle, which only the bound service can open. */
     public interface HandleFactory {
@@ -165,8 +167,8 @@ public class FileDropManager {
     // Staged copies of outgoing files, keyed by transfer id; see send().
     private final Map<String, List<ContentFileSource>> staged = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    // Go reports state changes but not progress, so a live transfer has to be
-    // polled; see POLL_INTERVAL_MS and scheduleNextPoll.
+    // Backs up the event stream while a transfer is live; see POLL_INTERVAL_MS
+    // and scheduleNextPoll.
     private final ScheduledExecutorService poller = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean pollPending = new AtomicBoolean();
 
@@ -263,9 +265,10 @@ public class FileDropManager {
     }
 
     /**
-     * Keeps the list refreshing while something is still moving. Go emits events
-     * for the offer and for the outcome, but never for progress, so without this
-     * a running transfer would sit at whatever the last event left behind.
+     * Keeps the list refreshing while something is still moving. Progress
+     * arrives as an event like everything else, so this only covers an update
+     * that goes missing; a row would otherwise sit at whatever the last event
+     * left behind until the transfer ends.
      * <p>
      * The poll chains off publish() rather than running on a fixed schedule: it
      * starts itself when a live transfer appears and stops as soon as the last

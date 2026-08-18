@@ -280,7 +280,9 @@ public class FileDropFragment extends Fragment {
             return getString(R.string.file_drop_state_transferring);
         }
         int percent = (int) (transfer.transferred() * 100 / transfer.totalSize());
-        return getString(R.string.file_drop_state_progress, percent);
+        return getString(transfer.outgoing()
+                ? R.string.file_drop_state_progress
+                : R.string.file_drop_state_progress_incoming, percent);
     }
 
     /**
@@ -460,6 +462,15 @@ public class FileDropFragment extends Fragment {
             }
             binding.transferStatus.setClickable(copyable);
 
+            // The bar only says how far along a live transfer is; a finished one
+            // has its outcome in the status slot and needs nothing else.
+            boolean moving = transfer.isRunning() && transfer.totalSize() > 0;
+            binding.transferProgress.setVisibility(moving ? View.VISIBLE : View.GONE);
+            if (moving) {
+                binding.transferProgress.setProgress(
+                        (int) (transfer.transferred() * 100 / transfer.totalSize()));
+            }
+
             boolean openable = !transfer.outgoing()
                     && transfer.state() == Android.FileDropStateCompleted
                     && !transfer.deliveredPaths().isEmpty();
@@ -467,7 +478,7 @@ public class FileDropFragment extends Fragment {
             binding.getRoot().setClickable(openable);
 
             binding.getRoot().setOnLongClickListener(v -> {
-                confirmDelete(transfer);
+                confirmStopOrDelete(transfer);
                 return true;
             });
         }
@@ -484,18 +495,29 @@ public class FileDropFragment extends Fragment {
     }
 
     /**
-     * Asks before dropping a history entry. A live transfer is cancelled by the
-     * same action, which the prompt spells out rather than silently aborting it.
+     * Long press does one thing at a time: it stops a transfer that is still
+     * running, and removes one that has finished. Stopping something and
+     * dropping its record are separate decisions, so a running transfer takes
+     * two presses to disappear and the first one is never destructive.
      */
+    private void confirmStopOrDelete(FileDropManager.Transfer transfer) {
+        if (transfer.isTerminal()) {
+            confirm(title(transfer), R.string.file_drop_delete_confirm, R.string.file_drop_delete,
+                    () -> FileDropManager.get().delete(transfer.id()));
+            return;
+        }
+        confirm(title(transfer), R.string.file_drop_stop_confirm, R.string.file_drop_stop,
+                () -> FileDropManager.get().cancel(transfer.id()));
+    }
+
+    /** Puts one question with one answer in front of the user. */
     @SuppressLint("InflateParams")
-    private void confirmDelete(FileDropManager.Transfer transfer) {
+    private void confirm(String title, int message, int action, Runnable onConfirm) {
         View view = LayoutInflater.from(requireContext())
                 .inflate(R.layout.dialog_simple_edit_text, null);
 
-        ((TextView) view.findViewById(R.id.text_title_dialog)).setText(title(transfer));
-        ((TextView) view.findViewById(R.id.text_label_dialog)).setText(transfer.isTerminal()
-                ? R.string.file_drop_delete_confirm
-                : R.string.file_drop_delete_confirm_live);
+        ((TextView) view.findViewById(R.id.text_title_dialog)).setText(title);
+        ((TextView) view.findViewById(R.id.text_label_dialog)).setText(message);
         view.findViewById(R.id.edit_text_dialog).setVisibility(View.GONE);
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
@@ -503,9 +525,9 @@ public class FileDropFragment extends Fragment {
                 .create();
 
         MaterialButton confirm = view.findViewById(R.id.btn_ok_dialog);
-        confirm.setText(R.string.file_drop_delete);
+        confirm.setText(action);
         confirm.setOnClickListener(v -> {
-            FileDropManager.get().delete(transfer.id());
+            onConfirm.run();
             dialog.dismiss();
         });
         view.findViewById(R.id.btn_cancel_dialog).setOnClickListener(v -> dialog.dismiss());

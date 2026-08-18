@@ -77,4 +77,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5" />
 
+    <!-- Rides the last line of the card so a transfer in flight does not make
+         the row any taller than a finished one. -->
+    <ProgressBar
+        android:id="@+id/transfer_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="96dp"
+        android:layout_height="6dp"
+        android:layout_marginStart="16dp"
+        android:max="100"
+        android:progressTint="@color/nb_orange"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/transfer_meta"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/transfer_meta"
+        app:layout_constraintTop_toTopOf="@id/transfer_meta" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
