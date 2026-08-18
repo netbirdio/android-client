@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/nb_bg_peers"
+    tools:context=".ui.ssh.SshSessionsFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/sessions_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="12dp"
+        android:paddingBottom="@dimen/fab_content_inset"
+        tools:listitem="@layout/list_item_ssh_session" />
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="32dp"
+        android:text="@string/ssh_sessions_empty"
+        android:textAlignment="center"
+        android:visibility="gone" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/new_session_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:contentDescription="@string/ssh_new_connection_title"
+        android:src="@drawable/add_24px"
+        app:backgroundTint="@color/nb_orange"
+        app:tint="@android:color/white"
+        app:elevation="0dp"
+        app:hoveredFocusedTranslationZ="0dp"
+        app:pressedTranslationZ="0dp" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -54,13 +54,16 @@
     </LinearLayout>
 
     <!-- NetBird logo. Head of a packed vertical chain (logo → switch → status →
-         hostname → address summary) centered between the profile chip and the
-         exit node row, so the group can never overlap either. The hostname and
+         hostname → address summary) held between the profile chip and the exit
+         node row, so the group can never overlap either. The hostname and
          address summary hold their height even when empty (minHeight, and
          INVISIBLE rather than GONE) so the block stays put when connecting fills
          them in. The expandable info rows are deliberately outside the chain:
          including them would grow the packed group and re-center the whole block
-         every time they open. -->
+         every time they open. The group is biased above the centre of that
+         space for the same reason: what is left underneath is where the info
+         rows open, and a centred group left too little for two of them, which
+         came out clipped against the exit node card. -->
     <ImageView
         android:id="@+id/home_logo"
         android:layout_width="0dp"
@@ -74,6 +77,7 @@
         app:layout_constraintTop_toBottomOf="@id/profile_chip"
         app:layout_constraintBottom_toTopOf="@+id/btn_connect"
         app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintVertical_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.42" />
@@ -124,12 +128,16 @@
     <!-- IP / network address (monospace, emphasized) -->
     <TextView
         android:id="@+id/text_hostname"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:ellipsize="end"
         android:fontFamily="@font/jetbrains_mono_variable"
         android:focusable="false"
         android:gravity="center"
+        android:maxLines="1"
         android:minHeight="20dp"
         android:textAlignment="center"
         android:textColor="@color/nb_txt"
@@ -207,6 +215,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="20dp"
+        android:layout_marginBottom="12dp"
         android:background="@drawable/info_row_bg"
         android:divider="@drawable/info_row_divider"
         android:orientation="vertical"

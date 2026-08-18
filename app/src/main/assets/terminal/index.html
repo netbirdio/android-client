@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>NetBird SSH</title>
+<link rel="stylesheet" href="xterm.css">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+  #terminal {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+  }
+  /* Without this the .xterm element keeps its initial height, so shrinking the
+     container (the keyboard opening) never reduces the row count. */
+  .xterm {
+    height: 100%;
+  }
+  /* xterm 6 draws its own scrollbar element instead of using the native one. */
+  .xterm-viewport::-webkit-scrollbar { width: 0; }
+  .xterm .xterm-scrollable-element > .scrollbar { display: none; }
+</style>
+</head>
+<body>
+<div id="terminal"></div>
+<script src="xterm.js"></script>
+<script src="xterm-addon-fit.js"></script>
+<script src="xterm-addon-webgl.js"></script>
+<script>
+// Without an explicit palette the 16 ANSI colours fall back to the WebView
+// defaults, whose blues and greys are close to unreadable on black. These are
+// the standard xterm hues raised for contrast against a dark background.
+var TERMINAL_THEME = {
+  background: '#000000',
+  foreground: '#e6e6e6',
+  cursor: '#e6e6e6',
+  cursorAccent: '#000000',
+  selectionBackground: '#4d4d4d',
+  black: '#2e3436',
+  red: '#e05561',
+  green: '#8cc265',
+  yellow: '#d5b06b',
+  blue: '#5c9fd6',
+  magenta: '#c162de',
+  cyan: '#42b3c2',
+  white: '#d7dae0',
+  brightBlack: '#6b7280',
+  brightRed: '#ff6d75',
+  brightGreen: '#a5e075',
+  brightYellow: '#f0c674',
+  brightBlue: '#7fb5e8',
+  brightMagenta: '#d67bef',
+  brightCyan: '#5ecbd9',
+  brightWhite: '#ffffff',
+};
+</script>
+<script>
+(function () {
+  var bridge = window.AndroidSSH;
+  var term = new Terminal({
+    cursorBlink: true,
+    cursorStyle: 'block',
+    // Makes it obvious when the terminal has lost focus to another view.
+    cursorInactiveStyle: 'outline',
+    // ui-monospace picks the platform terminal face where the WebView has one
+    // and falls back to the generic family elsewhere.
+    fontFamily: 'ui-monospace, monospace',
+    // Every point costs about 4 columns: 12 gives 67 on a 411dp-wide screen,
+    // 14 gives 57, 15 only 53. Wrapped lines hurt more than small glyphs do.
+    fontSize: 12,
+    letterSpacing: 0,
+    theme: TERMINAL_THEME,
+    // SSH servers send CRLF, so lone \n must not be rewritten: doing so
+    // breaks cursor positioning in full-screen TUIs.
+    convertEol: false,
+    scrollback: 10000,
+    // Lifts unreadable pairings (dark blue on black) to a legible ratio
+    // without discarding the server's colour choices entirely.
+    minimumContrastRatio: 4.5,
+    // Opens up the buffer and parser APIs.
+    allowProposedApi: true,
+  });
+  var fit = new FitAddon.FitAddon();
+  term.loadAddon(fit);
+  term.open(document.getElementById('terminal'));
+
+  // The DOM renderer repaints every cell as an element, which stutters under
+  // heavy output (top, cat of a large file). WebGL draws from a glyph atlas
+  // instead. The context can be lost when Android backgrounds the app or
+  // reclaims GPU memory, and the addon cannot recover on its own, so drop it
+  // and let xterm fall back to the DOM renderer.
+  try {
+    var webgl = new WebglAddon.WebglAddon();
+    webgl.onContextLoss(function () {
+      webgl.dispose();
+    });
+    term.loadAddon(webgl);
+  } catch (e) {
+    // No usable WebGL (emulator, blocklisted driver) — the DOM renderer stays.
+  }
+
+  function applyFit() {
+    try {
+      fit.fit();
+    } catch (e) {
+      // Layout not ready yet
+      return;
+    }
+    if (bridge && bridge.onResize) {
+      bridge.onResize(term.cols, term.rows);
+    }
+  }
+
+  // Forward keystrokes to native side
+  term.onData(function (data) {
+    if (bridge && bridge.onInput) {
+      bridge.onInput(data);
+    }
+  });
+
+  // Resize on viewport changes
+  window.addEventListener('resize', applyFit);
+
+  // When the keyboard opens, the native side pads the layout and the WebView
+  // itself gets shorter. That does not always surface as a window resize event,
+  // so watch the container directly. The callback runs before the .xterm child
+  // has been laid out at the new height, so the fit is deferred by a frame or
+  // it would measure the old size and keep the old row count.
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      requestAnimationFrame(applyFit);
+    }).observe(document.getElementById('terminal'));
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', applyFit);
+  }
+
+  // Called from Java to clear the terminal before replaying the scrollback
+  // when the fragment re-attaches to an existing session.
+  window.resetTerminal = function () {
+    term.reset();
+  };
+
+  // Called from Java with base64-encoded UTF-8 bytes from the SSH session.
+  window.writeFromHost = function (b64) {
+    try {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      term.write(bytes);
+    } catch (e) {
+      term.write('\r\n[terminal decode error]\r\n');
+    }
+  };
+
+  // Called from Java to print a status / error line in the terminal.
+  window.printStatus = function (text) {
+    term.write('\r\n\x1b[33m' + text + '\x1b[0m\r\n');
+  };
+
+  // Called from Java for the Copy key; returns '' when nothing is selected.
+  // Deliberately not named getSelection: that would shadow the DOM builtin
+  // xterm itself relies on.
+  window.getTerminalSelection = function () {
+    return term.getSelection();
+  };
+
+  // Called from Java for the Paste key, so pasted text takes the same path as
+  // typed input (including bracketed paste when the server asked for it).
+  window.pasteText = function (text) {
+    term.paste(text);
+  };
+
+  // Gboard otherwise autocorrects and capitalises what is typed into xterm's
+  // hidden textarea, which silently rewrites commands. These attributes are the
+  // only way to reach it: the textarea is created by xterm, not by this page,
+  // and a WebView-level input type does not apply to it.
+  var helper = document.querySelector('.xterm-helper-textarea');
+  if (helper) {
+    helper.setAttribute('autocorrect', 'off');
+    helper.setAttribute('autocapitalize', 'none');
+    helper.setAttribute('autocomplete', 'off');
+    helper.setAttribute('spellcheck', 'false');
+  }
+
+  // Initial fit and signal ready (which triggers SSH connect on the Java side).
+  setTimeout(function () {
+    applyFit();
+    if (bridge && bridge.onReady) {
+      bridge.onReady(term.cols, term.rows);
+    }
+    term.focus();
+  }, 50);
+})();
+</script>
+</body>
+</html>

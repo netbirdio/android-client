@@ -46,16 +46,20 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
+import io.netbird.client.tool.Profile;
+import io.netbird.client.tool.ProfileManagerWrapper;
 import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.SessionEventListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
+import io.netbird.client.ui.ssh.SshSessionManager;
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.SSHClient;
 import io.netbird.gomobile.android.URLOpener;
 
 
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
     private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
+    private SshSessionManager.ClientFactory sshClientFactory;
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
@@ -164,6 +169,26 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         applySystemBarIconContrast();
         applySystemBarInsets();
 
+        SshSessionManager.get().init(this);
+        syncSshSessionProfile();
+        sshClientFactory = new SshSessionManager.ClientFactory() {
+            @Override
+            public SSHClient newClient() {
+                return newSSHClient();
+            }
+
+            @Override
+            public URLOpener urlOpener() {
+                return getSSHURLOpener();
+            }
+
+            @Override
+            public boolean canConnect() {
+                return isEngineRunning();
+            }
+        };
+        SshSessionManager.get().setClientFactory(sshClientFactory);
+
         isRunningOnTV = PlatformUtils.isAndroidTV(this);
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
         if (isRunningOnTV) {
@@ -185,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         topLevelDestinations.add(R.id.nav_home);
         topLevelDestinations.add(R.id.nav_peers);
         topLevelDestinations.add(R.id.nav_networks);
+        topLevelDestinations.add(R.id.nav_ssh_sessions);
         topLevelDestinations.add(R.id.nav_settings);
         mAppBarConfiguration = new AppBarConfiguration.Builder(topLevelDestinations).build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
@@ -210,23 +236,36 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             int destId = destination.getId();
 
             // First-launch onboarding takes the whole screen — hide both nav surfaces.
-            if (destId == R.id.firstInstallFragment) {
+            // The SSH terminal does the same, so the keyboard and xterm grid get the
+            // full height rather than competing with the toolbar and bottom nav.
+            if (destId == R.id.firstInstallFragment || destId == R.id.nav_ssh_terminal) {
                 bottomNav.setVisibility(View.GONE);
                 setToolbarVisible(false);
                 return;
             }
             bottomNav.setVisibility(View.VISIBLE);
 
-            // Top-level destinations (Home, Peers, Networks, Settings) don't need a toolbar —
-            // bottom nav already identifies the screen. Sub-screens keep the toolbar with title + Up arrow.
-            boolean isTopLevel = topLevelDestinations.contains(destId);
-            setToolbarVisible(!isTopLevel);
+            // Home, Peers and Networks don't need a toolbar — bottom nav already
+            // identifies the screen. Sub-screens keep the toolbar with title + Up
+            // arrow. SSH sessions and Settings are the exceptions among the tabs:
+            // both are lists that run to the top of the screen, and without a title
+            // bar to anchor them the first row reads as cut off rather than as the
+            // start of a list.
+            boolean hideToolbar = topLevelDestinations.contains(destId)
+                    && destId != R.id.nav_ssh_sessions
+                    && destId != R.id.nav_settings;
+            setToolbarVisible(!hideToolbar);
 
             if (destId == R.id.nav_home) {
                 removeToolbarShadow();
             } else {
                 resetToolbar();
+                dismissBottomSheets();
             }
+        });
+
+        sshUrlOpener = new CustomTabURLOpener(this, () -> {
+            // Custom Tab closed; SSH device-code polling will time out if not completed.
         });
 
         if (!useDeviceCodeFlow) {
@@ -244,34 +283,38 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             urlOpener = new URLOpener() {
                 @Override
                 public void open(String url, String userCode) {
-                    qrCodeDialog = QrCodeDialog.newInstance(url, userCode, () -> {
-                        if (isSSOFinishedWell) {
-                            return;
-                        }
-                        if (mBinder == null) {
-                            return;
-                        }
-                        mBinder.stopEngine();
-                    });
-                    qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+                    runOnUiThread(() -> {
+                        qrCodeDialog = QrCodeDialog.newInstance(url, userCode, () -> {
+                            if (isSSOFinishedWell) {
+                                return;
+                            }
+                            if (mBinder == null) {
+                                return;
+                            }
+                            mBinder.stopEngine();
+                        });
+                        qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
 
-                    if (!isRunningOnTV) {
-                        try {
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                            startActivity(browserIntent);
-                        } catch (Exception e) {
-                            Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
+                        if (!isRunningOnTV) {
+                            try {
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(browserIntent);
+                            } catch (Exception e) {
+                                Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
+                            }
                         }
-                    }
+                    });
                 }
 
                 @Override
                 public void onLoginSuccess() {
                     Log.d(LOGTAG, "onLoginSuccess fired for device code flow.");
-                    if (qrCodeDialog != null && qrCodeDialog.isVisible()) {
-                        qrCodeDialog.dismiss();
-                        qrCodeDialog = null;
-                    }
+                    runOnUiThread(() -> {
+                        if (qrCodeDialog != null && qrCodeDialog.isVisible()) {
+                            qrCodeDialog.dismiss();
+                            qrCodeDialog = null;
+                        }
+                    });
                 }
             };
         }
@@ -397,6 +440,24 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Profiles are switched and deleted from a fragment, which reports
+        // neither, so re-read the active one whenever we come back into view.
+        syncSshSessionProfile();
+    }
+
+    private void syncSshSessionProfile() {
+        try {
+            ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
+            Profile active = profileManager.getActiveProfile();
+            SshSessionManager.get().setProfile(active != null ? active.getID() : null);
+        } catch (Exception e) {
+            Log.w(LOGTAG, "Could not sync SSH sessions with the active profile", e);
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         Log.d(LOGTAG, "onStop");
@@ -421,6 +482,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     @Override
     protected  void onDestroy() {
         super.onDestroy();
+
+        if (sshClientFactory != null) {
+            SshSessionManager.get().clearClientFactory(sshClientFactory);
+            sshClientFactory = null;
+        }
 
         if (mBinder != null) {
             mBinder.removeConnectionStateListener();
@@ -520,6 +586,46 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             throw new Exception("VPN service not connected");
         }
         return mBinder.debugBundle(anonymize);
+    }
+
+    @Override
+    public SSHClient newSSHClient() {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return null;
+        }
+        return mBinder.newSSHClient();
+    }
+
+    private boolean isEngineRunning() {
+        return mBinder != null && mBinder.isRunning();
+    }
+
+    private CustomTabURLOpener sshUrlOpener;
+
+    @Override
+    public io.netbird.gomobile.android.URLOpener getSSHURLOpener() {
+        return sshUrlOpener;
+    }
+
+    private void dismissBottomSheets() {
+        for (androidx.fragment.app.Fragment f : getSupportFragmentManager().getFragments()) {
+            dismissBottomSheetsRecursive(f);
+        }
+    }
+
+    private void dismissBottomSheetsRecursive(androidx.fragment.app.Fragment fragment) {
+        if (fragment instanceof com.google.android.material.bottomsheet.BottomSheetDialogFragment) {
+            try {
+                ((com.google.android.material.bottomsheet.BottomSheetDialogFragment) fragment).dismissAllowingStateLoss();
+            } catch (Exception ignore) {
+                // Already detached/dismissed.
+            }
+            return;
+        }
+        for (androidx.fragment.app.Fragment child : fragment.getChildFragmentManager().getFragments()) {
+            dismissBottomSheetsRecursive(child);
+        }
     }
 
     @Override

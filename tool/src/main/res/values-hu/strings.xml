@@ -12,5 +12,15 @@
     <string name="session_notification_expired_title">A NetBird munkamenet lejárt</string>
     <string name="session_notification_expired_text">A munkamenet lejárt. Nyissa meg az alkalmazást az újbóli bejelentkezéshez.</string>
     <string name="session_notification_extend">Munkamenet meghosszabbítása</string>
-    <string name="fg_notification_session_text">A munkamenet lejár: %1$s</string>
+    <string name="fg_notification_session_expired">A munkamenet lejárt</string>
+    <string name="fg_notification_session_expires_soon">A munkamenet kevesebb mint egy perc múlva lejár</string>
+    <plurals name="fg_notification_session_expires_minutes">
+        <item quantity="other">A munkamenet %1$d perc múlva lejár</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_hours">
+        <item quantity="other">A munkamenet %1$d óra múlva lejár</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_days">
+        <item quantity="other">A munkamenet %1$d nap múlva lejár</item>
+    </plurals>
 </resources>

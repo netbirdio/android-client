@@ -18,7 +18,8 @@ public class CustomTabURLOpener implements URLOpener {
     private final AppCompatActivity context;
     private final ActivityResultLauncher<Intent> customTabLauncher;
 
-    private boolean isOpened = false;
+    /** Written from a Go thread, read from the main thread and vice versa. */
+    private volatile boolean isOpened = false;
 
     public interface OnCustomTabResult {
         void onClosed();
@@ -41,29 +42,45 @@ public class CustomTabURLOpener implements URLOpener {
 
     @Override
     public void onLoginSuccess() {
-        Log.d(TAG, "onLoginSuccess fired.");
+        Log.d(TAG, "onLoginSuccess fired, isOpened=" + isOpened);
 
-        if (isOpened) {
+        if (!isOpened) {
+            return;
+        }
+        // isOpened stays set: MainActivity.onStop uses it to keep the service
+        // bound while the SSO surface is in front, and the launcher callback
+        // clears it when the tab actually goes away. The Custom Tab is a
+        // separate task, so it is dismissed by bringing this activity forward
+        // rather than by closing it directly.
+        context.runOnUiThread(() -> {
             Intent i = new Intent(this.context, MainActivity.class);
             i.setAction(Intent.ACTION_MAIN);
             i.addCategory(Intent.CATEGORY_LAUNCHER);
             this.context.startActivity(i);
-        }
+        });
     }
 
     @Override
     public void open(String url, String userCode) {
+        // Set before posting, not inside the post: callers invoke this from a Go
+        // thread and may report success straight after, and onLoginSuccess does
+        // nothing unless the surface is already marked as opened.
         isOpened = true;
-        try {
-            CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
-            Intent intent = customTabsIntent.intent;
-            intent.setData(Uri.parse(url));
-            customTabLauncher.launch(intent);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to launch CustomTab: " + e.getMessage());
-            if (context instanceof OnCustomTabResult) {
-                ((OnCustomTabResult) context).onClosed();
+        // launch() drives an activity result contract, which has to run on the
+        // main thread; a Go thread would otherwise raise a wrong-thread error.
+        context.runOnUiThread(() -> {
+            try {
+                CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
+                Intent intent = customTabsIntent.intent;
+                intent.setData(Uri.parse(url));
+                customTabLauncher.launch(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to launch CustomTab: " + e.getMessage());
+                isOpened = false;
+                if (context instanceof OnCustomTabResult) {
+                    ((OnCustomTabResult) context).onClosed();
+                }
             }
-        }
+        });
     }
 }

@@ -18,6 +18,7 @@ import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.NetworkChangeListener;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.SSHClient;
 import io.netbird.gomobile.android.StateChangeListener;
 import io.netbird.gomobile.android.TunAdapter;
 import io.netbird.gomobile.android.TunSettings;
@@ -376,6 +377,10 @@ class EngineRunner {
 
     private int androidSDKVersion() {
         return Build.VERSION.SDK_INT;
+    }
+
+    public SSHClient newSSHClient() {
+        return Android.newSSHClient(goClient);
     }
 
     public void renewTUN(int fd) {

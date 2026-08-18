@@ -5,6 +5,8 @@ import androidx.annotation.Nullable;
 import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
+import io.netbird.gomobile.android.SSHClient;
+import io.netbird.gomobile.android.URLOpener;
 
 public interface ServiceAccessor {
     // Add methods to interact with your service
@@ -33,4 +35,8 @@ public interface ServiceAccessor {
 
     /** Starts the interactive SSO flow to extend the session without dropping the tunnel. */
     void extendSession();
+
+    SSHClient newSSHClient();
+
+    URLOpener getSSHURLOpener();
 }
