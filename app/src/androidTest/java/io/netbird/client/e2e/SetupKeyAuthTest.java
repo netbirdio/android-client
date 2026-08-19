@@ -1,18 +1,14 @@
 package io.netbird.client.e2e;
 
-import android.os.Bundle;
-
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Login smoke test: drives the profile editor to create a profile and
@@ -24,6 +20,10 @@ import static org.junit.Assert.assertTrue;
  * {@link PeerConnectivityTest}. The shared login steps live in
  * {@link LoginFlow}.
  *
+ * <p>The profile this creates is the suite's shared plain-key profile
+ * ({@link SharedProfiles}): every later plain-key test reuses it instead of
+ * enrolling its own, and {@link E2eSuite} removes it after the whole run.
+ *
  * <p>The setup key is read from an instrumentation runner argument so CI can
  * inject it as a secret without baking it into the APK:
  * <pre>
@@ -34,9 +34,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class SetupKeyAuthTest {
 
-    private UiDevice device;
-    private String profileName;
-
     @Before
     public void skipIfPreviousFailed() {
         FailFast.skipIfAborted();
@@ -44,26 +41,8 @@ public class SetupKeyAuthTest {
 
     @Test
     public void loginWithSetupKeyViaUi() throws Exception {
-        Bundle args = InstrumentationRegistry.getArguments();
-        String setupKey = args.getString("setupKey");
-
-        assertNotNull("setupKey instrumentation argument is required", setupKey);
-        assertTrue("setupKey must not be blank", !setupKey.trim().isEmpty());
-
-        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        profileName = LoginFlow.createProfileAndLogin(
-                E2eAppRule.activity(), device, "login", setupKey);
-    }
-
-    /**
-     * Enrolling now creates a profile, so this test leaves one behind — remove
-     * it like the connectivity tests do, to keep the account's peer list and the
-     * device's profile list from growing with every run.
-     */
-    @After
-    public void tearDown() throws Exception {
-        if (profileName != null && device != null) {
-            LoginFlow.removeProfile(E2eAppRule.activity(), device, profileName);
-        }
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        String profileName = SharedProfiles.plain(E2eAppRule.activity(), device);
+        assertNotNull("shared profile must exist after login", profileName);
     }
 }

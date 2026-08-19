@@ -2,18 +2,15 @@ package io.netbird.client.e2e;
 
 import io.netbird.client.MainActivity;
 
-import android.os.Bundle;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -61,7 +58,6 @@ public class ExitNodeNetworkTransitionTest {
     private static final long PROBE_POLL_MS = 1_000;
 
     private VpnTestHarness harness;
-    private String profileName;
 
     @Before
     public void skipIfPreviousFailed() {
@@ -73,20 +69,11 @@ public class ExitNodeNetworkTransitionTest {
         if (harness != null) {
             harness.setWifi(true);
             harness.setMobileData(true);
-            harness.disableTouchVisualization();
-        }
-        if (profileName != null && harness != null) {
-            LoginFlow.removeProfile(E2eAppRule.activity(), harness.device(), profileName);
         }
     }
 
     @Test
     public void egressSurvivesNetworkTransitions() throws Exception {
-        Bundle args = InstrumentationRegistry.getArguments();
-        String setupKey = args.getString("exitNodeSetupKey");
-        assertNotNull("exitNodeSetupKey instrumentation argument is required", setupKey);
-        assertTrue("exitNodeSetupKey must not be blank", !setupKey.trim().isEmpty());
-
         MainActivity activity = E2eAppRule.activity();
         harness = new VpnTestHarness(activity);
         harness.enableTouchVisualization();
@@ -94,8 +81,7 @@ public class ExitNodeNetworkTransitionTest {
         harness.setWifi(true);
         harness.setMobileData(true);
 
-        profileName = LoginFlow.createProfileAndLogin(
-                activity, harness.device(), "exit-node-network", setupKey);
+        SharedProfiles.exitNode(activity, harness.device());
 
         boolean connected = harness.connectAndAwait(CONNECT_TIMEOUT_SEC);
         if (!connected) {

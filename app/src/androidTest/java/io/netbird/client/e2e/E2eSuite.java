@@ -5,6 +5,7 @@ import io.netbird.client.MainActivity;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -43,5 +44,16 @@ public class E2eSuite {
     public static void disableForceRelay() throws Exception {
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         LoginFlow.setForceRelay(E2eAppRule.activity(), device, false);
+    }
+
+    /**
+     * The tests share two profiles for the whole run (one per setup key, see
+     * {@link SharedProfiles}), so cleanup happens once here instead of per test.
+     */
+    @AfterClass
+    public static void removeSharedProfiles() throws Exception {
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        SharedProfiles.removeAll(E2eAppRule.activity(), device);
+        new VpnTestHarness(E2eAppRule.activity()).disableTouchVisualization();
     }
 }

@@ -2,33 +2,28 @@ package io.netbird.client.e2e;
 
 import io.netbird.client.MainActivity;
 
-import android.os.Bundle;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
  * End-to-end connectivity test — the Android port of the Robot
  * {@code client-tests.robot} "Should be able to connect to peer" cases.
  *
- * <p>Mirrors the Robot {@code Try Peer Connectivity} keyword. It creates a
- * fresh, isolated profile (via the Profiles UI — the Android equivalent of
- * {@code netbird profile add test-<random>}), logs in to the production
- * management server with a setup key (shared UI flow in {@link LoginFlow}),
+ * <p>Mirrors the Robot {@code Try Peer Connectivity} keyword. It activates the
+ * suite's shared plain-key profile ({@link SharedProfiles} — enrolled against
+ * the production management server via the UI flow in {@link LoginFlow}),
  * brings the VPN up, then verifies the data plane by pinging a remote peer's
  * <b>FQDN</b> through the tunnel. The NetBird tunnel DNS resolves the name to
  * the peer's overlay IP. The remote peers are live, externally-running NetBird
- * containers; this test does not create or tear them down. The profile is
- * removed in teardown.
+ * containers; this test does not create or tear them down. The shared profile
+ * is removed once, after the whole suite.
  *
  * <p>Two cases, exactly as in the Robot suite (peer FQDNs hard-coded as in the
  * original):
@@ -74,55 +69,38 @@ public class PeerConnectivityTest {
     private static final long PING_TIMEOUT_SEC = 90;
 
     private VpnTestHarness harness;
-    private String profileName;
 
     @Before
     public void skipIfPreviousFailed() {
         FailFast.skipIfAborted();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        if (profileName != null && harness != null) {
-            harness.disableTouchVisualization();
-            LoginFlow.removeProfile(E2eAppRule.activity(), harness.device(), profileName);
-        }
-    }
-
     @Test
     public void connectsWithRelay() throws Exception {
-        connectAndPing(PEER_FQDN_RELAY, "relay");
+        connectAndPing(PEER_FQDN_RELAY);
     }
 
     @Test
     public void connectsWithoutRelay() throws Exception {
-        connectAndPing(PEER_FQDN_NO_RELAY, "no-relay");
+        connectAndPing(PEER_FQDN_NO_RELAY);
     }
 
     /**
-     * Shared body: fresh profile → login → connect → ping {@code peerFqdn}
+     * Shared body: shared profile active → connect → ping {@code peerFqdn}
      * through the tunnel. This is the Android equivalent of the Robot
      * {@code Try Peer Connectivity ${peer_name}} keyword. Force-relay is
      * disabled once for the whole suite (see {@link E2eSuite}).
      */
-    private void connectAndPing(String peerFqdn, String scenario) throws Exception {
-        Bundle args = InstrumentationRegistry.getArguments();
-        String setupKey = args.getString("setupKey");
-
-        assertNotNull("setupKey instrumentation argument is required", setupKey);
-        assertTrue("setupKey must not be blank", !setupKey.trim().isEmpty());
-
+    private void connectAndPing(String peerFqdn) throws Exception {
         MainActivity activity = E2eAppRule.activity();
         harness = new VpnTestHarness(activity);
         harness.enableTouchVisualization();
 
         harness.grantVpnConsent();
 
-        // 1. Create a fresh, isolated profile and enrol it with the setup key
-        // (Android equivalent of the Robot suite's `netbird profile add
-        // test-<random>` plus login) — one dialog does both.
-        profileName = LoginFlow.createProfileAndLogin(
-                activity, harness.device(), scenario, setupKey);
+        // 1. Make sure the suite's shared plain-key profile exists and is the
+        // active one (created here if this class runs standalone).
+        SharedProfiles.plain(activity, harness.device());
 
         // 2. Bring the VPN up and wait for the engine to report connected.
         boolean connected = harness.connectAndAwait(CONNECT_TIMEOUT_SEC);
