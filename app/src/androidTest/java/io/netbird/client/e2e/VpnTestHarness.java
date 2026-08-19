@@ -121,6 +121,36 @@ final class VpnTestHarness {
         return connected;
     }
 
+    /**
+     * Toggle the emulator's virtual WiFi transport. {@code svc wifi} works on
+     * the API 30 image the e2e workflow runs on (removed in API 31+, where
+     * {@code cmd wifi set-wifi-enabled} replaces it).
+     */
+    void setWifi(boolean enabled) {
+        String out = shell("svc wifi " + (enabled ? "enable" : "disable"));
+        Log.i(TAG, "svc wifi " + (enabled ? "enable" : "disable") + " -> " + out.trim());
+    }
+
+    /** Toggle the emulator's virtual cellular data transport. */
+    void setMobileData(boolean enabled) {
+        String out = shell("svc data " + (enabled ? "enable" : "disable"));
+        Log.i(TAG, "svc data " + (enabled ? "enable" : "disable") + " -> " + out.trim());
+    }
+
+    /**
+     * Wait until the Home screen's status text shows exactly {@code expected}
+     * (English locale, like {@link #connectAndAwait(long)}).
+     */
+    boolean awaitStatusText(String expected, long timeoutSec) {
+        boolean shown = device.wait(
+                Until.hasObject(By.res(LoginFlow.PACKAGE, "text_connection_status")
+                        .text(expected)),
+                timeoutSec * 1000L);
+        Log.i(TAG, "Status '" + expected + "' " + (shown ? "shown" : "NOT shown")
+                + " within " + timeoutSec + "s");
+        return shown;
+    }
+
     /** Retry {@link #pingOnce(String)} until it succeeds or the timeout elapses. */
     boolean waitForPing(String target, long timeoutSec) throws InterruptedException {
         long deadline = System.currentTimeMillis() + (timeoutSec * 1000L);
@@ -156,7 +186,16 @@ final class VpnTestHarness {
 
     /** Ping a host (FQDN or IP) once through the tunnel. */
     boolean pingOnce(String target) {
-        String output = shell(String.format("ping -c 1 -W %d %s", PING_W_SEC, target));
+        return pingOnce(target, PING_W_SEC);
+    }
+
+    /**
+     * Ping a host once with a caller-chosen per-attempt timeout. The network
+     * transition tests probe on a ~1s cadence to measure outage windows, so
+     * they need a tighter timeout than the default {@link #PING_W_SEC}.
+     */
+    boolean pingOnce(String target, int timeoutSec) {
+        String output = shell(String.format("ping -c 1 -W %d %s", timeoutSec, target));
         // The full output goes to logcat — the CI artifact — so a failure shows
         // exactly what happened: the resolved address in the "PING x (a.b.c.d)"
         // header, an unknown-host error, or 100% loss to a resolved peer.
