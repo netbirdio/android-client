@@ -28,6 +28,10 @@ public class NetworkChangeDetector {
     // non-VPN), keyed by the Network object so onLost can be resolved even
     // though the lost network's capabilities are no longer queryable.
     private final Map<Network, Integer> availableNetworks = new ConcurrentHashMap<>();
+    // Tracks the NET_CAPABILITY_VALIDATED state per Network so we only fire
+    // onNetworkValidated on actual true<->false transitions, not on every
+    // capabilities update Android sends us.
+    private final Map<Network, Boolean> validatedNetworks = new ConcurrentHashMap<>();
     private final Object internetStateLock = new Object();
     private boolean internetAvailable = true;
 
@@ -59,9 +63,19 @@ public class NetworkChangeDetector {
                 int type = classifyTransport(network);
                 availableNetworks.put(network, type);
 
+                // Seed and forward the validation state so onCapabilitiesChanged
+                // can detect subsequent transitions.
+                NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(network);
+                boolean validated = caps != null
+                        && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                Boolean wasValidated = validatedNetworks.put(network, validated);
+
                 NetworkAvailabilityListener localListener = listener;
                 if (localListener != null && type != TYPE_UNCLASSIFIED) {
                     localListener.onNetworkAvailable(type);
+                    if (wasValidated == null || wasValidated != validated) {
+                        localListener.onNetworkValidated(type, validated);
+                    }
                 }
                 updateInternetAvailability();
             }
@@ -69,6 +83,7 @@ public class NetworkChangeDetector {
             @Override
             public void onLost(@NonNull Network network) {
                 Integer type = availableNetworks.remove(network);
+                validatedNetworks.remove(network);
 
                 NetworkAvailabilityListener localListener = listener;
                 if (localListener != null && type != null && type != TYPE_UNCLASSIFIED) {
@@ -82,6 +97,20 @@ public class NetworkChangeDetector {
                 super.onCapabilitiesChanged(network, networkCapabilities);
 
                 Log.d(LOGTAG, String.format("Network %s had their capabilities changed: %s", network, networkCapabilities));
+
+                // Detect validation state transitions and forward them.
+                // Unlike onAvailable, this fires only after Android has
+                // confirmed the network actually reaches the internet.
+                boolean validated = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                Boolean wasValidated = validatedNetworks.put(network, validated);
+
+                NetworkAvailabilityListener localListener = listener;
+                Integer type = availableNetworks.get(network);
+                if (localListener != null && type != null && type != TYPE_UNCLASSIFIED) {
+                    if (wasValidated == null || wasValidated != validated) {
+                        localListener.onNetworkValidated(type, validated);
+                    }
+                }
             }
         };
     }
@@ -180,6 +209,7 @@ public class NetworkChangeDetector {
             }
         }
         availableNetworks.clear();
+        validatedNetworks.clear();
     }
 
     public void subscribe(NetworkAvailabilityListener listener) {
