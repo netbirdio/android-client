@@ -129,7 +129,7 @@ final class LoginFlow {
     }
 
     /** Make {@code profileName} the active profile via its row's Switch button. */
-    static void switchToProfile(MainActivity activity, UiDevice device, String profileName)
+    private static void switchToProfile(MainActivity activity, UiDevice device, String profileName)
             throws InterruptedException {
         openProfiles(device);
 

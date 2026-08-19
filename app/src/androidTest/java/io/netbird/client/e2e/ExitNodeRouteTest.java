@@ -2,10 +2,13 @@ package io.netbird.client.e2e;
 
 import io.netbird.client.MainActivity;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,14 +58,34 @@ public class ExitNodeRouteTest {
     /** Time budget for the exit-node route to take effect after connecting. */
     private static final long EGRESS_TIMEOUT_SEC = 90;
     private VpnTestHarness harness;
+    private String profileName;
 
     @Before
+
     public void skipIfPreviousFailed() {
+
         FailFast.skipIfAborted();
+
+    }
+
+
+    @After
+    public void tearDown() throws Exception {
+        if (profileName != null && harness != null) {
+            harness.disableTouchVisualization();
+            LoginFlow.removeProfile(E2eAppRule.activity(), harness.device(), profileName);
+        }
     }
 
     @Test
     public void egressGoesThroughExitNode() throws Exception {
+        Bundle args = InstrumentationRegistry.getArguments();
+        // Separate key from the basic tests, like the Robot EXIT_NODE_TEST_SETUP_KEY.
+        String setupKey = args.getString("exitNodeSetupKey");
+
+        assertNotNull("exitNodeSetupKey instrumentation argument is required", setupKey);
+        assertTrue("exitNodeSetupKey must not be blank", !setupKey.trim().isEmpty());
+
         MainActivity activity = E2eAppRule.activity();
         assertNotNull("MainActivity must be available", activity);
         harness = new VpnTestHarness(activity);
@@ -70,8 +93,8 @@ public class ExitNodeRouteTest {
 
         harness.grantVpnConsent();
 
-        // Separate key from the basic tests, like the Robot EXIT_NODE_TEST_SETUP_KEY.
-        SharedProfiles.exitNode(activity, harness.device());
+        profileName = LoginFlow.createProfileAndLogin(
+                activity, harness.device(), "exit-node", setupKey);
 
         boolean connected = harness.connectAndAwait(CONNECT_TIMEOUT_SEC);
         if (!connected) {

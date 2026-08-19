@@ -1,8 +1,12 @@
 package io.netbird.client.e2e;
 
+import io.netbird.client.MainActivity;
+
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -11,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -52,10 +57,9 @@ import static org.junit.Assert.assertTrue;
  * NET_CAPABILITY_VALIDATED) and the detector's availability seeding on service
  * restart (unit-test territory).
  *
- * <p>Uses the suite's shared plain-key profile ({@link SharedProfiles}); each
- * test starts by restoring both transports, re-activating the profile and
- * re-verifying the ping baseline, so a failed scenario cannot poison the next
- * one.
+ * <p>Uses one shared profile for the whole class (login and VPN-up happen
+ * once); each test starts by restoring both transports and re-verifying the
+ * ping baseline, so a failed scenario cannot poison the next one.
  */
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -89,29 +93,28 @@ public class NetworkTransitionTest {
     private static final int PROBE_TIMEOUT_SEC = 2;
 
     private static VpnTestHarness harness;
+    private static String profileName;
 
     @Before
     public void setUp() throws Exception {
         FailFast.skipIfAborted();
-        ensureHarness();
+        ensureProfileAndTunnel();
         harness.setWifi(true);
         harness.setMobileData(true);
-        SharedProfiles.plain(E2eAppRule.activity(), harness.device());
-        boolean connected = harness.connectAndAwait(CONNECT_TIMEOUT_SEC);
-        if (!connected) {
-            LoginFlow.dumpScreenshot(harness.device(), "network-vpn-connect-timeout");
-        }
-        assertTrue("VPN did not reach connected state within " + CONNECT_TIMEOUT_SEC + "s",
-                connected);
         assertTrue("baseline: peer " + PEER_FQDN + " must be reachable before the scenario",
                 harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass() throws Exception {
         if (harness != null) {
             harness.setWifi(true);
             harness.setMobileData(true);
+            harness.disableTouchVisualization();
+            if (profileName != null) {
+                LoginFlow.removeProfile(E2eAppRule.activity(), harness.device(), profileName);
+                profileName = null;
+            }
         }
     }
 
@@ -241,13 +244,31 @@ public class NetworkTransitionTest {
                 outageSec <= HANDOVER_MAX_OUTAGE_SEC);
     }
 
-    private static void ensureHarness() {
-        if (harness != null) {
+    private static void ensureProfileAndTunnel() throws Exception {
+        if (profileName != null) {
             return;
         }
-        harness = new VpnTestHarness(E2eAppRule.activity());
+        Bundle args = InstrumentationRegistry.getArguments();
+        String setupKey = args.getString("setupKey");
+        assertNotNull("setupKey instrumentation argument is required", setupKey);
+        assertTrue("setupKey must not be blank", !setupKey.trim().isEmpty());
+
+        MainActivity activity = E2eAppRule.activity();
+        harness = new VpnTestHarness(activity);
         harness.enableTouchVisualization();
         harness.grantVpnConsent();
+        harness.setWifi(true);
+        harness.setMobileData(true);
+
+        profileName = LoginFlow.createProfileAndLogin(
+                activity, harness.device(), "network", setupKey);
+
+        boolean connected = harness.connectAndAwait(CONNECT_TIMEOUT_SEC);
+        if (!connected) {
+            LoginFlow.dumpScreenshot(harness.device(), "network-vpn-connect-timeout");
+        }
+        assertTrue("VPN did not reach connected state within " + CONNECT_TIMEOUT_SEC + "s",
+                connected);
     }
 
     /** Drop every transport — the emulator equivalent of airplane mode ON. */

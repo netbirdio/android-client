@@ -2,10 +2,13 @@ package io.netbird.client.e2e;
 
 import io.netbird.client.MainActivity;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,14 +66,33 @@ public class DnsResolutionTest {
     /** Time budget for DNS to start resolving once the engine is connected. */
     private static final long RESOLVE_TIMEOUT_SEC = 90;
     private VpnTestHarness harness;
+    private String profileName;
 
     @Before
+
     public void skipIfPreviousFailed() {
+
         FailFast.skipIfAborted();
+
+    }
+
+
+    @After
+    public void tearDown() throws Exception {
+        if (profileName != null && harness != null) {
+            harness.disableTouchVisualization();
+            LoginFlow.removeProfile(E2eAppRule.activity(), harness.device(), profileName);
+        }
     }
 
     @Test
     public void resolvesPeerNameThroughTunnel() throws Exception {
+        Bundle args = InstrumentationRegistry.getArguments();
+        String setupKey = args.getString("setupKey");
+
+        assertNotNull("setupKey instrumentation argument is required", setupKey);
+        assertTrue("setupKey must not be blank", !setupKey.trim().isEmpty());
+
         MainActivity activity = E2eAppRule.activity();
         assertNotNull("MainActivity must be available", activity);
         harness = new VpnTestHarness(activity);
@@ -78,7 +100,8 @@ public class DnsResolutionTest {
 
         harness.grantVpnConsent();
 
-        SharedProfiles.plain(activity, harness.device());
+        profileName = LoginFlow.createProfileAndLogin(
+                activity, harness.device(), "dns", setupKey);
 
         boolean connected = harness.connectAndAwait(CONNECT_TIMEOUT_SEC);
         if (!connected) {

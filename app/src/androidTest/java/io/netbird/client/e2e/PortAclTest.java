@@ -2,10 +2,13 @@ package io.netbird.client.e2e;
 
 import io.netbird.client.MainActivity;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,9 +33,8 @@ import static org.junit.Assert.assertTrue;
  * <p>This is the proof the ACL is actually enforced: the peer is reachable
  * (control plane connected, port 80 open) yet ICMP is filtered.
  *
- * <p>Reuses the suite's shared plain-key profile ({@link SharedProfiles}) and
- * the same connect flow as {@link PeerConnectivityTest}. Only the setup key is
- * injected:
+ * <p>Reuses the same fresh-profile + login + connect flow as
+ * {@link PeerConnectivityTest}. Only the setup key is injected:
  * <pre>
  *   ./gradlew connectedDebugAndroidTest \
  *     -Pandroid.testInstrumentationRunnerArguments.setupKey=&lt;UUID&gt;
@@ -70,14 +72,33 @@ public class PortAclTest {
      */
     private static final long PING_BLOCKED_PROBE_SEC = 10;
     private VpnTestHarness harness;
+    private String profileName;
 
     @Before
+
     public void skipIfPreviousFailed() {
+
         FailFast.skipIfAborted();
+
+    }
+
+
+    @After
+    public void tearDown() throws Exception {
+        if (profileName != null && harness != null) {
+            harness.disableTouchVisualization();
+            LoginFlow.removeProfile(E2eAppRule.activity(), harness.device(), profileName);
+        }
     }
 
     @Test
     public void connectsOnlyToAllowedPorts() throws Exception {
+        Bundle args = InstrumentationRegistry.getArguments();
+        String setupKey = args.getString("setupKey");
+
+        assertNotNull("setupKey instrumentation argument is required", setupKey);
+        assertTrue("setupKey must not be blank", !setupKey.trim().isEmpty());
+
         MainActivity activity = E2eAppRule.activity();
         assertNotNull("MainActivity must be available", activity);
         harness = new VpnTestHarness(activity);
@@ -85,7 +106,9 @@ public class PortAclTest {
 
         harness.grantVpnConsent();
 
-        SharedProfiles.plain(activity, harness.device());
+        // Fresh profile + login, like the Robot suite's per-test InitNetBird.
+        profileName = LoginFlow.createProfileAndLogin(
+                activity, harness.device(), "port-acl", setupKey);
 
         boolean connected = harness.connectAndAwait(CONNECT_TIMEOUT_SEC);
         if (!connected) {
