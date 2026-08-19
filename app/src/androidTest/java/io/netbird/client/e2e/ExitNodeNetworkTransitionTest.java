@@ -36,10 +36,10 @@ import static org.junit.Assert.assertTrue;
  *       the exit node within {@link #BLACKOUT_RECOVERY_SEC}.</li>
  * </ol>
  *
- * <p>The budgets are wider than the ping-based ones in
- * {@link NetworkTransitionTest} because each probe is a full HTTPS request
- * through the exit node, but they stay far below the tens of seconds the
- * fallback (ICE timeout) recovery path needs.
+ * <p>The budgets match the ping-based ones in {@link NetworkTransitionTest}:
+ * even though each probe is a full HTTPS request through the exit node, the
+ * probes run with a short timeout and tight polling so a request hung on a
+ * dead route cannot blur the measurement.
  */
 @RunWith(AndroidJUnit4.class)
 public class ExitNodeNetworkTransitionTest {
@@ -54,8 +54,11 @@ public class ExitNodeNetworkTransitionTest {
     /** Budget for the initial egress check — setup, not an assertion of speed. */
     private static final long BASELINE_EGRESS_TIMEOUT_SEC = 90;
     private static final long NO_NETWORK_UI_TIMEOUT_SEC = 15;
-    private static final long SWITCH_RECOVERY_SEC = 15;
-    private static final long BLACKOUT_RECOVERY_SEC = 20;
+    private static final long SWITCH_RECOVERY_SEC = 5;
+    private static final long BLACKOUT_RECOVERY_SEC = 15;
+    /** Short per-probe timeout + tight polling so a hung request cannot blur the measurement. */
+    private static final int PROBE_TIMEOUT_MS = 2_000;
+    private static final long PROBE_POLL_MS = 1_000;
 
     private VpnTestHarness harness;
     private String profileName;
@@ -121,7 +124,7 @@ public class ExitNodeNetworkTransitionTest {
     private void assertEgressViaExitNode(String phase, long budgetSec) throws Exception {
         long start = System.currentTimeMillis();
         boolean viaExitNode = harness.waitForHttpBodyContains(
-                EGRESS_CHECK_URL, EXIT_NODE_PUBLIC_IP, budgetSec);
+                EGRESS_CHECK_URL, EXIT_NODE_PUBLIC_IP, budgetSec, PROBE_TIMEOUT_MS, PROBE_POLL_MS);
         long elapsedSec = (System.currentTimeMillis() - start + 999) / 1000;
         Log.i(TAG, "C1 " + phase + ": exit-node egress "
                 + (viaExitNode ? "verified in " + elapsedSec + "s" : "NOT verified within " + budgetSec + "s"));

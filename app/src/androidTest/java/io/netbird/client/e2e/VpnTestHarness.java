@@ -264,12 +264,21 @@ final class VpnTestHarness {
      * exit node, the returned IP is the exit node's, not the device's.
      */
     String httpGet(String urlString) {
+        return httpGet(urlString, 10_000);
+    }
+
+    /**
+     * {@link #httpGet(String)} with a caller-chosen timeout. The network
+     * transition tests probe with short timeouts so a request hung on a dead
+     * route cannot blur the recovery-time measurement.
+     */
+    String httpGet(String urlString, int timeoutMs) {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(urlString);
             conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(10_000);
-            conn.setReadTimeout(10_000);
+            conn.setConnectTimeout(timeoutMs);
+            conn.setReadTimeout(timeoutMs);
             conn.setRequestMethod("GET");
             int code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
@@ -302,16 +311,26 @@ final class VpnTestHarness {
      */
     boolean waitForHttpBodyContains(String urlString, String expectedSubstring, long timeoutSec)
             throws InterruptedException {
+        return waitForHttpBodyContains(urlString, expectedSubstring, timeoutSec, 10_000, 3000);
+    }
+
+    /**
+     * {@link #waitForHttpBodyContains(String, String, long)} with caller-chosen
+     * per-probe timeout and poll interval, for recovery-time measurements that
+     * need finer granularity than the 10s/3s defaults.
+     */
+    boolean waitForHttpBodyContains(String urlString, String expectedSubstring, long timeoutSec,
+                                    int probeTimeoutMs, long pollMs) throws InterruptedException {
         Pattern p = Pattern.compile("(^|[^0-9.])" + Pattern.quote(expectedSubstring) + "([^0-9.]|$)");
         long deadline = System.currentTimeMillis() + (timeoutSec * 1000L);
         String last = null;
         while (System.currentTimeMillis() < deadline) {
-            last = httpGet(urlString);
+            last = httpGet(urlString, probeTimeoutMs);
             if (last != null && p.matcher(last).find()) {
                 Log.i(TAG, "GET " + urlString + " body matched " + expectedSubstring);
                 return true;
             }
-            Thread.sleep(3000);
+            Thread.sleep(pollMs);
         }
         Log.w(TAG, "GET " + urlString + " never matched " + expectedSubstring + " (last: " + last + ")");
         return false;
