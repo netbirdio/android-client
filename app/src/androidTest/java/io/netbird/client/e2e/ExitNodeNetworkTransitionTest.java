@@ -94,6 +94,12 @@ public class ExitNodeNetworkTransitionTest {
         harness.setWifi(true);
         harness.setMobileData(true);
 
+        // Force relay ON for the network transition tests: they measure the
+        // relay path's failover; the P2P/ICE failover path stays out of scope
+        // until it is optimized (a stale ICE connection blocks the switch to
+        // the ready relay connection for ~7s). See NetworkTransitionTest.
+        LoginFlow.setForceRelay(activity, harness.device(), true);
+
         profileName = LoginFlow.createProfileAndLogin(
                 activity, harness.device(), "exit-node-network", setupKey);
 

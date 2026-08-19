@@ -260,6 +260,14 @@ public class NetworkTransitionTest {
         harness.setWifi(true);
         harness.setMobileData(true);
 
+        // The suite-level default turns force relay OFF (the relay-less peer
+        // case needs that); these tests measure the relay path's failover, so
+        // turn it back ON before connecting. The P2P/ICE failover path is
+        // deliberately out of scope until it is optimized: a stale ICE
+        // connection keeps PriorityICEP2P and blocks the switch to the ready
+        // relay connection for ~7s (ICE disconnect detection).
+        LoginFlow.setForceRelay(activity, harness.device(), true);
+
         profileName = LoginFlow.createProfileAndLogin(
                 activity, harness.device(), "network", setupKey);
 
