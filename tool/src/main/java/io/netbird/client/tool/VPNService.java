@@ -296,6 +296,15 @@ public class VPNService extends android.net.VpnService {
             return engineRunner.debugBundle(anonymize);
         }
 
+        /**
+         * Rebuilds the tunnel so a split tunnelling change takes hold without
+         * asking the user to disconnect. A no-op while the engine is down: the
+         * new selection is read when the tunnel is next created.
+         */
+        public void applySplitTunneling() {
+            queueTUNRenewal(true);
+        }
+
         public void selectRoute(String route) throws Exception {
             engineRunner.selectRoute(route);
         }
@@ -374,19 +383,24 @@ public class VPNService extends android.net.VpnService {
     private TUNCreatorLooperThread tunCreator;
 
     private void queueTUNRenewal(String ignoredPayload) {
+        queueTUNRenewal(false);
+    }
+
+    private void queueTUNRenewal(boolean force) {
         if (tunCreator == null) {
             tunCreator = new TUNCreatorLooperThread(this::recreateTUN);
             tunCreator.setPriority(Thread.MAX_PRIORITY);
             tunCreator.start();
         }
 
-        var message = tunCreator.getHandler().obtainMessage(1);
+        var message = tunCreator.getHandler().obtainMessage(TUNCreatorLooperThread.MSG_RENEW_TUN);
+        message.arg1 = force ? TUNCreatorLooperThread.ARG_FORCE : 0;
         boolean isQueued = tunCreator.getHandler().sendMessage(message);
 
-        Log.d(LOGTAG, String.format("is TUN renewal queued? %b", isQueued));
+        Log.d(LOGTAG, String.format("is TUN renewal queued? %b (forced: %b)", isQueued, force));
     }
 
-    private void recreateTUN() {
+    private void recreateTUN(boolean force) {
         if (!engineRunner.isRunning()) return;
         if (currentTUNParameters == null) return;
 
@@ -397,7 +411,9 @@ public class VPNService extends android.net.VpnService {
 
         String routes = settings.getRoutes();
         String searchDomains = settings.getSearchDomains();
-        if (!currentTUNParameters.didChange(routes, searchDomains)) {
+        // A changed app filter leaves routes and search domains untouched, so the
+        // usual guard would skip the very rebuild that applies it.
+        if (!force && !currentTUNParameters.didChange(routes, searchDomains)) {
             return;
         }
 

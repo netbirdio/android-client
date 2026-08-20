@@ -559,6 +559,17 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     @Override
+    public void applySplitTunneling() {
+        if (mBinder == null) {
+            // Nothing is running to rebuild; the new selection is read when the
+            // tunnel is next created.
+            return;
+        }
+
+        mBinder.applySplitTunneling();
+    }
+
+    @Override
     public void selectRoute(String route) throws Exception {
         if (mBinder == null) {
             Log.w(LOGTAG, "VPN binder is null");

@@ -6,6 +6,18 @@
         android:name="io.netbird.permission.NOTIFICATION"
         android:protectionLevel="signature" />
 
+    <!--
+        Split tunnelling needs to show the user a list of apps. Resolving the
+        launcher intent keeps that to apps with an icon, which avoids
+        QUERY_ALL_PACKAGES and the Play declaration it drags along.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
