@@ -233,6 +233,23 @@ class EngineRestarter implements NetworkToggleListener {
             dropDisconnects = false;
         }
 
+        // Mirrors peer.ClientState in the Go core.
+        private static final long STATE_DISCONNECTED = 0;
+        private static final long STATE_DISCONNECTING = 3;
+
+        @Override
+        public void onStateChanged(long state) {
+            if (dropDisconnects && (state == STATE_DISCONNECTED || state == STATE_DISCONNECTING)) {
+                Log.d(LOGTAG, "filtered onStateChanged(" + state + ") during restart");
+                return;
+            }
+            try {
+                delegate.onStateChanged(state);
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onStateChanged failed: " + e.getMessage());
+            }
+        }
+
         @Override
         public void onConnecting() {
             try {

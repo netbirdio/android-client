@@ -212,6 +212,7 @@ class EngineRunner {
             this.connectedObservers = connectedObservers;
         }
 
+        @Override public void onStateChanged(long state) { delegate.onStateChanged(state); }
         @Override public void onConnecting() { delegate.onConnecting(); }
         @Override public void onConnected() {
             delegate.onConnected();

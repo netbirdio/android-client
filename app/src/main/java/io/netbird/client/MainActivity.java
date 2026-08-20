@@ -776,6 +776,12 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     ConnectionListener connectionListener = new ConnectionListener() {
+        // Every state this screen tracks still arrives through the callbacks
+        // below, which the Go core keeps delivering; nothing to do here yet.
+        @Override
+        public void onStateChanged(long state) {
+        }
+
         @Override
         public synchronized void onAddressChanged(String fqdn, String ip) {
             lastFqdn = fqdn;
