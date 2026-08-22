@@ -234,6 +234,7 @@ public class VPNService extends android.net.VpnService {
             return engineRunner.peersInfo();
         }
 
+        @Nullable
         public NetworkArray networks() {
             return engineRunner.networks();
         }

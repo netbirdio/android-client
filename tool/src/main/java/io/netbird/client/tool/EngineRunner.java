@@ -307,11 +307,11 @@ class EngineRunner {
         return goClient.peersList();
     }
 
+    @Nullable
     public NetworkArray networks() {
         NetworkArray networks = goClient.networks();
         if (networks == null) {
-            Log.e(LOGTAG, "Failed to retrieve networks, returning empty array");
-            return new NetworkArray();
+            Log.e(LOGTAG, "Failed to retrieve networks");
         }
         return networks;
     }

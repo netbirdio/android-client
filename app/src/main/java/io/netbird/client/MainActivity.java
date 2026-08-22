@@ -21,10 +21,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.android.material.navigation.NavigationBarView;
 
@@ -82,11 +82,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     private NavController navController;
 
     private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
-    private final List<StateListener> serviceStateListeners = new ArrayList<>();
+    private final List<StateListener> serviceStateListeners = new CopyOnWriteArrayList<>();
     // Route listeners are often registered before the service binding completes
     // (fragments come up first), so they are queued here and attached to the binder
     // in onServiceConnected.
-    private final List<RouteChangeListener> routeChangeListeners = new ArrayList<>();
+    private final List<RouteChangeListener> routeChangeListeners = new CopyOnWriteArrayList<>();
     private URLOpener urlOpener;
     private URLOpener extendUrlOpener;
     private QrCodeDialog qrCodeDialog;
@@ -561,8 +561,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     @Override
     public void selectRoute(String route) throws Exception {
         if (mBinder == null) {
-            Log.w(LOGTAG, "VPN binder is null");
-            return;
+            throw new Exception("VPN service not connected");
         }
 
         mBinder.selectRoute(route);
@@ -571,8 +570,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     @Override
     public void deselectRoute(String route) throws Exception {
         if (mBinder == null) {
-            Log.w(LOGTAG, "VPN binder is null");
-            return;
+            throw new Exception("VPN service not connected");
         }
 
         mBinder.deselectRoute(route);
