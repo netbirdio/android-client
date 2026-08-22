@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.netbird.client.tool.networks.NetworkToggleListener;
+import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 
 /**
@@ -274,6 +275,21 @@ class EngineRestarter implements NetworkToggleListener {
                 delegate.onDisconnected();
             } catch (Exception e) {
                 Log.w(LOGTAG, "delegate onDisconnected failed: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onStateChanged(long state) {
+            if (dropDisconnects
+                    && (state == Android.ClientStateDisconnected
+                     || state == Android.ClientStateDisconnecting)) {
+                Log.d(LOGTAG, "filtered onStateChanged during restart");
+                return;
+            }
+            try {
+                delegate.onStateChanged(state);
+            } catch (Exception e) {
+                Log.w(LOGTAG, "delegate onStateChanged failed: " + e.getMessage());
             }
         }
 

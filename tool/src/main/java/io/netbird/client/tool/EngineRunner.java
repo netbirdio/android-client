@@ -223,6 +223,7 @@ class EngineRunner {
         @Override public void onDisconnected() { delegate.onDisconnected(); }
         @Override public void onAddressChanged(String f, String i) { delegate.onAddressChanged(f, i); }
         @Override public void onPeersListChanged(long n) { delegate.onPeersListChanged(n); }
+        @Override public void onStateChanged(long state) { delegate.onStateChanged(state); }
     }
 
     public synchronized void removeStatusListener() {

@@ -777,6 +777,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     ConnectionListener connectionListener = new ConnectionListener() {
         @Override
+        public void onStateChanged(long state) {
+        }
+
+        @Override
         public synchronized void onAddressChanged(String fqdn, String ip) {
             lastFqdn = fqdn;
             lastIp = ip;
