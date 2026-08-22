@@ -781,6 +781,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     @Override
     public void onConnecting() {
         onEngineState(EngineState.CONNECTING);
+        updateExitNodeRow();
     }
 
     @Override
@@ -792,6 +793,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     @Override
     public void onDisconnecting() {
         onEngineState(EngineState.DISCONNECTING);
+        updateExitNodeRow();
     }
 
     @Override
