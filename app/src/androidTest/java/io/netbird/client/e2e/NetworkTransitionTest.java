@@ -72,6 +72,7 @@ public class NetworkTransitionTest {
     private static final String PEER_FQDN = "pingtest.netbird.cloud";
     /** The Home status text for the engine's NO_NETWORK state (English locale). */
     private static final String STATUS_NO_NETWORK = "No network available";
+    private static final String STATUS_CONNECTED = "Connected";
 
     /**
      * Budget for reaching a scenario's starting state — setup, not an assertion
@@ -114,6 +115,7 @@ public class NetworkTransitionTest {
         ensureProfileAndTunnel();
         harness.setWifi(true);
         harness.setMobileData(true);
+        ensureConnectedUi();
         assertPingReachable("baseline: peer " + PEER_FQDN + " must be reachable before the scenario",
                 "baseline-ping-timeout");
     }
@@ -254,6 +256,28 @@ public class NetworkTransitionTest {
                         + HANDOVER_MAX_OUTAGE_SEC + "s — the fallback (ICE timeout) path did "
                         + "the recovery instead of the network-change fast path (see PR #243)",
                 outageSec <= HANDOVER_MAX_OUTAGE_SEC);
+    }
+
+    /**
+     * Bring the app back to a connected Home screen before each case. The
+     * instrumentation finishes every activity still standing when a test method
+     * ends, and that teardown also stops the VPN service, so from the second
+     * case on the app is off-screen and the tunnel is down.
+     * {@link #ensureProfileAndTunnel()} returns early once the profile is
+     * cached, so without this the UI assertions would poll a screen the app no
+     * longer owns.
+     */
+    private static void ensureConnectedUi() throws Exception {
+        E2eAppRule.activity();
+        if (harness.awaitStatusText(STATUS_CONNECTED, 1)) {
+            return;
+        }
+        boolean connected = harness.connectAndAwait(CONNECT_TIMEOUT_SEC);
+        if (!connected) {
+            LoginFlow.dumpScreenshot(harness.device(), "network-reconnect-timeout");
+        }
+        assertTrue("VPN did not return to connected state within " + CONNECT_TIMEOUT_SEC
+                + "s after the activity was relaunched", connected);
     }
 
     private static void ensureProfileAndTunnel() throws Exception {
