@@ -295,4 +295,15 @@
         <item quantity="one">Session expires in %1$d day</item>
         <item quantity="other">Session expires in %1$d days</item>
     </plurals>
+    <string name="menu_split_tunneling">Split tunneling</string>
+    <string name="split_tunneling_mode_title">Mode</string>
+    <string name="split_tunneling_mode_off">Off</string>
+    <string name="split_tunneling_mode_off_description">All apps use the VPN</string>
+    <string name="split_tunneling_mode_off_hint">All apps currently use the VPN. Choose a mode to pick which ones do.</string>
+    <string name="split_tunneling_mode_exclude">Exclude</string>
+    <string name="split_tunneling_mode_exclude_description">Selected apps bypass the VPN</string>
+    <string name="split_tunneling_mode_include">Include</string>
+    <string name="split_tunneling_mode_include_description">Only selected apps use the VPN</string>
+    <string name="split_tunneling_hint_search_apps">Search apps</string>
+    <string name="split_tunneling_empty_include_warning">No app selected, so every app keeps using the VPN. Pick at least one.</string>
 </resources>

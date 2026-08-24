@@ -86,10 +86,7 @@ class IFace implements TunAdapter {
             Log.d(LOGTAG, "add route: "+r.addr+"/"+r.prefixLength);
         }
 
-        disallowApp(builder, "com.google.android.projection.gearhead");
-        disallowApp(builder, "com.google.android.apps.chromecast.app");
-        disallowApp(builder, "com.google.android.apps.messaging");
-        disallowApp(builder, "com.google.stadia.android");
+        applyAppFilter(builder);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             builder.setMetered(false);
@@ -138,11 +135,35 @@ class IFace implements TunAdapter {
         }
     }
 
-    private void disallowApp(VpnService.Builder builder, String packageName) {
-        try {
-            builder.addDisallowedApplication(packageName);
-        } catch (PackageManager.NameNotFoundException ignored) {
+    /**
+     * Narrows the tunnel to the apps the user picked.
+     *
+     * The selection is read here rather than passed in because the tunnel is
+     * also rebuilt from VPNService without going through the Go engine, and both
+     * paths must see the same stored answer.
+     */
+    private void applyAppFilter(VpnService.Builder builder) {
+        SplitTunnelConfig.Resolution resolution = new Preferences(vpnService)
+                .getSplitTunnelConfig()
+                .resolve(vpnService.getPackageName());
+
+        boolean allow = resolution.getFilter() == SplitTunnelConfig.Filter.ALLOW;
+        for (String packageName : resolution.getPackages()) {
+            try {
+                if (allow) {
+                    builder.addAllowedApplication(packageName);
+                } else {
+                    builder.addDisallowedApplication(packageName);
+                }
+            } catch (PackageManager.NameNotFoundException ignored) {
+                // Uninstalled since it was picked. Dropping the whole tunnel over a
+                // stale entry would be worse than ignoring it; the list screen
+                // prunes it on the next visit.
+            }
         }
+
+        Log.d(LOGTAG, "app filter: " + (allow ? "allow " : "disallow ")
+                + resolution.getPackages().size() + " package(s)");
     }
 
     @SuppressLint("DefaultLocale")

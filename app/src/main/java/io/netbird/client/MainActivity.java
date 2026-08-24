@@ -559,6 +559,17 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     @Override
+    public void applySplitTunneling() {
+        if (mBinder == null) {
+            // Nothing is running to rebuild; the new selection is read when the
+            // tunnel is next created.
+            return;
+        }
+
+        mBinder.applySplitTunneling();
+    }
+
+    @Override
     public void selectRoute(String route) throws Exception {
         if (mBinder == null) {
             throw new Exception("VPN service not connected");
@@ -774,6 +785,12 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     ConnectionListener connectionListener = new ConnectionListener() {
+        // Every state this screen tracks still arrives through the callbacks
+        // below, which the Go core keeps delivering; nothing to do here yet.
+        @Override
+        public void onStateChanged(long state) {
+        }
+
         @Override
         public void onStateChanged(long state) {
         }

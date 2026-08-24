@@ -43,6 +43,12 @@
         tools:layout="@layout/fragment_advanced" />
 
     <fragment
+        android:id="@+id/nav_split_tunneling"
+        android:name="io.netbird.client.ui.splittunneling.SplitTunnelingFragment"
+        android:label="@string/menu_split_tunneling"
+        tools:layout="@layout/fragment_split_tunneling" />
+
+    <fragment
         android:id="@+id/nav_troubleshoot"
         android:name="io.netbird.client.ui.troubleshoot.TroubleshootFragment"
         android:label="@string/menu_troubleshoot"

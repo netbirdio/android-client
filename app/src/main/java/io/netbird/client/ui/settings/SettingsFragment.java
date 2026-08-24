@@ -52,6 +52,9 @@ public class SettingsFragment extends Fragment {
         binding.rowAdvanced.setOnClickListener(v ->
                 navController.navigate(R.id.nav_advanced));
 
+        binding.rowSplitTunneling.setOnClickListener(v ->
+                navController.navigate(R.id.nav_split_tunneling));
+
         binding.rowLanguage.setOnClickListener(v ->
                 new LanguagePickerSheet().show(getChildFragmentManager(), "language_picker"));
 
