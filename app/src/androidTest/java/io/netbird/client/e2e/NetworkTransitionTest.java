@@ -386,15 +386,20 @@ public class NetworkTransitionTest {
                 + "network-change fast path", recoverySec >= 0);
     }
 
-    /** Seconds until the first successful probe, or -1 if the budget elapsed. */
-    private long timeToPingRecoverySec(long budgetSec) throws InterruptedException {
+    /**
+     * Seconds until the first successful probe, or -1 if the budget elapsed.
+     * A failed probe is not followed by a pause: {@code ping -W} already spends
+     * up to {@link #PROBE_TIMEOUT_SEC}s on it, and an extra fixed sleep on top
+     * coarsened the sampling to ~3s, wide enough for a recovery to land between
+     * two probes and be reported as a budget overrun.
+     */
+    private long timeToPingRecoverySec(long budgetSec) {
         long start = System.currentTimeMillis();
         long deadline = start + budgetSec * 1000L;
         while (System.currentTimeMillis() < deadline) {
             if (harness.pingOnce(PEER_FQDN, PROBE_TIMEOUT_SEC)) {
                 return (System.currentTimeMillis() - start + 999) / 1000;
             }
-            Thread.sleep(1000);
         }
         return -1;
     }
