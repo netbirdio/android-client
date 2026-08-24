@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Scenario C1 of the network transition matrix (see the table in
@@ -124,9 +125,11 @@ public class ExitNodeNetworkTransitionTest {
 
         harness.setWifi(false);
         harness.setMobileData(false);
-        assertTrue("status must show '" + STATUS_NO_NETWORK + "' within "
-                        + NO_NETWORK_UI_TIMEOUT_SEC + "s of losing all transports",
-                harness.awaitStatusText(STATUS_NO_NETWORK, NO_NETWORK_UI_TIMEOUT_SEC));
+        if (!harness.awaitStatusText(STATUS_NO_NETWORK, NO_NETWORK_UI_TIMEOUT_SEC)) {
+            LoginFlow.dumpScreenshot(harness.device(), "exit-node-no-network-status-timeout");
+            fail("status must show '" + STATUS_NO_NETWORK + "' within "
+                    + NO_NETWORK_UI_TIMEOUT_SEC + "s of losing all transports");
+        }
 
         harness.setWifi(true);
         harness.setMobileData(true);

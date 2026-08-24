@@ -17,6 +17,7 @@ import org.junit.runners.MethodSorters;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Network transition tests — prove that the engine survives every WiFi /
@@ -95,11 +96,19 @@ public class NetworkTransitionTest {
     private static final long LONG_BLACKOUT_HOLD_SEC = 60;
     /** Time given to Android to move the default network onto freshly-enabled WiFi. */
     private static final long HANDOVER_SETTLE_SEC = 10;
+    /** Budget for resolving the peer's address once the tunnel is up. */
+    private static final long PEER_RESOLVE_TIMEOUT_SEC = 30;
     /** Per-probe ping timeout; also the outage-measurement granularity. */
     private static final int PROBE_TIMEOUT_SEC = 2;
 
     private static VpnTestHarness harness;
     private static String profileName;
+    /**
+     * The peer's NetBird address, resolved once per suite. Probes ping this
+     * rather than the name so a transition measures the data plane alone,
+     * with no resolver round trip (or resolver cache) in the timing.
+     */
+    private static String peerIp;
 
     @Before
     public void setUp() throws Exception {
@@ -107,8 +116,9 @@ public class NetworkTransitionTest {
         ensureProfileAndTunnel();
         harness.setWifi(true);
         harness.setMobileData(true);
-        assertTrue("baseline: peer " + PEER_FQDN + " must be reachable before the scenario",
-                harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
+        ensurePeerIp();
+        assertPingReachable("baseline: peer " + PEER_FQDN + " must be reachable before the scenario",
+                "baseline-ping-timeout");
     }
 
     @AfterClass
@@ -128,8 +138,8 @@ public class NetworkTransitionTest {
     @Test
     public void a1AirplaneToggleWifiOnly() throws Exception {
         harness.setMobileData(false);
-        assertTrue("peer must stay reachable on WiFi-only before the blackout",
-                harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
+        assertPingReachable("peer must stay reachable on WiFi-only before the blackout",
+                "a1-wifi-only-ping-timeout");
         blackoutAndRecover("A1/wifi-only", () -> harness.setWifi(true));
     }
 
@@ -137,8 +147,8 @@ public class NetworkTransitionTest {
     @Test
     public void a2AirplaneToggleCellularOnly() throws Exception {
         harness.setWifi(false);
-        assertTrue("peer must be reachable on cellular-only before the blackout",
-                harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
+        assertPingReachable("peer must be reachable on cellular-only before the blackout",
+                "a2-cellular-only-ping-timeout");
         blackoutAndRecover("A2/cellular-only", () -> harness.setMobileData(true));
     }
 
@@ -159,14 +169,14 @@ public class NetworkTransitionTest {
     @Test
     public void a4LongBlackoutHoldsNoNetwork() throws Exception {
         blackout();
-        assertTrue("status must show '" + STATUS_NO_NETWORK + "' within "
-                        + NO_NETWORK_UI_TIMEOUT_SEC + "s of losing all transports",
-                harness.awaitStatusText(STATUS_NO_NETWORK, NO_NETWORK_UI_TIMEOUT_SEC));
+        assertNoNetworkStatus("A4/long-blackout");
 
         long holdEnd = System.currentTimeMillis() + LONG_BLACKOUT_HOLD_SEC * 1000L;
         while (System.currentTimeMillis() < holdEnd) {
-            assertTrue("status flapped away from '" + STATUS_NO_NETWORK + "' during the hold",
-                    harness.awaitStatusText(STATUS_NO_NETWORK, 2));
+            if (!harness.awaitStatusText(STATUS_NO_NETWORK, 2)) {
+                LoginFlow.dumpScreenshot(harness.device(), "a4-no-network-flap");
+                fail("status flapped away from '" + STATUS_NO_NETWORK + "' during the hold");
+            }
             Thread.sleep(5000);
         }
 
@@ -192,8 +202,8 @@ public class NetworkTransitionTest {
     @Test
     public void b3CellularUnderWifiIsSeamless() throws Exception {
         harness.setMobileData(false);
-        assertTrue("peer must be reachable on WiFi-only before enabling cellular",
-                harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
+        assertPingReachable("peer must be reachable on WiFi-only before enabling cellular",
+                "b3-wifi-only-ping-timeout");
 
         harness.setMobileData(true);
         int failed = failedProbesOver(SEAMLESS_PROBE_WINDOW_SEC);
@@ -208,17 +218,16 @@ public class NetworkTransitionTest {
     @Test
     public void b4CellularWifiCellularRoundTrip() throws Exception {
         harness.setWifi(false);
-        assertTrue("peer must be reachable on cellular-only before the round trip",
-                harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
+        assertPingReachable("peer must be reachable on cellular-only before the round trip",
+                "b4-cellular-only-ping-timeout");
 
         harness.setWifi(true);
-        assertTrue("peer unreachable after enabling WiFi",
-                harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
+        assertPingReachable("peer unreachable after enabling WiFi", "b4-wifi-ping-timeout");
         // Let the default network actually move onto WiFi before cutting it;
         // an instant success above may still have gone over cellular.
         Thread.sleep(HANDOVER_SETTLE_SEC * 1000L);
-        assertTrue("peer unreachable after the WiFi settle window",
-                harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
+        assertPingReachable("peer unreachable after the WiFi settle window",
+                "b4-wifi-settle-ping-timeout");
 
         harness.setWifi(false);
         assertRecoveryWithin("B4/back-to-cellular", SWITCH_RECOVERY_SEC);
@@ -238,8 +247,8 @@ public class NetworkTransitionTest {
     @Test
     public void zB2CellularToWifiHandoverIsFast() throws Exception {
         harness.setWifi(false);
-        assertTrue("peer must be reachable on cellular-only before the handover",
-                harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC));
+        assertPingReachable("peer must be reachable on cellular-only before the handover",
+                "b2-cellular-only-ping-timeout");
 
         harness.setWifi(true);
         long outageSec = maxOutageSecOver(HANDOVER_PROBE_WINDOW_SEC);
@@ -297,12 +306,51 @@ public class NetworkTransitionTest {
      */
     private void blackoutAndRecover(String scenario, Runnable restore) throws Exception {
         blackout();
-        assertTrue(scenario + ": status must show '" + STATUS_NO_NETWORK + "' within "
-                        + NO_NETWORK_UI_TIMEOUT_SEC + "s of losing all transports",
-                harness.awaitStatusText(STATUS_NO_NETWORK, NO_NETWORK_UI_TIMEOUT_SEC));
+        assertNoNetworkStatus(scenario);
 
         restore.run();
         assertRecoveryWithin(scenario, BLACKOUT_RECOVERY_SEC);
+    }
+
+    /**
+     * Resolve the peer's address once the tunnel is up, and keep it for the
+     * rest of the suite — the address is stable across transports, so a single
+     * lookup spares every later probe the resolver entirely.
+     */
+    private static void ensurePeerIp() throws InterruptedException {
+        if (peerIp != null) {
+            return;
+        }
+        peerIp = harness.waitForPeerIp(PEER_FQDN, PEER_RESOLVE_TIMEOUT_SEC);
+        if (peerIp == null) {
+            LoginFlow.dumpScreenshot(harness.device(), "peer-resolve-timeout");
+            fail("peer " + PEER_FQDN + " did not resolve to a NetBird address within "
+                    + PEER_RESOLVE_TIMEOUT_SEC + "s");
+        }
+        Log.i(TAG, "peer " + PEER_FQDN + " resolved to " + peerIp);
+    }
+
+    /**
+     * Ping assert that leaves a screenshot behind when the budget elapses, so a
+     * failure shows what the UI was doing rather than only that ping stayed dead.
+     */
+    private static void assertPingReachable(String message, String screenshotTag)
+            throws InterruptedException {
+        if (harness.waitForPing(peerIp, BASELINE_TIMEOUT_SEC)) {
+            return;
+        }
+        LoginFlow.dumpScreenshot(harness.device(), screenshotTag);
+        fail(message);
+    }
+
+    /** Assert the status text reaches NO_NETWORK, dumping a screenshot if it does not. */
+    private static void assertNoNetworkStatus(String scenario) {
+        if (harness.awaitStatusText(STATUS_NO_NETWORK, NO_NETWORK_UI_TIMEOUT_SEC)) {
+            return;
+        }
+        LoginFlow.dumpScreenshot(harness.device(), "no-network-status-timeout");
+        fail(scenario + ": status must show '" + STATUS_NO_NETWORK + "' within "
+                + NO_NETWORK_UI_TIMEOUT_SEC + "s of losing all transports");
     }
 
     /** Assert the data plane recovers within {@code budgetSec}, logging the measured time. */
@@ -323,7 +371,7 @@ public class NetworkTransitionTest {
         long start = System.currentTimeMillis();
         long deadline = start + budgetSec * 1000L;
         while (System.currentTimeMillis() < deadline) {
-            if (harness.pingOnce(PEER_FQDN, PROBE_TIMEOUT_SEC)) {
+            if (harness.pingOnce(peerIp, PROBE_TIMEOUT_SEC)) {
                 return (System.currentTimeMillis() - start + 999) / 1000;
             }
             Thread.sleep(1000);
@@ -342,7 +390,7 @@ public class NetworkTransitionTest {
         long maxOutageMs = 0;
         while (System.currentTimeMillis() < windowEnd) {
             long probeStart = System.currentTimeMillis();
-            if (harness.pingOnce(PEER_FQDN, PROBE_TIMEOUT_SEC)) {
+            if (harness.pingOnce(peerIp, PROBE_TIMEOUT_SEC)) {
                 if (outageStartMs >= 0) {
                     maxOutageMs = Math.max(maxOutageMs, probeStart - outageStartMs);
                     outageStartMs = -1;
@@ -363,7 +411,7 @@ public class NetworkTransitionTest {
         long windowEnd = System.currentTimeMillis() + windowSec * 1000L;
         int failed = 0;
         while (System.currentTimeMillis() < windowEnd) {
-            if (!harness.pingOnce(PEER_FQDN, PROBE_TIMEOUT_SEC)) {
+            if (!harness.pingOnce(peerIp, PROBE_TIMEOUT_SEC)) {
                 failed++;
             } else {
                 Thread.sleep(700);

@@ -4,6 +4,9 @@ import io.netbird.client.MainActivity;
 
 import android.app.Instrumentation;
 import android.app.UiAutomation;
+import android.net.DnsResolver;
+import android.os.Build;
+import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -17,9 +20,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -240,6 +249,93 @@ final class VpnTestHarness {
     private static final Pattern PING_RESOLVED_IP =
             Pattern.compile("\\(([0-9]{1,3}(?:\\.[0-9]{1,3}){3})\\)");
 
+    /**
+     * Resolve {@code host} to its NetBird address, retrying until one shows up
+     * or {@code timeoutSec} elapses. Returns null if it never resolved.
+     *
+     * <p>The lookup deliberately bypasses the device resolver cache. The
+     * NetBird DNS zone is registered a fraction of a second after the status
+     * reads Connected, so a query issued in that window reaches the upstream
+     * forwarder and comes back NXDOMAIN — which Android then negative-caches
+     * for the record's SOA TTL. Every later lookup of the same name is served
+     * from that cache and skips straight to the search-domain suffixes, so a
+     * plain retry loop stays poisoned for the whole test. Each attempt here is
+     * a real query instead.
+     *
+     * <p>An answer only counts when it lands in the NetBird CGNAT range: the
+     * upstream forwarder may hand back an unrelated address for a name that
+     * only exists inside the tunnel.
+     */
+    String waitForPeerIp(String host, long timeoutSec) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + (timeoutSec * 1000L);
+        String last = null;
+        while (System.currentTimeMillis() < deadline) {
+            last = queryUncached(host, DNS_QUERY_TIMEOUT_MS);
+            if (last != null && isNetBirdAddress(last)) {
+                Log.i(TAG, "Resolved " + host + " -> " + last);
+                return last;
+            }
+            Thread.sleep(1000);
+        }
+        Log.w(TAG, "Resolve " + host + " yielded no NetBird address within " + timeoutSec
+                + "s (last: " + last + ")");
+        return null;
+    }
+
+    /**
+     * One cache-bypassing A lookup. Falls back to the ping-based
+     * {@link #resolve(String)} below API 29, where the flag does not exist —
+     * the CI emulator is API 30, so the fallback is for local runs on old
+     * devices only.
+     */
+    private String queryUncached(String host, int timeoutMs) throws InterruptedException {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return resolve(host);
+        }
+        ArrayBlockingQueue<List<InetAddress>> answers = new ArrayBlockingQueue<>(1);
+        CancellationSignal cancellation = new CancellationSignal();
+        DnsResolver.getInstance().query(null, host, DnsResolver.FLAG_NO_CACHE_LOOKUP,
+                Runnable::run, cancellation,
+                new DnsResolver.Callback<List<InetAddress>>() {
+                    @Override
+                    public void onAnswer(List<InetAddress> answer, int rcode) {
+                        answers.offer(answer);
+                    }
+
+                    @Override
+                    public void onError(DnsResolver.DnsException e) {
+                        Log.d(TAG, "uncached lookup of " + host + " failed: " + e.getMessage());
+                        answers.offer(Collections.emptyList());
+                    }
+                });
+        List<InetAddress> answer = answers.poll(timeoutMs, TimeUnit.MILLISECONDS);
+        if (answer == null) {
+            cancellation.cancel();
+            return null;
+        }
+        for (InetAddress address : answer) {
+            if (address instanceof Inet4Address) {
+                return address.getHostAddress();
+            }
+        }
+        return null;
+    }
+
+    /** True for addresses in the NetBird CGNAT range, 100.64.0.0/10. */
+    private static boolean isNetBirdAddress(String ip) {
+        String[] octets = ip.split("\\.");
+        if (octets.length != 4) {
+            return false;
+        }
+        try {
+            return Integer.parseInt(octets[0]) == 100
+                    && Integer.parseInt(octets[1]) >= 64
+                    && Integer.parseInt(octets[1]) <= 127;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     /** Retry {@link #resolve(String)} until it returns {@code expectedIp} or the timeout elapses. */
     boolean waitForResolve(String host, String expectedIp, long timeoutSec) throws InterruptedException {
         long deadline = System.currentTimeMillis() + (timeoutSec * 1000L);
@@ -354,6 +450,9 @@ final class VpnTestHarness {
             return "";
         }
     }
+
+    /** Per-attempt timeout for a cache-bypassing DNS query. */
+    private static final int DNS_QUERY_TIMEOUT_MS = 5_000;
 
     /** Per-attempt ping timeout, in seconds. */
     private static final int PING_W_SEC = 5;
