@@ -73,8 +73,14 @@ public class NetworkTransitionTest {
     /** The Home status text for the engine's NO_NETWORK state (English locale). */
     private static final String STATUS_NO_NETWORK = "No network available";
 
-    /** Budget for reaching a scenario's starting state — setup, not an assertion of speed. */
-    private static final long BASELINE_TIMEOUT_SEC = 90;
+    /**
+     * Budget for reaching a scenario's starting state — setup, not an assertion
+     * of speed. Deliberately short: a peer that is up answers within a couple of
+     * seconds, and a longer wait only delays the retry that can actually help.
+     */
+    private static final long BASELINE_TIMEOUT_SEC = 15;
+    /** Budget for the toggle round trip when a failed baseline forces a reconnect. */
+    private static final long RECONNECT_TIMEOUT_SEC = 20;
     private static final long CONNECT_TIMEOUT_SEC = 20;
     /** How long the UI may take to show NO_NETWORK after the last transport drops. */
     // TODO: temporary bump to 90s; dropping cellular last (A2) does not
@@ -96,19 +102,11 @@ public class NetworkTransitionTest {
     private static final long LONG_BLACKOUT_HOLD_SEC = 60;
     /** Time given to Android to move the default network onto freshly-enabled WiFi. */
     private static final long HANDOVER_SETTLE_SEC = 10;
-    /** Budget for resolving the peer's address once the tunnel is up. */
-    private static final long PEER_RESOLVE_TIMEOUT_SEC = 30;
     /** Per-probe ping timeout; also the outage-measurement granularity. */
     private static final int PROBE_TIMEOUT_SEC = 2;
 
     private static VpnTestHarness harness;
     private static String profileName;
-    /**
-     * The peer's NetBird address, resolved once per suite. Probes ping this
-     * rather than the name so a transition measures the data plane alone,
-     * with no resolver round trip (or resolver cache) in the timing.
-     */
-    private static String peerIp;
 
     @Before
     public void setUp() throws Exception {
@@ -116,7 +114,6 @@ public class NetworkTransitionTest {
         ensureProfileAndTunnel();
         harness.setWifi(true);
         harness.setMobileData(true);
-        ensurePeerIp();
         assertPingReachable("baseline: peer " + PEER_FQDN + " must be reachable before the scenario",
                 "baseline-ping-timeout");
     }
@@ -313,34 +310,33 @@ public class NetworkTransitionTest {
     }
 
     /**
-     * Resolve the peer's address once the tunnel is up, and keep it for the
-     * rest of the suite — the address is stable across transports, so a single
-     * lookup spares every later probe the resolver entirely.
-     */
-    private static void ensurePeerIp() throws InterruptedException {
-        if (peerIp != null) {
-            return;
-        }
-        peerIp = harness.waitForPeerIp(PEER_FQDN, PEER_RESOLVE_TIMEOUT_SEC);
-        if (peerIp == null) {
-            LoginFlow.dumpScreenshot(harness.device(), "peer-resolve-timeout");
-            fail("peer " + PEER_FQDN + " did not resolve to a NetBird address within "
-                    + PEER_RESOLVE_TIMEOUT_SEC + "s");
-        }
-        Log.i(TAG, "peer " + PEER_FQDN + " resolved to " + peerIp);
-    }
-
-    /**
      * Ping assert that leaves a screenshot behind when the budget elapses, so a
      * failure shows what the UI was doing rather than only that ping stayed dead.
      */
     private static void assertPingReachable(String message, String screenshotTag)
             throws InterruptedException {
-        if (harness.waitForPing(peerIp, BASELINE_TIMEOUT_SEC)) {
+        if (harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC)) {
+            return;
+        }
+        // Retrying the ping on its own would ask the same question and get the
+        // same answer: the NetBird DNS zone is registered a moment after the
+        // status reads Connected, so a lookup landing in that window is
+        // forwarded upstream, comes back NXDOMAIN, and Android negative-caches
+        // it for the record's SOA TTL. Reconnecting hands the tunnel a new
+        // network, whose resolver cache starts empty, so the retry below is a
+        // real lookup rather than a replay of the cached failure.
+        Log.i(TAG, "baseline ping failed, reconnecting to drop the resolver cache");
+        if (!harness.disconnectAndAwait(RECONNECT_TIMEOUT_SEC)
+                || !harness.connectAndAwait(RECONNECT_TIMEOUT_SEC)) {
+            LoginFlow.dumpScreenshot(harness.device(), screenshotTag + "-reconnect-failed");
+            fail("reconnect before retrying the baseline ping did not complete within "
+                    + RECONNECT_TIMEOUT_SEC + "s");
+        }
+        if (harness.waitForPing(PEER_FQDN, BASELINE_TIMEOUT_SEC)) {
             return;
         }
         LoginFlow.dumpScreenshot(harness.device(), screenshotTag);
-        fail(message);
+        fail(message + " (still unreachable after a reconnect)");
     }
 
     /** Assert the status text reaches NO_NETWORK, dumping a screenshot if it does not. */
@@ -371,7 +367,7 @@ public class NetworkTransitionTest {
         long start = System.currentTimeMillis();
         long deadline = start + budgetSec * 1000L;
         while (System.currentTimeMillis() < deadline) {
-            if (harness.pingOnce(peerIp, PROBE_TIMEOUT_SEC)) {
+            if (harness.pingOnce(PEER_FQDN, PROBE_TIMEOUT_SEC)) {
                 return (System.currentTimeMillis() - start + 999) / 1000;
             }
             Thread.sleep(1000);
@@ -390,7 +386,7 @@ public class NetworkTransitionTest {
         long maxOutageMs = 0;
         while (System.currentTimeMillis() < windowEnd) {
             long probeStart = System.currentTimeMillis();
-            if (harness.pingOnce(peerIp, PROBE_TIMEOUT_SEC)) {
+            if (harness.pingOnce(PEER_FQDN, PROBE_TIMEOUT_SEC)) {
                 if (outageStartMs >= 0) {
                     maxOutageMs = Math.max(maxOutageMs, probeStart - outageStartMs);
                     outageStartMs = -1;
@@ -411,7 +407,7 @@ public class NetworkTransitionTest {
         long windowEnd = System.currentTimeMillis() + windowSec * 1000L;
         int failed = 0;
         while (System.currentTimeMillis() < windowEnd) {
-            if (!harness.pingOnce(peerIp, PROBE_TIMEOUT_SEC)) {
+            if (!harness.pingOnce(PEER_FQDN, PROBE_TIMEOUT_SEC)) {
                 failed++;
             } else {
                 Thread.sleep(700);
