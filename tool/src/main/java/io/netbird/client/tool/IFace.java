@@ -11,16 +11,21 @@ import android.os.ParcelFileDescriptor;
 import android.system.OsConstants;
 import android.util.Log;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 
 import io.netbird.gomobile.android.TunAdapter;
 import io.netbird.client.tool.wg.BackendException;
+import io.netbird.client.tool.wg.InetAddresses;
 import io.netbird.client.tool.wg.InetNetwork;
 
 class IFace implements TunAdapter {
 
     private static final String LOGTAG = "IFace";
+    private static final int HOST_PREFIX_V4 = 32;
+    private static final int HOST_PREFIX_V6 = 128;
     private final VPNService vpnService;
 
     public IFace(VPNService vpnService) {
@@ -63,9 +68,20 @@ class IFace implements TunAdapter {
 
     private int createTun(String ip, int prefixLength, InetNetwork addrV6, int mtu, String dns, String[] searchDomains, LinkedList<Route> routes) throws Exception {
         VpnService.Builder builder = vpnService.getBuilder();
-        builder.addAddress(ip, prefixLength);
+
+        // Assign the overlay addresses as single hosts and express the overlay
+        // network as an explicit route instead of letting it fall out of the
+        // address prefix. A prefix wider than a single host makes the tunnel a
+        // directly connected, broadcast-capable subnet, which is one of the
+        // things Android's local network protection keys on when deciding
+        // whether an app needs ACCESS_LOCAL_NETWORK to reach a destination.
+        // Reachability is unchanged: the route below covers exactly the range
+        // the address prefix used to cover.
+        builder.addAddress(ip, HOST_PREFIX_V4);
+        addNetworkRoute(builder, InetAddresses.parse(ip), prefixLength);
         if (addrV6 != null) {
-            builder.addAddress(addrV6.getAddress().getHostAddress(), addrV6.getMask());
+            builder.addAddress(addrV6.getAddress().getHostAddress(), HOST_PREFIX_V6);
+            addNetworkRoute(builder, addrV6.getAddress(), addrV6.getMask());
             Log.d(LOGTAG, "add IPv6 address: " + addrV6.getAddress().getHostAddress() + "/" + addrV6.getMask());
         }
         builder.allowFamily(OsConstants.AF_INET);
@@ -136,6 +152,39 @@ class IFace implements TunAdapter {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * Adds the route covering the overlay network the given address belongs to.
+     * No-op for an address that is already a single host, and for a malformed
+     * prefix, where dropping the route is safer than throwing away the whole
+     * tunnel.
+     */
+    private void addNetworkRoute(VpnService.Builder builder, InetAddress address, int prefixLength) {
+        byte[] raw = address.getAddress();
+        if (prefixLength <= 0 || prefixLength >= raw.length * 8) {
+            return;
+        }
+
+        byte[] masked = maskAddress(raw, prefixLength);
+        try {
+            String network = InetAddress.getByAddress(masked).getHostAddress();
+            builder.addRoute(network, prefixLength);
+            Log.d(LOGTAG, "add overlay network route: " + network + "/" + prefixLength);
+        } catch (UnknownHostException e) {
+            Log.e(LOGTAG, "failed to derive the overlay network route", e);
+        }
+    }
+
+    /** Clears every host bit beyond prefixLength, returning the network address. */
+    private static byte[] maskAddress(byte[] raw, int prefixLength) {
+        byte[] masked = raw.clone();
+        for (int i = 0; i < masked.length; i++) {
+            int bitsKeptInThisByte = Math.min(8, Math.max(0, prefixLength - i * 8));
+            int mask = bitsKeptInThisByte == 0 ? 0 : (0xFF << (8 - bitsKeptInThisByte)) & 0xFF;
+            masked[i] = (byte) (masked[i] & mask);
+        }
+        return masked;
     }
 
     private void disallowApp(VpnService.Builder builder, String packageName) {
