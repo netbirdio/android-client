@@ -52,6 +52,10 @@ final class VpnTestHarness {
 
     private static final long UI_TIMEOUT_MS = 5_000;
 
+    private static final Pattern ROUTE_DEV = Pattern.compile("\\bdev\\s+(\\S+)");
+    /** ip route's uid selector — ask as the shell, which the VPN does not capture. */
+    private static final int SHELL_UID = 2000;
+
     private static final String TAG = "NBVpnHarness";
 
     private final UiDevice device;
@@ -158,6 +162,50 @@ final class VpnTestHarness {
     void setMobileData(boolean enabled) {
         String out = shell("svc data " + (enabled ? "enable" : "disable"));
         Log.i(TAG, "svc data " + (enabled ? "enable" : "disable") + " -> " + out.trim());
+    }
+
+    /**
+     * Wait until the system's default network runs on {@code transport}
+     * ("WIFI" / "CELLULAR"). Enabling a transport only powers the radio up;
+     * Android moves the default network onto it seconds later, and a probe in
+     * that gap still travels over the old one. Tests that cut a transport to
+     * measure the failover must start from a default network they actually
+     * own, or they tear down a link nothing was using.
+     *
+     * <p>Read from the routing table over the shell rather than from
+     * ConnectivityManager: the shell runs privileged, so this needs no
+     * ACCESS_NETWORK_STATE in the app under test, and registers no network
+     * callback anywhere in production code.
+     *
+     * @return true if the default network reached {@code transport} in time
+     */
+    boolean awaitDefaultTransport(String transport, long timeoutSec) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + timeoutSec * 1000L;
+        String seen = null;
+        while (System.currentTimeMillis() < deadline) {
+            seen = defaultTransport();
+            if (transport.equals(seen)) {
+                Log.i(TAG, "Default network is on " + transport);
+                return true;
+            }
+            Thread.sleep(500);
+        }
+        Log.w(TAG, "Default network did not reach " + transport + " within " + timeoutSec
+                + "s (last seen: " + seen + ")");
+        return false;
+    }
+
+    /**
+     * Wait until the default network runs on {@code transport} and the tunnel
+     * carries traffic over it, so a scenario starts from a stated network
+     * rather than an assumed one.
+     */
+    boolean awaitDefaultTransportCarrying(String transport, String target, long timeoutSec)
+            throws InterruptedException {
+        if (!awaitDefaultTransport(transport, timeoutSec)) {
+            return false;
+        }
+        return waitForPing(target, timeoutSec);
     }
 
     /**
@@ -376,6 +424,56 @@ final class VpnTestHarness {
             Log.w(TAG, "Shell command failed: " + command + " - " + e.getMessage());
             return "";
         }
+    }
+
+    /**
+     * The transport backing the current default network ("WIFI", "CELLULAR",
+     * …), or null when it cannot be read.
+     *
+     * <p>Derived from the underlying network's own route table rather than
+     * {@code dumpsys connectivity}, whose layout differs across API levels.
+     * The tunnel owns the main table while the VPN is up, so ask the table
+     * ConnectivityService keeps per underlying network: {@code wlan*} means
+     * WiFi, {@code rmnet*} or the emulator's {@code eth*} means cellular.
+     */
+    private String defaultTransport() {
+        String iface = routeInterface(shell("ip route get 8.8.8.8 uid " + SHELL_UID));
+        if (iface == null || iface.startsWith("tun")) {
+            iface = firstNonTunnelDefaultRoute();
+        }
+        if (iface == null) {
+            Log.w(TAG, "could not read the default route interface");
+            return null;
+        }
+        if (iface.startsWith("wlan")) {
+            return "WIFI";
+        }
+        if (iface.startsWith("rmnet") || iface.startsWith("eth")) {
+            return "CELLULAR";
+        }
+        Log.w(TAG, "unrecognised default route interface: " + iface);
+        return iface;
+    }
+
+    /** The {@code dev <iface>} field of an {@code ip route} line, or null. */
+    private static String routeInterface(String routeOutput) {
+        Matcher m = ROUTE_DEV.matcher(routeOutput);
+        return m.find() ? m.group(1) : null;
+    }
+
+    /**
+     * The interface of the first default route that is not the tunnel, read
+     * from every routing table so the VPN's own main-table default does not
+     * mask the transport underneath it.
+     */
+    private String firstNonTunnelDefaultRoute() {
+        for (String line : shell("ip route show table all default").split("\n")) {
+            String iface = routeInterface(line);
+            if (iface != null && !iface.startsWith("tun")) {
+                return iface;
+            }
+        }
+        return null;
     }
 
     /** Per-attempt ping timeout, in seconds. */

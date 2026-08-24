@@ -101,8 +101,8 @@ public class NetworkTransitionTest {
     private static final long SEAMLESS_PROBE_WINDOW_SEC = 15;
     private static final int SEAMLESS_MAX_FAILED_PROBES = 1;
     private static final long LONG_BLACKOUT_HOLD_SEC = 60;
-    /** Time given to Android to move the default network onto freshly-enabled WiFi. */
-    private static final long HANDOVER_SETTLE_SEC = 10;
+    /** Time given to Android to move the default network onto a freshly-enabled transport. */
+    private static final long TRANSPORT_SETTLE_SEC = 30;
     /** Per-probe ping timeout; also the outage-measurement granularity. */
     private static final int PROBE_TIMEOUT_SEC = 2;
 
@@ -187,6 +187,8 @@ public class NetworkTransitionTest {
     /** Scenario B1: losing WiFi must fail over to cellular via the fast path. */
     @Test
     public void b1WifiLossFallsBackToCellular() throws Exception {
+        assertDefaultTransportCarrying("WIFI", "B1/wifi-loss");
+
         harness.setWifi(false);
         assertRecoveryWithin("B1/wifi-loss", SWITCH_RECOVERY_SEC);
     }
@@ -201,8 +203,7 @@ public class NetworkTransitionTest {
     @Test
     public void b3CellularUnderWifiIsSeamless() throws Exception {
         harness.setMobileData(false);
-        assertPingReachable("peer must be reachable on WiFi-only before enabling cellular",
-                "b3-wifi-only-ping-timeout");
+        assertDefaultTransportCarrying("WIFI", "B3/cellular-under-wifi");
 
         harness.setMobileData(true);
         int failed = failedProbesOver(SEAMLESS_PROBE_WINDOW_SEC);
@@ -217,16 +218,10 @@ public class NetworkTransitionTest {
     @Test
     public void b4CellularWifiCellularRoundTrip() throws Exception {
         harness.setWifi(false);
-        assertPingReachable("peer must be reachable on cellular-only before the round trip",
-                "b4-cellular-only-ping-timeout");
+        assertDefaultTransportCarrying("CELLULAR", "B4/cellular-leg");
 
         harness.setWifi(true);
-        assertPingReachable("peer unreachable after enabling WiFi", "b4-wifi-ping-timeout");
-        // Let the default network actually move onto WiFi before cutting it;
-        // an instant success above may still have gone over cellular.
-        Thread.sleep(HANDOVER_SETTLE_SEC * 1000L);
-        assertPingReachable("peer unreachable after the WiFi settle window",
-                "b4-wifi-settle-ping-timeout");
+        assertDefaultTransportCarrying("WIFI", "B4/wifi-leg");
 
         harness.setWifi(false);
         assertRecoveryWithin("B4/back-to-cellular", SWITCH_RECOVERY_SEC);
@@ -246,8 +241,7 @@ public class NetworkTransitionTest {
     @Test
     public void zB2CellularToWifiHandoverIsFast() throws Exception {
         harness.setWifi(false);
-        assertPingReachable("peer must be reachable on cellular-only before the handover",
-                "b2-cellular-only-ping-timeout");
+        assertDefaultTransportCarrying("CELLULAR", "B2/cellular-baseline");
 
         harness.setWifi(true);
         long outageSec = maxOutageSecOver(HANDOVER_PROBE_WINDOW_SEC);
@@ -256,6 +250,24 @@ public class NetworkTransitionTest {
                         + HANDOVER_MAX_OUTAGE_SEC + "s — the fallback (ICE timeout) path did "
                         + "the recovery instead of the network-change fast path (see PR #243)",
                 outageSec <= HANDOVER_MAX_OUTAGE_SEC);
+    }
+
+    /**
+     * Assert the scenario starts from the transport it claims to: the default
+     * network runs on {@code transport} and the tunnel carries traffic over
+     * it. Enabling a transport only powers the radio up — Android moves the
+     * default network onto it seconds later — so a test that cuts a transport
+     * without this may tear down a link nothing was using and record the
+     * untouched tunnel as an instant recovery.
+     */
+    private static void assertDefaultTransportCarrying(String transport, String scenario)
+            throws Exception {
+        if (harness.awaitDefaultTransportCarrying(transport, PEER_FQDN, TRANSPORT_SETTLE_SEC)) {
+            return;
+        }
+        LoginFlow.dumpScreenshot(harness.device(), scenario.replace('/', '-') + "-transport-timeout");
+        fail(scenario + ": the default network did not settle on " + transport + " with peer "
+                + PEER_FQDN + " reachable within " + TRANSPORT_SETTLE_SEC + "s");
     }
 
     /**
