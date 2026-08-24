@@ -235,13 +235,12 @@ public class NetworkTransitionTest {
     /**
      * Scenario B2 — named to sort LAST under NAME_ASCENDING because the
      * FailFast listener aborts everything after the first failure, and this
-     * one is EXPECTED TO FAIL on this branch: PR #243 is what makes the
-     * cellular->WiFi handover notify the Go core immediately. Until it merges,
-     * the tunnel only recovers once ICE notices the dead connections, a
-     * 10-20s outage; the fixed fast path takes ~1-2s. The probe window starts
-     * before the outage does (the default network switches a few seconds
-     * after WiFi comes up), so the assertion is on the longest continuous
-     * outage inside the window, not on time-to-first-success.
+     * one is STILL EXPECTED TO FAIL: PR #243 made the handover notification
+     * prompt, but the outage stays ~13s behind it, most of it endpoint.go's
+     * 5s fallbackDelay on the responder path.
+     * The probe window starts before the outage does (the default network
+     * switches a few seconds after WiFi comes up), so the assertion is on the
+     * longest continuous outage inside the window, not on time-to-first-success.
      */
     @Test
     public void zB2CellularToWifiHandoverIsFast() throws Exception {
@@ -252,8 +251,9 @@ public class NetworkTransitionTest {
         long outageSec = maxOutageSecOver(HANDOVER_PROBE_WINDOW_SEC);
         Log.i(TAG, "B2: max outage during cellular->WiFi handover: " + outageSec + "s");
         assertTrue("cellular->WiFi handover outage was " + outageSec + "s, budget "
-                        + HANDOVER_MAX_OUTAGE_SEC + "s — the fallback (ICE timeout) path did "
-                        + "the recovery instead of the network-change fast path (see PR #243)",
+                        + HANDOVER_MAX_OUTAGE_SEC + "s — the network-change notification is "
+                        + "prompt, so check the peer rebuild after it: mostly endpoint.go's 5s "
+                        + "fallbackDelay on the responder path, plus a retried offer",
                 outageSec <= HANDOVER_MAX_OUTAGE_SEC);
     }
 
