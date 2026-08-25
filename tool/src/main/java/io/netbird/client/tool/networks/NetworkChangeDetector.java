@@ -86,7 +86,11 @@ public class NetworkChangeDetector {
                 validatedNetworks.remove(network);
 
                 NetworkAvailabilityListener localListener = listener;
-                if (localListener != null && type != null && type != TYPE_UNCLASSIFIED) {
+                // During a same-type handover the replacement network is
+                // already tracked when the old one drops; the transport
+                // itself is not lost, so do not report it as such.
+                if (localListener != null && type != null && type != TYPE_UNCLASSIFIED
+                        && !availableNetworks.containsValue(type)) {
                     localListener.onNetworkLost(type);
                 }
                 updateInternetAvailability();
@@ -161,6 +165,7 @@ public class NetworkChangeDetector {
             public void onAvailable(@NonNull Network network) {
                 NetworkAvailabilityListener listenerToNotify = null;
                 int notifyType = 0;
+                long notifyHandle = network.getNetworkHandle();
                 synchronized (networkCallbackLock) {
                     if (!defaultNetworkCallbackActive) {
                         Log.d(LOGTAG, "ignoring onAvailable for " + network + "; default callback inactive");
@@ -188,7 +193,7 @@ public class NetworkChangeDetector {
                     Log.d(LOGTAG, "default network became " + network);
                 }
                 if (listenerToNotify != null) {
-                    listenerToNotify.onDefaultNetworkTypeChanged(notifyType);
+                    listenerToNotify.onDefaultNetworkTypeChanged(notifyType, notifyHandle);
                 }
             }
         };

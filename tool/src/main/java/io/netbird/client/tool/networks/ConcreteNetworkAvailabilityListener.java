@@ -7,12 +7,13 @@ import java.util.function.Consumer;
 
 public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityListener {
     private static final int UNKNOWN_NETWORK_TYPE = -1;
+    private static final long UNKNOWN_NETWORK_HANDLE = -1;
     private final Map<Integer, Boolean> availableNetworkTypes;
     private final Map<Integer, Boolean> validatedNetworkTypes;
     private final BooleanSupplier shouldNotify;
     private final Consumer<Boolean> internetAvailabilityConsumer;
     private NetworkToggleListener listener;
-    private volatile int lastDefaultType = UNKNOWN_NETWORK_TYPE;
+    private volatile long lastDefaultHandle = UNKNOWN_NETWORK_HANDLE;
     private volatile int activeValidatedType = UNKNOWN_NETWORK_TYPE;
 
     public ConcreteNetworkAvailabilityListener() {
@@ -66,13 +67,16 @@ public class ConcreteNetworkAvailabilityListener implements NetworkAvailabilityL
     }
 
     @Override
-    public void onDefaultNetworkTypeChanged(@Constants.NetworkType int networkType) {
-        if (networkType == lastDefaultType) {
+    public void onDefaultNetworkTypeChanged(@Constants.NetworkType int networkType, long networkHandle) {
+        // Deduplicate on the network identity, not the transport type: a
+        // same-type handover (WiFi AP -> different WiFi AP) rebinds every
+        // connection just like a type flip does.
+        if (networkHandle == lastDefaultHandle) {
             return;
         }
-        int previous = lastDefaultType;
-        lastDefaultType = networkType;
-        if (previous == UNKNOWN_NETWORK_TYPE) {
+        long previous = lastDefaultHandle;
+        lastDefaultHandle = networkHandle;
+        if (previous == UNKNOWN_NETWORK_HANDLE) {
             // first observation after subscribe; not a real transition
             return;
         }

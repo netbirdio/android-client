@@ -17,10 +17,13 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
         }
 
         public void defaultBecameWifi() {
-            this.listener.onDefaultNetworkTypeChanged(Constants.NetworkType.WIFI);
+            defaultBecameWifi(1);
+        }
+        public void defaultBecameWifi(long handle) {
+            this.listener.onDefaultNetworkTypeChanged(Constants.NetworkType.WIFI, handle);
         }
         public void defaultBecameMobile() {
-            this.listener.onDefaultNetworkTypeChanged(Constants.NetworkType.MOBILE);
+            this.listener.onDefaultNetworkTypeChanged(Constants.NetworkType.MOBILE, 2);
         }
         public void networkValidated(int type) {
             this.listener.onNetworkValidated(type, true);
@@ -91,6 +94,23 @@ public class ConcreteNetworkAvailabilityListenerUnitTest {
         detector.defaultBecameWifi();   // +1
 
         assertEquals(3, networkToggleListener.totalTimesNetworkTypeChanged);
+    }
+
+    @Test
+    public void shouldNotifyOnWifiToWifiHandover() {
+        // Same transport type but a different network identity: the tunnel's
+        // connections are bound to the old network, so the Go core must be
+        // notified just like on a type flip.
+        var networkToggleListener = new MockNetworkToggleListener();
+        var networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(() -> true);
+        networkAvailabilityListener.subscribe(networkToggleListener);
+
+        var detector = new MockNetworkChangeDetector(networkAvailabilityListener);
+
+        detector.defaultBecameWifi(10); // first observation
+        detector.defaultBecameWifi(11); // different WiFi network
+
+        assertEquals(1, networkToggleListener.totalTimesNetworkTypeChanged);
     }
 
     @Test
