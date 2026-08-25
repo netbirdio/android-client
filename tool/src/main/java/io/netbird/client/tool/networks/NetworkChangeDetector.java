@@ -121,6 +121,15 @@ public class NetworkChangeDetector {
 
     // updateInternetAvailability notifies the listener when the device
     // transitions between having some internet-capable network and none.
+    //
+    // Availability deliberately requires only NET_CAPABILITY_INTERNET, not
+    // NET_CAPABILITY_VALIDATED: validation lands seconds after every
+    // transport switch and can be revoked transiently on weak networks, so
+    // gating on it would suspend the Go reconnect loops and flash NO_NETWORK
+    // in the middle of exactly the handovers the fast path is built for. The
+    // accepted cost is that a captive-portal network counts as internet until
+    // its login completes, so the client shows Connecting there instead of
+    // NO_NETWORK.
     private void updateInternetAvailability() {
         boolean available = !availableNetworks.isEmpty();
         synchronized (internetStateLock) {
