@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.netbird.client.tool.files.MediaStoreFileDropSink;
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Client;
 import io.netbird.gomobile.android.ConnectionListener;
@@ -53,6 +54,8 @@ class EngineRunner {
                 tunAdapter,
                 iFaceDiscover,
                 networkChangeListener);
+
+        goClient.setFileDropSink(new MediaStoreFileDropSink(context));
 
         updateLogLevel(isTraceLogEnabled, isDebuggable);
 

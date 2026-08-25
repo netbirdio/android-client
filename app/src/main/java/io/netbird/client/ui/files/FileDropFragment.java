@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -223,19 +224,17 @@ public class FileDropFragment extends Fragment {
     }
 
     /**
-     * Opens a received file through the app's FileProvider. Received files land
-     * in app-private storage, so a plain file Uri would be unreadable to any
-     * other app.
+     * Opens a received file. A delivered entry in shared storage is already a
+     * content Uri any app can read; a plain path is one this app owns alone, so
+     * it needs a FileProvider grant to leave the app at all.
      */
     private void open(FileDropManager.Transfer transfer) {
         if (transfer.deliveredPaths().isEmpty()) {
             return;
         }
 
-        File file = new File(transfer.deliveredPaths().get(0));
         try {
-            Uri uri = FileProvider.getUriForFile(requireContext(),
-                    requireContext().getPackageName() + ".fileprovider", file);
+            Uri uri = readableUri(transfer.deliveredPaths().get(0));
 
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(uri, requireContext().getContentResolver().getType(uri));
@@ -244,6 +243,14 @@ public class FileDropFragment extends Fragment {
         } catch (Exception e) {
             Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    private Uri readableUri(String delivered) {
+        if (delivered.startsWith(ContentResolver.SCHEME_CONTENT + ":")) {
+            return Uri.parse(delivered);
+        }
+        return FileProvider.getUriForFile(requireContext(),
+                requireContext().getPackageName() + ".fileprovider", new File(delivered));
     }
 
     private String outcomeLabel(FileDropManager.Transfer transfer) {

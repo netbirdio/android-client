@@ -23,6 +23,7 @@ import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
 import io.netbird.client.tool.files.ContentFileSource;
 import io.netbird.client.tool.files.FileDropManager;
+import io.netbird.client.tool.files.MediaStoreFileDropSink;
 import io.netbird.client.tool.files.FileDropNotification;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
@@ -120,9 +121,10 @@ public class VPNService extends android.net.VpnService {
         FileDropManager.get().setOfferListener(fileDropNotification::showOffer);
         fileDropTransfersListener = this::onFileDropTransfers;
         FileDropManager.get().addTransfersListener(fileDropTransfersListener);
-        // A process killed mid-transfer leaves its staged outgoing copies
+        // A process killed mid-transfer leaves staged copies on both sides
         // behind; nothing else will ever claim them.
         ContentFileSource.clearStaging(this);
+        new MediaStoreFileDropSink(this).clearPartials();
 
         // Create network availability listener after the engine runner so we
         // can gate notifications on the engine actually being up; this avoids
