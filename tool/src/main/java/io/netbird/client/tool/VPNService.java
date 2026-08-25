@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 
 import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
+import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.NetworkArray;
@@ -33,6 +34,13 @@ public class VPNService extends android.net.VpnService {
     // on the persistent notification's "Extend session" action.
     public static final String ACTION_EXTEND_SESSION = "io.netbird.client.intent.action.EXTEND_SESSION";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
+    // Run-loop status labels, as returned by EngineRunner.status(); they come
+    // from internal.StatusType on the Go side.
+    private static final String STATUS_CONNECTED = "Connected";
+    private static final String STATUS_CONNECTING = "Connecting";
+    private static final String STATUS_NEEDS_LOGIN = "NeedsLogin";
+    private static final String STATUS_SESSION_EXPIRED = "SessionExpired";
+    private static final String STATUS_LOGIN_FAILED = "LoginFailed";
     private final IBinder myBinder = new MyLocalBinder();
     private EngineRunner engineRunner;
     private ForegroundNotification fgNotification;
@@ -45,7 +53,7 @@ public class VPNService extends android.net.VpnService {
 
     private NetworkChangeDetector networkChangeDetector;
     private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
-    private EngineRestarter engineRestarter;
+    private NetworkSwitchNotifier networkSwitchNotifier;
     private android.content.BroadcastReceiver stopEngineReceiver;
 
     @Override
@@ -84,20 +92,30 @@ public class VPNService extends android.net.VpnService {
         sessionMonitor.addListener(sessionEventListener);
         engineRunner.addOnConnectedObserver(() -> sessionNotification.cancel());
 
+        // Drive the status-bar icon from the tunnel's own phase rather than
+        // the engine start/stop edges, so "connecting" is visible while the
+        // core is still bringing the tunnel up.
+        engineRunner.addConnectionObserver(connectionObserver);
+
         engineRunner.addServiceStateListener(serviceStateListener);
 
         // Create network availability listener after the engine runner so we
         // can gate notifications on the engine actually being up; this avoids
         // acting on Android's initial onAvailable burst during cold start.
-        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(engineRunner::isRunning);
+        networkAvailabilityListener = new ConcreteNetworkAvailabilityListener(
+                engineRunner::isRunning, engineRunner::setNetworkAvailable);
 
-        engineRestarter = new EngineRestarter(engineRunner);
-        networkAvailabilityListener.subscribe(engineRestarter);
+        networkSwitchNotifier = new NetworkSwitchNotifier(engineRunner);
+        networkAvailabilityListener.subscribe(networkSwitchNotifier);
 
         networkChangeDetector = new NetworkChangeDetector(
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
         networkChangeDetector.subscribe(networkAvailabilityListener);
         networkChangeDetector.registerNetworkCallback();
+        // Push the initial connectivity state into the Go client: transition
+        // events alone would leave it stuck at the online default when the
+        // service starts while the device has no network (e.g. airplane mode).
+        engineRunner.setNetworkAvailable(networkChangeDetector.hasInternetConnectivity());
 
         // Register broadcast receiver for stopping engine (e.g., during profile switch)
         stopEngineReceiver = new android.content.BroadcastReceiver() {
@@ -105,7 +123,6 @@ public class VPNService extends android.net.VpnService {
             public void onReceive(Context context, Intent intent) {
                 if (ACTION_STOP_ENGINE.equals(intent.getAction())) {
                     Log.d(LOGTAG, "Received stop engine broadcast");
-                    engineRestarter.cancelPendingRestart();
                     if (engineRunner != null) {
                         engineRunner.stop();
                     }
@@ -129,11 +146,21 @@ public class VPNService extends android.net.VpnService {
         }
 
         if (INTENT_ALWAYS_ON_START.equals(intent.getAction())) {
+            // CONNECTING is only a safe assumption when the run below actually
+            // starts the engine; on a re-delivery over a running engine no
+            // event would follow to correct it, so read the state instead.
+            fgNotification.setState(engineRunner.isRunning()
+                    ? currentState()
+                    : ForegroundNotification.State.CONNECTING);
             fgNotification.startForeground();
-            engineRestarter.cancelPendingRestart();
             engineRunner.runWithoutAuth();
         }
         if (INTENT_ACTION_START.equals(intent.getAction())) {
+            // MainActivity.onStart fires this on every return to the
+            // foreground, not just when connecting, so take the state from the
+            // engine: the Go core only re-emits onConnected on an actual
+            // change, and assuming CONNECTING here would stick until then.
+            fgNotification.setState(currentState());
             fgNotification.startForeground();
         }
         return super.onStartCommand(intent, flags, startId);
@@ -171,7 +198,6 @@ public class VPNService extends android.net.VpnService {
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
-        engineRestarter.cleanup();
 
         engineRunner.stop();
         stopForeground(true);
@@ -189,7 +215,6 @@ public class VPNService extends android.net.VpnService {
     @Override
     public void onRevoke() {
         Log.d(LOGTAG, "VPN permission on revoke");
-        engineRestarter.cancelPendingRestart();
         if (engineRunner != null) {
             engineRunner.stop();
             stopForeground(true);
@@ -215,14 +240,13 @@ public class VPNService extends android.net.VpnService {
         }
 
         public void runEngine(URLOpener urlOpener, boolean isAndroidTV) {
+            fgNotification.setState(ForegroundNotification.State.CONNECTING);
             fgNotification.startForeground();
             sessionNotification.cancel();
-            engineRestarter.cancelPendingRestart();
             engineRunner.run(urlOpener, isAndroidTV);
         }
 
         public void stopEngine() {
-            engineRestarter.cancelPendingRestart();
             engineRunner.stop();
         }
 
@@ -350,6 +374,79 @@ public class VPNService extends android.net.VpnService {
         }
     };
 
+    /**
+     * The icon state implied by the engine's current status label, for the
+     * moments we have to paint the notification without an event to react to
+     * (re-entering the foreground). Mirrors the desktop tray's iconForState()
+     * priority: login trouble first, then the connection phase.
+     */
+    private ForegroundNotification.State currentState() {
+        String status = engineRunner.status();
+        if (STATUS_NEEDS_LOGIN.equals(status)
+                || STATUS_SESSION_EXPIRED.equals(status)
+                || STATUS_LOGIN_FAILED.equals(status)) {
+            return ForegroundNotification.State.NEEDS_LOGIN;
+        }
+        if (STATUS_CONNECTED.equals(status)) {
+            return ForegroundNotification.State.CONNECTED;
+        }
+        if (STATUS_CONNECTING.equals(status)) {
+            // The Go status label is never "NoNetwork" — the notifier only
+            // overlays it on Connecting while the OS reports no network
+            // (peer/notifier.go effectiveState), so apply the same rule here.
+            return networkChangeDetector.hasInternetConnectivity()
+                    ? ForegroundNotification.State.CONNECTING
+                    : ForegroundNotification.State.NO_NETWORK;
+        }
+        // Idle — the run loop is not running (never started, or stopped) —
+        // and anything the Go side may add later.
+        return ForegroundNotification.State.DISCONNECTED;
+    }
+
+    /**
+     * Mirrors the tunnel's connection phase onto the status-bar icon. The
+     * engine start/stop edges below are too coarse for this: the engine is
+     * "started" long before the tunnel is actually up.
+     */
+    private final ConnectionListener connectionObserver = new ConnectionListener() {
+        @Override
+        public void onStateChanged(long state) {
+            // Same split as MainActivity's listener: the legacy per-state
+            // callbacks below drive the ordinary states, and only NoNetwork —
+            // which arrives exclusively here — is handled from the state code.
+            if (state == Android.ClientStateNoNetwork) {
+                fgNotification.setState(ForegroundNotification.State.NO_NETWORK);
+            }
+        }
+
+        @Override
+        public void onConnecting() {
+            fgNotification.setState(ForegroundNotification.State.CONNECTING);
+        }
+
+        @Override
+        public void onConnected() {
+            fgNotification.setState(ForegroundNotification.State.CONNECTED);
+        }
+
+        @Override
+        public void onDisconnecting() {
+        }
+
+        @Override
+        public void onDisconnected() {
+            fgNotification.setState(ForegroundNotification.State.DISCONNECTED);
+        }
+
+        @Override
+        public void onAddressChanged(String fqdn, String ip) {
+        }
+
+        @Override
+        public void onPeersListChanged(long count) {
+        }
+    };
+
     public ServiceStateListener serviceStateListener = new ServiceStateListener() {
         @Override
         public void onStarted() {
@@ -358,17 +455,35 @@ public class VPNService extends android.net.VpnService {
 
         @Override
         public void onStopped() {
+            // Set before tearing the notification down: stopForeground can
+            // leave the notification on screen briefly (and does leave it when
+            // the service keeps running for a rebind), so it must not linger
+            // showing the connected icon.
+            //
+            // An expired session stops the engine right after onError, so keep
+            // the login prompt instead of overwriting it with a plain
+            // "Disconnected" — the Go side latches NeedsLogin until an actual
+            // login or extend clears it, so this stays true across the stop.
+            fgNotification.setState(sessionMonitor.isLoginRequired()
+                    ? ForegroundNotification.State.NEEDS_LOGIN
+                    : ForegroundNotification.State.DISCONNECTED);
             fgNotification.stopForeground();
             sessionMonitor.onStateChanged();
         }
 
         @Override
         public void onError(String msg) {
-            fgNotification.stopForeground();
             // An expired session surfaces here first (the run loop gives up
             // with PermissionDenied), so sample the status right away instead
             // of waiting for the monitor's next tick.
             sessionMonitor.onStateChanged();
+            // Same split the desktop tray makes: the NeedsLogin status label
+            // means the user has to sign in, which is worth saying outright.
+            // Anything else is a generic engine failure.
+            fgNotification.setState(sessionMonitor.isLoginRequired()
+                    ? ForegroundNotification.State.NEEDS_LOGIN
+                    : ForegroundNotification.State.ERROR);
+            fgNotification.stopForeground();
         }
     };
 

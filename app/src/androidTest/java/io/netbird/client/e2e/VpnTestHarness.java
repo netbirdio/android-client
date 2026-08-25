@@ -52,6 +52,10 @@ final class VpnTestHarness {
 
     private static final long UI_TIMEOUT_MS = 5_000;
 
+    private static final Pattern ROUTE_DEV = Pattern.compile("\\bdev\\s+(\\S+)");
+    /** ip route's uid selector — ask as the shell, which the VPN does not capture. */
+    private static final int SHELL_UID = 2000;
+
     private static final String TAG = "NBVpnHarness";
 
     private final UiDevice device;
@@ -121,6 +125,103 @@ final class VpnTestHarness {
         return connected;
     }
 
+    /**
+     * Disconnect by tapping the same Home screen toggle and wait for the status
+     * to read "Disconnected".
+     *
+     * @return true if the status showed Disconnected within the timeout
+     */
+    boolean disconnectAndAwait(long timeoutSec) {
+        UiObject2 toggle = device.wait(
+                Until.findObject(By.res(LoginFlow.PACKAGE, "btn_connect")), UI_TIMEOUT_MS);
+        assertNotNull("btn_connect must be present on the Home screen", toggle);
+        if (toggle.isChecked()) {
+            Log.i(TAG, "Tapping the connect toggle to disconnect");
+            toggle.click();
+        }
+        boolean disconnected = device.wait(
+                Until.hasObject(By.res(LoginFlow.PACKAGE, "text_connection_status")
+                        .text("Disconnected")),
+                timeoutSec * 1000L);
+        Log.i(TAG, disconnected ? "Status shows Disconnected"
+                : "Status did not reach Disconnected within " + timeoutSec + "s");
+        return disconnected;
+    }
+
+    /**
+     * Toggle the emulator's virtual WiFi transport. {@code svc wifi} works on
+     * the API 30 image the e2e workflow runs on (removed in API 31+, where
+     * {@code cmd wifi set-wifi-enabled} replaces it).
+     */
+    void setWifi(boolean enabled) {
+        String out = shell("svc wifi " + (enabled ? "enable" : "disable"));
+        Log.i(TAG, "svc wifi " + (enabled ? "enable" : "disable") + " -> " + out.trim());
+    }
+
+    /** Toggle the emulator's virtual cellular data transport. */
+    void setMobileData(boolean enabled) {
+        String out = shell("svc data " + (enabled ? "enable" : "disable"));
+        Log.i(TAG, "svc data " + (enabled ? "enable" : "disable") + " -> " + out.trim());
+    }
+
+    /**
+     * Wait until the system's default network runs on {@code transport}
+     * ("WIFI" / "CELLULAR"). Enabling a transport only powers the radio up;
+     * Android moves the default network onto it seconds later, and a probe in
+     * that gap still travels over the old one. Tests that cut a transport to
+     * measure the failover must start from a default network they actually
+     * own, or they tear down a link nothing was using.
+     *
+     * <p>Read from the routing table over the shell rather than from
+     * ConnectivityManager: the shell runs privileged, so this needs no
+     * ACCESS_NETWORK_STATE in the app under test, and registers no network
+     * callback anywhere in production code.
+     *
+     * @return true if the default network reached {@code transport} in time
+     */
+    boolean awaitDefaultTransport(String transport, long timeoutSec) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + timeoutSec * 1000L;
+        String seen = null;
+        while (System.currentTimeMillis() < deadline) {
+            seen = defaultTransport();
+            if (transport.equals(seen)) {
+                Log.i(TAG, "Default network is on " + transport);
+                return true;
+            }
+            Thread.sleep(500);
+        }
+        Log.w(TAG, "Default network did not reach " + transport + " within " + timeoutSec
+                + "s (last seen: " + seen + ")");
+        return false;
+    }
+
+    /**
+     * Wait until the default network runs on {@code transport} and the tunnel
+     * carries traffic over it, so a scenario starts from a stated network
+     * rather than an assumed one.
+     */
+    boolean awaitDefaultTransportCarrying(String transport, String target, long timeoutSec)
+            throws InterruptedException {
+        if (!awaitDefaultTransport(transport, timeoutSec)) {
+            return false;
+        }
+        return waitForPing(target, timeoutSec);
+    }
+
+    /**
+     * Wait until the Home screen's status text shows exactly {@code expected}
+     * (English locale, like {@link #connectAndAwait(long)}).
+     */
+    boolean awaitStatusText(String expected, long timeoutSec) {
+        boolean shown = device.wait(
+                Until.hasObject(By.res(LoginFlow.PACKAGE, "text_connection_status")
+                        .text(expected)),
+                timeoutSec * 1000L);
+        Log.i(TAG, "Status '" + expected + "' " + (shown ? "shown" : "NOT shown")
+                + " within " + timeoutSec + "s");
+        return shown;
+    }
+
     /** Retry {@link #pingOnce(String)} until it succeeds or the timeout elapses. */
     boolean waitForPing(String target, long timeoutSec) throws InterruptedException {
         long deadline = System.currentTimeMillis() + (timeoutSec * 1000L);
@@ -156,7 +257,16 @@ final class VpnTestHarness {
 
     /** Ping a host (FQDN or IP) once through the tunnel. */
     boolean pingOnce(String target) {
-        String output = shell(String.format("ping -c 1 -W %d %s", PING_W_SEC, target));
+        return pingOnce(target, PING_W_SEC);
+    }
+
+    /**
+     * Ping a host once with a caller-chosen per-attempt timeout. The network
+     * transition tests probe on a ~1s cadence to measure outage windows, so
+     * they need a tighter timeout than the default {@link #PING_W_SEC}.
+     */
+    boolean pingOnce(String target, int timeoutSec) {
+        String output = shell(String.format("ping -c 1 -W %d %s", timeoutSec, target));
         // The full output goes to logcat — the CI artifact — so a failure shows
         // exactly what happened: the resolved address in the "PING x (a.b.c.d)"
         // header, an unknown-host error, or 100% loss to a resolved peer.
@@ -225,12 +335,21 @@ final class VpnTestHarness {
      * exit node, the returned IP is the exit node's, not the device's.
      */
     String httpGet(String urlString) {
+        return httpGet(urlString, 10_000);
+    }
+
+    /**
+     * {@link #httpGet(String)} with a caller-chosen timeout. The network
+     * transition tests probe with short timeouts so a request hung on a dead
+     * route cannot blur the recovery-time measurement.
+     */
+    String httpGet(String urlString, int timeoutMs) {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(urlString);
             conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(10_000);
-            conn.setReadTimeout(10_000);
+            conn.setConnectTimeout(timeoutMs);
+            conn.setReadTimeout(timeoutMs);
             conn.setRequestMethod("GET");
             int code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
@@ -263,16 +382,26 @@ final class VpnTestHarness {
      */
     boolean waitForHttpBodyContains(String urlString, String expectedSubstring, long timeoutSec)
             throws InterruptedException {
+        return waitForHttpBodyContains(urlString, expectedSubstring, timeoutSec, 10_000, 3000);
+    }
+
+    /**
+     * {@link #waitForHttpBodyContains(String, String, long)} with caller-chosen
+     * per-probe timeout and poll interval, for recovery-time measurements that
+     * need finer granularity than the 10s/3s defaults.
+     */
+    boolean waitForHttpBodyContains(String urlString, String expectedSubstring, long timeoutSec,
+                                    int probeTimeoutMs, long pollMs) throws InterruptedException {
         Pattern p = Pattern.compile("(^|[^0-9.])" + Pattern.quote(expectedSubstring) + "([^0-9.]|$)");
         long deadline = System.currentTimeMillis() + (timeoutSec * 1000L);
         String last = null;
         while (System.currentTimeMillis() < deadline) {
-            last = httpGet(urlString);
+            last = httpGet(urlString, probeTimeoutMs);
             if (last != null && p.matcher(last).find()) {
                 Log.i(TAG, "GET " + urlString + " body matched " + expectedSubstring);
                 return true;
             }
-            Thread.sleep(3000);
+            Thread.sleep(pollMs);
         }
         Log.w(TAG, "GET " + urlString + " never matched " + expectedSubstring + " (last: " + last + ")");
         return false;
@@ -295,6 +424,56 @@ final class VpnTestHarness {
             Log.w(TAG, "Shell command failed: " + command + " - " + e.getMessage());
             return "";
         }
+    }
+
+    /**
+     * The transport backing the current default network ("WIFI", "CELLULAR",
+     * …), or null when it cannot be read.
+     *
+     * <p>Derived from the underlying network's own route table rather than
+     * {@code dumpsys connectivity}, whose layout differs across API levels.
+     * The tunnel owns the main table while the VPN is up, so ask the table
+     * ConnectivityService keeps per underlying network: {@code wlan*} means
+     * WiFi, {@code rmnet*} or the emulator's {@code eth*} means cellular.
+     */
+    private String defaultTransport() {
+        String iface = routeInterface(shell("ip route get 8.8.8.8 uid " + SHELL_UID));
+        if (iface == null || iface.startsWith("tun")) {
+            iface = firstNonTunnelDefaultRoute();
+        }
+        if (iface == null) {
+            Log.w(TAG, "could not read the default route interface");
+            return null;
+        }
+        if (iface.startsWith("wlan")) {
+            return "WIFI";
+        }
+        if (iface.startsWith("rmnet") || iface.startsWith("eth")) {
+            return "CELLULAR";
+        }
+        Log.w(TAG, "unrecognised default route interface: " + iface);
+        return iface;
+    }
+
+    /** The {@code dev <iface>} field of an {@code ip route} line, or null. */
+    private static String routeInterface(String routeOutput) {
+        Matcher m = ROUTE_DEV.matcher(routeOutput);
+        return m.find() ? m.group(1) : null;
+    }
+
+    /**
+     * The interface of the first default route that is not the tunnel, read
+     * from every routing table so the VPN's own main-table default does not
+     * mask the transport underneath it.
+     */
+    private String firstNonTunnelDefaultRoute() {
+        for (String line : shell("ip route show table all default").split("\n")) {
+            String iface = routeInterface(line);
+            if (iface != null && !iface.startsWith("tun")) {
+                return iface;
+            }
+        }
+        return null;
     }
 
     /** Per-attempt ping timeout, in seconds. */

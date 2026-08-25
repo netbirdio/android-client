@@ -1,12 +1,18 @@
 <resources>
     <string name="fg_notification_channel_name">Servizio NetBird</string>
-    <string name="fg_notification_text">Il servizio è in esecuzione</string>
+    <string name="fg_notification_connected">Connesso</string>
+    <string name="fg_notification_connecting">Connessione…</string>
+    <string name="fg_notification_disconnected">Disconnesso</string>
+    <string name="fg_notification_no_network">Nessuna rete disponibile</string>
+    <string name="fg_notification_needs_login">Accesso richiesto</string>
+    <string name="fg_notification_error">Errore</string>
     <string name="session_notification_channel_name">Scadenza sessione</string>
     <string name="session_notification_expiring_title">La sessione NetBird sta scadendo</string>
     <string name="session_notification_expiring_text">La tua sessione scade tra circa %1$d minuti. Apri l\'app per estenderla.</string>
     <string name="session_notification_expired_title">Sessione NetBird scaduta</string>
     <string name="session_notification_expired_text">La tua sessione è scaduta. Apri l\'app per accedere di nuovo.</string>
     <string name="session_notification_extend">Estendi sessione</string>
+
     <string name="fg_notification_session_expired">Sessione scaduta</string>
     <string name="fg_notification_session_expires_soon">La sessione scade in meno di un minuto</string>
     <plurals name="fg_notification_session_expires_minutes">

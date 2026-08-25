@@ -41,7 +41,9 @@ jobs:
         run: |
           BASE_TAG=$(git describe --tags --abbrev=0)
           SHORT_GIT_SHA=$(git rev-parse --short HEAD)
-          echo "version_name=${BASE_TAG}-snapshot-${SHORT_GIT_SHA}" >> "$GITHUB_OUTPUT"
+          VERSION_NAME="${BASE_TAG}-snapshot-${SHORT_GIT_SHA}"
+          echo "Version name: $VERSION_NAME"
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
 
       # Must stay identical to the Compute version code step in the sibling
       # workflow. build-release.yml and build-snapshot.yml feed the same Play

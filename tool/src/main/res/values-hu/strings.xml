@@ -1,6 +1,11 @@
 <resources>
     <string name="fg_notification_channel_name">NetBird szolgáltatás</string>
-    <string name="fg_notification_text">A szolgáltatás fut</string>
+    <string name="fg_notification_connected">Csatlakozva</string>
+    <string name="fg_notification_connecting">Csatlakozás…</string>
+    <string name="fg_notification_disconnected">Lecsatlakozva</string>
+    <string name="fg_notification_no_network">Nincs elérhető hálózat</string>
+    <string name="fg_notification_needs_login">Bejelentkezés szükséges</string>
+    <string name="fg_notification_error">Hiba</string>
     <string name="session_notification_channel_name">Munkamenet lejárata</string>
     <string name="session_notification_expiring_title">A NetBird munkamenet hamarosan lejár</string>
     <string name="session_notification_expiring_text">A munkamenet körülbelül %1$d perc múlva lejár. Nyissa meg az alkalmazást a meghosszabbításhoz.</string>

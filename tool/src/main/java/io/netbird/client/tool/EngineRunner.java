@@ -32,8 +32,8 @@ class EngineRunner {
     private final ProfileManagerWrapper profileManager;
     private boolean engineIsRunning = false;
     Set<ServiceStateListener> serviceStateListeners = ConcurrentHashMap.newKeySet();
-    private final Set<ServiceStateListener> suppressedServiceStateListeners = ConcurrentHashMap.newKeySet();
     private final Set<Runnable> connectedObservers = ConcurrentHashMap.newKeySet();
+    private final Set<ConnectionListener> connectionObservers = ConcurrentHashMap.newKeySet();
     private volatile SessionMonitor sessionMonitor;
     private final Client goClient;
     private ConnectionListener connectionListener;
@@ -106,6 +106,24 @@ class EngineRunner {
     /** Aborts an in-flight session extend, leaving the tunnel untouched. */
     public void cancelExtendAuthSession() {
         goClient.cancelExtendAuthSession();
+    }
+
+    // setNetworkAvailable forwards OS connectivity state to the Go client,
+    // which suspends its reconnect loops while no network is available. The
+    // Go-side state is process-global, so it may be called regardless of
+    // whether the engine is running.
+    public void setNetworkAvailable(boolean available) {
+        goClient.setNetworkAvailable(available);
+    }
+
+    // notifyNetworkChange tells the Go client the OS switched networks (e.g.
+    // cellular to WiFi). The Go side cuts the management, signal and relay
+    // connections, whose sockets are bound to the old network, so their
+    // reconnect loops redial immediately on the new one. Unlike an engine
+    // restart this keeps the TUN device, the WireGuard config and the peer
+    // state untouched.
+    public void notifyNetworkChange() {
+        goClient.notifyNetworkChange();
     }
 
     public void run(@NotNull URLOpener urlOpener, boolean isAndroidTV) {
@@ -185,14 +203,44 @@ class EngineRunner {
     }
 
     public synchronized void setConnectionListener(ConnectionListener listener) {
-        // Unwrap any previous ObservingConnectionListener to avoid stacking
-        // wrappers across repeated set/get cycles (e.g. EngineRestarter snapshots
-        // the current listener and re-installs it after wrapping its own filter
-        // around it).
+        // Unwrap first: a null listener still gets wrapped (around a no-op) so
+        // the service's own observers keep receiving events, which means the
+        // wrapper can otherwise be handed back to us and stack on itself.
         ConnectionListener raw = unwrap(listener);
-        ConnectionListener wrapped = raw == null ? null : new ObservingConnectionListener(raw, connectedObservers);
+        ConnectionListener wrapped = raw == null
+                ? new ObservingConnectionListener(NO_OP_CONNECTION_LISTENER, connectedObservers, connectionObservers)
+                : new ObservingConnectionListener(raw, connectedObservers, connectionObservers);
         this.connectionListener = wrapped;
         goClient.setConnectionListener(wrapped);
+    }
+
+    /**
+     * Keeps the connection callbacks flowing while no UI is bound, so the
+     * service's own observers (the status-bar icon) still track the tunnel
+     * during always-on / boot starts.
+     */
+    private static final ConnectionListener NO_OP_CONNECTION_LISTENER = new ConnectionListener() {
+        @Override public void onStateChanged(long state) {}
+        @Override public void onConnecting() {}
+        @Override public void onConnected() {}
+        @Override public void onDisconnecting() {}
+        @Override public void onDisconnected() {}
+        @Override public void onAddressChanged(String f, String i) {}
+        @Override public void onPeersListChanged(long n) {}
+    };
+
+    /**
+     * Registers a service-owned observer of the tunnel's connection phase.
+     * Unlike the app's ConnectionListener this survives the UI unbinding, so
+     * it stays accurate for always-on VPN and boot starts.
+     */
+    public synchronized void addConnectionObserver(ConnectionListener observer) {
+        connectionObservers.add(observer);
+        // Make sure the Go core has a listener installed even before any UI
+        // binds, otherwise the observer would never be called.
+        if (connectionListener == null) {
+            setConnectionListener(null);
+        }
     }
 
     private static ConnectionListener unwrap(ConnectionListener listener) {
@@ -204,48 +252,79 @@ class EngineRunner {
     }
 
     private static final class ObservingConnectionListener implements ConnectionListener {
-        final ConnectionListener delegate;
+        private final ConnectionListener delegate;
         private final java.util.Set<Runnable> connectedObservers;
+        private final java.util.Set<ConnectionListener> connectionObservers;
 
-        ObservingConnectionListener(ConnectionListener delegate, java.util.Set<Runnable> connectedObservers) {
+        ObservingConnectionListener(ConnectionListener delegate, java.util.Set<Runnable> connectedObservers,
+                                    java.util.Set<ConnectionListener> connectionObservers) {
             this.delegate = delegate;
             this.connectedObservers = connectedObservers;
+            this.connectionObservers = connectionObservers;
         }
 
-        @Override public void onConnecting() { delegate.onConnecting(); }
+        private void fanOut(java.util.function.Consumer<ConnectionListener> call) {
+            for (ConnectionListener obs : connectionObservers) {
+                try { call.accept(obs); } catch (Exception e) { Log.w(LOGTAG, "connection observer failed", e); }
+            }
+        }
+
+        @Override public void onStateChanged(long state) {
+            Log.d(LOGTAG, "FROM GO: onStateChanged(" + state + ")");
+            delegate.onStateChanged(state);
+            fanOut(obs -> obs.onStateChanged(state));
+        }
+        @Override public void onConnecting() {
+            Log.d(LOGTAG, "FROM GO: onConnecting()");
+            delegate.onConnecting();
+            fanOut(ConnectionListener::onConnecting);
+        }
         @Override public void onConnected() {
+            Log.d(LOGTAG, "FROM GO: onConnected()");
             delegate.onConnected();
             for (Runnable obs : connectedObservers) {
                 try { obs.run(); } catch (Exception e) { Log.w(LOGTAG, "connected observer failed", e); }
             }
+            fanOut(ConnectionListener::onConnected);
         }
-        @Override public void onDisconnecting() { delegate.onDisconnecting(); }
-        @Override public void onDisconnected() { delegate.onDisconnected(); }
-        @Override public void onAddressChanged(String f, String i) { delegate.onAddressChanged(f, i); }
-        @Override public void onPeersListChanged(long n) { delegate.onPeersListChanged(n); }
-        @Override public void onStateChanged(long state) { delegate.onStateChanged(state); }
-    }
-
-    public synchronized void removeStatusListener() {
-        this.connectionListener = null;
-        goClient.removeConnectionListener();
-    }
-
-    synchronized ConnectionListener getConnectionListener() {
-        return connectionListener;
+        @Override public void onDisconnecting() {
+            Log.d(LOGTAG, "FROM GO: onDisconnecting()");
+            delegate.onDisconnecting();
+            fanOut(ConnectionListener::onDisconnecting);
+        }
+        @Override public void onDisconnected() {
+            Log.d(LOGTAG, "FROM GO: onDisconnected()");
+            delegate.onDisconnected();
+            fanOut(ConnectionListener::onDisconnected);
+        }
+        @Override public void onAddressChanged(String f, String i) {
+            delegate.onAddressChanged(f, i);
+            fanOut(obs -> obs.onAddressChanged(f, i));
+        }
+        @Override public void onPeersListChanged(long n) {
+            delegate.onPeersListChanged(n);
+            fanOut(obs -> obs.onPeersListChanged(n));
+        }
     }
 
     /**
-     * Registers a callback that fires every time the engine reports
-     * OnConnected. EngineRestarter uses this to cancel a pending restart
-     * when the Go core has already reconnected on its own.
+     * Detaches the UI's connection listener. The service's own observers are
+     * kept subscribed: dropping the Go-side listener entirely would freeze the
+     * status-bar icon for as long as no activity is bound, which is exactly
+     * when the notification is the only status the user can see.
      */
-    public void addOnConnectedObserver(Runnable observer) {
-        connectedObservers.add(observer);
+    public synchronized void removeStatusListener() {
+        if (connectionObservers.isEmpty()) {
+            this.connectionListener = null;
+            goClient.removeConnectionListener();
+            return;
+        }
+        setConnectionListener(null);
     }
 
-    public void removeOnConnectedObserver(Runnable observer) {
-        connectedObservers.remove(observer);
+    /** Registers a callback that fires every time the engine reports OnConnected. */
+    public void addOnConnectedObserver(Runnable observer) {
+        connectedObservers.add(observer);
     }
 
     public synchronized void addServiceStateListener(ServiceStateListener serviceStateListener) {
@@ -257,46 +336,8 @@ class EngineRunner {
         serviceStateListeners.add(serviceStateListener);
     }
 
-    /**
-     * Atomically adds a listener if and only if the engine is currently running.
-     * Does NOT fire immediate callbacks like addServiceStateListener does.
-     *
-     * @return true if listener was registered (engine was running), false otherwise
-     */
-    public synchronized boolean addServiceStateListenerForRestart(ServiceStateListener listener) {
-        if (!engineIsRunning) {
-            return false;  // Engine not running, can't restart
-        }
-        // Add listener without firing immediate callback
-        serviceStateListeners.add(listener);
-        return true;
-    }
-
     public synchronized void removeServiceStateListener(ServiceStateListener serviceStateListener) {
         serviceStateListeners.remove(serviceStateListener);
-        suppressedServiceStateListeners.remove(serviceStateListener);
-    }
-
-    /**
-     * Marks a listener as suppressed: it will not receive onStarted / onStopped
-     * notifications until {@link #unsuppressServiceStateListener} is called.
-     * Used by EngineRestarter to hide the engine teardown from external UI
-     * listeners during a restart.
-     */
-    public synchronized void suppressServiceStateListener(ServiceStateListener listener) {
-        suppressedServiceStateListeners.add(listener);
-    }
-
-    public synchronized void unsuppressServiceStateListener(ServiceStateListener listener) {
-        suppressedServiceStateListeners.remove(listener);
-    }
-
-    public synchronized java.util.List<ServiceStateListener> snapshotExternalListeners(ServiceStateListener exclude) {
-        java.util.List<ServiceStateListener> out = new java.util.ArrayList<>();
-        for (ServiceStateListener s : serviceStateListeners) {
-            if (s != exclude) out.add(s);
-        }
-        return out;
     }
 
     public synchronized void stop() {
@@ -324,9 +365,6 @@ class EngineRunner {
 
     private synchronized void notifyServiceStateListeners(boolean engineIsRunning) {
         for (ServiceStateListener s : serviceStateListeners) {
-            if (suppressedServiceStateListeners.contains(s)) {
-                continue;
-            }
             if (engineIsRunning) {
                 s.onStarted();
             } else {

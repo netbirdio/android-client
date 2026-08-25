@@ -26,6 +26,7 @@
 
     <string name="main_status_disconnected">Déconnecté</string>
     <string name="main_status_connecting">Connexion…</string>
+    <string name="main_status_no_network">Aucun réseau disponible</string>
     <string name="main_status_connected">Connecté</string>
     <string name="main_status_disconnecting">Déconnexion…</string>
     <string name="main_desc_connect">connexion/déconnexion</string>

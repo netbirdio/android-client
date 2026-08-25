@@ -26,6 +26,7 @@
 
     <string name="main_status_disconnected">未接続</string>
     <string name="main_status_connecting">接続中…</string>
+    <string name="main_status_no_network">ネットワークがありません</string>
     <string name="main_status_connected">接続済み</string>
     <string name="main_status_disconnecting">切断中…</string>
     <string name="main_desc_connect">接続/切断</string>

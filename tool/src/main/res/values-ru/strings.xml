@@ -1,12 +1,18 @@
 <resources>
     <string name="fg_notification_channel_name">Служба NetBird</string>
-    <string name="fg_notification_text">Служба запущена</string>
+    <string name="fg_notification_connected">Подключено</string>
+    <string name="fg_notification_connecting">Подключение…</string>
+    <string name="fg_notification_disconnected">Отключено</string>
+    <string name="fg_notification_no_network">Сеть недоступна</string>
+    <string name="fg_notification_needs_login">Требуется вход</string>
+    <string name="fg_notification_error">Ошибка</string>
     <string name="session_notification_channel_name">Истечение сеанса</string>
     <string name="session_notification_expiring_title">Сеанс NetBird скоро истечёт</string>
     <string name="session_notification_expiring_text">Ваш сеанс истекает примерно через %1$d минут. Откройте приложение, чтобы продлить его.</string>
     <string name="session_notification_expired_title">Сеанс NetBird истёк</string>
     <string name="session_notification_expired_text">Ваш сеанс истёк. Откройте приложение, чтобы войти снова.</string>
     <string name="session_notification_extend">Продлить сеанс</string>
+
     <string name="fg_notification_session_expired">Сеанс истёк</string>
     <string name="fg_notification_session_expires_soon">Сеанс истекает менее чем через минуту</string>
     <plurals name="fg_notification_session_expires_minutes">

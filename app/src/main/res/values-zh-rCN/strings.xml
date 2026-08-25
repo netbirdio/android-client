@@ -26,6 +26,7 @@
 
     <string name="main_status_disconnected">已断开连接</string>
     <string name="main_status_connecting">正在连接…</string>
+    <string name="main_status_no_network">无可用网络</string>
     <string name="main_status_connected">已连接</string>
     <string name="main_status_disconnecting">正在断开连接…</string>
     <string name="main_desc_connect">连接/断开</string>
