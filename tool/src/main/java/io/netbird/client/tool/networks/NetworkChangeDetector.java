@@ -138,6 +138,23 @@ public class NetworkChangeDetector {
         }
     }
 
+    // Synchronous snapshot used only for seeding: getAllNetworks() is
+    // deprecated in favor of callback tracking, but the seed runs before any
+    // callback can have fired and there is no other synchronous enumeration.
+    private boolean hasNonVpnInternetNetwork() {
+        for (Network network : connectivityManager.getAllNetworks()) {
+            NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(network);
+            if (caps == null) {
+                continue;
+            }
+            if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void initDefaultNetworkCallback() {
         defaultNetworkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
@@ -181,8 +198,11 @@ public class NetworkChangeDetector {
         // Seed the availability state before callbacks arrive: when the device
         // starts with no connectivity at all (e.g. airplane mode), no
         // onAvailable ever fires, so the initial value must already be correct.
+        // Use the same criteria as the registered request below: our own VPN
+        // network is excluded, so an up tunnel cannot mask a missing
+        // underlying network.
         synchronized (internetStateLock) {
-            internetAvailable = connectivityManager.getActiveNetwork() != null;
+            internetAvailable = hasNonVpnInternetNetwork();
         }
 
         NetworkRequest.Builder builder = new NetworkRequest.Builder();

@@ -391,7 +391,12 @@ public class VPNService extends android.net.VpnService {
             return ForegroundNotification.State.CONNECTED;
         }
         if (STATUS_CONNECTING.equals(status)) {
-            return ForegroundNotification.State.CONNECTING;
+            // The Go status label is never "NoNetwork" — the notifier only
+            // overlays it on Connecting while the OS reports no network
+            // (peer/notifier.go effectiveState), so apply the same rule here.
+            return networkChangeDetector.hasInternetConnectivity()
+                    ? ForegroundNotification.State.CONNECTING
+                    : ForegroundNotification.State.NO_NETWORK;
         }
         // Idle — the run loop is not running (never started, or stopped) —
         // and anything the Go side may add later.

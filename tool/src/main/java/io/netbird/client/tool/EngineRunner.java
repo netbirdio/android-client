@@ -297,8 +297,14 @@ class EngineRunner {
             delegate.onDisconnected();
             fanOut(ConnectionListener::onDisconnected);
         }
-        @Override public void onAddressChanged(String f, String i) { delegate.onAddressChanged(f, i); }
-        @Override public void onPeersListChanged(long n) { delegate.onPeersListChanged(n); }
+        @Override public void onAddressChanged(String f, String i) {
+            delegate.onAddressChanged(f, i);
+            fanOut(obs -> obs.onAddressChanged(f, i));
+        }
+        @Override public void onPeersListChanged(long n) {
+            delegate.onPeersListChanged(n);
+            fanOut(obs -> obs.onPeersListChanged(n));
+        }
     }
 
     /**
