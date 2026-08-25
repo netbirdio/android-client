@@ -233,14 +233,10 @@ public class NetworkTransitionTest {
     }
 
     /**
-     * Scenario B2 — named to sort LAST under NAME_ASCENDING because the
-     * FailFast listener aborts everything after the first failure, and this
-     * one is STILL EXPECTED TO FAIL: PR #243 made the handover notification
-     * prompt, but the outage stays ~13s behind it, most of it endpoint.go's
-     * 5s fallbackDelay on the responder path.
-     * The probe window starts before the outage does (the default network
-     * switches a few seconds after WiFi comes up), so the assertion is on the
-     * longest continuous outage inside the window, not on time-to-first-success.
+     * Scenario B2. The probe window starts before the outage does (the default
+     * network switches a few seconds after WiFi comes up), so the assertion is
+     * on the longest continuous outage inside the window, not on
+     * time-to-first-success.
      */
     @Test
     public void zB2CellularToWifiHandoverIsFast() throws Exception {
