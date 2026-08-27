@@ -6,6 +6,12 @@ on:
 
 permissions:
   contents: write
+  # Needed to read the run counts the version code is derived from.
+  actions: read
+
+concurrency:
+  group: android-version-code-lock
+  cancel-in-progress: false
 
 jobs:
   build-release:
@@ -39,18 +45,49 @@ jobs:
           echo "${{ secrets.GPLAY_KEYSTORE }}" | base64 -d > gplay.keystore
           echo "NETBIRD_UPLOAD_STORE_FILE=$GITHUB_WORKSPACE/gplay.keystore" >> $GITHUB_ENV
 
+      # Must stay identical to the Compute version code step in the sibling
+      # workflow. build-release.yml and build-snapshot.yml feed the same Play
+      # Store listing, so they have to draw from one shared counter; a
+      # github.run_number sees only its own workflow's runs and would hand out a
+      # code the other already used. The concurrency group above keeps the two
+      # from computing at once. Renaming either workflow file resets the count
+      # GitHub keeps for it, which would send version codes backwards.
+      #
+      # A 404 means the workflow has never run and is not on the default branch
+      # yet, which is a true zero. Any other failure aborts the build: falling
+      # back to zero would mint a version code below already-published ones.
       - name: Compute version code
         id: version_code
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          adjusted=$(( ${{ github.run_number }} + 40 ))
-          echo "adjusted=$adjusted" >> $GITHUB_OUTPUT
+          count_runs() {
+            local runs
+            if runs=$(gh api "repos/${{ github.repository }}/actions/workflows/$1/runs?per_page=1" --jq '.total_count' 2>gh_err.txt); then
+              if ! [[ "$runs" =~ ^[0-9]+$ ]]; then
+                echo "::error::unexpected run count for $1: '$runs'" >&2
+                return 1
+              fi
+              echo "$runs"
+            elif grep -q 'HTTP 404' gh_err.txt; then
+              echo 0
+            else
+              echo "::error::failed to fetch run count for $1: $(cat gh_err.txt)" >&2
+              return 1
+            fi
+          }
+          release_runs=$(count_runs build-release.yml)
+          snapshot_runs=$(count_runs build-snapshot.yml)
+          version_code=$((release_runs + snapshot_runs + 40))
+          echo "Release runs: $release_runs, snapshot runs: $snapshot_runs -> version_code=$version_code"
+          echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
 
       - name: Build Android
         id: build
         uses: ./.github/actions/build-android
         with:
           version_name: ${{ steps.version.outputs.version_name }}
-          version_code: ${{ steps.version_code.outputs.adjusted }}
+          version_code: ${{ steps.version_code.outputs.version_code }}
           build_type: release
 
       - name: Upload files to existing release

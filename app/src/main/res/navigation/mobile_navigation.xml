@@ -79,6 +79,12 @@
         tools:layout="@layout/fragment_file_sharing" />
 
     <fragment
+        android:id="@+id/nav_ssh_sessions"
+        android:name="io.netbird.client.ui.ssh.SshSessionsFragment"
+        android:label="@string/ssh_sessions_title"
+        tools:layout="@layout/fragment_ssh_sessions" />
+
+    <fragment
         android:id="@+id/nav_ssh_terminal"
         android:name="io.netbird.client.ui.ssh.SSHTerminalFragment"
         android:label="@string/ssh_terminal_title"

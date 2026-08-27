@@ -146,9 +146,9 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
         var networks = accessor.getNetworks();
         var peersFromEngine = accessor.getPeersList();
         if (networks == null || peersFromEngine == null) {
-            // Service not bound (yet): keep the last snapshot instead of flashing an
-            // empty list. Another refresh follows once the binder arrives and the
-            // engine replays its state.
+            // Service not bound (yet), or the engine could not produce a network map:
+            // keep the last snapshot instead of flashing an empty list. Another refresh
+            // follows once the binder arrives and the engine replays its state.
             return;
         }
 
@@ -159,6 +159,10 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     @Override
     public void onRouteChanged(String routes) {
         postResources();
+    }
+
+    private void clearResources() {
+        uiState.postValue(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
     }
 
     public void selectRoute(String route) throws Exception {
@@ -183,7 +187,7 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
 
     @Override
     public void onEngineStopped() {
-
+        clearResources();
     }
 
     @Override
@@ -203,7 +207,7 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
 
     @Override
     public void onDisconnected() {
-
+        clearResources();
     }
 
     @Override

@@ -27,6 +27,11 @@ import org.junit.runners.Suite;
         PortAclTest.class,
         DnsResolutionTest.class,
         ExitNodeRouteTest.class,
+        ExitNodeNetworkTransitionTest.class,
+        // Last on purpose: its final case (B2, cellular->WiFi handover speed)
+        // is expected to fail until PR #243 merges, and the FailFast listener
+        // would skip everything scheduled after that failure.
+        NetworkTransitionTest.class,
 })
 public class E2eSuite {
 

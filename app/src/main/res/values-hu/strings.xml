@@ -28,6 +28,7 @@
 
     <string name="main_status_disconnected">Lecsatlakozva</string>
     <string name="main_status_connecting">Csatlakozás…</string>
+    <string name="main_status_no_network">Nincs elérhető hálózat</string>
     <string name="main_status_connected">Csatlakozva</string>
     <string name="main_status_disconnecting">Lecsatlakozás…</string>
     <string name="main_desc_connect">csatlakozás-leválasztás</string>

@@ -1,11 +1,30 @@
 <resources>
     <string name="fg_notification_channel_name">Servicio de NetBird</string>
-    <string name="fg_notification_text">El servicio está en ejecución</string>
+    <string name="fg_notification_connected">Conectado</string>
+    <string name="fg_notification_connecting">Conectando…</string>
+    <string name="fg_notification_disconnected">Desconectado</string>
+    <string name="fg_notification_no_network">No hay red disponible</string>
+    <string name="fg_notification_needs_login">Inicio de sesión requerido</string>
+    <string name="fg_notification_error">Error</string>
     <string name="session_notification_channel_name">Expiración de sesión</string>
     <string name="session_notification_expiring_title">La sesión de NetBird está por expirar</string>
     <string name="session_notification_expiring_text">Tu sesión expira en unos %1$d minutos. Abre la app para extenderla.</string>
     <string name="session_notification_expired_title">La sesión de NetBird expiró</string>
     <string name="session_notification_expired_text">Tu sesión ha expirado. Abre la app para iniciar sesión de nuevo.</string>
     <string name="session_notification_extend">Extender sesión</string>
-    <string name="fg_notification_session_text">La sesión expira a las %1$s</string>
+
+    <string name="fg_notification_session_expired">Sesión expirada</string>
+    <string name="fg_notification_session_expires_soon">La sesión expira en menos de un minuto</string>
+    <plurals name="fg_notification_session_expires_minutes">
+        <item quantity="one">La sesión expira en %1$d minuto</item>
+        <item quantity="other">La sesión expira en %1$d minutos</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_hours">
+        <item quantity="one">La sesión expira en %1$d hora</item>
+        <item quantity="other">La sesión expira en %1$d horas</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_days">
+        <item quantity="one">La sesión expira en %1$d día</item>
+        <item quantity="other">La sesión expira en %1$d días</item>
+    </plurals>
 </resources>

@@ -27,6 +27,7 @@
 
     <string name="main_status_disconnected">Disconnected</string>
     <string name="main_status_connecting">Connecting…</string>
+    <string name="main_status_no_network">No network available</string>
     <string name="main_status_connected">Connected</string>
     <string name="main_status_disconnecting">Disconnecting…</string>
     <string name="main_status_login_required">Login required</string>

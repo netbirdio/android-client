@@ -42,7 +42,7 @@ public class FileDropNotification {
         String text = transfer.label();
 
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.notification_icon)
+                .setSmallIcon(R.drawable.notification_icon_connected)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
@@ -74,7 +74,7 @@ public class FileDropNotification {
                 : 0;
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.notification_icon)
+                .setSmallIcon(R.drawable.notification_icon_connected)
                 .setContentTitle(transfer.label())
                 .setContentText(context.getString(transfer.outgoing()
                                 ? R.string.file_drop_notification_sending_to
@@ -94,6 +94,9 @@ public class FileDropNotification {
 
         String title = transfer.label();
         String text;
+        int icon = transfer.isFailed()
+                ? R.drawable.notification_icon_error
+                : R.drawable.notification_icon_connected;
         if (transfer.isFailed()) {
             text = context.getString(R.string.file_drop_notification_failed, transfer.peerName());
         } else if (transfer.outgoing()) {
@@ -103,7 +106,7 @@ public class FileDropNotification {
         }
 
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.notification_icon)
+                .setSmallIcon(icon)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))

@@ -28,6 +28,7 @@
 
     <string name="main_status_disconnected">Desconectado</string>
     <string name="main_status_connecting">Conectando…</string>
+    <string name="main_status_no_network">No hay red disponible</string>
     <string name="main_status_connected">Conectado</string>
     <string name="main_status_disconnecting">Desconectando…</string>
     <string name="main_desc_connect">conectar/desconectar</string>

@@ -24,10 +24,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.android.material.navigation.NavigationBarView;
 
@@ -58,6 +58,7 @@ import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
 import io.netbird.client.tool.files.FileDropManager;
 import io.netbird.client.ui.ssh.SshSessionManager;
+import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.FileDrop;
@@ -76,7 +77,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         CONNECTED,
         CONNECTING,
         DISCONNECTING,
-        DISCONNECTED
+        DISCONNECTED,
+        NO_NETWORK
     }
     private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
@@ -88,11 +90,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     private NavController navController;
 
     private ActivityResultLauncher<Intent> vpnActivityResultLauncher;
-    private final List<StateListener> serviceStateListeners = new ArrayList<>();
+    private final List<StateListener> serviceStateListeners = new CopyOnWriteArrayList<>();
     // Route listeners are often registered before the service binding completes
     // (fragments come up first), so they are queued here and attached to the binder
     // in onServiceConnected.
-    private final List<RouteChangeListener> routeChangeListeners = new ArrayList<>();
+    private final List<RouteChangeListener> routeChangeListeners = new CopyOnWriteArrayList<>();
     private URLOpener urlOpener;
     private URLOpener extendUrlOpener;
     private QrCodeDialog qrCodeDialog;
@@ -599,8 +601,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     @Override
     public void selectRoute(String route) throws Exception {
         if (mBinder == null) {
-            Log.w(LOGTAG, "VPN binder is null");
-            return;
+            throw new Exception("VPN service not connected");
         }
 
         mBinder.selectRoute(route);
@@ -609,8 +610,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     @Override
     public void deselectRoute(String route) throws Exception {
         if (mBinder == null) {
-            Log.w(LOGTAG, "VPN binder is null");
-            return;
+            throw new Exception("VPN service not connected");
         }
 
         mBinder.deselectRoute(route);
@@ -727,6 +727,9 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             case DISCONNECTED:
                 listener.onDisconnected();
                 break;
+            case NO_NETWORK:
+                listener.onNoNetwork();
+                break;
         }
 
         if (lastFqdn != null && lastIp != null) {
@@ -827,7 +830,30 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         alertDialog.show();
     }
 
+    /** Maps a gomobile ClientState value to a readable name for logging. */
+    private static String stateName(long state) {
+        if (state == Android.ClientStateDisconnected) return "Disconnected";
+        if (state == Android.ClientStateConnected) return "Connected";
+        if (state == Android.ClientStateConnecting) return "Connecting";
+        if (state == Android.ClientStateDisconnecting) return "Disconnecting";
+        if (state == Android.ClientStateNoNetwork) return "NoNetwork";
+        return "Unknown";
+    }
+
     ConnectionListener connectionListener = new ConnectionListener() {
+        @Override
+        public void onStateChanged(long state) {
+            Log.d(LOGTAG, "GO CALLBACK onStateChanged(" + state + " = " + stateName(state) + ")");
+            // Legacy per-state callbacks drive the existing states; only the
+            // states delivered exclusively through this callback are handled.
+            if (state == Android.ClientStateNoNetwork) {
+                lastKnownState = ConnectionState.NO_NETWORK;
+                for (StateListener listener : serviceStateListeners) {
+                    listener.onNoNetwork();
+                }
+            }
+        }
+
         @Override
         public synchronized void onAddressChanged(String fqdn, String ip) {
             lastFqdn = fqdn;
@@ -839,6 +865,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         public void onConnected() {
+            Log.d(LOGTAG, "GO CALLBACK onConnected()");
             lastKnownState = ConnectionState.CONNECTED;
 
             isSSOFinishedWell = true;
@@ -848,6 +875,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         public void onConnecting() {
+            Log.d(LOGTAG, "GO CALLBACK onConnecting()");
             lastKnownState = ConnectionState.CONNECTING;
 
             isSSOFinishedWell = true;
@@ -857,6 +885,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         public void onDisconnecting() {
+            Log.d(LOGTAG, "GO CALLBACK onDisconnecting()");
             lastKnownState = ConnectionState.DISCONNECTING;
 
             for (StateListener listener : serviceStateListeners) {
@@ -865,6 +894,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         public void onDisconnected() {
+            Log.d(LOGTAG, "GO CALLBACK onDisconnected()");
             lastKnownState = ConnectionState.DISCONNECTED;
 
             isSSOFinishedWell = false;
