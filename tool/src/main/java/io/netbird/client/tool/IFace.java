@@ -140,11 +140,12 @@ class IFace implements TunAdapter {
      *
      * The selection is read here rather than passed in because the tunnel is
      * also rebuilt from VPNService without going through the Go engine, and both
-     * paths must see the same stored answer.
+     * paths must see the same stored answer. It belongs to the active profile,
+     * so switching profile switches which applications the tunnel carries.
      */
     private void applyAppFilter(VpnService.Builder builder) {
-        SplitTunnelConfig.Resolution resolution = new Preferences(vpnService)
-                .getSplitTunnelConfig()
+        SplitTunnelConfig.Resolution resolution = new SplitTunnelStore(vpnService)
+                .load()
                 .resolve(vpnService.getPackageName());
 
         boolean allow = resolution.getFilter() == SplitTunnelConfig.Filter.ALLOW;
