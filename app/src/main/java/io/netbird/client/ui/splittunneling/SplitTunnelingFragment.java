@@ -2,11 +2,13 @@ package io.netbird.client.ui.splittunneling;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,8 +22,8 @@ import java.util.Set;
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentSplitTunnelingBinding;
-import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.SplitTunnelConfig;
+import io.netbird.client.tool.SplitTunnelStore;
 
 /**
  * Lets the user say which applications the tunnel carries.
@@ -33,10 +35,12 @@ import io.netbird.client.tool.SplitTunnelConfig;
 public class SplitTunnelingFragment extends Fragment
         implements SplitTunnelModeSheet.OnModeChangedListener, AppListAdapter.OnAppToggledListener {
 
+    private static final String LOGTAG = "SplitTunnelingFragment";
+
     private FragmentSplitTunnelingBinding binding;
     private SplitTunnelingViewModel viewModel;
     private AppListAdapter adapter;
-    private Preferences preferences;
+    private SplitTunnelStore store;
     private ServiceAccessor serviceAccessor;
 
     private SplitTunnelConfig.Mode mode = SplitTunnelConfig.Mode.OFF;
@@ -65,8 +69,8 @@ public class SplitTunnelingFragment extends Fragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        preferences = new Preferences(requireContext());
-        SplitTunnelConfig stored = preferences.getSplitTunnelConfig();
+        store = new SplitTunnelStore(requireContext());
+        SplitTunnelConfig stored = store.load();
         mode = stored.getMode();
         excluded.addAll(stored.getExcluded());
         included.addAll(stored.getIncluded());
@@ -134,8 +138,22 @@ public class SplitTunnelingFragment extends Fragment
     }
 
     private void save() {
-        preferences.saveSplitTunnelConfig(new SplitTunnelConfig(mode, excluded, included));
-        serviceAccessor.applySplitTunneling();
+        if (persist()) {
+            serviceAccessor.applySplitTunneling();
+        }
+    }
+
+    /** @return false when the store refused the write, so nothing was changed. */
+    private boolean persist() {
+        try {
+            store.save(new SplitTunnelConfig(mode, excluded, included));
+            return true;
+        } catch (Exception e) {
+            Log.e(LOGTAG, "could not save the split tunnelling settings", e);
+            Toast.makeText(requireContext(), getString(R.string.error_generic, e.toString()),
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 
     /**
@@ -152,7 +170,7 @@ public class SplitTunnelingFragment extends Fragment
         boolean changed = excluded.retainAll(installed);
         changed |= included.retainAll(installed);
         if (changed) {
-            preferences.saveSplitTunnelConfig(new SplitTunnelConfig(mode, excluded, included));
+            persist();
         }
     }
 
