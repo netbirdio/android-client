@@ -16,6 +16,9 @@
     <string name="menu_troubleshoot">Troubleshoot</string>
 
     <string name="main_status_disconnected">Disconnected</string>
+    <string name="main_status_connecting">Connecting</string>
+    <string name="main_status_connected">Connected</string>
+    <string name="main_status_disconnecting">Disconnecting</string>
     <string name="main_desc_bg_mask">background mask</string>
     <string name="main_desc_connect">connect-disconnect</string>
 
@@ -35,6 +38,8 @@
 
     <string name="btn_close">Close</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>of</b> <b>%2$d</b> Peers connected]]></string>
+    <string name="tab_peers">Peers</string>
+    <string name="tab_networks">Networks</string>
     <string name="peers_hint_search_peers">Search peers</string>
     <string name="peer_filter_all">All</string>
     <string name="peer_filter_idle">Idle</string>
