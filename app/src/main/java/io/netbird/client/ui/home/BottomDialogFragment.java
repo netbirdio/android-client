@@ -135,11 +135,11 @@ public class BottomDialogFragment extends com.google.android.material.bottomshee
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
-                    tab.setText("Peers");
+                    tab.setText(R.string.tab_peers);
                     tab.setIcon(R.drawable.peers);
                     break;
                 case 1:
-                    tab.setText("Networks");
+                    tab.setText(R.string.tab_networks);
                     tab.setIcon(R.drawable.networks);
                     break;
                 default:

@@ -5,6 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.annotation.StringRes;
+
+import io.netbird.client.R;
+
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieDrawable;
 
@@ -13,13 +17,13 @@ class ButtonAnimation {
     private TextView textConnStatus;
 
     private enum AnimationState {
-        DISCONNECTED("Disconnected"),
-        CONNECTING("Connecting"),
-        CONNECTED("Connected"),
-        DISCONNECTING("Disconnecting");
+        DISCONNECTED(R.string.main_status_disconnected),
+        CONNECTING(R.string.main_status_connecting),
+        CONNECTED(R.string.main_status_connected),
+        DISCONNECTING(R.string.main_status_disconnecting);
 
-        private final String text;
-        AnimationState(String text) { this.text = text; }
+        @StringRes private final int text;
+        AnimationState(@StringRes int text) { this.text = text; }
     }
 
     private AnimationState currentState = AnimationState.DISCONNECTED;
@@ -175,7 +179,7 @@ class ButtonAnimation {
         });
     }
 
-    private void updateText(String text) {
+    private void updateText(@StringRes int text) {
         Log.i("ButtonAnimation", "set text: "+text);
         textConnStatus.post(() -> textConnStatus.setText(text));
     }
