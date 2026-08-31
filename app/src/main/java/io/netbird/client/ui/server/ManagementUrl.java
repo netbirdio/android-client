@@ -1,5 +1,8 @@
 package io.netbird.client.ui.server;
 
+import android.security.NetworkSecurityPolicy;
+import android.util.Log;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
@@ -10,6 +13,8 @@ import java.util.regex.Pattern;
  * mirroring the desktop's useManagementUrl hook.
  */
 public final class ManagementUrl {
+
+    private static final String LOGTAG = "ManagementUrl";
 
     /** Management URL of NetBird's hosted service. */
     public static final String CLOUD = "https://api.netbird.io:443";
@@ -67,6 +72,16 @@ public final class ManagementUrl {
      * <p>Blocking call — run it off the main thread.
      */
     public static boolean isReachable(String url) {
+        if (!canProbe(url)) {
+            // Not an answer this can give, so it does not pretend to. The
+            // engine reaches the server with Go's own networking, which is not
+            // bound by the platform's cleartext policy the way this probe is,
+            // so a plain-HTTP server that the probe may not touch is still one
+            // the client can use. Reporting it unreachable would warn about a
+            // URL that works.
+            return true;
+        }
+
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) new URL(url).openConnection();
@@ -76,11 +91,35 @@ public final class ManagementUrl {
             connection.getResponseCode();
             return true;
         } catch (Exception e) {
+            // Logged because the reason is the whole diagnostic value: no
+            // route, a name that does not resolve, and a rejected certificate
+            // all arrive here and all show the user the same sentence.
+            Log.d(LOGTAG, "management server " + url + " did not answer the probe", e);
             return false;
         } finally {
             if (connection != null) {
                 connection.disconnect();
             }
+        }
+    }
+
+    /**
+     * Whether the probe is allowed to make this request at all. An app
+     * targeting API 28 or later has cleartext denied unless it opts in, and
+     * this one does not, so an http:// URL fails on policy before any packet
+     * is sent.
+     */
+    private static boolean canProbe(String url) {
+        try {
+            URL parsed = new URL(url);
+            if (!"http".equalsIgnoreCase(parsed.getProtocol())) {
+                return true;
+            }
+            return NetworkSecurityPolicy.getInstance()
+                    .isCleartextTrafficPermitted(parsed.getHost());
+        } catch (Exception e) {
+            Log.d(LOGTAG, "cannot tell whether " + url + " is probeable", e);
+            return false;
         }
     }
 }
