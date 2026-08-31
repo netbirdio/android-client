@@ -83,7 +83,7 @@ class EngineRunner {
             try {
                 configurationFilePath = profileManager.getActiveConfigPath();
                 stateFilePath = profileManager.getActiveStateFilePath();
-                String activeProfile = profileManager.getActiveProfile();
+                Profile activeProfile = profileManager.getActiveProfile();
                 Log.d(LOGTAG, "Initializing engine with profile: " + activeProfile);
                 Log.d(LOGTAG, "Config path: " + configurationFilePath);
                 Log.d(LOGTAG, "State path: " + stateFilePath);
@@ -327,7 +327,9 @@ class EngineRunner {
         String cacheDir = context.getCacheDir().getAbsolutePath();
         var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
         try {
-            return goClient.debugBundle(platformFiles, anonymize);
+            // The strict level stays unused until the troubleshoot screen
+            // grows an option for it.
+            return goClient.debugBundle(platformFiles, anonymize, Android.AnonymizeLevelDefault);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             throw e;
