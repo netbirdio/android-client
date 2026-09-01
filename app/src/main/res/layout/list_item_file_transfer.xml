@@ -33,7 +33,7 @@
         android:textColor="@color/nb_txt"
         android:textSize="14sp"
         tools:text="quarterly-report-2026-final.pdf"
-        app:layout_constraintEnd_toStartOf="@id/transfer_status"
+        app:layout_constraintEnd_toStartOf="@id/transfer_trailing"
         app:layout_constraintStart_toEndOf="@id/transfer_direction"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -47,7 +47,7 @@
         android:textColor="@color/nb_txt_light"
         android:textSize="14sp"
         tools:text="from office-mini.netbird.selfhosted"
-        app:layout_constraintEnd_toStartOf="@id/transfer_status"
+        app:layout_constraintEnd_toStartOf="@id/transfer_trailing"
         app:layout_constraintStart_toStartOf="@id/transfer_label"
         app:layout_constraintTop_toBottomOf="@id/transfer_label" />
 
@@ -61,7 +61,7 @@
         android:textColor="@color/nb_txt_light"
         android:textSize="14sp"
         tools:text="14:32 · 214 MB"
-        app:layout_constraintEnd_toStartOf="@id/transfer_status"
+        app:layout_constraintEnd_toStartOf="@id/transfer_trailing"
         app:layout_constraintStart_toStartOf="@id/transfer_label"
         app:layout_constraintTop_toBottomOf="@id/transfer_peer" />
 
@@ -76,6 +76,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5" />
+
+    <ImageView
+        android:id="@+id/transfer_copy"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/file_drop_copy"
+        android:focusable="true"
+        android:src="@drawable/ic_content_copy"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        app:tint="@color/nb_txt_light" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/transfer_trailing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="transfer_status,transfer_copy" />
 
     <!-- Rides the last line of the card so a transfer in flight does not make
          the row any taller than a finished one. -->

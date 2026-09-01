@@ -483,20 +483,17 @@ public class FileDropFragment extends Fragment implements SendPickerSheet.Listen
                     transfer.peerName()));
             binding.transferMeta.setText(meta(transfer));
 
-            // A received snippet is worth copying, not opening, so the status
-            // slot carries the action instead of the outcome.
+            // A received snippet is worth copying, not opening, so its row
+            // trades the outcome label for a clipboard icon.
             boolean copyable = transfer.isText() && !transfer.outgoing();
+            binding.transferStatus.setVisibility(copyable ? View.GONE : View.VISIBLE);
+            binding.transferCopy.setVisibility(copyable ? View.VISIBLE : View.GONE);
             if (copyable) {
-                binding.transferStatus.setText(R.string.file_drop_copy);
-                binding.transferStatus.setTextColor(
-                        ContextCompat.getColor(requireContext(), R.color.nb_orange));
-                binding.transferStatus.setOnClickListener(v -> copy(transfer));
+                binding.transferCopy.setOnClickListener(v -> copy(transfer));
             } else {
                 binding.transferStatus.setText(outcomeLabel(transfer));
                 binding.transferStatus.setTextColor(outcomeColor(transfer));
-                binding.transferStatus.setOnClickListener(null);
             }
-            binding.transferStatus.setClickable(copyable);
 
             // The bar only says how far along a live transfer is; a finished one
             // has its outcome in the status slot and needs nothing else.
