@@ -3,6 +3,8 @@ package io.netbird.client.ui.home;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -29,6 +33,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +43,8 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentPeerDetailBinding;
+import io.netbird.client.ui.files.SendPickerSheet;
+import io.netbird.client.ui.files.ShareTargetActivity;
 import io.netbird.client.ui.ssh.SshConnectDialog;
 
 /**
@@ -45,7 +52,7 @@ import io.netbird.client.ui.ssh.SshConnectDialog;
  * desktop app's peer detail panel: same rows, same ordering, and the same rule
  * that a row is hidden rather than shown with a meaningless value.
  */
-public class PeerDetailFragment extends Fragment {
+public class PeerDetailFragment extends Fragment implements SendPickerSheet.Listener {
 
     public static final String ARG_PUB_KEY = "pubKey";
 
@@ -69,6 +76,9 @@ public class PeerDetailFragment extends Fragment {
     /** Last peer state the rows were built from; guards redundant re-renders. */
     @Nullable
     private Peer rendered;
+
+    private final ActivityResultLauncher<String[]> filePicker = registerForActivityResult(
+            new ActivityResultContracts.OpenMultipleDocuments(), this::onFilesPicked);
 
     private final Handler pollHandler = new Handler(Looper.getMainLooper());
     private final Runnable pollTask = new Runnable() {
@@ -201,11 +211,35 @@ public class PeerDetailFragment extends Fragment {
         return null;
     }
 
+    @Override
+    public void onPickFile() {
+        filePicker.launch(new String[]{"*/*"});
+    }
+
+    /**
+     * Same handoff as the Send tab's picker, but names this peer so the peer
+     * list opens already narrowed to it.
+     */
+    private void onFilesPicked(List<Uri> uris) {
+        if (uris == null || uris.isEmpty()) {
+            return;
+        }
+        Intent intent = new Intent(requireContext(), ShareTargetActivity.class);
+        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, new ArrayList<>(uris));
+        if (rendered != null) {
+            intent.putExtra(ShareTargetActivity.EXTRA_PRESET_SEARCH, rendered.getFqdn());
+        }
+        startActivity(intent);
+    }
+
     private void render(Peer peer) {
         binding.peerDetailFqdn.setText(peer.getFqdn());
         binding.peerDetailStatusDot.setBackgroundResource(statusDot(peer.getStatus()));
         binding.peerDetailSsh.setOnClickListener(v -> SshConnectDialog.show(requireContext(),
                 peer.getIp(), getString(R.string.ssh_dialog_title, peer.getFqdn())));
+        binding.peerDetailSend.setOnClickListener(v -> SendPickerSheet.forPeer(peer.getFqdn())
+                .show(getChildFragmentManager(), "send_picker"));
 
         LinearLayout rows = binding.peerDetailRows;
         rows.removeAllViews();
@@ -275,7 +309,15 @@ public class PeerDetailFragment extends Fragment {
         View header = inflater.inflate(R.layout.list_item_peer_detail_header, rows, false);
         ((ImageView) header.findViewById(R.id.peer_detail_header_icon)).setImageResource(icon);
         ((TextView) header.findViewById(R.id.peer_detail_header_text)).setText(label);
-        rows.addView(header);
+        addSeparated(inflater, rows, header);
+    }
+
+    /** Every list element after the first gets a separator line above it. */
+    private void addSeparated(LayoutInflater inflater, LinearLayout rows, View view) {
+        if (rows.getChildCount() > 0) {
+            inflater.inflate(R.layout.list_item_setting_divider, rows, true);
+        }
+        rows.addView(view);
     }
 
     /** Skipped entirely when neither the type nor the endpoint is known, as on desktop. */
@@ -327,7 +369,7 @@ public class PeerDetailFragment extends Fragment {
             row.setClickable(false);
         }
 
-        rows.addView(row);
+        addSeparated(inflater, rows, row);
         return row;
     }
 
@@ -340,7 +382,7 @@ public class PeerDetailFragment extends Fragment {
         ((TextView) row.findViewById(R.id.peer_detail_bytes_tx))
                 .setText(Formatter.formatFileSize(context, peer.getBytesTx()));
 
-        rows.addView(row);
+        addSeparated(inflater, rows, row);
     }
 
     @ColorRes

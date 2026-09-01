@@ -25,11 +25,22 @@ import io.netbird.client.databinding.SheetSendPickerBinding;
  */
 public class SendPickerSheet extends BottomSheetDialogFragment {
 
-    interface Listener {
+    public interface Listener {
         void onPickFile();
     }
 
+    private static final String ARG_PEER = "peer";
+
     private SheetSendPickerBinding binding;
+
+    /** A sheet opened from a peer's own screen carries that peer into the picker. */
+    public static SendPickerSheet forPeer(String peerName) {
+        SendPickerSheet sheet = new SendPickerSheet();
+        Bundle args = new Bundle();
+        args.putString(ARG_PEER, peerName);
+        sheet.setArguments(args);
+        return sheet;
+    }
 
     @Nullable
     @Override
@@ -64,6 +75,10 @@ public class SendPickerSheet extends BottomSheetDialogFragment {
             Intent intent = new Intent(requireContext(), ShareTargetActivity.class);
             intent.setAction(Intent.ACTION_SEND);
             intent.putExtra(Intent.EXTRA_TEXT, text);
+            String peer = getArguments() == null ? null : getArguments().getString(ARG_PEER);
+            if (peer != null) {
+                intent.putExtra(ShareTargetActivity.EXTRA_PRESET_SEARCH, peer);
+            }
             startActivity(intent);
             dismiss();
         });

@@ -60,6 +60,8 @@ import io.netbird.gomobile.android.PeerInfoArray;
  */
 public class ShareTargetActivity extends AppCompatActivity {
 
+    public static final String EXTRA_PRESET_SEARCH = "io.netbird.client.PRESET_SEARCH";
+
     private static final String LOGTAG = "ShareTargetActivity";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -114,6 +116,14 @@ public class ShareTargetActivity extends AppCompatActivity {
             }
             @Override public void afterTextChanged(Editable s) {}
         });
+
+        // A send started from a peer's own screen lands here with that peer
+        // already named; prefilling the search narrows the list to it while
+        // still leaving the choice visible and editable.
+        String preset = getIntent().getStringExtra(EXTRA_PRESET_SEARCH);
+        if (preset != null && !preset.isEmpty()) {
+            binding.searchView.setText(preset);
+        }
 
         // Binds without BIND_AUTO_CREATE on purpose: starting the VPN service
         // from a share would ask for the VPN permission out of nowhere. If the
@@ -352,9 +362,13 @@ public class ShareTargetActivity extends AppCompatActivity {
             });
 
             runOnUiThread(() -> {
+                if (binding == null) {
+                    return;
+                }
                 allTargets.clear();
                 allTargets.addAll(targets);
-                showMatching("");
+                showMatching(binding.searchView.getText().toString().trim()
+                        .toLowerCase(Locale.getDefault()));
             });
         });
     }

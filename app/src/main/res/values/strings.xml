@@ -67,6 +67,7 @@
     <string name="peers_clipboard_copy_ipv6">Copy IPv6</string>
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
     <string name="peers_action_ssh">SSH</string>
+    <string name="peers_action_send">Send</string>
     <string name="ssh_terminal_title">SSH Terminal</string>
     <string name="ssh_dialog_title">SSH to %1$s</string>
     <string name="ssh_dialog_host">Host (IP or FQDN)</string>
