@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.w(LOGTAG, "VPN service disconnected");
             mBinder = null;
         }
     };
@@ -717,7 +718,13 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         startService(intent);
 
         Intent bindIntent = new Intent(this, VPNService.class);
-        bindService(bindIntent, serviceIPC, Context.BIND_ABOVE_CLIENT);
+        // AUTO_CREATE keeps the service alive for as long as this binding
+        // exists. Without it a theme-change relaunch kills the connection for
+        // good: the old instance's unbind reaches the service after the new
+        // instance has already bound, its stopSelf destroys the service under
+        // the fresh binding, and onServiceDisconnected leaves mBinder null
+        // with nothing left to bring the service back.
+        bindService(bindIntent, serviceIPC, Context.BIND_AUTO_CREATE | Context.BIND_ABOVE_CLIENT);
     }
 
     private void showFirstInstallFragment() {
