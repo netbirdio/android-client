@@ -30,13 +30,16 @@ import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentPeersBinding;
 import io.netbird.client.ui.SegmentedSwitch;
 
-public class PeersFragment extends Fragment {
+public class PeersFragment extends Fragment implements NetworksFragment.ResourcesCounterListener {
 
     private FragmentPeersBinding binding;
     private ServiceAccessor serviceAccessor;
     private StateListenerRegistry stateListenerRegistry;
     private PeersFragmentViewModel model;
     private final List<Peer> peers = new ArrayList<>();
+    private int peersConnected;
+    private int resourcesConnected;
+    private int resourcesTotal;
     // Which half of the segmented control is showing. Peers and Resources share
     // this screen because the bottom navigation is already at its five-item
     // limit, and Files holds the slot Resources used to have.
@@ -176,8 +179,16 @@ public class PeersFragment extends Fragment {
         if (resources) {
             binding.searchView.clearFocus();
         }
+        updateConnectedCounter();
         ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.peersList,
                 resources || !peers.isEmpty());
+    }
+
+    @Override
+    public void onResourcesCounterChanged(int connected, int total) {
+        resourcesConnected = connected;
+        resourcesTotal = total;
+        updateConnectedCounter();
     }
 
     @Override
@@ -206,8 +217,6 @@ public class PeersFragment extends Fragment {
     }
 
     private void updatePeersCounter(List<Peer> peers) {
-        TextView textPeersCount = binding.textOpenPanel;
-
         int connected = 0;
 
         for (var peer : peers) {
@@ -216,9 +225,22 @@ public class PeersFragment extends Fragment {
             }
         }
 
-        String text = getString(R.string.peers_connected, connected, peers.size());
-        textPeersCount.post(() ->
-                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
+        peersConnected = connected;
+        updateConnectedCounter();
+    }
+
+    // The single header line above the segmented control shows whichever
+    // counter belongs to the visible half.
+    private void updateConnectedCounter() {
+        if (binding == null) {
+            return;
+        }
+        TextView counter = binding.textOpenPanel;
+        String text = showingResources
+                ? getString(R.string.resources_connected, resourcesConnected, resourcesTotal)
+                : getString(R.string.peers_connected, peersConnected, peers.size());
+        counter.post(() ->
+                counter.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
         );
     }
 }

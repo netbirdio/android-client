@@ -26,22 +26,6 @@
         app:layout_constraintTop_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:id="@+id/text_open_panel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:padding="16dp"
-            android:textColor="@color/nb_txt_light"
-            tools:text="0 of 0 Resources connected"
-            android:textAlignment="center"
-            android:textSize="16sp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
         <EditText
             android:id="@+id/search_view"
             android:layout_width="0dp"
@@ -58,7 +42,7 @@
             android:background="@drawable/search_bg"
 	    android:textColor="@color/nb_txt"
             android:textColorHint="@color/nb_txt_light"
-            app:layout_constraintTop_toBottomOf="@id/text_open_panel"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
