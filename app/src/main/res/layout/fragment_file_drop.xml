@@ -18,6 +18,7 @@
         android:autofillHints=""
         android:background="@drawable/search_bg"
         android:drawableStart="@drawable/search"
+        android:drawableTint="@color/nb_txt_light"
         android:drawablePadding="10dp"
         android:hint="@string/file_drop_search_hint"
         android:inputType="text"

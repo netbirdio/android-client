@@ -23,10 +23,10 @@
             android:background="@drawable/bg_rounded_nb_bg"
             android:contentDescription="@null"
             android:padding="10dp"
-            android:src="@drawable/ic_menu_files"
+            android:src="@drawable/ic_segment_send"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/nb_orange" />
+            app:tint="@color/nb_txt_light" />
 
         <TextView
             android:id="@+id/share_title"
@@ -87,6 +87,7 @@
         android:autofillHints=""
         android:background="@drawable/search_bg"
         android:drawableStart="@drawable/search"
+        android:drawableTint="@color/nb_txt_light"
         android:drawablePadding="10dp"
         android:hint="@string/peers_hint_search_peers"
         android:inputType="text"
