@@ -1,147 +1,93 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:theme="@style/Theme.NetBird.Card"
-    app:cardBackgroundColor="@color/profile_card_background"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    android:layout_marginBottom="20dp"
+    android:padding="16dp"
+    android:background="@color/nb_gray_bg"
+    android:focusable="true"
+    android:focusableInTouchMode="false"
+    android:clickable="true"
+    android:foreground="@drawable/focus_highlight">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/icon_profile"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_profile_avatar"
+        android:contentDescription="@string/menu_profiles"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="@color/nb_txt" />
+
+    <TextView
+        android:id="@+id/text_profile_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt"
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/text_profile_email"
+        app:layout_constraintStart_toEndOf="@id/icon_profile"
+        app:layout_constraintEnd_toStartOf="@id/badge_active"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="default" />
 
-        <ImageView
-            android:id="@+id/icon_profile"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_profile_avatar"
-            android:contentDescription="@string/menu_profiles"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:tint="@color/nb_txt" />
+    <TextView
+        android:id="@+id/text_profile_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/text_profile_name"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/icon_profile"
+        app:layout_constraintEnd_toStartOf="@id/badge_active"
+        tools:text="user@example.com"
+        tools:visibility="visible" />
 
-        <TextView
-            android:id="@+id/text_profile_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.NetBird.ProfileName"
-            app:layout_constraintTop_toTopOf="@id/icon_profile"
-            app:layout_constraintBottom_toTopOf="@id/text_profile_email"
-            app:layout_constraintStart_toEndOf="@id/icon_profile"
-            app:layout_constraintEnd_toStartOf="@id/btn_rename"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintVertical_chainStyle="packed"
-            tools:text="default" />
+    <TextView
+        android:id="@+id/badge_active"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/bg_badge_active"
+        android:padding="4dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/profiles_active"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_profile_menu" />
 
-        <TextView
-            android:id="@+id/text_profile_email"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="12sp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/text_profile_name"
-            app:layout_constraintBottom_toBottomOf="@id/icon_profile"
-            app:layout_constraintStart_toEndOf="@id/icon_profile"
-            app:layout_constraintEnd_toStartOf="@id/btn_rename"
-            app:layout_constraintHorizontal_bias="0"
-            tools:text="user@example.com"
-            tools:visibility="visible" />
+    <ImageView
+        android:id="@+id/btn_profile_menu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="@string/profiles_actions"
+        android:padding="8dp"
+        android:src="@drawable/ic_more_vert"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/nb_txt_light" />
 
-        <ImageView
-            android:id="@+id/btn_rename"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:contentDescription="@string/profiles_rename"
-            android:focusable="true"
-            android:padding="6dp"
-            android:src="@drawable/ic_edit"
-            app:layout_constraintBottom_toBottomOf="@id/icon_profile"
-            app:layout_constraintEnd_toStartOf="@id/badge_active"
-            app:layout_constraintStart_toEndOf="@id/text_profile_name"
-            app:layout_constraintTop_toTopOf="@id/icon_profile"
-            app:tint="@color/nb_txt_light" />
-
-        <TextView
-            android:id="@+id/badge_active"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/bg_badge_active"
-            android:padding="4dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:text="@string/profiles_active"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:visibility="gone"
-            tools:visibility="visible"
-            app:layout_constraintTop_toTopOf="@id/icon_profile"
-            app:layout_constraintBottom_toBottomOf="@id/icon_profile"
-            app:layout_constraintStart_toEndOf="@id/btn_rename"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0" />
-
-        <!-- Switch is what the card is for, so it leads on the left. Logout and
-             Remove are the account-teardown pair: they belong together, sit
-             apart from Switch on the trailing edge, and escalate in weight
-             (quiet text, then destructive red). -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_switch"
-            style="@style/Widget.NetBird.Button.Secondary"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_marginTop="16dp"
-            android:minWidth="0dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:text="@string/profiles_switch"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/icon_profile" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_logout"
-            style="@style/Widget.NetBird.Button.Text"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="4dp"
-            android:minWidth="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:text="@string/profiles_logout"
-            app:layout_constraintEnd_toStartOf="@id/btn_remove"
-            app:layout_constraintTop_toBottomOf="@id/icon_profile" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_remove"
-            style="@style/Widget.NetBird.Button.Danger"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_marginTop="16dp"
-            android:minWidth="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:text="@string/profiles_remove"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/icon_profile" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</com.google.android.material.card.MaterialCardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

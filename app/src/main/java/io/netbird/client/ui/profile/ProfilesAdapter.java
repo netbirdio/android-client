@@ -7,9 +7,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
@@ -59,20 +58,14 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
         private final TextView textName;
         private final TextView textEmail;
         private final TextView badgeActive;
-        private final ImageView btnRename;
-        private final MaterialButton btnSwitch;
-        private final MaterialButton btnLogout;
-        private final MaterialButton btnRemove;
+        private final ImageView btnMenu;
 
         public ProfileViewHolder(@NonNull View itemView) {
             super(itemView);
             textName = itemView.findViewById(R.id.text_profile_name);
             textEmail = itemView.findViewById(R.id.text_profile_email);
             badgeActive = itemView.findViewById(R.id.badge_active);
-            btnRename = itemView.findViewById(R.id.btn_rename);
-            btnSwitch = itemView.findViewById(R.id.btn_switch);
-            btnLogout = itemView.findViewById(R.id.btn_logout);
-            btnRemove = itemView.findViewById(R.id.btn_remove);
+            btnMenu = itemView.findViewById(R.id.btn_profile_menu);
         }
 
         public void bind(Profile profile, ProfileActionListener listener) {
@@ -86,38 +79,47 @@ public class ProfilesAdapter extends RecyclerView.Adapter<ProfilesAdapter.Profil
                 textEmail.setVisibility(View.VISIBLE);
             }
 
-            if (profile.isActive()) {
-                badgeActive.setVisibility(View.VISIBLE);
-                btnSwitch.setEnabled(false);
-                btnSwitch.setText(R.string.profiles_active);
-            } else {
-                badgeActive.setVisibility(View.GONE);
-                btnSwitch.setEnabled(true);
-                btnSwitch.setText(R.string.profiles_switch);
-            }
+            badgeActive.setVisibility(profile.isActive() ? View.VISIBLE : View.GONE);
 
-            // Disable remove for the default profile. Keyed on ID, not name: the
-            // name is user-editable and no longer identifies the default profile.
-            // The button's text colour selector already dims the disabled state.
-            btnRemove.setEnabled(!DEFAULT_PROFILE_ID.equals(profile.getID()));
-
-            btnRename.setOnClickListener(v -> listener.onEditProfile(profile));
-
-            btnSwitch.setOnClickListener(v -> {
+            itemView.setOnClickListener(v -> {
                 if (!profile.isActive()) {
                     listener.onSwitchProfile(profile);
                 }
             });
 
-            btnLogout.setOnClickListener(v -> {
-                listener.onLogoutProfile(profile);
+            btnMenu.setOnClickListener(v -> showActionsMenu(v, profile, listener));
+            itemView.setOnLongClickListener(v -> {
+                showActionsMenu(btnMenu, profile, listener);
+                return true;
+            });
+        }
+
+        private static void showActionsMenu(View anchor, Profile profile,
+                                            ProfileActionListener listener) {
+            PopupMenu popup = new PopupMenu(anchor.getContext(), anchor);
+            popup.getMenuInflater().inflate(R.menu.profile_actions_menu, popup.getMenu());
+
+            // Remove is hidden for the default profile. Keyed on ID, not name: the
+            // name is user-editable and no longer identifies the default profile.
+            popup.getMenu().findItem(R.id.profile_action_remove)
+                    .setVisible(!DEFAULT_PROFILE_ID.equals(profile.getID()));
+
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.profile_action_edit) {
+                    listener.onEditProfile(profile);
+                    return true;
+                } else if (id == R.id.profile_action_logout) {
+                    listener.onLogoutProfile(profile);
+                    return true;
+                } else if (id == R.id.profile_action_remove) {
+                    listener.onRemoveProfile(profile);
+                    return true;
+                }
+                return false;
             });
 
-            btnRemove.setOnClickListener(v -> {
-                if (!DEFAULT_PROFILE_ID.equals(profile.getID())) {
-                    listener.onRemoveProfile(profile);
-                }
-            });
+            popup.show();
         }
     }
 }

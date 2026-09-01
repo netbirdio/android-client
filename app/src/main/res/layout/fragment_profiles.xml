@@ -17,8 +17,6 @@
             android:id="@+id/recycler_profiles"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
             android:paddingTop="16dp"
             android:paddingBottom="@dimen/fab_content_inset"
             android:clipToPadding="false"
