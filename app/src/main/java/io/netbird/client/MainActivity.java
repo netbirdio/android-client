@@ -736,9 +736,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
         lp.height = targetHeight;
         binding.toolbar.setLayoutParams(lp);
-        // Elevation shadows are invisible on the dark theme's background, so a 1dp
-        // hairline under the toolbar carries the separation there; it follows the
-        // toolbar's visibility so hidden-toolbar screens don't show a stray line.
+        // In light mode the toolbar and content are nearly the same shade, so a 1dp
+        // hairline under the toolbar carries the separation; at night the divider
+        // color is transparent because the darker chrome against the lighter content
+        // already separates them tonally. It follows the toolbar's visibility so
+        // hidden-toolbar screens don't show a stray line.
         binding.toolbarDivider.setVisibility(visible ? View.VISIBLE : View.GONE);
         // Ensure AppBarLayout re-measures itself so the content below shifts up correctly.
         binding.appbar.requestLayout();

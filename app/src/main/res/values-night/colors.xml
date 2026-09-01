@@ -10,15 +10,16 @@
 
     <color name="nb_sheet_bg">#1B1B1B</color>
     <color name="nb_bg">#181A1D</color>
-    <color name="nb_bg_peers">#181A1D</color>
-    <color name="nb_bg_home">#1c1e21</color>
+    <color name="nb_bg_peers">#1C1E21</color>
+    <color name="nb_bg_home">#1C1E21</color>
     <color name="nb_bg_mask">#181A1D</color>
     <color name="nb_gray_light">#32363D</color>
     <color name="nb_gray_dark">#1C1E21</color>
-    <color name="nb_gray_bg">#1C1E21</color>
+    <color name="nb_gray_bg">#202225</color>
     <color name="nb_gray_separator">#32363D</color>
     <color name="nb_gray_border">#545961</color>
     <color name="nb_chip_border">#545961</color>
+    <color name="nb_toolbar_divider">#00000000</color>
     <color name="nb_orange">#F68330</color>
     <color name="nb_orange_15">#26F68330</color>
     <color name="nb_txt">#E6E1E5</color>

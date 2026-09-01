@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nb_bg"
+    android:background="@color/nb_bg_peers"
     android:orientation="vertical"
     tools:context=".ui.home.PeerDetailFragment">
 
