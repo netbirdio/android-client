@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.TextViewCompat;
 
 import io.netbird.client.R;
 
@@ -109,6 +110,8 @@ public final class SegmentedSwitch {
         ColorStateList inactive = ContextCompat.getColorStateList(context, R.color.nb_txt_light);
         firstLabel.setTextColor(second ? inactive : active);
         secondLabel.setTextColor(second ? active : inactive);
+        TextViewCompat.setCompoundDrawableTintList(firstLabel, second ? inactive : active);
+        TextViewCompat.setCompoundDrawableTintList(secondLabel, second ? active : inactive);
     }
 
     private int halfWidth() {
