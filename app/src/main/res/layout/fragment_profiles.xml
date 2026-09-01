@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nb_bg"
+    android:background="@color/nb_bg_peers"
     tools:context=".ui.profile.ProfilesFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,8 +17,6 @@
             android:id="@+id/recycler_profiles"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
             android:paddingTop="16dp"
             android:paddingBottom="@dimen/fab_content_inset"
             android:clipToPadding="false"

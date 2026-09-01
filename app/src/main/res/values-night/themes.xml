@@ -34,7 +34,7 @@
 
     <style name="Theme.NetBird.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="colorPrimary">@color/nb_gray_dark</item>
-        <item name="android:textColorPrimary">@color/nb_orange</item>
+        <item name="android:textColorPrimary">@color/nb_txt</item>
     </style>
 
     <style name="Theme.NetBird.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

@@ -164,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.w(LOGTAG, "VPN service disconnected");
             mBinder = null;
         }
     };
@@ -249,9 +250,19 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             // First-launch onboarding takes the whole screen — hide both nav surfaces.
             // The SSH terminal does the same, so the keyboard and xterm grid get the
             // full height rather than competing with the toolbar and bottom nav.
+            // Deferred a frame: this listener fires before the fragment swap, so
+            // hiding immediately re-layouts the outgoing screen without its toolbar
+            // (a visible flash) before the new one appears. By the next frame the
+            // destination's view is in place; re-check in case navigation moved on.
             if (destId == R.id.firstInstallFragment || destId == R.id.nav_ssh_terminal) {
-                bottomNav.setVisibility(View.GONE);
-                setToolbarVisible(false);
+                binding.getRoot().post(() -> {
+                    NavDestination current = navController.getCurrentDestination();
+                    if (current == null || current.getId() != destId) {
+                        return;
+                    }
+                    bottomNav.setVisibility(View.GONE);
+                    setToolbarVisible(false);
+                });
                 return;
             }
             bottomNav.setVisibility(View.VISIBLE);
@@ -759,7 +770,13 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         startService(intent);
 
         Intent bindIntent = new Intent(this, VPNService.class);
-        bindService(bindIntent, serviceIPC, Context.BIND_ABOVE_CLIENT);
+        // AUTO_CREATE keeps the service alive for as long as this binding
+        // exists. Without it a theme-change relaunch kills the connection for
+        // good: the old instance's unbind reaches the service after the new
+        // instance has already bound, its stopSelf destroys the service under
+        // the fresh binding, and onServiceDisconnected leaves mBinder null
+        // with nothing left to bring the service back.
+        bindService(bindIntent, serviceIPC, Context.BIND_AUTO_CREATE | Context.BIND_ABOVE_CLIENT);
     }
 
     private void showFirstInstallFragment() {
@@ -788,6 +805,12 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
         lp.height = targetHeight;
         binding.toolbar.setLayoutParams(lp);
+        // In light mode the toolbar and content are nearly the same shade, so a 1dp
+        // hairline under the toolbar carries the separation; at night the divider
+        // color is transparent because the darker chrome against the lighter content
+        // already separates them tonally. It follows the toolbar's visibility so
+        // hidden-toolbar screens don't show a stray line.
+        binding.toolbarDivider.setVisibility(visible ? View.VISIBLE : View.GONE);
         // Ensure AppBarLayout re-measures itself so the content below shifts up correctly.
         binding.appbar.requestLayout();
     }

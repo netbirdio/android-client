@@ -17,7 +17,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:contentDescription="@null"
-        app:tint="@color/nb_orange"
+        app:tint="@color/nb_txt_light"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:src="@drawable/ic_menu_profile" />
 

@@ -159,10 +159,11 @@ public final class SshConnectDialog {
         LinearLayout buttonRow = new LinearLayout(context);
         buttonRow.setOrientation(LinearLayout.HORIZONTAL);
         buttonRow.setGravity(Gravity.END);
-        MaterialButton cancelButton = textButton(context, R.string.ssh_dialog_cancel);
+        MaterialButton cancelButton = textButton(context, R.string.ssh_dialog_cancel,
+                R.color.dialog_btn_secondary_text);
         MaterialButton confirmButton = textButton(context, onSaved != null
                 ? R.string.ssh_dialog_save
-                : R.string.ssh_dialog_connect);
+                : R.string.ssh_dialog_connect, R.color.nb_orange);
         buttonRow.addView(cancelButton);
         buttonRow.addView(confirmButton);
         container.addView(buttonRow, layoutWithMargin(marginV));
@@ -293,12 +294,12 @@ public final class SshConnectDialog {
         return true;
     }
 
-    /** Matches the borderless orange buttons the XML dialog layouts use. */
-    private static MaterialButton textButton(Context context, int textRes) {
+    /** Matches the borderless text buttons the XML dialog layouts use. */
+    private static MaterialButton textButton(Context context, int textRes, int colorRes) {
         MaterialButton button = new MaterialButton(context, null,
                 com.google.android.material.R.attr.borderlessButtonStyle);
         button.setText(textRes);
-        button.setTextColor(ContextCompat.getColor(context, R.color.nb_orange));
+        button.setTextColor(ContextCompat.getColor(context, colorRes));
         return button;
     }
 

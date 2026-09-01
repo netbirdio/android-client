@@ -38,6 +38,7 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentPeerDetailBinding;
+import io.netbird.client.ui.ssh.SshConnectDialog;
 
 /**
  * Full-screen view of everything the client knows about one peer. Mirrors the
@@ -203,6 +204,8 @@ public class PeerDetailFragment extends Fragment {
     private void render(Peer peer) {
         binding.peerDetailFqdn.setText(peer.getFqdn());
         binding.peerDetailStatusDot.setBackgroundResource(statusDot(peer.getStatus()));
+        binding.peerDetailSsh.setOnClickListener(v -> SshConnectDialog.show(requireContext(),
+                peer.getIp(), getString(R.string.ssh_dialog_title, peer.getFqdn())));
 
         LinearLayout rows = binding.peerDetailRows;
         rows.removeAllViews();
