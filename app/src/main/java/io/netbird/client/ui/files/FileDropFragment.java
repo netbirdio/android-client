@@ -50,7 +50,7 @@ import io.netbird.gomobile.android.Android;
  * log grouped by day, newest first. The receiving policy is not here; it lives
  * under Settings, so this screen stays a log.
  */
-public class FileDropFragment extends Fragment {
+public class FileDropFragment extends Fragment implements SendPickerSheet.Listener {
 
     private static final int TYPE_OFFER = 0;
     private static final int TYPE_DAY = 1;
@@ -92,7 +92,8 @@ public class FileDropFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        binding.sendFab.setOnClickListener(v -> filePicker.launch(new String[]{"*/*"}));
+        binding.sendFab.setOnClickListener(v ->
+                new SendPickerSheet().show(getChildFragmentManager(), "send_picker"));
 
         FileDropManager.get().addTransfersListener(transfersListener);
 
@@ -106,6 +107,11 @@ public class FileDropFragment extends Fragment {
         super.onDestroyView();
         FileDropManager.get().removeTransfersListener(transfersListener);
         binding = null;
+    }
+
+    @Override
+    public void onPickFile() {
+        filePicker.launch(new String[]{"*/*"});
     }
 
     /**
