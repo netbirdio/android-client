@@ -81,17 +81,17 @@ public class SplitTunnelStore {
         return out;
     }
 
-    private static SplitTunnelConfig.Mode toMode(String goMode) {
-        if (Android.SplitTunnelModeExclude.equals(goMode)) {
+    private static SplitTunnelConfig.Mode toMode(long goMode) {
+        if (goMode == Android.SplitTunnelModeExclude) {
             return SplitTunnelConfig.Mode.EXCLUDE;
         }
-        if (Android.SplitTunnelModeInclude.equals(goMode)) {
+        if (goMode == Android.SplitTunnelModeInclude) {
             return SplitTunnelConfig.Mode.INCLUDE;
         }
         return SplitTunnelConfig.Mode.OFF;
     }
 
-    private static String toGoMode(SplitTunnelConfig.Mode mode) {
+    private static long toGoMode(SplitTunnelConfig.Mode mode) {
         switch (mode) {
             case EXCLUDE:
                 return Android.SplitTunnelModeExclude;
