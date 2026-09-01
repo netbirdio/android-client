@@ -71,6 +71,39 @@ public class SshSessionsFragment extends Fragment {
         super.onDestroyView();
     }
 
+    // The shared dialog layout carries the rounded background AlertDialogTheme
+    // expects; a stock builder dialog would render with the platform's default
+    // frame instead of the app's design.
+    private void showDeleteDialog(SshSession.Info info) {
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_simple_edit_text, null);
+
+        TextView title = dialogView.findViewById(R.id.text_title_dialog);
+        title.setText(R.string.ssh_session_delete);
+
+        TextView message = dialogView.findViewById(R.id.text_label_dialog);
+        message.setText(getString(R.string.ssh_session_delete_confirm, info.label()));
+
+        dialogView.findViewById(R.id.edit_text_dialog).setVisibility(View.GONE);
+
+        TextView confirm = dialogView.findViewById(R.id.btn_ok_dialog);
+        TextView cancel = dialogView.findViewById(R.id.btn_cancel_dialog);
+        confirm.setText(R.string.ssh_session_delete_confirm_yes);
+        cancel.setText(R.string.ssh_dialog_cancel);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
+                .setView(dialogView)
+                .create();
+
+        cancel.setOnClickListener(v -> dialog.dismiss());
+        confirm.setOnClickListener(v -> {
+            SshSessionManager.get().close(info.id);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
     private static int colorForState(SshSession.State state) {
         switch (state) {
             case CONNECTED: return Color.parseColor("#4caf50");
@@ -166,13 +199,7 @@ public class SshSessionsFragment extends Fragment {
                 return true;
             });
 
-            closeButton.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.ssh_session_delete)
-                    .setMessage(getString(R.string.ssh_session_delete_confirm, info.label()))
-                    .setPositiveButton(R.string.ssh_session_delete_confirm_yes, (d, w) ->
-                            SshSessionManager.get().close(info.id))
-                    .setNegativeButton(R.string.ssh_dialog_cancel, null)
-                    .show());
+            closeButton.setOnClickListener(v -> showDeleteDialog(info));
         }
 
         private String stateLabel(SshSession.Info info) {
