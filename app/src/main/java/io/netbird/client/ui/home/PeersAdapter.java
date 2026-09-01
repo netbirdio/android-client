@@ -201,8 +201,6 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
                 binding.verticalLine.setBackgroundResource(R.drawable.peer_status_disconnected); // Red for disconnected
             }
 
-            binding.sshButton.setOnClickListener(v -> promptSSHUser(v, peer));
-
             binding.getRoot().setOnClickListener(v -> {
                 if (clickListener != null) {
                     clickListener.onPeerClick(peer);
