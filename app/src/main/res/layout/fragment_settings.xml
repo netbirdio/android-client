@@ -131,7 +131,7 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_menu_files"
-                app:tint="@color/nb_orange" />
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"

@@ -299,7 +299,7 @@
         <item quantity="other">Session expires in %1$d days</item>
     </plurals>
 
-    <string name="bottom_nav_files">Files</string>
+    <string name="bottom_nav_files">Send</string>
     <string name="file_drop_share_pick_peer">Send to</string>
     <string name="file_drop_share_nothing">Nothing to send</string>
     <string name="file_drop_share_not_running">NetBird is not running</string>
