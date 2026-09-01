@@ -52,6 +52,7 @@
             android:hint="@string/networks_hint_search_networks"
             android:inputType="text"
             android:drawableStart="@drawable/search"
+            android:drawableTint="@color/nb_txt_light"
             android:drawablePadding="10dp"
             android:paddingStart="15dp"
             android:paddingEnd="15dp"

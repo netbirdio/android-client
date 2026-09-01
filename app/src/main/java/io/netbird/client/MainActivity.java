@@ -736,6 +736,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
         lp.height = targetHeight;
         binding.toolbar.setLayoutParams(lp);
+        // Elevation shadows are invisible on the dark theme's background, so a 1dp
+        // hairline under the toolbar carries the separation there; it follows the
+        // toolbar's visibility so hidden-toolbar screens don't show a stray line.
+        binding.toolbarDivider.setVisibility(visible ? View.VISIBLE : View.GONE);
         // Ensure AppBarLayout re-measures itself so the content below shifts up correctly.
         binding.appbar.requestLayout();
     }

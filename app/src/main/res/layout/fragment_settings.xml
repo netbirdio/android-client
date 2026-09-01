@@ -37,7 +37,7 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_menu_profile"
-                app:tint="@color/nb_orange" />
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"
@@ -89,7 +89,7 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_menu_change_server"
-                app:tint="@color/nb_orange" />
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"
@@ -131,7 +131,7 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_menu_advanced"
-                app:tint="@color/nb_orange" />
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"
@@ -170,7 +170,7 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_language"
-                app:tint="@color/nb_orange" />
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"
@@ -219,7 +219,7 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_menu_troubleshoot"
-                app:tint="@color/nb_orange" />
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"
@@ -261,7 +261,7 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_menu_about"
-                app:tint="@color/nb_orange" />
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"
@@ -300,7 +300,7 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_menu_docs"
-                app:tint="@color/nb_orange" />
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"
