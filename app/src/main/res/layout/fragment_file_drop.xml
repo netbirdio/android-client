@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -49,6 +50,21 @@
             android:textAlignment="center"
             android:textColor="@color/nb_txt_light"
             android:visibility="gone" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/send_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="@dimen/fab_margin"
+            android:contentDescription="@string/file_drop_pick_files"
+            android:src="@drawable/add_24px"
+            app:backgroundTint="@color/nb_orange"
+            app:tint="@android:color/white"
+            app:elevation="0dp"
+            app:hoveredFocusedTranslationZ="0dp"
+            app:pressedTranslationZ="0dp" />
     </FrameLayout>
 
 </LinearLayout>

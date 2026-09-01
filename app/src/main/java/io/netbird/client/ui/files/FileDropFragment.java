@@ -18,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -64,6 +66,9 @@ public class FileDropFragment extends Fragment {
     private final FileDropManager.TransfersListener transfersListener =
             transfers -> onUiThread(() -> onTransfers(transfers));
 
+    private final ActivityResultLauncher<String[]> filePicker = registerForActivityResult(
+            new ActivityResultContracts.OpenMultipleDocuments(), this::onFilesPicked);
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -87,6 +92,8 @@ public class FileDropFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
+        binding.sendFab.setOnClickListener(v -> filePicker.launch(new String[]{"*/*"}));
+
         FileDropManager.get().addTransfersListener(transfersListener);
 
         // The list is only readable through the bound service, which may have
@@ -99,6 +106,22 @@ public class FileDropFragment extends Fragment {
         super.onDestroyView();
         FileDropManager.get().removeTransfersListener(transfersListener);
         binding = null;
+    }
+
+    /**
+     * Hands files picked in-app to the same peer-picking screen the system
+     * share sheet uses, so both entry points share one send path. The SAF
+     * grant belongs to this app as a whole, so the activity can read the
+     * uris without the share sheet's per-intent permission grants.
+     */
+    private void onFilesPicked(List<Uri> uris) {
+        if (uris == null || uris.isEmpty()) {
+            return;
+        }
+        Intent intent = new Intent(requireContext(), ShareTargetActivity.class);
+        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, new ArrayList<>(uris));
+        startActivity(intent);
     }
 
     private void onTransfers(List<FileDropManager.Transfer> transfers) {

@@ -317,6 +317,7 @@
     <string name="file_drop_empty">No transfers yet</string>
     <string name="file_drop_no_results">No matching transfers</string>
     <string name="file_drop_search_hint">Search by file or peer</string>
+    <string name="file_drop_pick_files">Send files</string>
     <string name="file_drop_delete_confirm">Remove this transfer from the list?</string>
     <string name="file_drop_stop_confirm">Stop this transfer? It stays in the list so you can remove it afterwards.</string>
     <string name="file_drop_stop">Stop</string>
