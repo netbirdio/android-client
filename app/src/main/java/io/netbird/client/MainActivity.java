@@ -238,9 +238,19 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             // First-launch onboarding takes the whole screen — hide both nav surfaces.
             // The SSH terminal does the same, so the keyboard and xterm grid get the
             // full height rather than competing with the toolbar and bottom nav.
+            // Deferred a frame: this listener fires before the fragment swap, so
+            // hiding immediately re-layouts the outgoing screen without its toolbar
+            // (a visible flash) before the new one appears. By the next frame the
+            // destination's view is in place; re-check in case navigation moved on.
             if (destId == R.id.firstInstallFragment || destId == R.id.nav_ssh_terminal) {
-                bottomNav.setVisibility(View.GONE);
-                setToolbarVisible(false);
+                binding.getRoot().post(() -> {
+                    NavDestination current = navController.getCurrentDestination();
+                    if (current == null || current.getId() != destId) {
+                        return;
+                    }
+                    bottomNav.setVisibility(View.GONE);
+                    setToolbarVisible(false);
+                });
                 return;
             }
             bottomNav.setVisibility(View.VISIBLE);
