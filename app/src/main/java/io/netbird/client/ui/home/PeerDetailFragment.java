@@ -275,7 +275,15 @@ public class PeerDetailFragment extends Fragment {
         View header = inflater.inflate(R.layout.list_item_peer_detail_header, rows, false);
         ((ImageView) header.findViewById(R.id.peer_detail_header_icon)).setImageResource(icon);
         ((TextView) header.findViewById(R.id.peer_detail_header_text)).setText(label);
-        rows.addView(header);
+        addSeparated(inflater, rows, header);
+    }
+
+    /** Every list element after the first gets a separator line above it. */
+    private void addSeparated(LayoutInflater inflater, LinearLayout rows, View view) {
+        if (rows.getChildCount() > 0) {
+            inflater.inflate(R.layout.list_item_setting_divider, rows, true);
+        }
+        rows.addView(view);
     }
 
     /** Skipped entirely when neither the type nor the endpoint is known, as on desktop. */
@@ -327,7 +335,7 @@ public class PeerDetailFragment extends Fragment {
             row.setClickable(false);
         }
 
-        rows.addView(row);
+        addSeparated(inflater, rows, row);
         return row;
     }
 
@@ -340,7 +348,7 @@ public class PeerDetailFragment extends Fragment {
         ((TextView) row.findViewById(R.id.peer_detail_bytes_tx))
                 .setText(Formatter.formatFileSize(context, peer.getBytesTx()));
 
-        rows.addView(row);
+        addSeparated(inflater, rows, row);
     }
 
     @ColorRes

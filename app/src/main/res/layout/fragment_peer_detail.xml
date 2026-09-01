@@ -8,19 +8,6 @@
     android:orientation="vertical"
     tools:context=".ui.home.PeerDetailFragment">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/peer_detail_ssh"
-        style="@style/Widget.NetBird.Button.Primary"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_gravity="end"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="20dp"
-        android:minWidth="0dp"
-        android:paddingStart="32dp"
-        android:paddingEnd="32dp"
-        android:text="@string/peers_action_ssh" />
-
     <!-- No back arrow or title here: the activity toolbar already provides both via
          setupActionBarWithNavController. This row only carries the peer identity. -->
     <LinearLayout
@@ -63,6 +50,24 @@
             app:tint="@color/nb_txt_light" />
 
     </LinearLayout>
+
+    <include layout="@layout/list_item_setting_divider" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/peer_detail_ssh"
+        style="@style/Widget.NetBird.Button.Primary"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:minWidth="0dp"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:text="@string/peers_action_ssh" />
+
+    <include layout="@layout/list_item_setting_divider" />
 
     <ScrollView
         android:layout_width="match_parent"
