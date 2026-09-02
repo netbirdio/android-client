@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -581,6 +582,10 @@ public class SSHTerminalFragment extends Fragment {
             // password would be shown in the clear.
             input.setSingleLine(true);
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            // The stock transformation briefly shows each typed character when
+            // the system "show passwords" setting is on; this one renders a
+            // bullet unconditionally so the password never appears on screen.
+            input.setTransformationMethod(new NoPeekPasswordTransformation());
             input.setHint(R.string.ssh_dialog_password);
 
             MaterialButton connect = dialogView.findViewById(R.id.btn_ok_dialog);
@@ -681,6 +686,37 @@ public class SSHTerminalFragment extends Fragment {
             dialog.show();
             hostKeyDialog = dialog;
         });
+    }
+
+    private static final class NoPeekPasswordTransformation extends PasswordTransformationMethod {
+        @Override
+        public CharSequence getTransformation(CharSequence source, View view) {
+            return new BulletSequence(source);
+        }
+
+        private static final class BulletSequence implements CharSequence {
+            private final CharSequence source;
+
+            BulletSequence(CharSequence source) {
+                this.source = source;
+            }
+
+            @Override
+            public int length() {
+                return source.length();
+            }
+
+            @Override
+            public char charAt(int index) {
+                return '•';
+            }
+
+            @NonNull
+            @Override
+            public CharSequence subSequence(int start, int end) {
+                return new BulletSequence(source.subSequence(start, end));
+            }
+        }
     }
 
     private final class SessionListener implements SshSession.Listener {
