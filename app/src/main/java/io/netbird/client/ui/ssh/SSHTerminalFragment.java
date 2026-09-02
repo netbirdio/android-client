@@ -255,8 +255,13 @@ public class SSHTerminalFragment extends Fragment {
         binding.keyPaste.setOnClickListener(v -> pasteClipboard());
     }
 
+    /**
+     * An armed modifier is dimmed like a held-down key; released matches the
+     * full brightness of every other key. The released look is the view
+     * default, so no styling has to be applied up front.
+     */
     private void updateModifierStyle(Button btn, boolean armed) {
-        btn.setAlpha(armed ? 1f : 0.6f);
+        btn.setAlpha(armed ? 0.6f : 1f);
     }
 
     /**
