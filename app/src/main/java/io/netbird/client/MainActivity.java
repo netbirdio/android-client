@@ -1,5 +1,6 @@
 package io.netbird.client;
 
+import android.Manifest;
 import android.animation.StateListAnimator;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -7,9 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Html;
@@ -53,10 +56,12 @@ import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.SessionEventListener;
 import io.netbird.client.tool.VPNService;
 import io.netbird.client.ui.PreferenceUI;
+import io.netbird.client.tool.files.FileDropManager;
 import io.netbird.client.ui.ssh.SshSessionManager;
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
+import io.netbird.gomobile.android.FileDrop;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.SSHClient;
@@ -78,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     private final static String LOGTAG = "NBMainActivity";
     private VPNService.MyLocalBinder mBinder;
     private SshSessionManager.ClientFactory sshClientFactory;
+    private ActivityResultLauncher<String> notificationPermissionLauncher;
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
@@ -150,6 +156,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                 pendingExtendRequest = false;
                 extendSession();
             }
+
+            // The transfer list is only readable through the binder, so a
+            // fragment that opened before this point is still showing nothing.
+            FileDropManager.get().refresh();
         }
 
         @Override
@@ -207,11 +217,12 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         NavigationBarView bottomNav = (NavigationBarView) binding.bottomNav;
 
         // All four bottom-nav destinations are top-level — no Up arrow on those.
+        // BottomNavigationView rejects a sixth item outright, so anything beyond
+        // these lives under Settings and keeps its Up arrow.
         final Set<Integer> topLevelDestinations = new HashSet<>();
         topLevelDestinations.add(R.id.nav_home);
         topLevelDestinations.add(R.id.nav_peers);
-        topLevelDestinations.add(R.id.nav_networks);
-        topLevelDestinations.add(R.id.nav_ssh_sessions);
+        topLevelDestinations.add(R.id.nav_apps);
         topLevelDestinations.add(R.id.nav_settings);
         mAppBarConfiguration = new AppBarConfiguration.Builder(topLevelDestinations).build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
@@ -256,14 +267,13 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             }
             bottomNav.setVisibility(View.VISIBLE);
 
-            // Home, Peers and Networks don't need a toolbar — bottom nav already
-            // identifies the screen. Sub-screens keep the toolbar with title + Up
-            // arrow. SSH sessions and Settings are the exceptions among the tabs:
-            // both are lists that run to the top of the screen, and without a title
-            // bar to anchor them the first row reads as cut off rather than as the
-            // start of a list.
+            // Home, Peers and Apps don't need a toolbar — bottom nav already
+            // identifies the screen, and Apps carries its own segmented control at
+            // the top. Sub-screens keep the toolbar with title + Up arrow. Settings
+            // is the exception among the tabs: it is a list that runs to the top of
+            // the screen, and without a title bar to anchor it the first row reads
+            // as cut off rather than as the start of a list.
             boolean hideToolbar = topLevelDestinations.contains(destId)
-                    && destId != R.id.nav_ssh_sessions
                     && destId != R.id.nav_settings;
             setToolbarVisible(!hideToolbar);
 
@@ -335,6 +345,17 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         // opener must be built here, not lazily at tap time.
         extendUrlOpener = buildExtendURLOpener();
 
+        // Asked once, on the first launch that can act on it: without it every
+        // notify() this app makes is dropped silently on API 33+, which takes
+        // the file drop consent prompt and transfer progress with it.
+        notificationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> {
+                    if (!granted) {
+                        Log.i(LOGTAG, "notification permission denied");
+                    }
+                });
+
         // VPN permission result launcher
         vpnActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -369,7 +390,24 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             showFirstInstallFragment();
         }
 
+        requestNotificationPermission();
         handleSessionIntent(getIntent());
+    }
+
+    /**
+     * Asks for POST_NOTIFICATIONS when the platform requires it. Everything this
+     * app notifies about — session expiry, incoming files, transfer progress —
+     * is dropped silently without it.
+     */
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return;
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
     }
 
     @Override
@@ -604,6 +642,20 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             return null;
         }
         return mBinder.newSSHClient();
+    }
+
+    @Override
+    public FileDrop fileDrop() {
+        if (mBinder == null) {
+            Log.w(LOGTAG, "VPN binder is null");
+            return null;
+        }
+        try {
+            return mBinder.fileDrop();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "failed to open file drop", e);
+            return null;
+        }
     }
 
     private boolean isEngineRunning() {

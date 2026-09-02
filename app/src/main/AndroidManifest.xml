@@ -46,6 +46,23 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.files.ShareTargetActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.NetBird.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+
         <!-- Persists the in-app language choice on API < 33 (AppCompat per-app locales). -->
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

@@ -16,7 +16,9 @@
     <string name="bottom_nav_home">Accueil</string>
     <string name="bottom_nav_peers">Pairs</string>
     <string name="bottom_nav_networks">Ressources</string>
+    <string name="bottom_nav_files">Fichiers</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">Applis</string>
     <string name="bottom_nav_settings">Paramètres</string>
 
     <string name="settings_section_connection">Connexion</string>

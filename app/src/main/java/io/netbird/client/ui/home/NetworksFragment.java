@@ -4,12 +4,10 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +27,12 @@ import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentNetworksBinding;
 
 public class NetworksFragment extends Fragment {
+
+    // The connected-resources counter renders in the host PeersFragment's header
+    // line, shared with the peers counter, so this fragment only reports counts.
+    public interface ResourcesCounterListener {
+        void onResourcesCounterChanged(int connected, int total);
+    }
 
     private FragmentNetworksBinding binding;
     private NetworksAdapter adapter;
@@ -128,7 +132,6 @@ public class NetworksFragment extends Fragment {
     }
 
     private void updateResourcesCounter(List<Resource> resources) {
-        TextView textPeersCount = binding.textOpenPanel;
         int connected = 0;
 
         for (var resource : resources) {
@@ -137,10 +140,9 @@ public class NetworksFragment extends Fragment {
             }
         }
 
-        String text = getString(R.string.resources_connected, connected, resources.size());
-        textPeersCount.post(() ->
-                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
-        );
+        if (getParentFragment() instanceof ResourcesCounterListener) {
+            ((ResourcesCounterListener) getParentFragment()).onResourcesCounterChanged(connected, resources.size());
+        }
     }
 
     private void routeSwitchToggleHandler(String route, boolean isChecked) throws Exception {

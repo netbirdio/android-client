@@ -8,6 +8,16 @@
     <string name="session_notification_expired_title">NetBird session expired</string>
     <string name="session_notification_expired_text">Your login session has expired. Open the app to sign in again.</string>
     <string name="session_notification_extend">Extend session</string>
+    <string name="fg_notification_session_text">Session expires at %1$s</string>
+    <string name="file_drop_notification_channel_name">Incoming files</string>
+    <string name="file_drop_notification_offer_title">%1$s wants to send you a file</string>
+    <string name="file_drop_notification_accept">Accept</string>
+    <string name="file_drop_notification_decline">Decline</string>
+    <string name="file_drop_notification_sending_to">Sending to %1$s</string>
+    <string name="file_drop_notification_receiving_from">Receiving from %1$s</string>
+    <string name="file_drop_notification_sent">Sent to %1$s</string>
+    <string name="file_drop_notification_received">Received from %1$s</string>
+    <string name="file_drop_notification_failed">Transfer with %1$s failed</string>
     <string name="fg_notification_connecting">Connecting…</string>
     <string name="fg_notification_disconnected">Disconnected</string>
     <string name="fg_notification_no_network">No network available</string>

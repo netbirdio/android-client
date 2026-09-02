@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/nb_bg_peers"
+    android:orientation="vertical"
+    tools:context=".ui.apps.AppsFragment">
+
+    <FrameLayout
+        android:id="@+id/toggle_ssh_files"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/bg_segmented_track"
+        android:padding="4dp">
+
+        <View
+            android:id="@+id/segment_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_segmented_thumb" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/btn_view_ssh"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/label_view_ssh"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:drawableStart="@drawable/ic_segment_ssh"
+                    android:drawablePadding="6dp"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:text="@string/bottom_nav_ssh"
+                    android:textColor="@color/nb_txt"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/btn_view_files"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/label_view_files"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:drawableStart="@drawable/ic_segment_send"
+                    android:drawablePadding="6dp"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:text="@string/bottom_nav_files"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/ssh_container"
+        android:name="io.netbird.client.ui.ssh.SshSessionsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/files_container"
+        android:name="io.netbird.client.ui.files.FileDropFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
+</LinearLayout>

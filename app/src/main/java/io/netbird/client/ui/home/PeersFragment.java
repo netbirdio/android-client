@@ -28,14 +28,22 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentPeersBinding;
+import io.netbird.client.ui.SegmentedSwitch;
 
-public class PeersFragment extends Fragment {
+public class PeersFragment extends Fragment implements NetworksFragment.ResourcesCounterListener {
 
     private FragmentPeersBinding binding;
     private ServiceAccessor serviceAccessor;
     private StateListenerRegistry stateListenerRegistry;
     private PeersFragmentViewModel model;
     private final List<Peer> peers = new ArrayList<>();
+    private int peersConnected;
+    private int resourcesConnected;
+    private int resourcesTotal;
+    // Which half of the segmented control is showing. Peers and Resources share
+    // this screen because the bottom navigation is already at its five-item
+    // limit, and Files holds the slot Resources used to have.
+    private boolean showingResources;
     private static final String ARG_IS_RUNNING_ON_TV = "isRunningOnTV";
 
     @Override
@@ -102,10 +110,18 @@ public class PeersFragment extends Fragment {
 
             updatePeersCounter(peers);
 
-            ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.peersList, !peers.isEmpty());
+            // The zero-peers view replaces the whole list container, so it must
+            // not claim the screen while the Resources view is the one showing.
+            ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.peersList,
+                    showingResources || !peers.isEmpty());
             adapter.notifyDataSetChanged();
             adapter.filterBySearchQuery(binding.searchView.getText().toString());
         });
+
+        new SegmentedSwitch(view, R.id.toggle_peers_resources, R.id.segment_thumb,
+                R.id.btn_view_peers, R.id.label_view_peers,
+                R.id.btn_view_resources, R.id.label_view_resources,
+                this::showResources);
 
         binding.searchView.clearFocus();
         binding.searchView.addTextChangedListener(new TextWatcher() {
@@ -147,6 +163,34 @@ public class PeersFragment extends Fragment {
         });
     }
 
+    /** Swaps the peer list and its search controls for the resource list. */
+    private void showResources(boolean resources) {
+        if (binding == null) {
+            return;
+        }
+        showingResources = resources;
+
+        int listVisibility = resources ? View.GONE : View.VISIBLE;
+        binding.searchView.setVisibility(listVisibility);
+        binding.filterIcon.setVisibility(listVisibility);
+        binding.peersRecyclerView.setVisibility(listVisibility);
+        binding.resourcesContainer.setVisibility(resources ? View.VISIBLE : View.GONE);
+
+        if (resources) {
+            binding.searchView.clearFocus();
+        }
+        updateConnectedCounter();
+        ZeroPeerView.updateVisibility(binding.zeroPeerLayout, binding.peersList,
+                resources || !peers.isEmpty());
+    }
+
+    @Override
+    public void onResourcesCounterChanged(int connected, int total) {
+        resourcesConnected = connected;
+        resourcesTotal = total;
+        updateConnectedCounter();
+    }
+
     @Override
     public void onDetach() {
         stateListenerRegistry = null;
@@ -173,8 +217,6 @@ public class PeersFragment extends Fragment {
     }
 
     private void updatePeersCounter(List<Peer> peers) {
-        TextView textPeersCount = binding.textOpenPanel;
-
         int connected = 0;
 
         for (var peer : peers) {
@@ -183,9 +225,22 @@ public class PeersFragment extends Fragment {
             }
         }
 
-        String text = getString(R.string.peers_connected, connected, peers.size());
-        textPeersCount.post(() ->
-                textPeersCount.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
+        peersConnected = connected;
+        updateConnectedCounter();
+    }
+
+    // The single header line above the segmented control shows whichever
+    // counter belongs to the visible half.
+    private void updateConnectedCounter() {
+        if (binding == null) {
+            return;
+        }
+        TextView counter = binding.textOpenPanel;
+        String text = showingResources
+                ? getString(R.string.resources_connected, resourcesConnected, resourcesTotal)
+                : getString(R.string.peers_connected, peersConnected, peers.size());
+        counter.post(() ->
+                counter.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY))
         );
     }
 }

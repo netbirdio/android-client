@@ -3,6 +3,7 @@ package io.netbird.client;
 import androidx.annotation.Nullable;
 
 import io.netbird.client.tool.RouteChangeListener;
+import io.netbird.gomobile.android.FileDrop;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.SSHClient;
@@ -37,6 +38,13 @@ public interface ServiceAccessor {
     void extendSession();
 
     SSHClient newSSHClient();
+
+    /**
+     * File drop handle of the active profile, or null while the VPN service is
+     * not bound. Usable with the engine stopped; only sending needs the tunnel.
+     */
+    @Nullable
+    FileDrop fileDrop();
 
     URLOpener getSSHURLOpener();
 }

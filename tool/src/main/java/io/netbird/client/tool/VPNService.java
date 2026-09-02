@@ -14,11 +14,21 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
+import io.netbird.client.tool.files.ContentFileSource;
+import io.netbird.client.tool.files.FileDropManager;
+import io.netbird.client.tool.files.MediaStoreFileDropSink;
+import io.netbird.client.tool.files.FileDropNotification;
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
+import io.netbird.gomobile.android.FileDrop;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.SSHClient;
@@ -46,6 +56,15 @@ public class VPNService extends android.net.VpnService {
     private ForegroundNotification fgNotification;
     private SessionNotification sessionNotification;
     private SessionMonitor sessionMonitor;
+    private FileDropNotification fileDropNotification;
+    private FileDropManager.HandleFactory fileDropHandleFactory;
+    private FileDropManager.TransfersListener fileDropTransfersListener;
+    // Last notified state per transfer, so a poll that changed nothing does not
+    // re-post a notification and re-alert the user.
+    private final Map<String, Long> fileDropNotifiedStates = new ConcurrentHashMap<>();
+    // Guards the first transfer list, which is the persisted history rather
+    // than anything that just happened. See onFileDropTransfers.
+    private final AtomicBoolean fileDropHistorySeeded = new AtomicBoolean();
     private TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
 
@@ -98,6 +117,27 @@ public class VPNService extends android.net.VpnService {
         engineRunner.addConnectionObserver(connectionObserver);
 
         engineRunner.addServiceStateListener(serviceStateListener);
+
+        // File drop is wired to the service rather than to an activity so an
+        // incoming offer still raises its consent prompt, and the answer still
+        // reaches Go, with no UI bound.
+        fileDropNotification = new FileDropNotification(this);
+        fileDropHandleFactory = () -> {
+            try {
+                return engineRunner.fileDrop();
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to open file drop", e);
+                return null;
+            }
+        };
+        FileDropManager.get().setHandleFactory(fileDropHandleFactory);
+        FileDropManager.get().setOfferListener(fileDropNotification::showOffer);
+        fileDropTransfersListener = this::onFileDropTransfers;
+        FileDropManager.get().addTransfersListener(fileDropTransfersListener);
+        // A process killed mid-transfer leaves staged copies on both sides
+        // behind; nothing else will ever claim them.
+        ContentFileSource.clearStaging(this);
+        new MediaStoreFileDropSink(this).clearPartials();
 
         // Create network availability listener after the engine runner so we
         // can gate notifications on the engine actually being up; this avoids
@@ -195,6 +235,16 @@ public class VPNService extends android.net.VpnService {
             }
         }
 
+        if (fileDropTransfersListener != null) {
+            FileDropManager.get().removeTransfersListener(fileDropTransfersListener);
+            fileDropTransfersListener = null;
+        }
+        if (fileDropHandleFactory != null) {
+            FileDropManager.get().setOfferListener(null);
+            FileDropManager.get().clearHandleFactory(fileDropHandleFactory);
+            fileDropHandleFactory = null;
+        }
+
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
@@ -210,6 +260,47 @@ public class VPNService extends android.net.VpnService {
             tunCreator.getHandler().getLooper().quitSafely();
             tunCreator = null;
         }
+    }
+
+    /**
+     * Mirrors running and finished transfers into notifications. Offers are left
+     * to the offer listener, which posts the consent prompt with its actions.
+     */
+    private void onFileDropTransfers(List<FileDropManager.Transfer> transfers) {
+        // The first non-empty list to arrive is the stored history, every entry
+        // of which finished long ago. Recording it without notifying is what
+        // keeps a restart from replaying an outcome for each past transfer.
+        // Empty lists are skipped: registering a listener replays the manager's
+        // current list, which is empty until the first read from Go lands.
+        boolean seeding = !transfers.isEmpty()
+                && fileDropHistorySeeded.compareAndSet(false, true);
+
+        for (FileDropManager.Transfer transfer : transfers) {
+            if (!transfer.isRunning() && !transfer.isTerminal()) {
+                continue;
+            }
+
+            Long last = fileDropNotifiedStates.put(transfer.id(), transfer.state());
+
+            if (transfer.isRunning()) {
+                // Shown even while seeding: a transfer still moving when the
+                // app restarted deserves its bar back. Re-posted on every
+                // update, with setOnlyAlertOnce keeping it quiet, because the
+                // bar would otherwise sit frozen at its last value.
+                fileDropNotification.showProgress(transfer);
+            } else if (!seeding && (last == null || last.longValue() != transfer.state())) {
+                fileDropNotification.showOutcome(transfer);
+            }
+        }
+
+        fileDropNotifiedStates.keySet().removeIf(id -> {
+            for (FileDropManager.Transfer t : transfers) {
+                if (t.id().equals(id)) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     @Override
@@ -337,6 +428,16 @@ public class VPNService extends android.net.VpnService {
                 return null;
             }
             return engineRunner.newSSHClient();
+        }
+
+        /**
+         * File drop handle of the active profile. Deliberately not gated on the
+         * engine: the transfer history and the receiving policy are readable
+         * while disconnected, and a send attempt reports the missing tunnel
+         * itself.
+         */
+        public FileDrop fileDrop() throws Exception {
+            return engineRunner.fileDrop();
         }
     }
 

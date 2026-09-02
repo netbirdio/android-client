@@ -11,6 +11,9 @@
     <!-- List bottom padding on screens with a FAB: the button (56dp), its margin
          (16dp) and a gap so the last card clears it. -->
     <dimen name="fab_content_inset">88dp</dimen>
+    <!-- Gap under the last peer card on the share screen, before the navigation
+         bar inset is added on top of it. -->
+    <dimen name="share_list_bottom_padding">16dp</dimen>
     <!-- Lifts the floating address panel over the cards it covers. -->
     <dimen name="address_popup_elevation">8dp</dimen>
 </resources>

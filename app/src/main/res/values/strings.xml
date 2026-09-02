@@ -17,6 +17,7 @@
     <string name="bottom_nav_peers">Peers</string>
     <string name="bottom_nav_networks">Resources</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">Apps</string>
     <string name="bottom_nav_settings">Settings</string>
 
     <string name="settings_section_connection">Connection</string>
@@ -66,6 +67,7 @@
     <string name="peers_clipboard_copy_ipv6">Copy IPv6</string>
     <string name="peers_clipboard_copy_fqdn">Copy FQDN</string>
     <string name="peers_action_ssh">SSH</string>
+    <string name="peers_action_send">Send</string>
     <string name="ssh_terminal_title">SSH Terminal</string>
     <string name="ssh_dialog_title">SSH to %1$s</string>
     <string name="ssh_dialog_host">Host (IP or FQDN)</string>
@@ -296,5 +298,74 @@
     <plurals name="session_banner_expires_days">
         <item quantity="one">Session expires in %1$d day</item>
         <item quantity="other">Session expires in %1$d days</item>
+    </plurals>
+
+    <string name="bottom_nav_files">Send</string>
+    <string name="file_drop_share_pick_peer">Send to</string>
+    <string name="file_drop_share_nothing">Nothing to send</string>
+    <string name="file_drop_share_not_running">NetBird is not running</string>
+    <string name="file_drop_share_no_peers">No peers to send to</string>
+    <string name="file_drop_share_no_matches">No matching peers</string>
+    <string name="file_drop_share_unreadable">The shared files could not be read</string>
+    <string name="file_drop_share_text_title">Text snippet</string>
+    <string name="file_drop_share_state_waiting">Waiting…</string>
+    <string name="file_drop_share_state_sent">✓ Sent</string>
+    <string name="file_drop_share_sending">Sending to %1$s</string>
+    <string name="file_drop_share_stop_confirm">Stop sending to this peer?</string>
+    <string name="file_drop_share_stop">Stop</string>
+    <string name="file_drop_share_failed">Could not send: %1$s</string>
+    <string name="file_drop_title">Files</string>
+    <string name="file_drop_empty">No transfers yet</string>
+    <string name="file_drop_no_results">No matching transfers</string>
+    <string name="file_drop_search_hint">Search by file or peer</string>
+    <string name="file_drop_pick_files">Send files</string>
+    <string name="file_drop_send_sheet_title">Send</string>
+    <string name="file_drop_send_file">Send file…</string>
+    <string name="file_drop_send_clipboard">Send clipboard</string>
+    <string name="file_drop_clipboard_empty">Clipboard is empty</string>
+    <string name="file_drop_delete_confirm">Remove this transfer from the list?</string>
+    <string name="file_drop_stop_confirm">Stop this transfer? It stays in the list so you can remove it afterwards.</string>
+    <string name="file_drop_stop">Stop</string>
+    <string name="file_drop_mode_title">Receiving files</string>
+    <string name="file_drop_mode_off">Off</string>
+    <string name="file_drop_mode_ask">Ask every time</string>
+    <string name="file_drop_mode_auto">Accept automatically</string>
+    <string name="file_drop_state_pending">Waiting</string>
+    <string name="file_drop_state_transferring">Transferring</string>
+    <string name="file_drop_state_completed">Completed</string>
+    <string name="file_drop_state_declined">Declined</string>
+    <string name="file_drop_state_expired">No response</string>
+    <string name="file_drop_state_cancelled">Cancelled</string>
+    <string name="file_drop_state_failed">Failed</string>
+    <string name="file_drop_state_unreachable">Declined</string>
+    <string name="file_drop_direction_sent">to %1$s</string>
+    <string name="file_drop_direction_received">from %1$s</string>
+    <string name="file_drop_state_sent">Sent</string>
+    <string name="file_drop_state_received">Received</string>
+    <string name="file_drop_state_progress">Sending %1$d%%</string>
+    <string name="file_drop_state_progress_incoming">Receiving %1$d%%</string>
+    <string name="file_drop_group_today">Today</string>
+    <string name="file_drop_group_yesterday">Yesterday</string>
+    <string name="file_drop_group_earlier">Earlier</string>
+    <string name="file_drop_offer_label">%1$s · %2$s</string>
+    <string name="file_drop_offer_subtitle">%1$s wants to send this</string>
+    <string name="file_drop_text_title">“%1$s”</string>
+    <string name="file_drop_copy">Copy</string>
+    <string name="file_drop_copied">Copied</string>
+
+    <string name="file_sharing_title">File sharing</string>
+    <string name="file_sharing_receive_header">File receiving</string>
+    <string name="file_sharing_receive_description">How this device handles incoming file offers.</string>
+    <string name="file_sharing_destination_header">Received files</string>
+    <string name="file_sharing_destination_label">Save to</string>
+    <string name="file_sharing_destination_hint">Files land in the app\'s own storage; open one to move or share it.</string>
+    <string name="file_drop_accept">Accept</string>
+    <string name="file_drop_decline">Decline</string>
+    <string name="file_drop_cancel">Cancel</string>
+    <string name="file_drop_delete">Remove</string>
+    <string name="file_drop_open">Open</string>
+    <plurals name="file_drop_share_items">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
     </plurals>
 </resources>
