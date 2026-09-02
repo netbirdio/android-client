@@ -179,6 +179,18 @@ var TERMINAL_THEME = {
     term.paste(text);
   };
 
+  // Called from Java for the arrow keys. Full-screen programs switch the
+  // terminal to application cursor keys mode (DECCKM) and then expect SS3
+  // sequences instead of CSI ones, so the sequence has to be picked from the
+  // live mode rather than hardcoded. Sent through the input bridge so the
+  // Java side applies the same modifier handling as for typed characters.
+  window.sendCursorKey = function (ch) {
+    var prefix = term.modes.applicationCursorKeysMode ? '\x1bO' : '\x1b[';
+    if (bridge && bridge.onInput) {
+      bridge.onInput(prefix + ch);
+    }
+  };
+
   // Gboard otherwise autocorrects and capitalises what is typed into xterm's
   // hidden textarea, which silently rewrites commands. These attributes are the
   // only way to reach it: the textarea is created by xterm, not by this page,

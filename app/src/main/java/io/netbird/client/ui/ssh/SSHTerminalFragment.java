@@ -221,10 +221,10 @@ public class SSHTerminalFragment extends Fragment {
         });
         binding.keyEsc.setOnClickListener(v -> sendBytes(new byte[]{0x1b}));
         binding.keyTab.setOnClickListener(v -> sendBytes(new byte[]{0x09}));
-        binding.keyUp.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'A'}));
-        binding.keyDown.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'B'}));
-        binding.keyRight.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'C'}));
-        binding.keyLeft.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'D'}));
+        binding.keyUp.setOnClickListener(v -> sendCursorKey('A'));
+        binding.keyDown.setOnClickListener(v -> sendCursorKey('B'));
+        binding.keyRight.setOnClickListener(v -> sendCursorKey('C'));
+        binding.keyLeft.setOnClickListener(v -> sendCursorKey('D'));
 
         // The three most common control codes get their own key: arming Ctrl and
         // then hitting a letter needs the soft keyboard to deliver that letter,
@@ -358,6 +358,17 @@ public class SSHTerminalFragment extends Fragment {
             disarmModifier(ModifierKey.ALT);
         }
         session.write(payload);
+    }
+
+    /**
+     * Arrow keys go through the page rather than straight to the session:
+     * only xterm knows whether the application asked for application cursor
+     * keys mode, and the sequence differs between the two modes. The page
+     * routes the chosen sequence back through the input bridge, so armed
+     * modifiers apply the same way as to typed characters.
+     */
+    private void sendCursorKey(char ch) {
+        postToTerminal("window.sendCursorKey('" + ch + "');");
     }
 
     private enum ModifierKey { ALT, CTRL }
