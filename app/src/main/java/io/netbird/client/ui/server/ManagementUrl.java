@@ -4,6 +4,7 @@ import android.security.NetworkSecurityPolicy;
 import android.util.Log;
 
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -72,7 +73,18 @@ public final class ManagementUrl {
      * <p>Blocking call — run it off the main thread.
      */
     public static boolean isReachable(String url) {
-        if (!canProbe(url)) {
+        URL parsed;
+        try {
+            parsed = new URL(url);
+        } catch (MalformedURLException e) {
+            // Nothing to probe, and nothing the engine could dial either, so
+            // this is a genuine negative rather than a question the probe
+            // cannot answer.
+            Log.d(LOGTAG, "management server " + url + " is not a URL", e);
+            return false;
+        }
+
+        if (!cleartextPermitted(parsed)) {
             // Not an answer this can give, so it does not pretend to. The
             // engine reaches the server with Go's own networking, which is not
             // bound by the platform's cleartext policy the way this probe is,
@@ -84,7 +96,7 @@ public final class ManagementUrl {
 
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection = (HttpURLConnection) parsed.openConnection();
             connection.setConnectTimeout(REACHABILITY_TIMEOUT_MS);
             connection.setReadTimeout(REACHABILITY_TIMEOUT_MS);
             connection.setRequestMethod("GET");
@@ -104,22 +116,15 @@ public final class ManagementUrl {
     }
 
     /**
-     * Whether the probe is allowed to make this request at all. An app
-     * targeting API 28 or later has cleartext denied unless it opts in, and
-     * this one does not, so an http:// URL fails on policy before any packet
-     * is sent.
+     * Whether the platform will carry this request. An app targeting API 28 or
+     * later has cleartext denied unless it opts in, and this one does not, so
+     * an http:// URL fails on policy before any packet is sent. Anything else
+     * is permitted as far as this policy is concerned.
      */
-    private static boolean canProbe(String url) {
-        try {
-            URL parsed = new URL(url);
-            if (!"http".equalsIgnoreCase(parsed.getProtocol())) {
-                return true;
-            }
-            return NetworkSecurityPolicy.getInstance()
-                    .isCleartextTrafficPermitted(parsed.getHost());
-        } catch (Exception e) {
-            Log.d(LOGTAG, "cannot tell whether " + url + " is probeable", e);
-            return false;
+    private static boolean cleartextPermitted(URL url) {
+        if (!"http".equalsIgnoreCase(url.getProtocol())) {
+            return true;
         }
+        return NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted(url.getHost());
     }
 }
