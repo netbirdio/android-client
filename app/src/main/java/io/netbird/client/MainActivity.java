@@ -194,10 +194,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
         if (isRunningOnTV) {
             Log.i(LOGTAG, "Running on Android TV - optimizing for D-pad navigation");
-        } else {
-            // The phone UX is portrait-only, like the iOS app (which locks
-            // portrait in its project settings). TV stays unlocked: it is
-            // landscape by nature and uses the w960dp navigation-rail layout.
+        } else if (getResources().getBoolean(R.bool.lock_portrait)) {
+            // Phone-sized screens (sw < 600dp) are portrait-only, like the iOS
+            // app. Tablets, car head units and TV rotate freely: a portrait lock
+            // on a landscape-only display letterboxes the app into a narrow
+            // strip and clips the system keyboard with it.
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         if (useDeviceCodeFlow && !isRunningOnTV) {
