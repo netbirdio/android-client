@@ -5,6 +5,8 @@ import android.util.Log;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -26,7 +28,8 @@ public final class ManagementUrl {
     private static final String LEGACY_CLOUD = "https://api.wiretrustee.com:443";
 
     // Same syntactic check as the desktop UI: host is a domain, localhost or
-    // IPv4, with optional scheme, port, path, query and fragment.
+    // IPv4, with optional scheme, port, path, query and fragment. A bracketed
+    // IPv6 literal does not go through here, see isValid.
     private static final Pattern URL_PATTERN = Pattern.compile(
             "^(https?://)?"
                     + "((([a-z\\d]([a-z\\d-]*[a-z\\d])?)\\.)+[a-z]{2,}|localhost|"
@@ -49,9 +52,37 @@ public final class ManagementUrl {
         return CLOUD.equals(trimmed) || LEGACY_CLOUD.equals(trimmed);
     }
 
+    /**
+     * Whether the string is a syntactically usable management URL. The scheme,
+     * port, path, query and fragment are all optional; the host may be a
+     * domain, localhost, an IPv4 address or an IPv6 literal in brackets.
+     */
     public static boolean isValid(String url) {
         String trimmed = url == null ? "" : url.trim();
-        return !trimmed.isEmpty() && URL_PATTERN.matcher(trimmed).matches();
+        if (trimmed.isEmpty()) {
+            return false;
+        }
+        if (trimmed.indexOf('[') >= 0) {
+            return hasIpv6Host(trimmed);
+        }
+        return URL_PATTERN.matcher(trimmed).matches();
+    }
+
+    /**
+     * Whether the URL's host is a bracketed IPv6 literal. Left to java.net.URI
+     * rather than the pattern above, so the address grammar is checked by a
+     * parser instead of a hand-written character class.
+     */
+    private static boolean hasIpv6Host(String url) {
+        String host;
+        try {
+            host = new URI(normalize(url)).getHost();
+        } catch (URISyntaxException e) {
+            return false;
+        }
+        // getHost keeps the brackets for an IPv6 literal, and returns null for
+        // an authority the parser could not read as host and port.
+        return host != null && host.startsWith("[") && host.endsWith("]");
     }
 
     /** Adds the https:// scheme when the user omitted it. */
