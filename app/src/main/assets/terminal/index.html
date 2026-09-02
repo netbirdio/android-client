@@ -191,6 +191,71 @@ var TERMINAL_THEME = {
     helper.setAttribute('spellcheck', 'false');
   }
 
+  // xterm 6 replaced the natively scrollable viewport with a wheel-driven
+  // scrollable element, and this build never wires up its touch gesture
+  // support, so on a phone the scrollback is unreachable. Map a vertical drag
+  // to scrollLines instead. The slop keeps a plain tap focusing the terminal,
+  // and preventDefault (only once a drag became a scroll) stops the browser
+  // from replaying the drag as synthetic mouse events, which would select
+  // text instead.
+  (function () {
+    var SCROLL_SLOP_PX = 12;
+    var container = document.getElementById('terminal');
+    var tracking = false;
+    var scrolling = false;
+    var startY = 0;
+    var lastY = 0;
+    var carry = 0;
+
+    // The screen element spans exactly term.rows cells with both renderers,
+    // which makes it the one reliable source for the cell height.
+    function cellHeight() {
+      var screen = container.querySelector('.xterm-screen');
+      if (screen && term.rows > 0) {
+        var h = screen.getBoundingClientRect().height / term.rows;
+        if (h > 0) return h;
+      }
+      return 16;
+    }
+
+    container.addEventListener('touchstart', function (e) {
+      tracking = e.touches.length === 1;
+      if (tracking) {
+        startY = lastY = e.touches[0].clientY;
+        carry = 0;
+        scrolling = false;
+      }
+    }, { passive: true });
+
+    container.addEventListener('touchmove', function (e) {
+      if (!tracking || e.touches.length !== 1) {
+        return;
+      }
+      var y = e.touches[0].clientY;
+      if (!scrolling) {
+        if (Math.abs(y - startY) < SCROLL_SLOP_PX) {
+          return;
+        }
+        scrolling = true;
+        lastY = y;
+      }
+      // The remainder carries over between events so slow drags still add up
+      // to whole lines instead of being floored away one event at a time.
+      carry += lastY - y;
+      lastY = y;
+      var cell = cellHeight();
+      var lines = carry < 0 ? Math.ceil(carry / cell) : Math.floor(carry / cell);
+      if (lines !== 0) {
+        carry -= lines * cell;
+        term.scrollLines(lines);
+      }
+      e.preventDefault();
+    }, { passive: false });
+
+    container.addEventListener('touchend', function () { tracking = false; });
+    container.addEventListener('touchcancel', function () { tracking = false; });
+  })();
+
   // Initial fit and signal ready (which triggers SSH connect on the Java side).
   setTimeout(function () {
     applyFit();
