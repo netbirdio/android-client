@@ -243,10 +243,12 @@ public class SSHTerminalFragment extends Fragment {
         binding.keyCtrl.setOnClickListener(v -> {
             ctrlArmed = !ctrlArmed;
             updateModifierStyle(binding.keyCtrl, ctrlArmed);
+            syncModifierArmed();
         });
         binding.keyAlt.setOnClickListener(v -> {
             altArmed = !altArmed;
             updateModifierStyle(binding.keyAlt, altArmed);
+            syncModifierArmed();
         });
 
         binding.keyCopy.setOnClickListener(v -> copySelection());
@@ -384,7 +386,17 @@ public class SSHTerminalFragment extends Fragment {
                 return;
             }
             updateModifierStyle(key == ModifierKey.ALT ? binding.keyAlt : binding.keyCtrl, false);
+            syncModifierArmed();
         });
+    }
+
+    /**
+     * Mirrors the armed state into the page, which needs it to know when a
+     * letter must be pulled out of a keyboard's pending word composition
+     * instead of waiting for a commit that may never come.
+     */
+    private void syncModifierArmed() {
+        postToTerminal("window.setModifierArmed(" + (ctrlArmed || altArmed) + ");");
     }
 
     private void postToTerminal(String script) {

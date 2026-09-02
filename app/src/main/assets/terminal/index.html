@@ -203,6 +203,35 @@ var TERMINAL_THEME = {
     helper.setAttribute('spellcheck', 'false');
   }
 
+  // Word-composing keyboards hold each typed letter in an IME composition and
+  // commit it only at a word boundary, so the armed Ctrl/Alt on the Java side
+  // never sees the lone letter it waits for and stays armed. While a modifier
+  // is armed the letter is lifted straight out of the composition and sent
+  // through the input bridge, where the Java side applies the modifier and
+  // disarms as for a plainly delivered letter. The pending composition is
+  // dropped with a blur: xterm clears its textarea on blur, so the letter
+  // cannot arrive a second time when the keyboard would have committed it.
+  var modifierArmed = false;
+  window.setModifierArmed = function (armed) {
+    modifierArmed = armed;
+  };
+  if (helper) {
+    helper.addEventListener('compositionupdate', function (e) {
+      if (!modifierArmed || !e.data) {
+        return;
+      }
+      var ch = e.data.charAt(e.data.length - 1);
+      if (!/[a-zA-Z]/.test(ch)) {
+        return;
+      }
+      helper.blur();
+      helper.focus();
+      if (bridge && bridge.onInput) {
+        bridge.onInput(ch);
+      }
+    });
+  }
+
   // xterm 6 replaced the natively scrollable viewport with a wheel-driven
   // scrollable element, and this build never wires up its touch gesture
   // support, so on a phone the scrollback is unreachable. Map a vertical drag
