@@ -74,8 +74,6 @@ public class NetworksFragment extends Fragment {
 
         if (PlatformUtils.isAndroidTV(requireContext())) {
             binding.zeroPeerLayout.btnLearnWhy.setVisibility(View.GONE);
-            binding.searchView.setFocusable(false);
-            binding.searchView.setFocusableInTouchMode(false);
         } else {
             ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
         }
