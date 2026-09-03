@@ -135,6 +135,8 @@
     <string name="advanced_disable_ipv6_desc">Deaktiviert die IPv6-Overlay-Adressierung auf der Tunnel-Schnittstelle</string>
     <string name="advanced_allow_ssh">SSH aktivieren</string>
     <string name="advanced_allow_ssh_desc">Erlaubt SSH-Verbindungen zu diesem Gerät</string>
+    <string name="troubleshoot_allow_remote_jobs">Remote-Debug-Pakete erlauben</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Erlaubt dem Administrator, über den Management-Dienst ein Debug-Paket von diesem Gerät anzufordern. Wird bei der nächsten Verbindung wirksam</string>
     <string name="advanced_block_inbound">Eingehende Verbindungen blockieren</string>
     <string name="advanced_block_inbound_desc">Blockiert alle eingehenden Verbindungen zu diesem Gerät und den gerouteten Netzwerken. Dies überschreibt alle vom Management-Dienst empfangenen Richtlinien</string>
 

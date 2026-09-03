@@ -18,6 +18,7 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentTroubleshootBinding;
 import io.netbird.client.tool.Preferences;
+import io.netbird.client.tool.ProfileManagerWrapper;
 
 public class TroubleshootFragment extends Fragment {
 
@@ -47,6 +48,8 @@ public class TroubleshootFragment extends Fragment {
             binding.switchAnonymize.toggle();
         });
 
+        initializeRemoteJobsSwitch(inflater.getContext());
+
         binding.buttonDebugBundle.setOnClickListener(v -> {
             generateDebugBundle();
         });
@@ -58,6 +61,25 @@ public class TroubleshootFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void initializeRemoteJobsSwitch(Context context) {
+        try {
+            String configFilePath = new ProfileManagerWrapper(context).getActiveConfigPath();
+            io.netbird.gomobile.android.Preferences goPreferences = new io.netbird.gomobile.android.Preferences(configFilePath);
+            binding.switchAllowRemoteJobs.setChecked(goPreferences.getRemoteJobsAllowed());
+            binding.switchAllowRemoteJobs.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setRemoteJobsAllowed(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set remote jobs allowed", e);
+                }
+            });
+            binding.allowRemoteJobsLayout.setOnClickListener(v -> binding.switchAllowRemoteJobs.toggle());
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to initialize remote jobs switch", e);
+        }
     }
 
     private void generateDebugBundle() {

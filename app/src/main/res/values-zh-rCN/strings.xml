@@ -135,6 +135,8 @@
     <string name="advanced_disable_ipv6_desc">在隧道接口上禁用 IPv6 叠加寻址</string>
     <string name="advanced_allow_ssh">启用 SSH</string>
     <string name="advanced_allow_ssh_desc">允许通过 SSH 连接到此设备</string>
+    <string name="troubleshoot_allow_remote_jobs">允许远程调试包</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">允许管理员通过管理服务从此设备请求调试包。将在下次连接时生效</string>
     <string name="advanced_block_inbound">阻止入站连接</string>
     <string name="advanced_block_inbound_desc">阻止到此设备和路由网络的所有入站连接。这将覆盖从管理服务接收的任何策略</string>
 

@@ -135,6 +135,8 @@
     <string name="advanced_disable_ipv6_desc">Letiltja az IPv6 overlay címzést a tunnel interfészen</string>
     <string name="advanced_allow_ssh">SSH engedélyezése</string>
     <string name="advanced_allow_ssh_desc">Engedélyezi az SSH-kapcsolatokat ehhez az eszközhöz</string>
+    <string name="troubleshoot_allow_remote_jobs">Távoli hibakeresési csomagok engedélyezése</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Lehetővé teszi, hogy a rendszergazda a felügyeleti szolgáltatáson keresztül hibakeresési csomagot kérjen ettől az eszköztől. A következő csatlakozáskor lép érvénybe</string>
     <string name="advanced_block_inbound">Bejövő kapcsolatok blokkolása</string>
     <string name="advanced_block_inbound_desc">Blokkol minden bejövő kapcsolatot ehhez az eszközhöz és az irányított hálózatokhoz. Ez felülírja a felügyeleti szolgáltatástól kapott házirendeket</string>
 

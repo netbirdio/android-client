@@ -135,6 +135,8 @@
     <string name="advanced_disable_ipv6_desc">Desativa o endereçamento IPv6 de sobreposição na interface do túnel</string>
     <string name="advanced_allow_ssh">Ativar SSH</string>
     <string name="advanced_allow_ssh_desc">Permite conexões SSH a este dispositivo</string>
+    <string name="troubleshoot_allow_remote_jobs">Permitir pacotes de depuração remotos</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Permite que o administrador solicite um pacote de depuração deste dispositivo através do serviço de gerenciamento. Entra em vigor na próxima conexão</string>
     <string name="advanced_block_inbound">Bloquear conexões de entrada</string>
     <string name="advanced_block_inbound_desc">Bloqueia todas as conexões de entrada para este dispositivo e redes roteadas. Isso substitui quaisquer políticas recebidas do serviço de gerenciamento</string>
 
