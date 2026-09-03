@@ -135,6 +135,8 @@
     <string name="advanced_disable_ipv6_desc">Отключает оверлейную IPv6-адресацию на туннельном интерфейсе</string>
     <string name="advanced_allow_ssh">Включить SSH</string>
     <string name="advanced_allow_ssh_desc">Разрешает SSH-подключения к этому устройству</string>
+    <string name="troubleshoot_allow_remote_jobs">Разрешить удалённые отладочные пакеты</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Позволяет администратору запрашивать отладочный пакет с этого устройства через сервис управления. Вступает в силу при следующем подключении</string>
     <string name="advanced_block_inbound">Блокировать входящие подключения</string>
     <string name="advanced_block_inbound_desc">Блокирует все входящие подключения к этому устройству и маршрутизируемым сетям. Это переопределяет любые политики, полученные от службы управления</string>
 

@@ -135,6 +135,8 @@
     <string name="advanced_disable_ipv6_desc">Disabilita l’indirizzamento IPv6 overlay sull’interfaccia del tunnel</string>
     <string name="advanced_allow_ssh">Abilita SSH</string>
     <string name="advanced_allow_ssh_desc">Consente connessioni SSH a questo dispositivo</string>
+    <string name="troubleshoot_allow_remote_jobs">Consenti bundle di debug remoti</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Consente all\'amministratore di richiedere un bundle di debug da questo dispositivo tramite il servizio di gestione. Ha effetto alla prossima connessione</string>
     <string name="advanced_block_inbound">Blocca connessioni in entrata</string>
     <string name="advanced_block_inbound_desc">Blocca tutte le connessioni in entrata verso questo dispositivo e le reti instradate. Questo sovrascrive qualsiasi criterio ricevuto dal servizio di gestione</string>
 

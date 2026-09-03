@@ -135,6 +135,8 @@
     <string name="advanced_disable_ipv6_desc">トンネルインターフェースでの IPv6 オーバーレイアドレッシングを無効にします</string>
     <string name="advanced_allow_ssh">SSHを有効にする</string>
     <string name="advanced_allow_ssh_desc">このデバイスへの SSH 接続を許可します</string>
+    <string name="troubleshoot_allow_remote_jobs">リモートデバッグバンドルを許可</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">管理者が管理サービスを通じてこのデバイスからデバッグバンドルを要求できるようにします。次回の接続時に有効になります</string>
     <string name="advanced_block_inbound">受信接続をブロック</string>
     <string name="advanced_block_inbound_desc">このデバイスおよびルーティングされたネットワークへのすべての受信接続をブロックします。管理サービスから受信したポリシーより優先されます</string>
 

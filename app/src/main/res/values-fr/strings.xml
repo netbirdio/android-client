@@ -135,6 +135,8 @@
     <string name="advanced_disable_ipv6_desc">Désactive l’adressage IPv6 overlay sur l’interface tunnel</string>
     <string name="advanced_allow_ssh">Activer SSH</string>
     <string name="advanced_allow_ssh_desc">Autorise les connexions SSH vers cet appareil</string>
+    <string name="troubleshoot_allow_remote_jobs">Autoriser les bundles de débogage à distance</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Permet à l\'administrateur de demander un bundle de débogage depuis cet appareil via le service de gestion. Prend effet à la prochaine connexion</string>
     <string name="advanced_block_inbound">Bloquer les connexions entrantes</string>
     <string name="advanced_block_inbound_desc">Bloque toutes les connexions entrantes vers cet appareil et les réseaux routés. Cela remplace toutes les politiques reçues du service de gestion</string>
 
