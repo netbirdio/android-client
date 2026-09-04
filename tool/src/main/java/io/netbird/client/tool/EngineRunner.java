@@ -163,8 +163,14 @@ class EngineRunner {
                 Log.d(LOGTAG, "Config path: " + configurationFilePath);
                 Log.d(LOGTAG, "State path: " + stateFilePath);
             } catch (Exception e) {
+                // Thrown on the worker thread this would take the whole process
+                // down; report it through the same listener path a failed engine
+                // run uses so the UI shows an error and returns to idle.
                 Log.e(LOGTAG, "Failed to get profile paths from ProfileManager", e);
-                throw new RuntimeException("Failed to get profile paths: " + e.getMessage(), e);
+                notifyError(new Exception("Failed to get profile paths: " + e.getMessage(), e));
+                engineIsRunning = false;
+                notifyServiceStateListeners(false);
+                return;
             }
 
             // Create fresh PlatformFiles with current config/state paths
