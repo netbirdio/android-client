@@ -24,8 +24,10 @@ pre-releases tagged `vX.Y.Z-rc.N` (for example `v0.6.0-rc.1`, `v0.3.3-rc.2`).
 
 ### `build-snapshot.yml` — the hand-distributed build
 
-Manually dispatched. Produces a release-signed build from an arbitrary commit
-with no tag behind it, uploaded as a 14-day artifact rather than published.
+Manually dispatched. Produces a release-signed build from an arbitrary untagged
+commit, uploaded as a 14-day artifact rather than published. The version name
+anchors that commit to the last release it descends from, so a build off the
+`v0.6.0-rc.1` line reads `v0.6.0-rc.1-snapshot-4d10386`.
 
 Use it when someone needs a real, installable build of work in progress and you
 do not want a public pre-release for it. Every run consumes a version code from
@@ -39,14 +41,20 @@ the shared counter, so it is not something to run per pull request.
 |---|---|---|---|
 | Trigger | `pull_request`, `push` → `main` | `release: published` | `workflow_dispatch` |
 | Build type | debug | release | release |
-| **Version name** | `ci-<sha>` | the release tag verbatim (`v0.5.0`, `v0.6.0-rc.1`) | `snapshot-<sha>` |
+| **Version name** | `ci-<sha>` | the release tag verbatim (`v0.5.0`, `v0.6.0-rc.1`) | `<tag>-snapshot-<sha>` |
 | **Version code** | `9999` (fallback from `version.properties`) | `release_runs + snapshot_runs + 40` | `release_runs + snapshot_runs + 40` |
 | **Signing key** | default Android debug keystore | Play upload keystore (`gplay.keystore`) | Play upload keystore (`gplay.keystore`) |
 | **Firebase Crashlytics + Analytics** | **absent** | present | present |
 | Runs tests | yes (unit + instrumented) | no | no |
-| Artifact | `debug-artifacts-<name>`, 3 days; `netbird-aar`, 1 day | attached to the GitHub release | `snapshot-<sha>`, 14 days |
+| Artifact | `debug-artifacts-<name>`, 3 days; `netbird-aar`, 1 day | attached to the GitHub release | `<tag>-snapshot-<sha>`, 14 days |
 | Permissions | `contents: read` | `contents: write`, `actions: read` | `contents: read`, `actions: read` |
 | Concurrency group | none | `android-version-code-lock` | `android-version-code-lock` |
 
 `<sha>` is the short commit hash of the `android-client` repository, not of the
 submodule.
+
+`<tag>` is the nearest release tag in the built commit's ancestry, as reported by
+`git describe --tags --abbrev=0` — the closest tag walking back through the
+commit graph, not the most recent tag by date. A branch that forked before a tag
+was cut therefore reports the older tag, and merging `main` into it moves the
+name forward.

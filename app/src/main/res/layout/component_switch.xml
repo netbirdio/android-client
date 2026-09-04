@@ -25,6 +25,7 @@
             android:textColor="@color/nb_txt_light" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
+            style="@style/Widget.NetBird.Switch"
             android:id="@+id/switch_control"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

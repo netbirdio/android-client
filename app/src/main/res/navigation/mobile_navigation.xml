@@ -13,6 +13,30 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/nav_peers"
+        android:name="io.netbird.client.ui.home.PeersFragment"
+        android:label="@string/bottom_nav_peers"
+        tools:layout="@layout/fragment_peers" />
+
+    <fragment
+        android:id="@+id/nav_peer_detail"
+        android:name="io.netbird.client.ui.home.PeerDetailFragment"
+        android:label="@string/peer_detail_title"
+        tools:layout="@layout/fragment_peer_detail" />
+
+    <fragment
+        android:id="@+id/nav_networks"
+        android:name="io.netbird.client.ui.home.NetworksFragment"
+        android:label="@string/bottom_nav_networks"
+        tools:layout="@layout/fragment_networks" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="io.netbird.client.ui.settings.SettingsFragment"
+        android:label="@string/bottom_nav_settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
         android:id="@+id/nav_advanced"
         android:name="io.netbird.client.ui.advanced.AdvancedFragment"
         android:label="@string/menu_advanced"
@@ -37,19 +61,45 @@
         tools:layout="@layout/fragment_profiles" />
 
     <fragment
-        android:id="@+id/nav_change_server"
-        android:name="io.netbird.client.ui.server.ChangeServerFragment"
-        android:label="@string/menu_change_server"
-        tools:layout="@layout/fragment_server">
-        <argument
-            android:name="hideAlert"
-            app:argType="boolean"
-            android:defaultValue="false" />
-    </fragment>
-
-    <fragment
         android:id="@+id/firstInstallFragment"
         android:name="io.netbird.client.ui.fistinstall.FirstInstallFragment"
         android:label="FirstInstall"
         tools:layout="@layout/fragment_firstinstall" />
+
+    <fragment
+        android:id="@+id/nav_ssh_sessions"
+        android:name="io.netbird.client.ui.ssh.SshSessionsFragment"
+        android:label="@string/ssh_sessions_title"
+        tools:layout="@layout/fragment_ssh_sessions" />
+
+    <fragment
+        android:id="@+id/nav_ssh_terminal"
+        android:name="io.netbird.client.ui.ssh.SSHTerminalFragment"
+        android:label="@string/ssh_terminal_title"
+        tools:layout="@layout/fragment_ssh_terminal">
+        <argument
+            android:name="sessionId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="host"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="port"
+            app:argType="integer"
+            android:defaultValue="22" />
+        <argument
+            android:name="user"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="mode"
+            app:argType="string"
+            android:defaultValue="netbird" />
+        <argument
+            android:name="password"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
 </navigation>

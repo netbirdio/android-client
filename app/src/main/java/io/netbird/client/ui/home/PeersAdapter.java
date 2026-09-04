@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
+import io.netbird.client.ui.ssh.SshConnectDialog;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,14 +31,20 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
         CONNECTED,
     }
 
+    public interface OnPeerClickListener {
+        void onPeerClick(Peer peer);
+    }
+
     private final List<Peer> peerList;
     private final List<Peer> filteredPeerList;
+    private final OnPeerClickListener clickListener;
 
     private FilterStatus filterStatus = ALL;
     private String filterQueryString = "";
 
-    public PeersAdapter(List<Peer> peerList) {
+    public PeersAdapter(List<Peer> peerList, OnPeerClickListener clickListener) {
         this.peerList = peerList;
+        this.clickListener = clickListener;
         filteredPeerList = new ArrayList<>(peerList);
         sortPeers();
     }
@@ -52,7 +60,7 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
     @Override
     public void onBindViewHolder(@NonNull PeerViewHolder holder, int position) {
         Peer peer = filteredPeerList.get(position);
-        holder.bind(peer);
+        holder.bind(peer, clickListener);
     }
 
     @Override
@@ -134,6 +142,9 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
             } else if (id == R.id.copy_ipv6) {
                 copyToClipboard(view.getContext(), "IPv6 Address", peer.getIpv6());
                 return true;
+            } else if (id == R.id.ssh_connect) {
+                promptSSHUser(view, peer);
+                return true;
             }
             return false;
         });
@@ -145,6 +156,12 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
+    }
+
+    private static void promptSSHUser(View anchor, Peer peer) {
+        Context context = anchor.getContext();
+        SshConnectDialog.show(context, peer.getIp(),
+                context.getString(R.string.ssh_dialog_title, peer.getFqdn()));
     }
 
     private void sortPeers() {
@@ -169,13 +186,13 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
             this.binding = binding;
         }
 
-        public void bind(Peer peer) {
-            binding.status.setText(peer.getStatus().toString());
-            String ipDisplay = peer.getIp();
-            if (peer.getIpv6() != null && !peer.getIpv6().isEmpty()) {
-                ipDisplay = ipDisplay + "\n" + peer.getIpv6();
-            }
-            binding.ip.setText(ipDisplay);
+        public void bind(Peer peer, OnPeerClickListener clickListener) {
+            binding.status.setText(peer.getStatus().labelRes());
+            binding.ip.setText(peer.getIp());
+            String ipv6 = peer.getIpv6();
+            boolean hasIpv6 = ipv6 != null && !ipv6.isEmpty();
+            binding.ipv6.setText(hasIpv6 ? ipv6 : "");
+            binding.ipv6.setVisibility(hasIpv6 ? View.VISIBLE : View.GONE);
             binding.fqdn.setText(peer.getFqdn());
 
             if (peer.getStatus() == Status.CONNECTED) {
@@ -183,6 +200,12 @@ public class PeersAdapter extends RecyclerView.Adapter<PeersAdapter.PeerViewHold
             } else {
                 binding.verticalLine.setBackgroundResource(R.drawable.peer_status_disconnected); // Red for disconnected
             }
+
+            binding.getRoot().setOnClickListener(v -> {
+                if (clickListener != null) {
+                    clickListener.onPeerClick(peer);
+                }
+            });
 
             // Long press listener
             binding.getRoot().setOnLongClickListener(v -> {

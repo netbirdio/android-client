@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill-shaped track for list-row switches. Same look as the home connect toggle
+     (connect_switch_track) at row scale: colours are defined per state here rather than
+     via trackTint, so the off state can carry a subtle border while the on state stays a
+     clean orange fill. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- On: orange fill, no border -->
+    <item android:state_checked="true">
+        <shape android:shape="rectangle">
+            <size android:width="34dp" android:height="20dp" />
+            <corners android:radius="100dp" />
+            <solid android:color="@color/connect_track_on" />
+        </shape>
+    </item>
+
+    <!-- Off: grey fill with a thin, slightly darker border -->
+    <item>
+        <shape android:shape="rectangle">
+            <size android:width="34dp" android:height="20dp" />
+            <corners android:radius="100dp" />
+            <solid android:color="@color/connect_track_off" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/connect_track_off_stroke" />
+        </shape>
+    </item>
+
+</selector>

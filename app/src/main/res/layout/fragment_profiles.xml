@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nb_bg"
+    android:background="@color/nb_bg_peers"
     tools:context=".ui.profile.ProfilesFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,10 +17,8 @@
             android:id="@+id/recycler_profiles"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
             android:paddingTop="16dp"
-            android:paddingBottom="88dp"
+            android:paddingBottom="@dimen/fab_content_inset"
             android:clipToPadding="false"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +30,8 @@
             android:id="@+id/btn_add_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="@dimen/fab_margin"
             android:contentDescription="@string/profiles_add"
             android:src="@drawable/add_24px"
             app:backgroundTint="@color/nb_orange"

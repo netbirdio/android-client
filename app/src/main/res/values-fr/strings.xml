@@ -1,0 +1,298 @@
+<resources>
+    <string name="app_name">NetBird</string>
+    <string name="quick_settings_tile_label">NetBird</string>
+
+    <string name="menu_advanced">Avancé</string>
+    <string name="menu_about">À propos</string>
+    <string name="menu_change_server">Serveur de gestion</string>
+    <string name="menu_profiles">Profils</string>
+    <string name="menu_troubleshoot">Dépannage</string>
+
+    <string name="profile_picker_title">Profil actif</string>
+    <string name="profile_picker_add">Ajouter un profil</string>
+    <string name="profile_picker_manage">Gérer les profils</string>
+    <string name="profile_picker_show_all">Afficher tous les profils (%1$d)</string>
+
+    <string name="bottom_nav_home">Accueil</string>
+    <string name="bottom_nav_peers">Pairs</string>
+    <string name="bottom_nav_networks">Ressources</string>
+    <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_settings">Paramètres</string>
+
+    <string name="settings_section_connection">Connexion</string>
+    <string name="settings_section_settings">Paramètres</string>
+    <string name="settings_section_information">Informations</string>
+    <string name="settings_documentation">Documentation</string>
+
+    <string name="main_status_disconnected">Déconnecté</string>
+    <string name="main_status_connecting">Connexion…</string>
+    <string name="main_status_no_network">Aucun réseau disponible</string>
+    <string name="main_status_connected">Connecté</string>
+    <string name="main_status_disconnecting">Déconnexion…</string>
+    <string name="main_desc_connect">connexion/déconnexion</string>
+    <string name="main_desc_logo">Logo NetBird</string>
+    <string name="main_desc_copy">Copier dans le presse-papiers</string>
+    <string name="main_copied">Copié</string>
+    <string name="main_value_empty">–</string>
+
+    <string name="fragment_firstinstall_continue">Continuer</string>
+    <string name="firstinstall_setup_description">Appuyez sur Continuer pour NetBird Cloud, ou choisissez Auto-hébergé pour votre propre serveur</string>
+    <string name="fragment_firstinstall_desc_logo">Logo NetBird</string>
+    <string name="fragment_firstinstall_androidtv_beta">La prise en charge d’Android TV est actuellement en bêta. Certaines fonctionnalités peuvent ne pas fonctionner comme prévu.</string>
+
+
+    <string name="about_version">Version&#160;:&#160;</string>
+    <string name="about_license"><u>Contrat de licence</u></string>
+    <string name="about_privacy_poliy"><u>Politique de confidentialité</u></string>
+    <string name="about_rights">© 2026 NetBird. Tous droits réservés.</string>
+
+    <string name="zero_peers_no_machines">Il semble qu’il n’y ait aucune machine à laquelle vous connecter…</string>
+    <string name="zero_peers_btn_learn_why">En savoir plus</string>
+
+    <string name="btn_close">Fermer</string>
+    <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>sur</b> <b>%2$d</b> pairs connectés]]></string>
+    <string name="peers_hint_search_peers">Rechercher des pairs</string>
+    <string name="peer_filter_all">Tous</string>
+    <string name="peer_filter_idle">Inactif</string>
+    <string name="peer_filter_connecting">Connexion</string>
+    <string name="peer_filter_connected">Connecté</string>
+    <string name="peer_status_idle">Inactif</string>
+    <string name="peer_status_connecting">Connexion</string>
+    <string name="peer_status_connected">Connecté</string>
+    <string name="peer_status_unknown">Inconnu</string>
+    <string name="peers_clipboard_copy_ip">Copier l’IP</string>
+    <string name="peers_clipboard_copy_ipv6">Copier l’IPv6</string>
+    <string name="peers_clipboard_copy_fqdn">Copier le FQDN</string>
+    <string name="peers_desc_filter">Filtre</string>
+
+    <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->
+    <string name="peer_detail_title">Pair</string>
+    <string name="peer_detail_refresh">Actualiser</string>
+    <string name="peer_detail_copy">Copier</string>
+    <string name="peer_detail_copied">Copié dans le presse-papiers</string>
+    <string name="peer_detail_netbird_ip">IP NetBird</string>
+    <string name="peer_detail_netbird_ipv6">IPv6 NetBird</string>
+    <string name="peer_detail_connection">Connexion</string>
+    <string name="peer_detail_connection_relayed">Relayée</string>
+    <string name="peer_detail_connection_p2p">P2P</string>
+    <string name="peer_detail_relay_address">Relais</string>
+    <string name="peer_detail_latency">Latence</string>
+    <string name="peer_detail_latency_value">%1$d ms</string>
+    <string name="peer_detail_rosenpass">Rosenpass activé</string>
+    <string name="peer_detail_transfer">Octets</string>
+    <string name="peer_detail_bytes_received">Reçus</string>
+    <string name="peer_detail_bytes_sent">Envoyés</string>
+    <string name="peer_detail_status_since">Dernière mise à jour de connexion</string>
+    <string name="peer_detail_networks">Ressources</string>
+    <string name="peer_detail_local_ice">ICE local</string>
+    <string name="peer_detail_remote_ice">ICE distant</string>
+    <string name="peer_detail_ice_with_type">%1$s (%2$s)</string>
+    <string name="peer_detail_public_key">Clé publique</string>
+    <string name="peer_detail_just_now">À l’instant</string>
+    <string name="peer_detail_unknown">-</string>
+    <string name="peer_detail_yes">Oui</string>
+    <string name="peer_detail_no">Non</string>
+
+
+    <string name="resources_connected"><![CDATA[<b>%1$d</b> <b>sur</b> <b>%2$d</b> ressources connectées]]></string>
+    <string name="networks_hint_search_networks">Rechercher des ressources</string>
+    <string name="networks_desc_exit_node">nœud de sortie</string>
+
+    <string name="change_server_setup_key">Ajouter cet appareil avec une clé d’installation</string>
+    <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
+    <string name="change_server_error_invalid_setup_key">Format de clé d’installation invalide</string>
+
+
+
+
+
+    <string name="advanced_section_presharedkey">Clé pré-partagée</string>
+    <string name="advanced_section_rosenpass">Rosenpass</string>
+    <string name="advanced_section_appearance">Apparence</string>
+    <string name="advanced_details">Vous ne communiquerez qu’avec les pairs utilisant la même clé.</string>
+    <string name="advanced_hint">Ajouter une clé pré-partagée</string>
+    <string name="advanced_save">Enregistrer</string>
+    <string name="advanced_presharedkey_saved_success">Clé pré-partagée enregistrée avec succès</string>
+    <string name="advanced_presharedkey_save_error">Échec de l’enregistrement de la clé pré-partagée</string>
+    <string name="advanced_tracelog">Activer le niveau de journalisation trace.</string>
+    <string name="troubleshoot_debug_bundle">Envoyer le lot de diagnostic</string>
+    <string name="troubleshoot_anonymize">Anonymiser les données sensibles</string>
+    <string name="troubleshoot_section_logging">Journalisation</string>
+    <string name="troubleshoot_section_debug_bundle">Lot de diagnostic</string>
+    <string name="advanced_rosenpass">Activer Rosenpass</string>
+    <string name="advanced_rosenpass_permissive">Activer le mode permissif de Rosenpass.</string>
+    <string name="advanced_title_network_security">Réseau et sécurité</string>
+
+    <string name="advanced_disable_client_routes">Désactiver les routes client</string>
+    <string name="advanced_disable_client_routes_desc">Empêche cet appareil de traiter les routes client reçues du service de gestion</string>
+    <string name="advanced_disable_server_routes">Désactiver les routes serveur</string>
+    <string name="advanced_disable_server_routes_desc">Empêche cet appareil d’agir comme routeur pour les routes serveur reçues du service de gestion</string>
+    <string name="advanced_disable_dns">Désactiver le DNS</string>
+    <string name="advanced_disable_dns_desc">Désactive la configuration DNS de NetBird sur cet appareil</string>
+    <string name="advanced_disable_firewall">Désactiver le pare-feu</string>
+    <string name="advanced_disable_firewall_desc">Désactive le pare-feu NetBird</string>
+    <string name="advanced_disable_ipv6">Désactiver IPv6</string>
+    <string name="advanced_disable_ipv6_desc">Désactive l’adressage IPv6 overlay sur l’interface tunnel</string>
+    <string name="advanced_allow_ssh">Activer SSH</string>
+    <string name="advanced_allow_ssh_desc">Autorise les connexions SSH vers cet appareil</string>
+    <string name="troubleshoot_allow_remote_jobs">Autoriser les bundles de débogage à distance</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Permet à l\'administrateur de demander un bundle de débogage depuis cet appareil via le service de gestion. Prend effet à la prochaine connexion</string>
+    <string name="advanced_block_inbound">Bloquer les connexions entrantes</string>
+    <string name="advanced_block_inbound_desc">Bloque toutes les connexions entrantes vers cet appareil et les réseaux routés. Cela remplace toutes les politiques reçues du service de gestion</string>
+
+
+    <string name="desc_logo">Logo NetBird</string>
+    <string name="desc_exclamation_mark">point d’exclamation</string>
+    <string name="desc_peers_empty">boîte vide</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[Une application VPN a l’option « VPN permanent » activée. Pour activer l’application NetBird, accédez d’abord aux <b>paramètres Réseau et Internet</b> → <b>Avancé</b> → vérifiez l’<b>icône d’engrenage</b> de toutes les applications listées sur cette page. Désactivez « VPN permanent » pour les applications autres que NetBird.]]></string>
+
+    <string name="theme_picker_selected">Sélectionné</string>
+    <string name="theme_picker_announce">Thème %1$s sélectionné</string>
+
+    <string name="advanced_theme_system">Système</string>
+    <string name="advanced_theme_title">Mode de thème</string>
+    <string name="advanced_theme_dark">Sombre</string>
+    <string name="advanced_theme_light">Clair</string>
+    <string name="advanced_force_relay_conn">Forcer la connexion par relais</string>
+    <string name="advanced_force_relay_conn_desc">Force l’utilisation d’un relais lors de la connexion aux pairs</string>
+    <string name="exclamation_mark">point d’exclamation</string>
+    <string name="reconnectionNeededWarningMessage">Pour appliquer le paramètre, vous devrez vous reconnecter.</string>
+    <string name="change_server_setup_key_warning">L’utilisation de clés d’installation pour les appareils des utilisateurs n’est pas recommandée. Le SSO avec MFA offre une sécurité renforcée, une association correcte utilisateur-appareil et une réauthentification périodique.</string>
+    <string name="device_code">Code de l’appareil : %s</string>
+
+    <!-- Profile strings -->
+    <string name="profiles_active">Actif</string>
+    <string name="profiles_add">Ajouter un profil</string>
+    <string name="profiles_switch">Basculer</string>
+    <string name="profiles_logout">Se déconnecter</string>
+    <string name="profiles_remove">Retirer</string>
+    <string name="profiles_dialog_add_title">Nouveau profil</string>
+    <string name="profiles_dialog_add_hint">ex. travail</string>
+    <string name="profiles_dialog_edit_title">Modifier le profil</string>
+    <string name="profiles_dialog_edit_submit">Enregistrer les modifications</string>
+    <string name="profiles_dialog_name_label">Nom du profil</string>
+    <string name="profiles_dialog_name_help">Choisissez un nom facilement identifiable pour votre profil.</string>
+    <string name="profiles_dialog_server_label">Serveur de gestion</string>
+    <string name="profiles_dialog_server_help">Utilisez NetBird Cloud ou votre propre serveur.</string>
+    <string name="profiles_dialog_server_cloud">Cloud</string>
+    <string name="profiles_dialog_server_self_hosted">Auto-hébergé</string>
+    <string name="profiles_dialog_url_invalid">Veuillez saisir une URL valide, ex. https://netbird.selfhosted.com:443</string>
+    <string name="profiles_dialog_url_unreachable">Impossible de joindre ce serveur. Vérifiez l’URL, ou ajoutez le profil quand même si vous êtes sûr qu’elle est correcte.</string>
+    <string name="profiles_dialog_checking">Vérification…</string>
+    <string name="profiles_rename">Modifier le profil</string>
+    <string name="profiles_dialog_switch_title">Changer de profil</string>
+    <string name="profiles_dialog_switch_message">Basculer vers le profil « %s » ?\n\nCela déconnectera la connexion actuelle.</string>
+    <string name="profiles_dialog_logout_title">Se déconnecter du profil</string>
+    <string name="profiles_dialog_logout_message">Se déconnecter du profil « %s » ?\n\nVous devrez vous authentifier à nouveau pour réutiliser ce profil.</string>
+    <string name="profiles_dialog_remove_title">Retirer le profil</string>
+    <string name="profiles_dialog_remove_message">Voulez-vous vraiment retirer le profil « %s » ?\n\nCette action est irréversible.</string>
+    <string name="profiles_error_empty_name">Le nom du profil ne peut pas être vide</string>
+    <string name="profiles_error_already_exists">Le profil « %s » existe déjà</string>
+    <string name="profiles_error_cannot_remove_active">Impossible de retirer le profil actif. Basculez d’abord vers un autre profil.</string>
+    <string name="profiles_error_cannot_remove_default">Impossible de retirer le profil par défaut</string>
+    <string name="profiles_success_logged_out">Déconnecté du profil « %s »</string>
+    <string name="profiles_success_removed">Profil « %s » retiré avec succès</string>
+
+    <!-- Language picker -->
+    <string name="settings_language">Langue d’affichage</string>
+    <string name="language_system_default">Par défaut du système</string>
+    <string name="language_picker_announce">Langue définie sur %1$s</string>
+
+    <!-- Messages previously hardcoded in code, extracted so they can be translated. -->
+    <string name="error_vpn_permission_required">Autorisation VPN requise</string>
+    <string name="about_version_unknown">inconnue</string>
+    <string name="error_generic">Erreur : %s</string>
+    <string name="error_config_path">Impossible d’obtenir le chemin de configuration : %s</string>
+    <string name="troubleshoot_key_copied">Clé du lot de diagnostic copiée dans le presse-papiers</string>
+    <string name="troubleshoot_bundle_failed">Impossible de créer le lot de diagnostic : %s</string>
+    <string name="settings_no_browser">Aucun navigateur disponible pour ouvrir %s</string>
+    <string name="error_vpn_dialog_unavailable">Cet appareil ne peut pas afficher la boîte de dialogue d\'autorisation VPN, la connexion ne peut donc pas démarrer</string>
+    <string name="profiles_dialog_url_add_anyway">Ajouter quand même</string>
+    <string name="profiles_dialog_url_save_anyway">Enregistrer quand même</string>
+    <string name="fragment_firstinstall_continue_anyway">Continuer quand même</string>
+    <string name="main_status_login_required">Connexion requise</string>
+    <string name="exit_node_title">Nœud de sortie</string>
+    <string name="exit_node_none">Aucun sélectionné</string>
+    <string name="exit_node_unavailable">Aucun nœud de sortie disponible</string>
+    <string name="exit_node_picker_none">Aucun</string>
+    <string name="exit_node_switch_failed">Échec du changement de nœud de sortie : %1$s</string>
+    <string name="session_extended">Session prolongée</string>
+    <string name="session_extend_failed">Échec de la prolongation de la session : %1$s</string>
+    <string name="session_banner_expired">Session expirée</string>
+    <string name="session_banner_expires_soon">La session expire dans moins d\'une minute</string>
+    <string name="session_banner_hint">Appuyez pour prolonger votre session</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="one">La session expire dans %1$d minute</item>
+        <item quantity="other">La session expire dans %1$d minutes</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="one">La session expire dans %1$d heure</item>
+        <item quantity="other">La session expire dans %1$d heures</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="one">La session expire dans %1$d jour</item>
+        <item quantity="other">La session expire dans %1$d jours</item>
+    </plurals>
+    <string name="ssh_terminal_title">Terminal SSH</string>
+    <string name="ssh_dialog_title">SSH vers %1$s</string>
+    <string name="ssh_dialog_host">Hôte (IP ou FQDN)</string>
+    <string name="ssh_dialog_username">Nom d\'utilisateur</string>
+    <string name="ssh_dialog_username_required">Saisissez un nom d\'utilisateur</string>
+    <string name="ssh_dialog_host_required">Saisissez un hôte</string>
+    <string name="ssh_dialog_port">Port</string>
+    <string name="ssh_dialog_port_invalid">Saisissez un port entre 1 et 65535</string>
+    <string name="ssh_dialog_port_default">22</string>
+    <string name="ssh_dialog_port_default_peer">22</string>
+    <string name="ssh_dialog_password">Mot de passe</string>
+    <string name="ssh_password_prompt_title">Mot de passe requis</string>
+    <string name="ssh_dialog_connect">Se connecter</string>
+    <string name="ssh_dialog_save">Enregistrer</string>
+    <string name="ssh_dialog_cancel">Annuler</string>
+    <string name="ssh_hostkey_prompt_title">Clé d\'hôte inconnue</string>
+    <string name="ssh_hostkey_prompt_message">Le serveur %1$s n\'est pas encore approuvé. Vérifiez son empreinte avant de vous connecter :</string>
+    <string name="ssh_hostkey_trust">Approuver</string>
+    <string name="ssh_sessions_title">Sessions SSH</string>
+    <string name="ssh_sessions_empty">Aucune session SSH active.\nAppuyez sur + pour en démarrer une.</string>
+    <string name="ssh_new_connection_title">Nouvelle connexion SSH</string>
+    <string name="ssh_session_delete">Supprimer la session</string>
+    <string name="ssh_session_reconnect">Se reconnecter</string>
+    <string name="ssh_session_disconnect">Se déconnecter</string>
+    <string name="ssh_session_duplicate">Dupliquer la session</string>
+    <string name="ssh_session_edit">Modifier la session</string>
+    <string name="ssh_session_edit_gone">Cette session n\'est plus ouverte</string>
+    <string name="ssh_netbird_not_running">NetBird n\'est pas en cours d\'exécution</string>
+    <string name="ssh_status_connecting">Connexion à %1$s …</string>
+    <string name="ssh_status_session_closed">Session fermée</string>
+    <string name="ssh_status_session_closed_reason">Session fermée : %1$s</string>
+    <string name="ssh_status_error">Erreur : %1$s</string>
+    <string name="ssh_status_session_gone">Session introuvable (elle a peut-être été fermée).</string>
+    <string name="ssh_status_service_not_connected">Service VPN non connecté</string>
+    <string name="ssh_status_missing_host">Hôte manquant</string>
+    <string name="ssh_status_missing_user">Utilisateur manquant</string>
+    <string name="ssh_status_wrong_password">Mot de passe incorrect</string>
+    <string name="ssh_state_connecting">connexion</string>
+    <string name="ssh_state_connected">connecté</string>
+    <string name="ssh_state_password_required">mot de passe requis</string>
+    <string name="ssh_state_closed">fermé</string>
+    <string name="ssh_state_error">erreur</string>
+    <string name="ssh_session_delete_confirm">Supprimer %1$s et sa sortie ?</string>
+    <string name="ssh_session_delete_confirm_yes">Supprimer</string>
+    <string name="ssh_key_copy">Copier</string>
+    <string name="ssh_key_paste">Coller</string>
+    <string name="ssh_key_desc_arrow_up">Flèche haut</string>
+    <string name="ssh_key_desc_arrow_down">Flèche bas</string>
+    <string name="ssh_key_desc_arrow_left">Flèche gauche</string>
+    <string name="ssh_key_desc_arrow_right">Flèche droite</string>
+    <string name="ssh_key_desc_ctrl_c">Contrôle C</string>
+    <string name="ssh_key_desc_ctrl_d">Contrôle D</string>
+    <string name="ssh_key_desc_ctrl_z">Contrôle Z</string>
+    <string name="ssh_key_desc_pipe">Barre verticale</string>
+    <string name="ssh_key_desc_tilde">Tilde</string>
+    <string name="ssh_key_desc_slash">Barre oblique</string>
+    <string name="ssh_key_desc_dash">Tiret</string>
+    <string name="ssh_key_desc_underscore">Tiret bas</string>
+    <string name="ssh_copy_no_selection">Sélectionnez d\'abord du texte dans le terminal</string>
+    <string name="ssh_copy_done">Copié dans le presse-papiers</string>
+    <string name="ssh_paste_empty">Le presse-papiers est vide</string>
+</resources>

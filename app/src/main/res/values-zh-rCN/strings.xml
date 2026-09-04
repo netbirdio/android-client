@@ -1,0 +1,295 @@
+<resources>
+    <string name="app_name">NetBird</string>
+    <string name="quick_settings_tile_label">NetBird</string>
+
+    <string name="menu_advanced">高级</string>
+    <string name="menu_about">关于</string>
+    <string name="menu_change_server">管理服务器</string>
+    <string name="menu_profiles">配置文件</string>
+    <string name="menu_troubleshoot">故障排除</string>
+
+    <string name="profile_picker_title">当前配置文件</string>
+    <string name="profile_picker_add">添加配置文件</string>
+    <string name="profile_picker_manage">管理配置文件</string>
+    <string name="profile_picker_show_all">显示所有配置文件（%1$d）</string>
+
+    <string name="bottom_nav_home">主页</string>
+    <string name="bottom_nav_peers">对等节点</string>
+    <string name="bottom_nav_networks">资源</string>
+    <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_settings">设置</string>
+
+    <string name="settings_section_connection">连接</string>
+    <string name="settings_section_settings">设置</string>
+    <string name="settings_section_information">信息</string>
+    <string name="settings_documentation">文档</string>
+
+    <string name="main_status_disconnected">已断开连接</string>
+    <string name="main_status_connecting">正在连接…</string>
+    <string name="main_status_no_network">无可用网络</string>
+    <string name="main_status_connected">已连接</string>
+    <string name="main_status_disconnecting">正在断开连接…</string>
+    <string name="main_desc_connect">连接/断开</string>
+    <string name="main_desc_logo">NetBird 徽标</string>
+    <string name="main_desc_copy">复制到剪贴板</string>
+    <string name="main_copied">已复制</string>
+    <string name="main_value_empty">–</string>
+
+    <string name="fragment_firstinstall_continue">继续</string>
+    <string name="firstinstall_setup_description">点按“继续”以使用 NetBird Cloud；若要使用自己的服务器，请选择“自托管”</string>
+    <string name="fragment_firstinstall_desc_logo">NetBird 徽标</string>
+    <string name="fragment_firstinstall_androidtv_beta">Android TV 支持目前处于测试阶段。某些功能可能无法按预期工作。</string>
+
+
+    <string name="about_version">版本:&#160;</string>
+    <string name="about_license"><u>许可协议</u></string>
+    <string name="about_privacy_poliy"><u>隐私政策</u></string>
+    <string name="about_rights">© 2026 NetBird。保留所有权利。</string>
+
+    <string name="zero_peers_no_machines">看起来没有可连接的设备…</string>
+    <string name="zero_peers_btn_learn_why">了解原因</string>
+
+    <string name="btn_close">关闭</string>
+    <string name="peers_connected"><![CDATA[<b>%2$d</b> 个对等节点中已连接 <b>%1$d</b> 个]]></string>
+    <string name="peers_hint_search_peers">搜索对等节点</string>
+    <string name="peer_filter_all">全部</string>
+    <string name="peer_filter_idle">空闲</string>
+    <string name="peer_filter_connecting">正在连接</string>
+    <string name="peer_filter_connected">已连接</string>
+    <string name="peer_status_idle">空闲</string>
+    <string name="peer_status_connecting">正在连接</string>
+    <string name="peer_status_connected">已连接</string>
+    <string name="peer_status_unknown">未知</string>
+    <string name="peers_clipboard_copy_ip">复制 IP</string>
+    <string name="peers_clipboard_copy_ipv6">复制 IPv6</string>
+    <string name="peers_clipboard_copy_fqdn">复制 FQDN</string>
+    <string name="peers_desc_filter">筛选</string>
+
+    <!-- Peer detail screen. Labels mirror the desktop app so the two read the same. -->
+    <string name="peer_detail_title">对等节点</string>
+    <string name="peer_detail_refresh">刷新</string>
+    <string name="peer_detail_copy">复制</string>
+    <string name="peer_detail_copied">已复制到剪贴板</string>
+    <string name="peer_detail_netbird_ip">NetBird IP</string>
+    <string name="peer_detail_netbird_ipv6">NetBird IPv6</string>
+    <string name="peer_detail_connection">连接</string>
+    <string name="peer_detail_connection_relayed">经中继</string>
+    <string name="peer_detail_connection_p2p">P2P</string>
+    <string name="peer_detail_relay_address">中继</string>
+    <string name="peer_detail_latency">延迟</string>
+    <string name="peer_detail_latency_value">%1$d ms</string>
+    <string name="peer_detail_rosenpass">已启用 Rosenpass</string>
+    <string name="peer_detail_transfer">字节</string>
+    <string name="peer_detail_bytes_received">已接收</string>
+    <string name="peer_detail_bytes_sent">已发送</string>
+    <string name="peer_detail_status_since">上次连接更新</string>
+    <string name="peer_detail_networks">资源</string>
+    <string name="peer_detail_local_ice">本地 ICE</string>
+    <string name="peer_detail_remote_ice">远程 ICE</string>
+    <string name="peer_detail_ice_with_type">%1$s (%2$s)</string>
+    <string name="peer_detail_public_key">公钥</string>
+    <string name="peer_detail_just_now">刚刚</string>
+    <string name="peer_detail_unknown">-</string>
+    <string name="peer_detail_yes">是</string>
+    <string name="peer_detail_no">否</string>
+
+
+    <string name="resources_connected"><![CDATA[<b>%2$d</b> 个资源中已连接 <b>%1$d</b> 个]]></string>
+    <string name="networks_hint_search_networks">搜索资源</string>
+    <string name="networks_desc_exit_node">出口节点</string>
+
+    <string name="change_server_setup_key">使用设置密钥添加此设备</string>
+    <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
+    <string name="change_server_error_invalid_setup_key">设置密钥格式无效</string>
+
+
+
+
+
+    <string name="advanced_section_presharedkey">预共享密钥</string>
+    <string name="advanced_section_rosenpass">Rosenpass</string>
+    <string name="advanced_section_appearance">外观</string>
+    <string name="advanced_details">您将只能与使用相同密钥的对等节点通信。</string>
+    <string name="advanced_hint">添加预共享密钥</string>
+    <string name="advanced_save">保存</string>
+    <string name="advanced_presharedkey_saved_success">预共享密钥保存成功</string>
+    <string name="advanced_presharedkey_save_error">无法保存预共享密钥</string>
+    <string name="advanced_tracelog">启用跟踪日志级别。</string>
+    <string name="troubleshoot_debug_bundle">上传调试包</string>
+    <string name="troubleshoot_anonymize">匿名化敏感数据</string>
+    <string name="troubleshoot_section_logging">日志</string>
+    <string name="troubleshoot_section_debug_bundle">调试包</string>
+    <string name="advanced_rosenpass">启用 Rosenpass</string>
+    <string name="advanced_rosenpass_permissive">启用 Rosenpass 宽松模式。</string>
+    <string name="advanced_title_network_security">网络与安全</string>
+
+    <string name="advanced_disable_client_routes">禁用客户端路由</string>
+    <string name="advanced_disable_client_routes_desc">阻止此设备处理从管理服务接收的客户端路由</string>
+    <string name="advanced_disable_server_routes">禁用服务器路由</string>
+    <string name="advanced_disable_server_routes_desc">阻止此设备充当从管理服务接收的服务器路由的路由器</string>
+    <string name="advanced_disable_dns">禁用 DNS</string>
+    <string name="advanced_disable_dns_desc">在此设备上禁用 NetBird 的 DNS 配置</string>
+    <string name="advanced_disable_firewall">禁用防火墙</string>
+    <string name="advanced_disable_firewall_desc">禁用 NetBird 防火墙</string>
+    <string name="advanced_disable_ipv6">禁用 IPv6</string>
+    <string name="advanced_disable_ipv6_desc">在隧道接口上禁用 IPv6 叠加寻址</string>
+    <string name="advanced_allow_ssh">启用 SSH</string>
+    <string name="advanced_allow_ssh_desc">允许通过 SSH 连接到此设备</string>
+    <string name="troubleshoot_allow_remote_jobs">允许远程调试包</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">允许管理员通过管理服务从此设备请求调试包。将在下次连接时生效</string>
+    <string name="advanced_block_inbound">阻止入站连接</string>
+    <string name="advanced_block_inbound_desc">阻止到此设备和路由网络的所有入站连接。这将覆盖从管理服务接收的任何策略</string>
+
+
+    <string name="desc_logo">NetBird 徽标</string>
+    <string name="desc_exclamation_mark">感叹号</string>
+    <string name="desc_peers_empty">空箱子</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[您有一个已开启“始终开启的 VPN”的 VPN 应用。要启用 NetBird 应用，请先前往<b>网络和互联网设置</b> → <b>高级</b> → 检查此页面上列出的所有应用的<b>齿轮图标</b>。为非 NetBird 的应用关闭“始终开启”。]]></string>
+
+    <string name="theme_picker_selected">已选择</string>
+    <string name="theme_picker_announce">已选择%1$s主题</string>
+
+    <string name="advanced_theme_system">系统</string>
+    <string name="advanced_theme_title">主题模式</string>
+    <string name="advanced_theme_dark">深色</string>
+    <string name="advanced_theme_light">浅色</string>
+    <string name="advanced_force_relay_conn">强制使用中继连接</string>
+    <string name="advanced_force_relay_conn_desc">连接对等节点时强制使用中继</string>
+    <string name="exclamation_mark">感叹号</string>
+    <string name="reconnectionNeededWarningMessage">要应用该设置，您需要重新连接。</string>
+    <string name="change_server_setup_key_warning">不建议为用户设备使用设置密钥。带 MFA 的 SSO 可提供更强的安全性、正确的用户与设备关联以及定期重新验证。</string>
+    <string name="device_code">设备代码：%s</string>
+
+    <!-- Profile strings -->
+    <string name="profiles_active">活动</string>
+    <string name="profiles_add">添加配置文件</string>
+    <string name="profiles_switch">切换</string>
+    <string name="profiles_logout">退出登录</string>
+    <string name="profiles_remove">移除</string>
+    <string name="profiles_dialog_add_title">新建配置文件</string>
+    <string name="profiles_dialog_add_hint">例如：工作</string>
+    <string name="profiles_dialog_edit_title">编辑配置文件</string>
+    <string name="profiles_dialog_edit_submit">保存更改</string>
+    <string name="profiles_dialog_name_label">配置文件名称</string>
+    <string name="profiles_dialog_name_help">为您的配置文件设置一个易于识别的名称。</string>
+    <string name="profiles_dialog_server_label">管理服务器</string>
+    <string name="profiles_dialog_server_help">使用 NetBird Cloud 或您自己的服务器。</string>
+    <string name="profiles_dialog_server_cloud">Cloud</string>
+    <string name="profiles_dialog_server_self_hosted">自托管</string>
+    <string name="profiles_dialog_url_invalid">请输入有效的 URL，例如：https://netbird.selfhosted.com:443</string>
+    <string name="profiles_dialog_url_unreachable">无法连接到此服务器。请检查 URL，如果确认无误，也可以照常添加该配置文件。</string>
+    <string name="profiles_dialog_checking">正在检查…</string>
+    <string name="profiles_rename">编辑配置文件</string>
+    <string name="profiles_dialog_switch_title">切换配置文件</string>
+    <string name="profiles_dialog_switch_message">切换到配置文件“%s”？\n\n这将断开当前连接。</string>
+    <string name="profiles_dialog_logout_title">退出配置文件</string>
+    <string name="profiles_dialog_logout_message">退出配置文件“%s”？\n\n您需要重新验证才能再次使用此配置文件。</string>
+    <string name="profiles_dialog_remove_title">移除配置文件</string>
+    <string name="profiles_dialog_remove_message">您确定要移除配置文件“%s”吗？\n\n此操作无法撤销。</string>
+    <string name="profiles_error_empty_name">配置文件名称不能为空</string>
+    <string name="profiles_error_already_exists">配置文件“%s”已存在</string>
+    <string name="profiles_error_cannot_remove_active">无法移除当前配置文件。请先切换到其他配置文件。</string>
+    <string name="profiles_error_cannot_remove_default">无法移除默认配置文件</string>
+    <string name="profiles_success_logged_out">已退出配置文件“%s”</string>
+    <string name="profiles_success_removed">已成功移除配置文件“%s”</string>
+
+    <!-- Language picker -->
+    <string name="settings_language">显示语言</string>
+    <string name="language_system_default">系统默认</string>
+    <string name="language_picker_announce">语言已设置为%1$s</string>
+
+    <!-- Messages previously hardcoded in code, extracted so they can be translated. -->
+    <string name="error_vpn_permission_required">需要 VPN 权限</string>
+    <string name="about_version_unknown">未知</string>
+    <string name="error_generic">错误：%s</string>
+    <string name="error_config_path">无法获取配置路径：%s</string>
+    <string name="troubleshoot_key_copied">调试包密钥已复制到剪贴板</string>
+    <string name="troubleshoot_bundle_failed">无法创建调试包：%s</string>
+    <string name="settings_no_browser">没有可打开 %s 的浏览器应用</string>
+    <string name="error_vpn_dialog_unavailable">此设备无法显示 VPN 权限对话框，因此无法启动连接</string>
+    <string name="profiles_dialog_url_add_anyway">仍然添加</string>
+    <string name="profiles_dialog_url_save_anyway">仍然保存</string>
+    <string name="fragment_firstinstall_continue_anyway">仍然继续</string>
+    <string name="main_status_login_required">需要登录</string>
+    <string name="exit_node_title">出口节点</string>
+    <string name="exit_node_none">未选择</string>
+    <string name="exit_node_unavailable">没有可用的出口节点</string>
+    <string name="exit_node_picker_none">无</string>
+    <string name="exit_node_switch_failed">切换出口节点失败：%1$s</string>
+    <string name="session_extended">会话已延长</string>
+    <string name="session_extend_failed">延长会话失败：%1$s</string>
+    <string name="session_banner_expired">会话已过期</string>
+    <string name="session_banner_expires_soon">会话将在不到一分钟后过期</string>
+    <string name="session_banner_hint">点按以延长会话</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="other">会话将在 %1$d 分钟后过期</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="other">会话将在 %1$d 小时后过期</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="other">会话将在 %1$d 天后过期</item>
+    </plurals>
+    <string name="ssh_terminal_title">SSH 终端</string>
+    <string name="ssh_dialog_title">SSH 连接到 %1$s</string>
+    <string name="ssh_dialog_host">主机（IP 或 FQDN）</string>
+    <string name="ssh_dialog_username">用户名</string>
+    <string name="ssh_dialog_username_required">请输入用户名</string>
+    <string name="ssh_dialog_host_required">请输入主机</string>
+    <string name="ssh_dialog_port">端口</string>
+    <string name="ssh_dialog_port_invalid">请输入 1 到 65535 之间的端口</string>
+    <string name="ssh_dialog_port_default">22</string>
+    <string name="ssh_dialog_port_default_peer">22</string>
+    <string name="ssh_dialog_password">密码</string>
+    <string name="ssh_password_prompt_title">需要密码</string>
+    <string name="ssh_dialog_connect">连接</string>
+    <string name="ssh_dialog_save">保存</string>
+    <string name="ssh_dialog_cancel">取消</string>
+    <string name="ssh_hostkey_prompt_title">未知主机密钥</string>
+    <string name="ssh_hostkey_prompt_message">服务器 %1$s 尚未受信任。请在连接前核对其指纹：</string>
+    <string name="ssh_hostkey_trust">信任</string>
+    <string name="ssh_sessions_title">SSH 会话</string>
+    <string name="ssh_sessions_empty">没有活动的 SSH 会话。\n点按 + 以开始一个会话。</string>
+    <string name="ssh_new_connection_title">新建 SSH 连接</string>
+    <string name="ssh_session_delete">删除会话</string>
+    <string name="ssh_session_reconnect">重新连接</string>
+    <string name="ssh_session_disconnect">断开连接</string>
+    <string name="ssh_session_duplicate">复制会话</string>
+    <string name="ssh_session_edit">编辑会话</string>
+    <string name="ssh_session_edit_gone">该会话已不再打开</string>
+    <string name="ssh_netbird_not_running">NetBird 未运行</string>
+    <string name="ssh_status_connecting">正在连接 %1$s …</string>
+    <string name="ssh_status_session_closed">会话已关闭</string>
+    <string name="ssh_status_session_closed_reason">会话已关闭：%1$s</string>
+    <string name="ssh_status_error">错误：%1$s</string>
+    <string name="ssh_status_session_gone">未找到会话（可能已关闭）。</string>
+    <string name="ssh_status_service_not_connected">VPN 服务未连接</string>
+    <string name="ssh_status_missing_host">缺少主机</string>
+    <string name="ssh_status_missing_user">缺少用户</string>
+    <string name="ssh_status_wrong_password">密码错误</string>
+    <string name="ssh_state_connecting">连接中</string>
+    <string name="ssh_state_connected">已连接</string>
+    <string name="ssh_state_password_required">需要密码</string>
+    <string name="ssh_state_closed">已关闭</string>
+    <string name="ssh_state_error">错误</string>
+    <string name="ssh_session_delete_confirm">删除 %1$s 并放弃其输出？</string>
+    <string name="ssh_session_delete_confirm_yes">删除</string>
+    <string name="ssh_key_copy">复制</string>
+    <string name="ssh_key_paste">粘贴</string>
+    <string name="ssh_key_desc_arrow_up">向上箭头</string>
+    <string name="ssh_key_desc_arrow_down">向下箭头</string>
+    <string name="ssh_key_desc_arrow_left">向左箭头</string>
+    <string name="ssh_key_desc_arrow_right">向右箭头</string>
+    <string name="ssh_key_desc_ctrl_c">Control C</string>
+    <string name="ssh_key_desc_ctrl_d">Control D</string>
+    <string name="ssh_key_desc_ctrl_z">Control Z</string>
+    <string name="ssh_key_desc_pipe">竖线</string>
+    <string name="ssh_key_desc_tilde">波浪号</string>
+    <string name="ssh_key_desc_slash">斜杠</string>
+    <string name="ssh_key_desc_dash">连字符</string>
+    <string name="ssh_key_desc_underscore">下划线</string>
+    <string name="ssh_copy_no_selection">请先在终端中选择文本</string>
+    <string name="ssh_copy_done">已复制到剪贴板</string>
+    <string name="ssh_paste_empty">剪贴板为空</string>
+</resources>

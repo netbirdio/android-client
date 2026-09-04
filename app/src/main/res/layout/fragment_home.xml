@@ -11,194 +11,428 @@
     android:focusableInTouchMode="false"
     tools:context=".ui.home.HomeFragment">
 
-    <Space
-        android:id="@+id/spacer"
+    <!-- Profile chip, top-center -->
+    <LinearLayout
+        android:id="@+id/profile_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/profile_chip_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="40dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/peer_status_connected" />
+
+        <TextView
+            android:id="@+id/profile_chip_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/nb_txt"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="default" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="4dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_drop_down"
+            app:tint="@color/nb_txt" />
+    </LinearLayout>
+
+    <!-- NetBird logo. Head of a packed vertical chain (logo → switch → status →
+         hostname → address summary) held between the profile chip and the exit
+         node row, so the group can never overlap either. The hostname and
+         address summary hold their height even when empty (minHeight, and
+         INVISIBLE rather than GONE) so the block stays put when connecting fills
+         them in. The expandable info rows are deliberately outside the chain:
+         including them would grow the packed group and re-center the whole block
+         every time they open. The group is biased above the centre of that
+         space for the same reason: what is left underneath is where the info
+         rows open, and a centred group left too little for two of them, which
+         came out clipped against the exit node card. -->
+    <ImageView
+        android:id="@+id/home_logo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/main_desc_logo"
         android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:layout_constraintTop_toTopOf="@id/top_guideline"
-        app:layout_constraintBottom_toTopOf="@id/barrier_below_bg_mask_container"
+        android:scaleType="fitCenter"
+        android:src="@drawable/nb_logo_full"
+        app:layout_constraintTop_toBottomOf="@id/profile_chip"
+        app:layout_constraintBottom_toTopOf="@+id/btn_connect"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintVertical_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.412" />
+        app:layout_constraintWidth_percent="0.42" />
 
-    <View
-        android:id="@+id/mask_background"
+    <!-- Connect toggle. saveEnabled is off because the checked state is painted
+         from the engine state replayed on every listener registration; the
+         framework's view-state restore would otherwise re-apply a stale checked
+         value saved before navigating away (e.g. while a previous profile was
+         connected), silently overriding the fresh paint after onCreateView. -->
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/btn_connect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/nb_bg_mask"
-        android:focusable="false"
+        android:layout_marginTop="24dp"
+        android:background="@null"
+        android:clickable="true"
+        android:saveEnabled="false"
+        android:contentDescription="@string/main_desc_connect"
+        android:focusable="true"
         android:focusableInTouchMode="false"
-        app:layout_constraintTop_toTopOf="@id/spacer"
+        android:switchMinWidth="92dp"
+        android:thumb="@drawable/connect_switch_thumb"
+        app:track="@drawable/connect_switch_track"
+        app:useMaterialThemeColors="false"
+        app:layout_constraintTop_toBottomOf="@id/home_logo"
+        app:layout_constraintBottom_toTopOf="@+id/text_connection_status"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Connection status -->
+    <TextView
+        android:id="@+id/text_connection_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:fontFamily="@font/inter_variable"
+        android:focusable="false"
+        android:textAlignment="center"
+        android:textColor="@color/nb_txt"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/btn_connect"
+        app:layout_constraintBottom_toTopOf="@+id/text_hostname"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintWidth_percent="0.79" />
+        tools:text="@string/main_status_disconnected" />
 
+    <!-- IP / network address (monospace, emphasized) -->
+    <TextView
+        android:id="@+id/text_hostname"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/jetbrains_mono_variable"
+        android:focusable="false"
+        android:gravity="center"
+        android:maxLines="1"
+        android:minHeight="20dp"
+        android:textAlignment="center"
+        android:textColor="@color/nb_txt"
+        android:textSize="15sp"
+        app:layout_constraintTop_toBottomOf="@id/text_connection_status"
+        app:layout_constraintBottom_toTopOf="@+id/network_address_summary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="sdk-phone-x86-64.netbird.cloud" />
+
+    <!-- Hostname summary (muted) + chevron. Tapping toggles the info rows below. -->
+    <LinearLayout
+        android:id="@+id/network_address_summary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/focus_highlight"
+        android:clickable="false"
+        android:focusable="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="4dp"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/text_hostname"
+        app:layout_constraintBottom_toTopOf="@+id/exit_node_row"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/text_network_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/jetbrains_mono_variable"
+            android:focusable="false"
+            android:textAlignment="center"
+            android:textColor="@color/nb_txt_light"
+            android:textSize="14sp"
+            tools:text="100.72.68.65/16" />
+
+        <ImageView
+            android:id="@+id/info_rows_chevron"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="2dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_drop_down"
+            app:tint="@color/nb_txt_light" />
+    </LinearLayout>
+
+    <!-- Top edge of the bottom row stack. Resolves to the session expiry row when
+         one is shown and the exit node row otherwise, giving the expandable info
+         rows a cap that follows whichever row is currently topmost. A barrier
+         ignores GONE views, so it collapses to the exit node row on its own. -->
     <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier_below_bg_mask_container"
+        android:id="@+id/bottom_rows_barrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="bg_mask_container" />
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="exit_node_row,session_expiry_row" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bg_mask_container"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:layout_constraintTop_toTopOf="@id/top_guideline"
+    <!-- Info rows: IP address + secondary value. Hidden until the summary above
+         is tapped. Outside the packed chain above on purpose: as a chain link it
+         would grow the group and re-center it on every expand. The bottom
+         constraint plus constrainedHeight only caps the rows against the bottom
+         row stack on a short screen; it cannot feed back into the chain, because
+         no chain link points at this view. -->
+    <LinearLayout
+        android:id="@+id/info_rows"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/info_row_bg"
+        android:divider="@drawable/info_row_divider"
+        android:orientation="vertical"
+        android:showDividers="middle"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintTop_toBottomOf="@id/network_address_summary"
+        app:layout_constraintBottom_toTopOf="@id/bottom_rows_barrier"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Primary: IP / CIDR -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="40dp"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/text_ip_address"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/jetbrains_mono_variable"
+                android:textColor="@color/nb_txt"
+                android:textSize="12sp"
+                tools:text="100.72.74.247/16" />
+
+            <ImageButton
+                android:id="@+id/btn_copy_ip"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/focus_highlight"
+                android:contentDescription="@string/main_desc_copy"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_content_copy"
+                app:tint="@color/nb_txt_light" />
+        </LinearLayout>
+
+        <!-- Secondary value (IPv6). Only shown when an IPv6 address is available. -->
+        <LinearLayout
+            android:id="@+id/secondary_value_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="40dp"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/text_secondary_value"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="middle"
+                android:fontFamily="@font/jetbrains_mono_variable"
+                android:singleLine="true"
+                android:text="@string/main_value_empty"
+                android:textColor="@color/nb_txt"
+                android:textSize="12sp" />
+
+            <ImageButton
+                android:id="@+id/btn_copy_secondary"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/focus_highlight"
+                android:contentDescription="@string/main_desc_copy"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_content_copy"
+                app:tint="@color/nb_txt_light" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Exit node selector, pinned to the bottom of the screen like the desktop
+         main view. Always shown; disabled and dimmed while there is no exit node
+         to pick (disconnected, or none shared with this peer). Its bottom anchor
+         is the parent, not the session row, so it never moves: the centered
+         block above ends its chain here, and an anchor that shifted when the
+         session row appeared would drag that whole block up with it. -->
+    <LinearLayout
+        android:id="@+id/exit_node_row"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:alpha="0.5"
+        android:background="@drawable/info_row_bg"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:id="@+id/bg_mask"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/main_desc_bg_mask"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:scaleType="fitCenter"
-            android:src="@drawable/bg_bottom"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:id="@+id/exit_node_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/networks_desc_exit_node"
+            android:src="@drawable/exit"
+            app:tint="@color/nb_txt_light" />
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/btn_connect"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:background="@drawable/focus_highlight"
-            android:clickable="true"
-            android:contentDescription="@string/main_desc_connect"
-            android:focusable="true"
-            android:focusableInTouchMode="false"
-            android:scaleType="fitCenter"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="0.07"
-            app:layout_constraintWidth_percent="0.79" />
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/text_connection_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:text="@string/main_status_disconnected"
-            android:textAlignment="center"
-            android:textColor="@color/nb_txt_light"
-            android:textSize="22sp"
-            app:layout_constraintTop_toBottomOf="@id/btn_connect"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/exit_node_title"
+                android:textColor="@color/nb_txt"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/exit_node_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/exit_node_unavailable"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="13sp"
+                tools:text="aws-frankfurt" />
+        </LinearLayout>
 
-    <View
-        android:id="@+id/white_background"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/nb_bg_mask"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:layout_constraintTop_toBottomOf="@id/bg_mask_container"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/bg_mask_container"
-        app:layout_constraintEnd_toEndOf="@id/bg_mask_container" />
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_drop_down"
+            app:tint="@color/nb_txt_light" />
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/text_hostname"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:textAlignment="center"
-        android:textColor="@color/nb_txt_light"
-        android:textSize="16sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:text="budafoki.netbird.cloud" />
-
-    <TextView
-        android:id="@+id/text_network_address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:textAlignment="center"
-        android:textColor="@color/nb_txt_light"
-        android:textSize="16sp"
-        tools:text="100.127.123.95/16"
-        app:layout_constraintTop_toBottomOf="@id/text_hostname"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <FrameLayout
-        android:id="@+id/peers_btn"
+    <!-- Session expiry row, stacked directly above the exit node row. Same shape
+         as that row, and hidden until a session deadline is known. It grows
+         upwards from the fixed exit node row rather than pushing it, so showing
+         it leaves everything below untouched. The chevron marks it as
+         actionable, matching the other rows; tapping starts the browser
+         re-authentication that extends the session. -->
+    <LinearLayout
+        android:id="@+id/session_expiry_row"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/shadow"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:focusable="true"
-        android:focusableInTouchMode="false"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/info_row_bg"
         android:clickable="true"
-        android:foreground="@drawable/focus_highlight"
-        app:layout_constraintWidth_max="600dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@id/exit_node_row"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:focusable="false"
-            android:focusableInTouchMode="false">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_schedule"
+            app:tint="@color/nb_txt_light" />
 
-            <View
-                android:layout_width="110dp"
-                android:layout_height="5dp"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/separator"
-                android:focusable="false"
-                android:focusableInTouchMode="false" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/text_open_panel"
+                android:id="@+id/session_expiry_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:padding="16dp"
-                android:textAlignment="center"
+                android:textColor="@color/nb_txt"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                tools:text="Session expires in 2 hours" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/session_banner_hint"
                 android:textColor="@color/nb_txt_light"
-                android:textSize="16sp"
-                tools:text="0 of 0 Peers connected" />
+                android:textSize="13sp" />
         </LinearLayout>
 
-    </FrameLayout>
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/top_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.18019079" />
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_chevron_right"
+            app:tint="@color/nb_txt_light" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

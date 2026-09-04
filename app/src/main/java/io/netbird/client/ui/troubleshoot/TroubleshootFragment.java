@@ -18,6 +18,7 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentTroubleshootBinding;
 import io.netbird.client.tool.Preferences;
+import io.netbird.client.tool.ProfileManagerWrapper;
 
 public class TroubleshootFragment extends Fragment {
 
@@ -47,6 +48,8 @@ public class TroubleshootFragment extends Fragment {
             binding.switchAnonymize.toggle();
         });
 
+        initializeRemoteJobsSwitch(inflater.getContext());
+
         binding.buttonDebugBundle.setOnClickListener(v -> {
             generateDebugBundle();
         });
@@ -58,6 +61,25 @@ public class TroubleshootFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void initializeRemoteJobsSwitch(Context context) {
+        try {
+            String configFilePath = new ProfileManagerWrapper(context).getActiveConfigPath();
+            io.netbird.gomobile.android.Preferences goPreferences = new io.netbird.gomobile.android.Preferences(configFilePath);
+            binding.switchAllowRemoteJobs.setChecked(goPreferences.getRemoteJobsAllowed());
+            binding.switchAllowRemoteJobs.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    goPreferences.setRemoteJobsAllowed(isChecked);
+                    goPreferences.commit();
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "Failed to set remote jobs allowed", e);
+                }
+            });
+            binding.allowRemoteJobsLayout.setOnClickListener(v -> binding.switchAllowRemoteJobs.toggle());
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Failed to initialize remote jobs switch", e);
+        }
     }
 
     private void generateDebugBundle() {
@@ -77,14 +99,14 @@ public class TroubleshootFragment extends Fragment {
                     ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData clip = ClipData.newPlainText("Debug bundle key", key);
                     clipboard.setPrimaryClip(clip);
-                    Toast.makeText(activity, "Debug bundle key copied to clipboard", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, getString(R.string.troubleshoot_key_copied), Toast.LENGTH_SHORT).show();
                 });
             } catch (Exception e) {
                 Log.e(LOGTAG, "failed to create debug bundle", e);
                 activity.runOnUiThread(() -> {
                     if (binding == null || !isAdded()) return;
                     binding.buttonDebugBundle.setEnabled(true);
-                    Toast.makeText(activity, "Failed to create debug bundle: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(activity, getString(R.string.troubleshoot_bundle_failed, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
             }
         }).start();

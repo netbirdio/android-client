@@ -36,7 +36,25 @@ public class Resource {
     }
 
     public boolean isExitNode() {
-        return address != null && (address.contains("0.0.0.0/0") || address.contains("::/0"));
+        return isExitNodeAddress(address);
+    }
+
+    /**
+     * A route whose range covers all traffic (0.0.0.0/0 or ::/0) is an exit node.
+     * Dual-stack exit nodes are reported as a single comma-joined field, e.g.
+     * "0.0.0.0/0, ::/0", so each part must be checked individually.
+     */
+    public static boolean isExitNodeAddress(String address) {
+        if (address == null) {
+            return false;
+        }
+        for (String part : address.split(",")) {
+            String trimmed = part.trim();
+            if (trimmed.equals("0.0.0.0/0") || trimmed.equals("::/0")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isSelected() {

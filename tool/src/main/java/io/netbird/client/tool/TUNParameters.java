@@ -17,11 +17,15 @@ public class TUNParameters {
         this.routesString = routesString;
     }
 
-    public boolean didRoutesChange(String routesString) {
-        if (this.routesString != null) {
-            return !this.routesString.equals(routesString);
-        } else {
-            return routesString != null;
+    public boolean didChange(String routesString, String searchDomainsString) {
+        return didPartChange(this.routesString, routesString)
+                || didPartChange(this.searchDomainsString, searchDomainsString);
+    }
+
+    private static boolean didPartChange(String current, String updated) {
+        if (current != null) {
+            return !current.equals(updated);
         }
+        return updated != null;
     }
 }

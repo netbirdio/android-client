@@ -6,17 +6,15 @@ import android.os.Message;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Consumer;
-
 import java.util.Objects;
 
 public class TUNCreatorLooperThread extends Thread {
     private static final String TAG = TUNCreatorLooperThread.class.getSimpleName();
     private Handler handler;
 
-    private final Consumer<String> tunCreator;
+    private final Runnable tunCreator;
 
-    public TUNCreatorLooperThread(Consumer<String> tunCreator) {
+    public TUNCreatorLooperThread(Runnable tunCreator) {
         this.tunCreator = tunCreator;
     }
 
@@ -29,8 +27,7 @@ public class TUNCreatorLooperThread extends Thread {
                 public void handleMessage(@NonNull Message msg) {
                     if (msg.what == 1) {
                         Log.d(TAG, "handleMessage: renewing TUN!");
-                        String routes = msg.obj.toString();
-                        tunCreator.accept(routes);
+                        tunCreator.run();
                     }
                 }
             };
