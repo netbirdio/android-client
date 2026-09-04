@@ -2,6 +2,7 @@ package io.netbird.client;
 
 import android.animation.StateListAnimator;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -538,10 +539,18 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         Intent prepareIntent = mBinder.prepareVpnIntent(this);
-        if (prepareIntent != null) {
-            vpnActivityResultLauncher.launch(prepareIntent);
-        } else {
+        if (prepareIntent == null) {
             mBinder.runEngine(urlOpener, useDeviceCodeFlow);
+            return;
+        }
+        try {
+            vpnActivityResultLauncher.launch(prepareIntent);
+        } catch (ActivityNotFoundException e) {
+            // Some stripped-down or custom ROMs ship without the system
+            // vpndialogs package, so the consent screen the platform asked us
+            // to show does not exist and the VPN cannot be enabled at all.
+            Log.e(LOGTAG, "VPN permission dialog is not available on this device", e);
+            Toast.makeText(this, R.string.error_vpn_dialog_unavailable, Toast.LENGTH_LONG).show();
         }
     }
 

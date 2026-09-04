@@ -207,6 +207,7 @@
     <string name="troubleshoot_key_copied">Chave do pacote de depuração copiada para a área de transferência</string>
     <string name="troubleshoot_bundle_failed">Falha ao criar o pacote de depuração: %s</string>
     <string name="settings_no_browser">Nenhum navegador disponível para abrir %s</string>
+    <string name="error_vpn_dialog_unavailable">Este dispositivo não consegue mostrar a caixa de diálogo de permissão de VPN, por isso a ligação não pode ser iniciada</string>
     <string name="profiles_dialog_url_add_anyway">Adicionar mesmo assim</string>
     <string name="profiles_dialog_url_save_anyway">Salvar mesmo assim</string>
     <string name="fragment_firstinstall_continue_anyway">Continuar mesmo assim</string>

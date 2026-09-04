@@ -207,6 +207,7 @@
     <string name="troubleshoot_key_copied">调试包密钥已复制到剪贴板</string>
     <string name="troubleshoot_bundle_failed">无法创建调试包：%s</string>
     <string name="settings_no_browser">没有可打开 %s 的浏览器应用</string>
+    <string name="error_vpn_dialog_unavailable">此设备无法显示 VPN 权限对话框，因此无法启动连接</string>
     <string name="profiles_dialog_url_add_anyway">仍然添加</string>
     <string name="profiles_dialog_url_save_anyway">仍然保存</string>
     <string name="fragment_firstinstall_continue_anyway">仍然继续</string>

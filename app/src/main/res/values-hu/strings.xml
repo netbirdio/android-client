@@ -207,6 +207,7 @@
     <string name="troubleshoot_key_copied">A hibakeresési csomag kulcsa a vágólapra másolva</string>
     <string name="troubleshoot_bundle_failed">A hibakeresési csomag létrehozása sikertelen: %s</string>
     <string name="settings_no_browser">Nincs elérhető böngésző a(z) %s megnyitásához</string>
+    <string name="error_vpn_dialog_unavailable">Ez az eszköz nem tudja megjeleníteni a VPN-engedély párbeszédablakot, így a kapcsolat nem indítható</string>
     <string name="profiles_dialog_url_add_anyway">Hozzáadás mindenképp</string>
     <string name="profiles_dialog_url_save_anyway">Mentés mindenképp</string>
     <string name="fragment_firstinstall_continue_anyway">Folytatás mindenképp</string>

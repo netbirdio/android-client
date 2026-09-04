@@ -282,6 +282,7 @@
     <string name="troubleshoot_key_copied">Debug bundle key copied to clipboard</string>
     <string name="troubleshoot_bundle_failed">Failed to create debug bundle: %s</string>
     <string name="settings_no_browser">No browser app available to open %s</string>
+    <string name="error_vpn_dialog_unavailable">This device cannot show the VPN permission dialog, so the connection cannot be started</string>
     <string name="session_extended">Session extended</string>
     <string name="session_extend_failed">Failed to extend session: %1$s</string>
     <string name="session_banner_expired">Session expired</string>

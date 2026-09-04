@@ -207,6 +207,7 @@
     <string name="troubleshoot_key_copied">Debug-Paket-Schlüssel in die Zwischenablage kopiert</string>
     <string name="troubleshoot_bundle_failed">Debug-Paket konnte nicht erstellt werden: %s</string>
     <string name="settings_no_browser">Keine Browser-App verfügbar, um %s zu öffnen</string>
+    <string name="error_vpn_dialog_unavailable">Dieses Gerät kann den VPN-Berechtigungsdialog nicht anzeigen, daher kann die Verbindung nicht gestartet werden</string>
     <string name="profiles_dialog_url_add_anyway">Trotzdem hinzufügen</string>
     <string name="profiles_dialog_url_save_anyway">Trotzdem speichern</string>
     <string name="fragment_firstinstall_continue_anyway">Trotzdem fortfahren</string>

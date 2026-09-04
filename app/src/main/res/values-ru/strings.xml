@@ -207,6 +207,7 @@
     <string name="troubleshoot_key_copied">Ключ отладочного пакета скопирован в буфер обмена</string>
     <string name="troubleshoot_bundle_failed">Не удалось создать отладочный пакет: %s</string>
     <string name="settings_no_browser">Нет браузера, чтобы открыть %s</string>
+    <string name="error_vpn_dialog_unavailable">Это устройство не может показать диалог разрешения VPN, поэтому подключение невозможно запустить</string>
     <string name="profiles_dialog_url_add_anyway">Всё равно добавить</string>
     <string name="profiles_dialog_url_save_anyway">Всё равно сохранить</string>
     <string name="fragment_firstinstall_continue_anyway">Всё равно продолжить</string>
