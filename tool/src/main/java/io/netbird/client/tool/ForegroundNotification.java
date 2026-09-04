@@ -80,6 +80,16 @@ class ForegroundNotification {
             return;
         }
         state = newState;
+        refreshIfActive();
+    }
+
+    /**
+     * Re-posts the notification with the current state, but only while the
+     * service is already in the foreground. Unlike {@link #startForeground}
+     * this never promotes the service, so it is safe to call from a
+     * background-started bind.
+     */
+    public synchronized void refreshIfActive() {
         if (!foregroundActive) {
             return;
         }

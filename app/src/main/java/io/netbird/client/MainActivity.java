@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             for (RouteChangeListener listener : routeChangeListeners) {
                 mBinder.addRouteChangeListener(listener);
             }
+            mBinder.refreshForegroundState();
             // The engine can stop while we are unbound — most notably when the
             // management server expires the session, which tears the engine
             // down on its own. No connection callback reaches us then, so
@@ -713,18 +714,23 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     private void startService() {
-        Log.i(LOGTAG, "start VPN service");
-        Intent intent = new Intent(this, VPNService.class);
-        intent.setAction(VPNService.INTENT_ACTION_START);
-        startService(intent);
-
-        Intent bindIntent = new Intent(this, VPNService.class);
+        Log.i(LOGTAG, "bind VPN service");
+        // Bind only, no startService: onStart also runs when the system
+        // rebuilds the activity without the process being in the foreground
+        // (procstate still cached after a long idle), and Android 12+ rejects
+        // a background startService with
+        // BackgroundServiceStartNotAllowedException. Binding is allowed from
+        // the background, and the foreground notification refresh the start
+        // intent used to trigger happens over the binder instead, once
+        // onServiceConnected runs.
+        //
         // AUTO_CREATE keeps the service alive for as long as this binding
         // exists. Without it a theme-change relaunch kills the connection for
         // good: the old instance's unbind reaches the service after the new
         // instance has already bound, its stopSelf destroys the service under
         // the fresh binding, and onServiceDisconnected leaves mBinder null
         // with nothing left to bring the service back.
+        Intent bindIntent = new Intent(this, VPNService.class);
         bindService(bindIntent, serviceIPC, Context.BIND_AUTO_CREATE | Context.BIND_ABOVE_CLIENT);
     }
 

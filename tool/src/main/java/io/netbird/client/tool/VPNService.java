@@ -156,10 +156,12 @@ public class VPNService extends android.net.VpnService {
             engineRunner.runWithoutAuth();
         }
         if (INTENT_ACTION_START.equals(intent.getAction())) {
-            // MainActivity.onStart fires this on every return to the
-            // foreground, not just when connecting, so take the state from the
-            // engine: the Go core only re-emits onConnected on an actual
-            // change, and assuming CONNECTING here would stick until then.
+            // The quick settings tile sends this via startForegroundService,
+            // which obliges us to call startForeground promptly. It arrives
+            // whether or not the engine is about to connect, so take the state
+            // from the engine: the Go core only re-emits onConnected on an
+            // actual change, and assuming CONNECTING here would stick until
+            // then.
             fgNotification.setState(currentState());
             fgNotification.startForeground();
         }
@@ -252,6 +254,16 @@ public class VPNService extends android.net.VpnService {
 
         public boolean isRunning() {
             return engineRunner.isRunning();
+        }
+
+        // Called on every activity bind. The notification may only be
+        // re-posted while the service is already in the foreground: with the
+        // engine stopped the service is not foreground, and a startForeground
+        // from a bind-only, background-started service is rejected on
+        // Android 12+ just like a background startService would be.
+        public void refreshForegroundState() {
+            fgNotification.setState(currentState());
+            fgNotification.refreshIfActive();
         }
 
         public PeerInfoArray peersInfo() {
