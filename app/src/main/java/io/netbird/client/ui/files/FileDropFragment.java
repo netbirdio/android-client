@@ -322,10 +322,10 @@ public class FileDropFragment extends Fragment implements SendPickerSheet.Listen
     }
 
     /**
-     * Colours only what the eye should catch scanning the outcome column, as on
-     * the desktop: a refusal or failure in red, a completed send in green.
-     * Everything else, a received file and a transfer in flight included, stays
-     * neutral so the exceptions stand out.
+     * The outcome column has its own legend, separate from the icon's: green is
+     * a transfer that arrived, either way round, red is one the far side refused
+     * or that broke, grey is everything else. A transfer in flight is grey too,
+     * the progress bar already says it is moving.
      */
     private int outcomeColor(FileDropManager.Transfer transfer) {
         long state = transfer.state();
@@ -334,10 +334,21 @@ public class FileDropFragment extends Fragment implements SendPickerSheet.Listen
                 || state == Android.FileDropStateDeclined
                 || state == Android.FileDropStateFailed) {
             color = R.color.nb_danger;
-        } else if (state == Android.FileDropStateCompleted && transfer.outgoing()) {
+        } else if (state == Android.FileDropStateCompleted) {
             color = R.color.nb_latency_good;
         }
         return ContextCompat.getColor(requireContext(), color);
+    }
+
+    /**
+     * A text snippet reads as a quote; a file carries its arrow on the document,
+     * the same three glyphs the desktop and iOS rows use.
+     */
+    private static int kindIcon(FileDropManager.Transfer transfer) {
+        if (transfer.isText()) {
+            return R.drawable.ic_file_drop_text;
+        }
+        return transfer.outgoing() ? R.drawable.ic_file_drop_up : R.drawable.ic_file_drop_down;
     }
 
     /** Manager callbacks come off its executor; view work has to go back. */
@@ -470,9 +481,7 @@ public class FileDropFragment extends Fragment implements SendPickerSheet.Listen
         }
 
         void bind(FileDropManager.Transfer transfer) {
-            binding.transferDirection.setImageResource(transfer.outgoing()
-                    ? R.drawable.ic_arrow_up_small
-                    : R.drawable.ic_arrow_down_small);
+            binding.transferDirection.setImageResource(kindIcon(transfer));
             binding.transferDirection.setColorFilter(ContextCompat.getColor(requireContext(),
                     transfer.outgoing() ? R.color.nb_orange : R.color.nb_latency_good));
 
