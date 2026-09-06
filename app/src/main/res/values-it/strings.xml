@@ -7,6 +7,7 @@
     <string name="menu_change_server">Server di gestione</string>
     <string name="menu_profiles">Profili</string>
     <string name="menu_troubleshoot">Risoluzione problemi</string>
+    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">Profilo attivo</string>
     <string name="profile_picker_add">Aggiungi profilo</string>
@@ -52,6 +53,7 @@
     <string name="btn_close">Chiudi</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>di</b> <b>%2$d</b> peer connessi]]></string>
     <string name="peers_hint_search_peers">Cerca peer</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">Tutti</string>
     <string name="peer_filter_idle">Inattivo</string>
     <string name="peer_filter_connecting">Connessione</string>
@@ -193,6 +195,7 @@
     <string name="profiles_error_cannot_remove_default">Impossibile rimuovere il profilo predefinito</string>
     <string name="profiles_success_logged_out">Disconnesso dal profilo «%s»</string>
     <string name="profiles_success_removed">Profilo «%s» rimosso correttamente</string>
+    <string name="profiles_actions">Azioni del profilo</string>
 
     <!-- Language picker -->
     <string name="settings_language">Lingua dell’interfaccia</string>
@@ -295,4 +298,14 @@
     <string name="ssh_copy_no_selection">Seleziona prima del testo nel terminale</string>
     <string name="ssh_copy_done">Copiato negli appunti</string>
     <string name="ssh_paste_empty">Gli appunti sono vuoti</string>
+    <string name="split_tunneling_mode_title">Modalità</string>
+    <string name="split_tunneling_mode_off">Disattivato</string>
+    <string name="split_tunneling_mode_off_description">Tutte le app usano la VPN</string>
+    <string name="split_tunneling_mode_off_hint">Al momento tutte le app usano la VPN. Scegli una modalità per selezionare quali.</string>
+    <string name="split_tunneling_mode_exclude">Escludi</string>
+    <string name="split_tunneling_mode_exclude_description">Le app selezionate aggirano la VPN</string>
+    <string name="split_tunneling_mode_include">Includi</string>
+    <string name="split_tunneling_mode_include_description">Solo le app selezionate usano la VPN</string>
+    <string name="split_tunneling_hint_search_apps">Cerca app</string>
+    <string name="split_tunneling_empty_include_warning">Nessuna app selezionata, quindi tutte continuano a usare la VPN. Scegline almeno una.</string>
 </resources>

@@ -7,6 +7,7 @@
     <string name="menu_change_server">Felügyeleti szerver</string>
     <string name="menu_profiles">Profilok</string>
     <string name="menu_troubleshoot">Hibaelhárítás</string>
+    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">Aktív profil</string>
     <string name="profile_picker_add">Profil hozzáadása</string>
@@ -52,6 +53,7 @@
     <string name="btn_close">Bezárás</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> / <b>%2$d</b> Peer csatlakoztatva]]></string>
     <string name="peers_hint_search_peers">Peerek keresése</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">Összes</string>
     <string name="peer_filter_idle">Tétlen</string>
     <string name="peer_filter_connecting">Csatlakozás</string>
@@ -193,6 +195,7 @@
     <string name="profiles_error_cannot_remove_default">Az alapértelmezett profil nem távolítható el</string>
     <string name="profiles_success_logged_out">Kijelentkezett a(z) \"%s\" profilból</string>
     <string name="profiles_success_removed">A(z) \"%s\" profil sikeresen eltávolítva</string>
+    <string name="profiles_actions">Profilműveletek</string>
 
     <!-- Language picker -->
     <string name="settings_language">Megjelenítési nyelv</string>
@@ -292,4 +295,14 @@
     <string name="ssh_copy_no_selection">Előbb jelöljön ki szöveget a terminálban</string>
     <string name="ssh_copy_done">Vágólapra másolva</string>
     <string name="ssh_paste_empty">A vágólap üres</string>
+    <string name="split_tunneling_mode_title">Mód</string>
+    <string name="split_tunneling_mode_off">Ki</string>
+    <string name="split_tunneling_mode_off_description">Minden alkalmazás a VPN-t használja</string>
+    <string name="split_tunneling_mode_off_hint">Jelenleg minden alkalmazás a VPN-t használja. Válasszon módot, hogy kijelölhesse, melyek használják.</string>
+    <string name="split_tunneling_mode_exclude">Kizárás</string>
+    <string name="split_tunneling_mode_exclude_description">A kijelölt alkalmazások megkerülik a VPN-t</string>
+    <string name="split_tunneling_mode_include">Felvétel</string>
+    <string name="split_tunneling_mode_include_description">Csak a kijelölt alkalmazások használják a VPN-t</string>
+    <string name="split_tunneling_hint_search_apps">Alkalmazások keresése</string>
+    <string name="split_tunneling_empty_include_warning">Nincs kijelölt alkalmazás, ezért továbbra is mind a VPN-t használja. Jelöljön ki legalább egyet.</string>
 </resources>

@@ -300,7 +300,7 @@
         <item quantity="one">Session expires in %1$d day</item>
         <item quantity="other">Session expires in %1$d days</item>
     </plurals>
-    <string name="menu_split_tunneling">Split tunneling</string>
+    <string name="menu_split_tunneling" translatable="false">Split tunneling</string>
     <string name="split_tunneling_mode_title">Mode</string>
     <string name="split_tunneling_mode_off">Off</string>
     <string name="split_tunneling_mode_off_description">All apps use the VPN</string>

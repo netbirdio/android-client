@@ -7,6 +7,7 @@
     <string name="menu_change_server">Сервер управления</string>
     <string name="menu_profiles">Профили</string>
     <string name="menu_troubleshoot">Диагностика</string>
+    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">Активный профиль</string>
     <string name="profile_picker_add">Добавить профиль</string>
@@ -52,6 +53,7 @@
     <string name="btn_close">Закрыть</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>из</b> <b>%2$d</b> пиров подключено]]></string>
     <string name="peers_hint_search_peers">Поиск пиров</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">Все</string>
     <string name="peer_filter_idle">Неактивен</string>
     <string name="peer_filter_connecting">Подключение</string>
@@ -193,6 +195,7 @@
     <string name="profiles_error_cannot_remove_default">Профиль по умолчанию нельзя удалить</string>
     <string name="profiles_success_logged_out">Выполнен выход из профиля «%s»</string>
     <string name="profiles_success_removed">Профиль «%s» успешно удалён</string>
+    <string name="profiles_actions">Действия с профилем</string>
 
     <!-- Language picker -->
     <string name="settings_language">Язык интерфейса</string>
@@ -301,4 +304,14 @@
     <string name="ssh_copy_no_selection">Сначала выделите текст в терминале</string>
     <string name="ssh_copy_done">Скопировано в буфер обмена</string>
     <string name="ssh_paste_empty">Буфер обмена пуст</string>
+    <string name="split_tunneling_mode_title">Режим</string>
+    <string name="split_tunneling_mode_off">Выключено</string>
+    <string name="split_tunneling_mode_off_description">Все приложения используют VPN</string>
+    <string name="split_tunneling_mode_off_hint">Сейчас VPN используют все приложения. Выберите режим, чтобы указать нужные.</string>
+    <string name="split_tunneling_mode_exclude">Исключить</string>
+    <string name="split_tunneling_mode_exclude_description">Выбранные приложения работают в обход VPN</string>
+    <string name="split_tunneling_mode_include">Включить</string>
+    <string name="split_tunneling_mode_include_description">VPN используют только выбранные приложения</string>
+    <string name="split_tunneling_hint_search_apps">Поиск приложений</string>
+    <string name="split_tunneling_empty_include_warning">Приложения не выбраны, поэтому VPN продолжают использовать все. Выберите хотя бы одно.</string>
 </resources>

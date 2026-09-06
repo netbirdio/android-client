@@ -7,6 +7,7 @@
     <string name="menu_change_server">管理服务器</string>
     <string name="menu_profiles">配置文件</string>
     <string name="menu_troubleshoot">故障排除</string>
+    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">当前配置文件</string>
     <string name="profile_picker_add">添加配置文件</string>
@@ -52,6 +53,7 @@
     <string name="btn_close">关闭</string>
     <string name="peers_connected"><![CDATA[<b>%2$d</b> 个对等节点中已连接 <b>%1$d</b> 个]]></string>
     <string name="peers_hint_search_peers">搜索对等节点</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">全部</string>
     <string name="peer_filter_idle">空闲</string>
     <string name="peer_filter_connecting">正在连接</string>
@@ -193,6 +195,7 @@
     <string name="profiles_error_cannot_remove_default">无法移除默认配置文件</string>
     <string name="profiles_success_logged_out">已退出配置文件“%s”</string>
     <string name="profiles_success_removed">已成功移除配置文件“%s”</string>
+    <string name="profiles_actions">配置文件操作</string>
 
     <!-- Language picker -->
     <string name="settings_language">显示语言</string>
@@ -292,4 +295,14 @@
     <string name="ssh_copy_no_selection">请先在终端中选择文本</string>
     <string name="ssh_copy_done">已复制到剪贴板</string>
     <string name="ssh_paste_empty">剪贴板为空</string>
+    <string name="split_tunneling_mode_title">模式</string>
+    <string name="split_tunneling_mode_off">关闭</string>
+    <string name="split_tunneling_mode_off_description">所有应用均使用 VPN</string>
+    <string name="split_tunneling_mode_off_hint">目前所有应用都在使用 VPN。请选择一种模式来指定使用范围。</string>
+    <string name="split_tunneling_mode_exclude">排除</string>
+    <string name="split_tunneling_mode_exclude_description">所选应用绕过 VPN</string>
+    <string name="split_tunneling_mode_include">包含</string>
+    <string name="split_tunneling_mode_include_description">仅所选应用使用 VPN</string>
+    <string name="split_tunneling_hint_search_apps">搜索应用</string>
+    <string name="split_tunneling_empty_include_warning">未选择任何应用，因此所有应用仍会使用 VPN。请至少选择一个。</string>
 </resources>

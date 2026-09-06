@@ -7,6 +7,7 @@
     <string name="menu_change_server">Management-Server</string>
     <string name="menu_profiles">Profile</string>
     <string name="menu_troubleshoot">Fehlerbehebung</string>
+    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">Aktives Profil</string>
     <string name="profile_picker_add">Profil hinzufügen</string>
@@ -52,6 +53,7 @@
     <string name="btn_close">Schließen</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>von</b> <b>%2$d</b> Peers verbunden]]></string>
     <string name="peers_hint_search_peers">Peers suchen</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">Alle</string>
     <string name="peer_filter_idle">Inaktiv</string>
     <string name="peer_filter_connecting">Wird verbunden</string>
@@ -193,6 +195,7 @@
     <string name="profiles_error_cannot_remove_default">Das Standardprofil kann nicht entfernt werden</string>
     <string name="profiles_success_logged_out">Von Profil \"%s\" abgemeldet</string>
     <string name="profiles_success_removed">Profil \"%s\" erfolgreich entfernt</string>
+    <string name="profiles_actions">Profilaktionen</string>
 
     <!-- Language picker -->
     <string name="settings_language">Anzeigesprache</string>
@@ -295,4 +298,14 @@
     <string name="ssh_copy_no_selection">Wählen Sie zuerst Text im Terminal aus</string>
     <string name="ssh_copy_done">In die Zwischenablage kopiert</string>
     <string name="ssh_paste_empty">Zwischenablage ist leer</string>
+    <string name="split_tunneling_mode_title">Modus</string>
+    <string name="split_tunneling_mode_off">Aus</string>
+    <string name="split_tunneling_mode_off_description">Alle Apps nutzen das VPN</string>
+    <string name="split_tunneling_mode_off_hint">Derzeit nutzen alle Apps das VPN. Wählen Sie einen Modus, um die Auswahl zu treffen.</string>
+    <string name="split_tunneling_mode_exclude">Ausschließen</string>
+    <string name="split_tunneling_mode_exclude_description">Ausgewählte Apps umgehen das VPN</string>
+    <string name="split_tunneling_mode_include">Einschließen</string>
+    <string name="split_tunneling_mode_include_description">Nur ausgewählte Apps nutzen das VPN</string>
+    <string name="split_tunneling_hint_search_apps">Apps suchen</string>
+    <string name="split_tunneling_empty_include_warning">Keine App ausgewählt, daher nutzen weiterhin alle Apps das VPN. Wählen Sie mindestens eine aus.</string>
 </resources>
