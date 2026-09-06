@@ -8,6 +8,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.VpnService;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.util.Log;
@@ -60,6 +61,9 @@ public class VPNService extends android.net.VpnService {
     public void onCreate() {
         super.onCreate();
         Log.d(LOGTAG, "onCreate");
+
+        tunCreator.setPriority(Thread.MAX_PRIORITY);
+        tunCreator.start();
 
         var versionName = Version.getVersionName(this);
         var tunAdapter = new IFace(this);
@@ -208,10 +212,7 @@ public class VPNService extends android.net.VpnService {
             this.notifier.removeRouteChangeListener(listener);
         }
 
-        if (tunCreator != null) {
-            tunCreator.getHandler().getLooper().quitSafely();
-            tunCreator = null;
-        }
+        tunCreator.getHandler().getLooper().quitSafely();
     }
 
     @Override
@@ -508,22 +509,17 @@ public class VPNService extends android.net.VpnService {
         }
     };
 
-    private TUNCreatorLooperThread tunCreator;
+    private final TUNCreatorLooperThread tunCreator = new TUNCreatorLooperThread(this::recreateTUN);
 
     private void queueTUNRenewal(String ignoredPayload) {
         queueTUNRenewal(false);
     }
 
     private void queueTUNRenewal(boolean force) {
-        if (tunCreator == null) {
-            tunCreator = new TUNCreatorLooperThread(this::recreateTUN);
-            tunCreator.setPriority(Thread.MAX_PRIORITY);
-            tunCreator.start();
-        }
-
-        var message = tunCreator.getHandler().obtainMessage(TUNCreatorLooperThread.MSG_RENEW_TUN);
+        Handler handler = tunCreator.getHandler();
+        var message = handler.obtainMessage(TUNCreatorLooperThread.MSG_RENEW_TUN);
         message.arg1 = force ? TUNCreatorLooperThread.ARG_FORCE : 0;
-        boolean isQueued = tunCreator.getHandler().sendMessage(message);
+        boolean isQueued = handler.sendMessage(message);
 
         Log.d(LOGTAG, String.format("is TUN renewal queued? %b (forced: %b)", isQueued, force));
     }
