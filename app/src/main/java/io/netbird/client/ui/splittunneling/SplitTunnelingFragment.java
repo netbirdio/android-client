@@ -186,7 +186,10 @@ public class SplitTunnelingFragment extends Fragment
         binding.currentModeName.setText(label);
 
         boolean listUsable = mode != SplitTunnelConfig.Mode.OFF;
-        binding.searchView.setEnabled(listUsable);
+        if (!listUsable) {
+            binding.searchView.setText("");
+        }
+        binding.searchView.setVisibility(listUsable ? View.VISIBLE : View.GONE);
         binding.appsRecyclerView.setVisibility(listUsable ? View.VISIBLE : View.GONE);
         binding.modeOffHint.setVisibility(listUsable ? View.GONE : View.VISIBLE);
 
