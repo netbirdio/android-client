@@ -74,6 +74,7 @@ public class SplitTunnelingFragment extends Fragment
         mode = stored.getMode();
         excluded.addAll(stored.getExcluded());
         included.addAll(stored.getIncluded());
+        pruneAlwaysExcluded();
 
         adapter = new AppListAdapter(activeSelection(), mode, this);
         binding.appsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -99,7 +100,6 @@ public class SplitTunnelingFragment extends Fragment
 
         viewModel = new ViewModelProvider(this).get(SplitTunnelingViewModel.class);
         viewModel.getApps().observe(getViewLifecycleOwner(), apps -> {
-            pruneUninstalled(apps);
             adapter.submitApps(apps);
             binding.loadingIndicator.setVisibility(View.GONE);
         });
@@ -160,21 +160,15 @@ public class SplitTunnelingFragment extends Fragment
     }
 
     /**
-     * Drops packages that were picked and later uninstalled. The tunnel already
-     * ignores them, but leaving them in storage would silently re-apply them if
-     * the app were installed again. Packages the tunnel always keeps out are
-     * dropped too: the list never lets them be picked, so a stored pick could
-     * only have come from an older build.
+     * Packages the tunnel always keeps out are dropped from both selections:
+     * the list never lets them be picked, so a stored pick could only have come
+     * from an older build. Uninstalled picks are left alone on purpose. The
+     * tunnel already skips them, and keeping them means the setting survives a
+     * reinstall or a temporarily disabled app.
      */
-    private void pruneUninstalled(java.util.List<AppEntry> apps) {
-        Set<String> installed = new HashSet<>();
-        for (AppEntry app : apps) {
-            installed.add(app.getPackageName());
-        }
-        installed.removeAll(SplitTunnelConfig.ALWAYS_EXCLUDED);
-
-        boolean changed = excluded.retainAll(installed);
-        changed |= included.retainAll(installed);
+    private void pruneAlwaysExcluded() {
+        boolean changed = excluded.removeAll(SplitTunnelConfig.ALWAYS_EXCLUDED);
+        changed |= included.removeAll(SplitTunnelConfig.ALWAYS_EXCLUDED);
         if (changed) {
             save();
         }

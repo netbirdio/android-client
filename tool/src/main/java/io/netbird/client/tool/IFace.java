@@ -166,8 +166,7 @@ class IFace implements TunAdapter {
                 }
             } catch (PackageManager.NameNotFoundException ignored) {
                 // Uninstalled since it was picked. Dropping the whole tunnel over a
-                // stale entry would be worse than ignoring it; the list screen
-                // prunes it on the next visit.
+                // stale entry would be worse than ignoring it.
             }
         }
 
