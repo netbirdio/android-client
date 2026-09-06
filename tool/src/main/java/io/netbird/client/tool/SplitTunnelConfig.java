@@ -43,7 +43,8 @@ public final class SplitTunnelConfig {
                     "com.google.android.projection.gearhead",
                     "com.google.android.apps.chromecast.app",
                     "com.google.android.apps.messaging",
-                    "com.google.stadia.android")));
+                    "com.google.stadia.android",
+                    "com.google.android.apps.scone")));
 
     private final Mode mode;
     private final Set<String> excluded;
