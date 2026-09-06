@@ -169,8 +169,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_menu_advanced"
-                app:tint="@color/nb_orange" />
+                android:src="@drawable/ic_menu_split_tunneling"
+                app:tint="@color/nb_txt_light" />
 
             <TextView
                 android:layout_width="0dp"

@@ -66,6 +66,28 @@
         app:layout_constraintTop_toBottomOf="@id/row_mode"
         tools:visibility="visible" />
 
+    <EditText
+        android:id="@+id/search_view"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="20dp"
+        android:autofillHints=""
+        android:background="@drawable/search_bg"
+        android:drawableStart="@drawable/search"
+        android:drawableTint="@color/nb_txt_light"
+        android:drawablePadding="10dp"
+        android:hint="@string/split_tunneling_hint_search_apps"
+        android:inputType="text"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:textColor="@color/nb_txt"
+        android:textColorHint="@color/nb_txt_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mode_off_hint" />
+
     <TextView
         android:id="@+id/empty_include_warning"
         android:layout_width="0dp"
@@ -79,29 +101,8 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mode_off_hint"
+        app:layout_constraintTop_toBottomOf="@id/search_view"
         tools:visibility="visible" />
-
-    <EditText
-        android:id="@+id/search_view"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:autofillHints=""
-        android:background="@drawable/search_bg"
-        android:drawableStart="@drawable/search"
-        android:drawablePadding="10dp"
-        android:hint="@string/split_tunneling_hint_search_apps"
-        android:inputType="text"
-        android:paddingStart="15dp"
-        android:paddingEnd="15dp"
-        android:textColor="@color/nb_txt"
-        android:textColorHint="@color/nb_txt_light"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/empty_include_warning" />
 
     <ProgressBar
         android:id="@+id/loading_indicator"
@@ -110,7 +111,7 @@
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_view" />
+        app:layout_constraintTop_toBottomOf="@id/empty_include_warning" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/apps_recycler_view"
@@ -120,7 +121,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_view"
+        app:layout_constraintTop_toBottomOf="@id/empty_include_warning"
         tools:listitem="@layout/list_item_app" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
