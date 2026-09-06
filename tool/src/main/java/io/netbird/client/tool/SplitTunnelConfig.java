@@ -33,9 +33,10 @@ public final class SplitTunnelConfig {
     }
 
     /**
-     * Apps that misbehave when tunnelled, kept out in every mode that can express
-     * an exclusion. They predate this feature and stay as the floor of EXCLUDE so
-     * that turning split tunnelling on never silently pulls them into the tunnel.
+     * Apps that misbehave when tunnelled, kept out of the tunnel in every mode.
+     * They predate this feature and stay as the floor of EXCLUDE so that turning
+     * split tunnelling on never silently pulls them into the tunnel, and an
+     * INCLUDE selection cannot pull them in either.
      */
     public static final Set<String> ALWAYS_EXCLUDED = Collections.unmodifiableSet(
             new LinkedHashSet<>(java.util.Arrays.asList(
@@ -77,7 +78,7 @@ public final class SplitTunnelConfig {
             return !excluded.isEmpty();
         }
         if (mode == Mode.INCLUDE) {
-            return !included.isEmpty();
+            return !effectiveIncluded().isEmpty();
         }
         return false;
     }
@@ -90,7 +91,7 @@ public final class SplitTunnelConfig {
      */
     public Resolution resolve(String ownPackage) {
         if (mode == Mode.INCLUDE && isActive()) {
-            Set<String> allowed = new LinkedHashSet<>(included);
+            Set<String> allowed = effectiveIncluded();
             if (ownPackage != null && !ownPackage.isEmpty()) {
                 allowed.add(ownPackage);
             }
@@ -102,6 +103,12 @@ public final class SplitTunnelConfig {
             disallowed.addAll(excluded);
         }
         return new Resolution(Filter.DISALLOW, disallowed);
+    }
+
+    private Set<String> effectiveIncluded() {
+        Set<String> allowed = new LinkedHashSet<>(included);
+        allowed.removeAll(ALWAYS_EXCLUDED);
+        return allowed;
     }
 
     private static Set<String> copyOf(Collection<String> source) {

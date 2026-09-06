@@ -79,6 +79,30 @@ public class SplitTunnelConfigUnitTest {
     // An empty allowlist would leave a tunnel carrying nothing, which reads as a
     // broken VPN rather than a configured one.
     @Test
+    public void includeNeverCarriesTheHistoricExclusions() {
+        String messaging = "com.google.android.apps.messaging";
+        SplitTunnelConfig.Resolution r =
+                config(SplitTunnelConfig.Mode.INCLUDE, Collections.emptySet(),
+                        setOf("com.example.a", messaging))
+                        .resolve(OWN);
+
+        assertEquals(SplitTunnelConfig.Filter.ALLOW, r.getFilter());
+        assertEquals(setOf("com.example.a", OWN), r.getPackages());
+    }
+
+    @Test
+    public void includeMadeOnlyOfHistoricExclusionsIsInactive() {
+        SplitTunnelConfig cfg =
+                config(SplitTunnelConfig.Mode.INCLUDE, Collections.emptySet(),
+                        new HashSet<>(SplitTunnelConfig.ALWAYS_EXCLUDED));
+
+        assertFalse(cfg.isActive());
+        SplitTunnelConfig.Resolution r = cfg.resolve(OWN);
+        assertEquals(SplitTunnelConfig.Filter.DISALLOW, r.getFilter());
+        assertEquals(SplitTunnelConfig.ALWAYS_EXCLUDED, r.getPackages());
+    }
+
+    @Test
     public void emptyIncludeFallsBackToCarryingEverything() {
         SplitTunnelConfig cfg =
                 config(SplitTunnelConfig.Mode.INCLUDE, Collections.emptySet(), Collections.emptySet());

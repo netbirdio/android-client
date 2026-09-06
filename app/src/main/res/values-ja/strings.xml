@@ -306,4 +306,6 @@
     <string name="split_tunneling_mode_include_description">選択したアプリだけが VPN を使用します</string>
     <string name="split_tunneling_hint_search_apps">アプリを検索</string>
     <string name="split_tunneling_empty_include_warning">アプリが選択されていないため、すべてのアプリが VPN を使用したままです。1 つ以上選択してください。</string>
+    <string name="split_tunneling_always_excluded">常に VPN から除外されます</string>
+    <string name="split_tunneling_never_included">VPN を使用できません</string>
 </resources>

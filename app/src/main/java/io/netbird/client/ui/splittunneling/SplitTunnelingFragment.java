@@ -75,7 +75,7 @@ public class SplitTunnelingFragment extends Fragment
         excluded.addAll(stored.getExcluded());
         included.addAll(stored.getIncluded());
 
-        adapter = new AppListAdapter(activeSelection(), this);
+        adapter = new AppListAdapter(activeSelection(), mode, this);
         binding.appsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.appsRecyclerView.setAdapter(adapter);
 
@@ -117,12 +117,15 @@ public class SplitTunnelingFragment extends Fragment
         // Both selections are kept, so switching back and forth does not make the
         // user pick their apps again.
         save();
-        adapter.setSelected(activeSelection());
+        adapter.setSelected(activeSelection(), mode);
         renderMode();
     }
 
     @Override
     public void onAppToggled(String packageName, boolean selected) {
+        if (SplitTunnelConfig.ALWAYS_EXCLUDED.contains(packageName)) {
+            return;
+        }
         Set<String> selection = activeSelection();
         if (selected) {
             selection.add(packageName);
@@ -159,13 +162,16 @@ public class SplitTunnelingFragment extends Fragment
     /**
      * Drops packages that were picked and later uninstalled. The tunnel already
      * ignores them, but leaving them in storage would silently re-apply them if
-     * the app were installed again.
+     * the app were installed again. Packages the tunnel always keeps out are
+     * dropped too: the list never lets them be picked, so a stored pick could
+     * only have come from an older build.
      */
     private void pruneUninstalled(java.util.List<AppEntry> apps) {
         Set<String> installed = new HashSet<>();
         for (AppEntry app : apps) {
             installed.add(app.getPackageName());
         }
+        installed.removeAll(SplitTunnelConfig.ALWAYS_EXCLUDED);
 
         boolean changed = excluded.retainAll(installed);
         changed |= included.retainAll(installed);

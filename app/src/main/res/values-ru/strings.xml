@@ -314,4 +314,6 @@
     <string name="split_tunneling_mode_include_description">VPN используют только выбранные приложения</string>
     <string name="split_tunneling_hint_search_apps">Поиск приложений</string>
     <string name="split_tunneling_empty_include_warning">Приложения не выбраны, поэтому VPN продолжают использовать все. Выберите хотя бы одно.</string>
+    <string name="split_tunneling_always_excluded">Всегда исключено из VPN</string>
+    <string name="split_tunneling_never_included">Не может использовать VPN</string>
 </resources>

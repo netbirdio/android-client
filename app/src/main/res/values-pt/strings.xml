@@ -308,4 +308,6 @@
     <string name="split_tunneling_mode_include_description">Apenas os aplicativos selecionados usam a VPN</string>
     <string name="split_tunneling_hint_search_apps">Pesquisar aplicativos</string>
     <string name="split_tunneling_empty_include_warning">Nenhum aplicativo selecionado, então todos continuam usando a VPN. Escolha pelo menos um.</string>
+    <string name="split_tunneling_always_excluded">Sempre fora da VPN</string>
+    <string name="split_tunneling_never_included">Não pode usar a VPN</string>
 </resources>

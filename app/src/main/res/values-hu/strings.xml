@@ -305,4 +305,6 @@
     <string name="split_tunneling_mode_include_description">Csak a kijelölt alkalmazások használják a VPN-t</string>
     <string name="split_tunneling_hint_search_apps">Alkalmazások keresése</string>
     <string name="split_tunneling_empty_include_warning">Nincs kijelölt alkalmazás, ezért továbbra is mind a VPN-t használja. Jelöljön ki legalább egyet.</string>
+    <string name="split_tunneling_always_excluded">Mindig kimarad a VPN-ből</string>
+    <string name="split_tunneling_never_included">Nem használhatja a VPN-t</string>
 </resources>

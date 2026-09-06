@@ -50,6 +50,19 @@
             android:textColor="@color/nb_txt_light"
             android:textSize="12sp"
             tools:text="org.mozilla.firefox" />
+
+        <TextView
+            android:id="@+id/app_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/nb_txt_light"
+            android:textSize="12sp"
+            android:visibility="gone"
+            tools:text="Always kept out of the VPN"
+            tools:visibility="visible" />
     </LinearLayout>
 
     <com.google.android.material.switchmaterial.SwitchMaterial

@@ -305,4 +305,6 @@
     <string name="split_tunneling_mode_include_description">仅所选应用使用 VPN</string>
     <string name="split_tunneling_hint_search_apps">搜索应用</string>
     <string name="split_tunneling_empty_include_warning">未选择任何应用，因此所有应用仍会使用 VPN。请至少选择一个。</string>
+    <string name="split_tunneling_always_excluded">始终不使用 VPN</string>
+    <string name="split_tunneling_never_included">无法使用 VPN</string>
 </resources>
