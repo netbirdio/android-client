@@ -103,6 +103,27 @@ public class SplitTunnelConfigUnitTest {
     }
 
     @Test
+    public void includeWhoseOnlyPickIsGoneFallsBackToCarryingEverything() {
+        SplitTunnelConfig.Resolution r =
+                config(SplitTunnelConfig.Mode.INCLUDE, Collections.emptySet(), setOf("com.example.gone"))
+                        .resolve(OWN, packageName -> false);
+
+        assertEquals(SplitTunnelConfig.Filter.DISALLOW, r.getFilter());
+        assertEquals(SplitTunnelConfig.ALWAYS_EXCLUDED, r.getPackages());
+    }
+
+    @Test
+    public void includeSkipsPicksThatAreGoneAndKeepsTheRest() {
+        SplitTunnelConfig.Resolution r =
+                config(SplitTunnelConfig.Mode.INCLUDE, Collections.emptySet(),
+                        setOf("com.example.a", "com.example.gone"))
+                        .resolve(OWN, packageName -> !packageName.equals("com.example.gone"));
+
+        assertEquals(SplitTunnelConfig.Filter.ALLOW, r.getFilter());
+        assertEquals(setOf("com.example.a", OWN), r.getPackages());
+    }
+
+    @Test
     public void emptyIncludeFallsBackToCarryingEverything() {
         SplitTunnelConfig cfg =
                 config(SplitTunnelConfig.Mode.INCLUDE, Collections.emptySet(), Collections.emptySet());

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Which applications the tunnel carries.
@@ -91,12 +92,26 @@ public final class SplitTunnelConfig {
      *                   peers through it.
      */
     public Resolution resolve(String ownPackage) {
-        if (mode == Mode.INCLUDE && isActive()) {
+        return resolve(ownPackage, packageName -> true);
+    }
+
+    /**
+     * @param installed says whether a package is present on the device. An
+     *                  INCLUDE pick that is gone would be skipped by the builder,
+     *                  and a selection left with nothing but this app would raise
+     *                  a tunnel that carries nothing, so the fallback is decided
+     *                  on what will actually be applied.
+     */
+    public Resolution resolve(String ownPackage, Predicate<String> installed) {
+        if (mode == Mode.INCLUDE) {
             Set<String> allowed = effectiveIncluded();
-            if (ownPackage != null && !ownPackage.isEmpty()) {
-                allowed.add(ownPackage);
+            allowed.removeIf(packageName -> !installed.test(packageName));
+            if (!allowed.isEmpty()) {
+                if (ownPackage != null && !ownPackage.isEmpty()) {
+                    allowed.add(ownPackage);
+                }
+                return new Resolution(Filter.ALLOW, allowed);
             }
-            return new Resolution(Filter.ALLOW, allowed);
         }
 
         Set<String> disallowed = new LinkedHashSet<>(ALWAYS_EXCLUDED);

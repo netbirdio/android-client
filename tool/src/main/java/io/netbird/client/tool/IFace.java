@@ -144,9 +144,17 @@ class IFace implements TunAdapter {
      * so switching profile switches which applications the tunnel carries.
      */
     private void applyAppFilter(VpnService.Builder builder) {
+        PackageManager packageManager = vpnService.getPackageManager();
         SplitTunnelConfig.Resolution resolution = new SplitTunnelStore(vpnService)
                 .load()
-                .resolve(vpnService.getPackageName());
+                .resolve(vpnService.getPackageName(), packageName -> {
+                    try {
+                        packageManager.getApplicationInfo(packageName, 0);
+                        return true;
+                    } catch (PackageManager.NameNotFoundException e) {
+                        return false;
+                    }
+                });
 
         boolean allow = resolution.getFilter() == SplitTunnelConfig.Filter.ALLOW;
         for (String packageName : resolution.getPackages()) {
