@@ -176,7 +176,7 @@ public class SplitTunnelingFragment extends Fragment
         boolean changed = excluded.retainAll(installed);
         changed |= included.retainAll(installed);
         if (changed) {
-            persist();
+            save();
         }
     }
 
