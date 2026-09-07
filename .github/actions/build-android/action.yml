@@ -48,7 +48,7 @@ runs:
         fi
 
     - name: Setup Java
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         java-version: "17"
         # AdoptOpenJDK became Eclipse Temurin; resolving "adopt" now fails
@@ -57,14 +57,14 @@ runs:
         cache: "gradle"
 
     - name: Install Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v7
       with:
         go-version-file: "netbird/go.mod"
         cache-dependency-path: "netbird/go.sum"
 
     - name: Cache Android NDK
       id: ndk-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         # ANDROID_HOME is set by the runner image but not visible to ${{ env.X }}
         # in composite actions; the ubuntu-latest image pins it to this path.
@@ -105,7 +105,7 @@ runs:
     # hit the cache, skip the install and leave the build without a generator.
     - name: Cache gomobile and gobind
       id: gomobile-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/go/bin/gomobile
