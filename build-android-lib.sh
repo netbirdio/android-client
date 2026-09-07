@@ -23,6 +23,9 @@ app_path=$(pwd)
 readonly RELEASE_TAG_MATCH='v[0-9]*'
 readonly RELEASE_TAG_EXCLUDE='*-*'
 
+# The NDK gomobile links against. CI reads this line to install the same one.
+readonly NDK_VERSION=23.1.7779620
+
 # Normalize semantic versions to drop a leading 'v' (e.g., v1.2.3 -> 1.2.3).
 # Only strips if the string starts with 'v' followed by a digit, so it won't affect
 # dev/ci strings or other non-semver values.
@@ -112,15 +115,29 @@ ensure_gomobile_tools() {
   done
 }
 
+ensure_ndk() {
+  : "${ANDROID_HOME:?ANDROID_HOME must point at the Android SDK}"
+  export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$NDK_VERSION"
+  if [ ! -d "$ANDROID_NDK_HOME" ]; then
+    echo "NDK $NDK_VERSION not found under $ANDROID_HOME/ndk; install it with:" >&2
+    echo "  sdkmanager --install \"ndk;$NDK_VERSION\"" >&2
+    exit 1
+  fi
+}
+
 cd netbird
 
 # Get version using the function
 version=$(get_version "${1:-}")
 echo "Using version: $version"
 
+ensure_ndk
 ensure_gomobile_tools
 
+# -androidapi must match minSdkVersion in build.gradle.kts. Without it gomobile
+# defaults to API 16, which only NDK r23 and older still accept.
 CGO_ENABLED=0 gomobile bind \
+  -androidapi 26 \
   -o "$app_path/gomobile/netbird.aar" \
   -javapkg=io.netbird.gomobile \
   -ldflags="-linkmode=external -extldflags=-Wl,-z,max-page-size=16384 -checklinkname=0 -X golang.zx2c4.com/wireguard/ipc.socketDirectory=/data/data/io.netbird.client/cache/wireguard -X github.com/netbirdio/netbird/version.version=$version" \
