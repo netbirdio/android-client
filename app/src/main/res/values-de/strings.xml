@@ -7,7 +7,6 @@
     <string name="menu_change_server">Management-Server</string>
     <string name="menu_profiles">Profile</string>
     <string name="menu_troubleshoot">Fehlerbehebung</string>
-    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">Aktives Profil</string>
     <string name="profile_picker_add">Profil hinzufügen</string>
@@ -17,7 +16,9 @@
     <string name="bottom_nav_home">Start</string>
     <string name="bottom_nav_peers">Peers</string>
     <string name="bottom_nav_networks">Ressourcen</string>
+    <string name="bottom_nav_files">Dateien</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">Apps</string>
     <string name="bottom_nav_settings">Einstellungen</string>
 
     <string name="settings_section_connection">Verbindung</string>

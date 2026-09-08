@@ -7,7 +7,6 @@
     <string name="menu_change_server">管理服务器</string>
     <string name="menu_profiles">配置文件</string>
     <string name="menu_troubleshoot">故障排除</string>
-    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">当前配置文件</string>
     <string name="profile_picker_add">添加配置文件</string>
@@ -17,7 +16,9 @@
     <string name="bottom_nav_home">主页</string>
     <string name="bottom_nav_peers">对等节点</string>
     <string name="bottom_nav_networks">资源</string>
+    <string name="bottom_nav_files">文件</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">应用</string>
     <string name="bottom_nav_settings">设置</string>
 
     <string name="settings_section_connection">连接</string>

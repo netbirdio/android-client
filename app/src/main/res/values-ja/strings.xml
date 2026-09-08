@@ -7,7 +7,6 @@
     <string name="menu_change_server">管理サーバー</string>
     <string name="menu_profiles">プロファイル</string>
     <string name="menu_troubleshoot">トラブルシューティング</string>
-    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">使用中のプロファイル</string>
     <string name="profile_picker_add">プロファイルを追加</string>
@@ -17,7 +16,9 @@
     <string name="bottom_nav_home">ホーム</string>
     <string name="bottom_nav_peers">ピア</string>
     <string name="bottom_nav_networks">リソース</string>
+    <string name="bottom_nav_files">ファイル</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">アプリ</string>
     <string name="bottom_nav_settings">設定</string>
 
     <string name="settings_section_connection">接続</string>
