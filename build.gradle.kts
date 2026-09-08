@@ -21,9 +21,9 @@ val cmdVersionName = project.findProperty("versionName") as String?
 
 // Define the version properties in the extra properties extension
 ext {
-    set("compileSdkVersion", 35)
+    set("compileSdkVersion", 36)
     set("minSdkVersion", 26)
-    set("targetSdkVersion", 35)
+    set("targetSdkVersion", 36)
     set("appVersionCode", cmdVersionCode ?: (versionProps["versionCode"] as String).toInt())
     set("appVersionName", cmdVersionName ?: versionProps["versionName"] as String)
 }

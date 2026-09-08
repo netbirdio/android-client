@@ -4,13 +4,18 @@
     android:id="@+id/fragment_peers"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/nb_bg_peers"
     tools:context=".ui.home.NetworksFragment">
 
     <include
         android:id="@+id/zeroPeerLayout"
         layout="@layout/layout_zero_peer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -47,6 +52,7 @@
             android:hint="@string/networks_hint_search_networks"
             android:inputType="text"
             android:drawableStart="@drawable/search"
+            android:drawableTint="@color/nb_txt_light"
             android:drawablePadding="10dp"
             android:paddingStart="15dp"
             android:paddingEnd="15dp"

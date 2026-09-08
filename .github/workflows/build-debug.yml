@@ -59,11 +59,16 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Read the daemon JDK version
+        id: jdk
+        shell: bash
+        run: echo "version=$(sed -n 's/^toolchainVersion=//p' gradle/gradle-daemon-jvm.properties)" >> "$GITHUB_OUTPUT"
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
-          distribution: "adopt"
+          java-version: ${{ steps.jdk.outputs.version }}
+          distribution: "temurin"
           cache: "gradle"
 
       - name: Download AAR artifact
@@ -94,11 +99,16 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Read the daemon JDK version
+        id: jdk
+        shell: bash
+        run: echo "version=$(sed -n 's/^toolchainVersion=//p' gradle/gradle-daemon-jvm.properties)" >> "$GITHUB_OUTPUT"
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
-          distribution: "adopt"
+          java-version: ${{ steps.jdk.outputs.version }}
+          distribution: "temurin"
           cache: "gradle"
 
       - name: Download AAR artifact
@@ -123,7 +133,10 @@ jobs:
           disk-size: 4096M
           heap-size: 512M
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest --no-daemon -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest
+          # The e2e package needs a setup key for a live account, which only the
+          # private mobile-e2e repo holds, so it is excluded here along with the
+          # long-running stress test.
+          script: ./gradlew connectedDebugAndroidTest --no-daemon -Pandroid.testInstrumentationRunnerArguments.notClass=io.netbird.client.NetworkConnectivityStressTest -Pandroid.testInstrumentationRunnerArguments.notPackage=io.netbird.client.e2e
 
       - name: Upload test results
         if: always()

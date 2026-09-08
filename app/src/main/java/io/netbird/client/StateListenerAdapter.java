@@ -41,4 +41,14 @@ public abstract class StateListenerAdapter implements StateListener {
     public void onPeersListChanged(long totalPeers) {
 
     }
+
+    @Override
+    public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
+
+    }
+
+    @Override
+    public void onLoginRequired() {
+
+    }
 }

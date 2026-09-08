@@ -23,6 +23,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # git describe below needs the tags and the history down to the
+          # nearest release tag; the default shallow clone carries neither.
+          fetch-depth: 0
           submodules: recursive
 
       # Reaches the management server as the peer's ui_version and is shown on
@@ -30,11 +33,17 @@ jobs:
       # signed and handed out rather than released. build-debug.yml already
       # claims the ci- prefix, and sharing it would make an unsigned PR build
       # and a signed hand-out indistinguishable in the peer list.
+      # The tag is the nearest release tag in the commit's ancestry, so once a
+      # new release is tagged, later snapshots pick it up on their own. If
+      # describe finds no tag the step fails instead of minting a bare name.
       - name: Get version name
         id: version
         run: |
+          BASE_TAG=$(git describe --tags --abbrev=0)
           SHORT_GIT_SHA=$(git rev-parse --short HEAD)
-          echo "version_name=snapshot-${SHORT_GIT_SHA}" >> "$GITHUB_OUTPUT"
+          VERSION_NAME="${BASE_TAG}-snapshot-${SHORT_GIT_SHA}"
+          echo "Version name: $VERSION_NAME"
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
 
       # Must stay identical to the Compute version code step in the sibling
       # workflow. build-release.yml and build-snapshot.yml feed the same Play

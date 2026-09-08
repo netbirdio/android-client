@@ -1,0 +1,26 @@
+<resources>
+    <string name="fg_notification_channel_name">NetBird 服务</string>
+    <string name="fg_notification_connected">已连接</string>
+    <string name="fg_notification_connecting">正在连接…</string>
+    <string name="fg_notification_disconnected">已断开连接</string>
+    <string name="fg_notification_no_network">无可用网络</string>
+    <string name="fg_notification_needs_login">需要登录</string>
+    <string name="fg_notification_error">错误</string>
+    <string name="session_notification_channel_name">会话过期</string>
+    <string name="session_notification_expiring_title">NetBird 会话即将过期</string>
+    <string name="session_notification_expiring_text">您的会话将在约 %1$d 分钟后过期。打开应用以延长会话。</string>
+    <string name="session_notification_expired_title">NetBird 会话已过期</string>
+    <string name="session_notification_expired_text">您的会话已过期。打开应用以重新登录。</string>
+    <string name="session_notification_extend">延长会话</string>
+    <string name="fg_notification_session_expired">会话已过期</string>
+    <string name="fg_notification_session_expires_soon">会话将在不到一分钟后过期</string>
+    <plurals name="fg_notification_session_expires_minutes">
+        <item quantity="other">会话将在 %1$d 分钟后过期</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_hours">
+        <item quantity="other">会话将在 %1$d 小时后过期</item>
+    </plurals>
+    <plurals name="fg_notification_session_expires_days">
+        <item quantity="other">会话将在 %1$d 天后过期</item>
+    </plurals>
+</resources>

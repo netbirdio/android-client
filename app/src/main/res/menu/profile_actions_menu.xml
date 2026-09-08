@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/profile_action_edit"
+        android:title="@string/profiles_rename" />
+    <item
+        android:id="@+id/profile_action_logout"
+        android:title="@string/profiles_logout" />
+    <item
+        android:id="@+id/profile_action_remove"
+        android:title="@string/profiles_remove" />
+</menu>

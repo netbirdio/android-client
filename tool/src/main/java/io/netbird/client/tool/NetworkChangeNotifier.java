@@ -5,9 +5,8 @@ import android.content.Intent;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.netbird.gomobile.android.NetworkChangeListener;
 
@@ -17,11 +16,11 @@ public class NetworkChangeNotifier implements NetworkChangeListener {
 
     private final Context context;
 
-    private final List<RouteChangeListener> routeChangeListeners;
+    private final CopyOnWriteArrayList<RouteChangeListener> routeChangeListeners;
 
     NetworkChangeNotifier(Context context) {
         this.context = context;
-        this.routeChangeListeners = new ArrayList<>();
+        this.routeChangeListeners = new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -47,10 +46,7 @@ public class NetworkChangeNotifier implements NetworkChangeListener {
 
     public void addRouteChangeListener(RouteChangeListener routeChangeListener) {
         Objects.requireNonNull(routeChangeListener);
-
-        if (!this.routeChangeListeners.contains(routeChangeListener)) {
-            this.routeChangeListeners.add(routeChangeListener);
-        }
+        this.routeChangeListeners.addIfAbsent(routeChangeListener);
     }
 
     public void removeRouteChangeListener(RouteChangeListener routeChangeListener) {

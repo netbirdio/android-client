@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@color/nb_gray_bg"
+    android:foreground="?attr/selectableItemBackground"
+    android:padding="16dp">
+
+    <!-- Spans the label block rather than the parent: a match_constraint height
+         inside a wrap_content parent is ambiguous and can resolve to zero, which
+         would make the state bar vanish. -->
+    <View
+        android:id="@+id/state_indicator"
+        android:layout_width="5dp"
+        android:layout_height="0dp"
+        android:background="@drawable/ssh_session_state"
+        app:layout_constraintBottom_toBottomOf="@id/session_state"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/session_label" />
+
+    <TextView
+        android:id="@+id/session_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="17dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/toggle_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/session_state"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@id/toggle_button"
+        app:layout_constraintStart_toStartOf="@id/session_label"
+        app:layout_constraintTop_toBottomOf="@id/session_label" />
+
+    <ImageButton
+        android:id="@+id/toggle_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/ssh_session_disconnect"
+        android:src="@drawable/ic_ssh_disconnect"
+        app:tint="@color/nb_txt"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/close_button"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/close_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/ssh_session_delete"
+        android:src="@drawable/ic_ssh_close"
+        app:tint="@color/nb_txt"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

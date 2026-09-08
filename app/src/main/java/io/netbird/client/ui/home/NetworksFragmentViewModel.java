@@ -1,10 +1,9 @@
 package io.netbird.client.ui.home;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,36 +11,44 @@ import java.util.List;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.tool.RouteChangeListener;
+import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.NetworkDomains;
+import io.netbird.gomobile.android.PeerInfoArray;
 import io.netbird.gomobile.android.PeerRoutes;
 
 public class NetworksFragmentViewModel extends ViewModel implements RouteChangeListener, StateListener {
-    private final ServiceAccessor serviceAccessor;
+
+    // The accessor is the Activity, which this ViewModel outlives across configuration
+    // changes (language switch, rotation). The fragment re-supplies the current one on
+    // every view creation and clears it on view destruction; holding a reference
+    // captured at construction would keep reading through a dead Activity's unbound
+    // service connection forever.
+    private volatile ServiceAccessor serviceAccessor;
     private final MutableLiveData<NetworksFragmentUiState> uiState =
             new MutableLiveData<>(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
 
-    public NetworksFragmentViewModel(ServiceAccessor serviceAccessor) {
-        this.serviceAccessor = serviceAccessor;
-        serviceAccessor.addRouteChangeListener(this);
-    }
-
-    public static ViewModelProvider.Factory getFactory(ServiceAccessor serviceAccessor) {
-        return new ViewModelProvider.Factory() {
-            @NonNull
-            @Override
-            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                if (modelClass.isAssignableFrom(NetworksFragmentViewModel.class)) {
-                    return (T) new NetworksFragmentViewModel(serviceAccessor);
-                }
-                throw new IllegalArgumentException("Unknown ViewModel class");
-            }
-        };
+    /**
+     * Swaps in the current accessor and moves the route-change registration over to it,
+     * so route events keep flowing after the Activity is recreated.
+     */
+    public void setServiceAccessor(@Nullable ServiceAccessor accessor) {
+        ServiceAccessor previous = this.serviceAccessor;
+        if (previous == accessor) {
+            return;
+        }
+        if (previous != null) {
+            previous.removeRouteChangeListener(this);
+        }
+        this.serviceAccessor = accessor;
+        if (accessor != null) {
+            accessor.addRouteChangeListener(this);
+        }
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
-        serviceAccessor.removeRouteChangeListener(this);
+        setServiceAccessor(null);
     }
 
     public LiveData<NetworksFragmentUiState> getUiState() {
@@ -90,12 +97,18 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
         return domains;
     }
 
-    private List<Resource> getNetworks() {
+    private List<Resource> getNetworks(NetworkArray networks) {
         var resources = new ArrayList<Resource>();
-        var networks = serviceAccessor.getNetworks();
 
         for (int i = 0; i < networks.size(); i++) {
             var network = networks.get(i);
+
+            // Exit nodes are surfaced through the Home screen picker; keep them
+            // out of the resources list.
+            if (Resource.isExitNodeAddress(network.getNetwork())) {
+                continue;
+            }
+
             var networkDomains = network.getNetworkDomains();
 
             resources.add(new Resource(Status.fromString(network.getStatus()),
@@ -109,9 +122,8 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
         return resources;
     }
 
-    private List<RoutingPeer> getRoutingPeers() {
+    private List<RoutingPeer> getRoutingPeers(PeerInfoArray peersFromEngine) {
         var peers = new ArrayList<RoutingPeer>();
-        var peersFromEngine = serviceAccessor.getPeersList();
 
         for (int i = 0; i < peersFromEngine.size(); i++) {
             var peerInfo = peersFromEngine.get(i);
@@ -126,11 +138,22 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     }
 
     private void postResources() {
-        var resources = getNetworks();
-        var peers = getRoutingPeers();
+        ServiceAccessor accessor = serviceAccessor;
+        if (accessor == null) {
+            return;
+        }
+
+        var networks = accessor.getNetworks();
+        var peersFromEngine = accessor.getPeersList();
+        if (networks == null || peersFromEngine == null) {
+            // Service not bound (yet), or the engine could not produce a network map:
+            // keep the last snapshot instead of flashing an empty list. Another refresh
+            // follows once the binder arrives and the engine replays its state.
+            return;
+        }
 
         // This value will be set from a background thread.
-        uiState.postValue(new NetworksFragmentUiState(resources, peers));
+        uiState.postValue(new NetworksFragmentUiState(getNetworks(networks), getRoutingPeers(peersFromEngine)));
     }
 
     @Override
@@ -138,12 +161,22 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
         postResources();
     }
 
+    private void clearResources() {
+        uiState.postValue(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
+    }
+
     public void selectRoute(String route) throws Exception {
-        this.serviceAccessor.selectRoute(route);
+        ServiceAccessor accessor = serviceAccessor;
+        if (accessor != null) {
+            accessor.selectRoute(route);
+        }
     }
 
     public void deselectRoute(String route) throws Exception {
-        this.serviceAccessor.deselectRoute(route);
+        ServiceAccessor accessor = serviceAccessor;
+        if (accessor != null) {
+            accessor.deselectRoute(route);
+        }
     }
 
     // region StateListener implementation
@@ -154,7 +187,7 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
 
     @Override
     public void onEngineStopped() {
-
+        clearResources();
     }
 
     @Override
@@ -174,7 +207,7 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
 
     @Override
     public void onDisconnected() {
-
+        clearResources();
     }
 
     @Override
@@ -185,6 +218,16 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     @Override
     public void onPeersListChanged(long var1) {
         postResources();
+    }
+
+    @Override
+    public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
+
+    }
+
+    @Override
+    public void onLoginRequired() {
+
     }
     // endregion
 }

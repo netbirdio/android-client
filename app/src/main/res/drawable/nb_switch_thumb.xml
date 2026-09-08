@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Circular thumb for list-row switches. Same construction as the home connect toggle
+     (connect_switch_thumb) at row scale: the white colour is baked in here (no thumbTint),
+     so the switch needs useMaterialThemeColors="false" to avoid a default tint.
+     A transparent full-size layer fixes the bounds to the track height (32dp); the visible
+     white oval is a smaller, centred item that floats inside the track. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Transparent spacer: fixes the thumb bounds to the track height (20dp) -->
+    <item>
+        <shape android:shape="oval">
+            <size
+                android:width="20dp"
+                android:height="20dp" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Visible white thumb, centred -->
+    <item
+        android:width="16dp"
+        android:height="16dp"
+        android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="@android:color/white" />
+        </shape>
+    </item>
+
+</layer-list>

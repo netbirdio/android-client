@@ -5,9 +5,10 @@ import java.util.Objects;
 public class Profile {
     private final String id;
     private final String name;
+    private final String email;
     private final boolean isActive;
 
-    public Profile(String id, String name, boolean isActive) {
+    public Profile(String id, String name, String email, boolean isActive) {
         if (name == null) {
             throw new IllegalArgumentException("Profile name cannot be null");
         }
@@ -16,6 +17,9 @@ public class Profile {
         }
         this.id = id;
         this.name = name;
+        // Absent for a profile that never completed an SSO login, or was logged
+        // out; normalised to "" so callers only test for emptiness.
+        this.email = email == null ? "" : email;
         this.isActive = isActive;
     }
 
@@ -23,6 +27,10 @@ public class Profile {
 
     public String getName() {
         return name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public boolean isActive() {

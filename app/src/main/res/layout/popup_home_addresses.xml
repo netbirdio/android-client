@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The addresses as a floating panel, for the screens where the inline rows on
+     the home screen have nowhere to open. Same rows, same background: the panel
+     is where they are drawn, not what they are. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/info_row_bg"
+    android:divider="@drawable/info_row_divider"
+    android:orientation="vertical"
+    android:showDividers="middle">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="40dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp">
+
+        <TextView
+            android:id="@+id/popup_ip_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/jetbrains_mono_variable"
+            android:textColor="@color/nb_txt"
+            android:textSize="12sp"
+            tools:text="100.72.74.247/16" />
+
+        <ImageButton
+            android:id="@+id/popup_ip_copy"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/focus_highlight"
+            android:contentDescription="@string/main_desc_copy"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_content_copy"
+            app:tint="@color/nb_txt_light" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/popup_secondary_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="40dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/popup_secondary_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="middle"
+            android:fontFamily="@font/jetbrains_mono_variable"
+            android:singleLine="true"
+            android:textColor="@color/nb_txt"
+            android:textSize="12sp"
+            tools:text="fd7f:8e1f:13f7:817f::1/64" />
+
+        <ImageButton
+            android:id="@+id/popup_secondary_copy"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/focus_highlight"
+            android:contentDescription="@string/main_desc_copy"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_content_copy"
+            app:tint="@color/nb_txt_light" />
+    </LinearLayout>
+
+</LinearLayout>

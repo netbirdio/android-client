@@ -16,18 +16,16 @@
         android:layout_width="5dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="@id/fqdn"
-        app:layout_constraintBottom_toBottomOf="@id/ip"
+        app:layout_constraintBottom_toBottomOf="@id/ipv6"
         android:background="@drawable/peer_status_disconnected"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/ip"
-        android:layout_marginEnd="16dp"/>
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/fqdn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="mypeer.really.long.long.long.longexample.selfhosted"
-        android:textColor="@color/nb_txt_light"
+        android:textColor="@color/nb_txt"
         android:textSize="14sp"
         android:maxLines="1"
         android:ellipsize="end"
@@ -35,18 +33,44 @@
         app:layout_constraintEnd_toStartOf="@id/status"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="16dp"/>
 
     <TextView
         android:id="@+id/ip"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="192.168.1.13"
         android:textColor="@color/nb_txt_light"
         android:textSize="14sp"
+        android:ellipsize="middle"
+        android:singleLine="true"
         app:layout_constraintStart_toEndOf="@id/vertical_line"
+        app:layout_constraintEnd_toStartOf="@id/status"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintTop_toBottomOf="@id/fqdn"
-        android:layout_marginStart="8dp"/>
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"/>
+
+    <!-- Own view rather than a second line of @id/ip: an IPv6 address is too
+         long for the row, and ellipsize only clips single-line text. Clipped
+         in the middle, as elsewhere for addresses, so both the prefix and the
+         host part stay readable. The long-press menu still copies it in full. -->
+    <TextView
+        android:id="@+id/ipv6"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="2001:0db8:85a3:08d3:1319:8a2e:0370:7344"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="14sp"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintStart_toEndOf="@id/vertical_line"
+        app:layout_constraintEnd_toStartOf="@id/status"
+        app:layout_constraintTop_toBottomOf="@id/ip"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"/>
 
     <TextView
         android:id="@+id/status"
@@ -58,7 +82,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginEnd="16dp"
         app:layout_constraintVertical_bias="0.5"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

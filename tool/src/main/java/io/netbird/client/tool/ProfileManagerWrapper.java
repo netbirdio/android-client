@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.netbird.gomobile.android.ProfileManager;
 import io.netbird.gomobile.android.ProfileArray;
@@ -36,7 +38,7 @@ public class ProfileManagerWrapper {
                 for (int i = 0; i < array.length(); i++) {
                     io.netbird.gomobile.android.Profile p = array.get(i);
                     if (p != null) {
-                        profiles.add(new Profile(p.getID(), p.getName(), p.getIsActive()));
+                        profiles.add(new Profile(p.getID(), p.getName(), p.getEmail(), p.getIsActive()));
                     }
                 }
             }
@@ -55,7 +57,7 @@ public class ProfileManagerWrapper {
             if (p == null)  {
               throw new IllegalStateException("Active profile is unavailable");
             }
-            return new Profile(p.getID(), p.getName(), p.getIsActive());
+            return new Profile(p.getID(), p.getName(), p.getEmail(), p.getIsActive());
         } catch (Exception e) {
             Log.e(TAG, "Failed to get active profile", e);
             throw new IllegalStateException("Failed to get active profile", e);
@@ -78,13 +80,28 @@ public class ProfileManagerWrapper {
     }
 
     /**
-     * Creates a new profile
+     * Creates a new profile and returns it.
+     * The gomobile AddProfile call does not return the generated ID, so the new
+     * profile is identified by diffing the profile list before and after.
      */
-    public void addProfile(String profileName) throws Exception {
+    public Profile addProfile(String profileName) throws Exception {
         if (profileName == null || profileName.trim().isEmpty()) {
             throw new IllegalArgumentException("Profile name cannot be empty");
         }
+
+        Set<String> existingIds = new HashSet<>();
+        for (Profile p : listProfiles()) {
+            existingIds.add(p.getID());
+        }
+
         profileManager.addProfile(profileName);
+
+        for (Profile p : listProfiles()) {
+            if (!existingIds.contains(p.getID())) {
+                return p;
+            }
+        }
+        throw new IllegalStateException("Newly created profile not found");
     }
 
     /**
@@ -107,6 +124,20 @@ public class ProfileManagerWrapper {
     }
 
     /**
+     * Renames a profile. Only the display name changes; the profile keeps its ID
+     * and its config stays in the same file.
+     */
+    public void renameProfile(String id, String newName) throws Exception {
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be empty");
+        }
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Profile name cannot be empty");
+        }
+        profileManager.renameProfile(id, newName);
+    }
+
+    /**
      * Removes a profile
      */
     public void removeProfile(String id) throws Exception {
@@ -114,6 +145,13 @@ public class ProfileManagerWrapper {
             throw new IllegalArgumentException("Profile name cannot be empty");
         }
         profileManager.removeProfile(id);
+    }
+
+    /**
+     * Gets the config file path for the given profile
+     */
+    public String getConfigPath(String id) throws Exception {
+        return profileManager.getConfigPath(id);
     }
 
     /**

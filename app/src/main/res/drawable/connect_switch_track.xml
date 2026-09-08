@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill-shaped track for the home connect toggle. Colours are defined per state here
+     (no trackTint) so the disconnected state can carry a subtle darker border while the
+     connected state stays a clean orange fill. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Connected: orange fill, no border -->
+    <item android:state_checked="true">
+        <shape android:shape="rectangle">
+            <size android:width="88dp" android:height="44dp" />
+            <corners android:radius="100dp" />
+            <solid android:color="@color/connect_track_on" />
+        </shape>
+    </item>
+
+    <!-- Disconnected: light grey fill with a thin, slightly darker border -->
+    <item>
+        <shape android:shape="rectangle">
+            <size android:width="88dp" android:height="44dp" />
+            <corners android:radius="100dp" />
+            <solid android:color="@color/connect_track_off" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/connect_track_off_stroke" />
+        </shape>
+    </item>
+
+</selector>

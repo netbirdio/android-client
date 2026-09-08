@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:clipToPadding="false"
+    android:paddingStart="@dimen/dialog_horizontal_margin"
+    android:paddingEnd="@dimen/dialog_horizontal_margin">
+
+    <!-- Centring wrapper: the card fills the available width up to
+         dialog_max_width, so it sits centred on phones instead of hugging its
+         content on the left, and stays a readable width on tablets and TVs. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:background="@drawable/bg_rounded_nb_bg"
+            android:maxWidth="@dimen/dialog_max_width"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/text_title_dialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/profiles_dialog_add_title"
+                android:textSize="24sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/profiles_dialog_name_label"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/profiles_dialog_name_help"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/edit_text_profile_name"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:autofillHints=""
+                android:background="@drawable/edit_text_white_focusable"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/profiles_dialog_add_hint"
+                android:inputType="text"
+                android:maxLength="128"
+                android:padding="12dp"
+                android:textColor="@color/nb_txt"
+                android:textColorHint="@color/nb_txt_light" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/profiles_dialog_server_label"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/profiles_dialog_server_help"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="12sp" />
+
+            <!-- Segmented control mirroring the desktop app's management-server
+                 switch: recessed track, sliding raised thumb under the labels. -->
+            <!-- Fixed height (36dp label + 2×4dp padding) so the track cannot
+                 be stretched by a parent that has spare vertical space. -->
+            <FrameLayout
+                android:id="@+id/toggle_server_mode"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_segmented_track"
+                android:padding="4dp">
+
+                <View
+                    android:id="@+id/segment_thumb"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_segmented_thumb" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:id="@+id/btn_server_cloud"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:focusable="true">
+
+                        <TextView
+                            android:id="@+id/label_server_cloud"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:includeFontPadding="false"
+                            android:text="@string/profiles_dialog_server_cloud"
+                            android:textColor="@color/nb_txt"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/btn_server_self_hosted"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:focusable="true">
+
+                        <TextView
+                            android:id="@+id/label_server_self_hosted"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:includeFontPadding="false"
+                            android:text="@string/profiles_dialog_server_self_hosted"
+                            android:textColor="@color/nb_txt_light"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <EditText
+                android:id="@+id/edit_text_server_url"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:autofillHints=""
+                android:background="@drawable/edit_text_white_focusable"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/profiles_dialog_url_hint"
+                android:imeOptions="actionDone"
+                android:inputType="textUri"
+                android:padding="12dp"
+                android:textColor="@color/nb_txt"
+                android:textColorHint="@color/nb_txt_light"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_server_url_warning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/profiles_dialog_url_unreachable"
+                android:textColor="@color/nb_orange"
+                android:textSize="12sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- Optional setup-key login, off by default: SSO is the
+                 recommended path, so the key stays out of the way until the
+                 user switches it on. -->
+            <LinearLayout
+                android:id="@+id/row_setup_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/change_server_setup_key"
+                    android:textColor="@color/nb_txt"
+                    android:textSize="13sp" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_setup_key"
+                    style="@style/Widget.NetBird.Switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/edit_text_setup_key"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:autofillHints=""
+                android:background="@drawable/edit_text_white_focusable"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/change_server_setup_key_hint"
+                android:imeOptions="actionDone"
+                android:inputType="textCapCharacters|textNoSuggestions"
+                android:padding="12dp"
+                android:textColor="@color/nb_txt"
+                android:textColorHint="@color/nb_txt_light"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_setup_key_warning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/change_server_setup_key_warning"
+                android:textColor="@color/nb_orange"
+                android:textSize="12sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+                <!-- Cancel is the quiet, outlined action and Add Profile the
+                     filled primary one, matching the desktop dialog's
+                     secondary/primary button pair. -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_cancel_dialog"
+                    style="@style/Widget.NetBird.Button.Secondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="10dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="false"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:text="@android:string/cancel" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_ok_dialog"
+                    style="@style/Widget.NetBird.Button.Primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="false"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:text="@string/profiles_add" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

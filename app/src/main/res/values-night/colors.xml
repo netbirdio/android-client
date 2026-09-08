@@ -8,22 +8,62 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFF</color>
 
+    <color name="nb_sheet_bg">#1B1B1B</color>
     <color name="nb_bg">#181A1D</color>
-    <color name="nb_bg_peers">#181A1D</color>
-    <color name="nb_bg_home">#1c1e21</color>
+    <color name="nb_bg_peers">#1C1E21</color>
+    <color name="nb_bg_home">#1C1E21</color>
     <color name="nb_bg_mask">#181A1D</color>
     <color name="nb_gray_light">#32363D</color>
     <color name="nb_gray_dark">#1C1E21</color>
-    <color name="nb_gray_bg">#1C1E21</color>
+    <color name="nb_gray_bg">#202225</color>
     <color name="nb_gray_separator">#32363D</color>
     <color name="nb_gray_border">#545961</color>
+    <color name="nb_chip_border">#545961</color>
+    <color name="nb_toolbar_divider">#00000000</color>
     <color name="nb_orange">#F68330</color>
-    <color name="nb_txt">#FEFEFE</color>
+    <color name="nb_orange_15">#26F68330</color>
+    <color name="nb_txt">#E6E1E5</color>
     <color name="nb_txt_light">#7E858F</color>
     <color name="nb_button_inactive">#545961</color>
+
+    <!-- Chrome surfaces: white in light mode, dark in night mode -->
+    <color name="nb_bottom_nav_bg">#181A1D</color>
+    <color name="nb_chip_bg">#181A1D</color>
+
+    <!-- Bottom navigation unselected item colour (white on the dark home background) -->
+    <color name="tab_unselected">#FFFFFF</color>
+    <!-- Bottom navigation unselected icon colour (white on the dark bottom nav) -->
+    <color name="tab_icon_unselected">#FFFFFF</color>
 
     <color name="thumb_on_color">#F58431</color>
     <color name="thumb_off_color">#545961</color>
     <color name="track_on_color">#F6833080</color>
     <color name="track_off_color">#32363D</color>
+
+    <!-- Custom home connect toggle -->
+    <color name="connect_track_on">#F58431</color>
+    <color name="connect_track_off">#3A3A3A</color>
+    <color name="connect_track_off_stroke">#00000000</color>
+    <color name="connect_thumb_on">#FFFFFF</color>
+    <color name="connect_thumb_off">#FFFFFF</color>
+
+    <!-- Connection info rows -->
+    <color name="info_row_bg">#1C1E22</color>
+    <color name="info_row_stroke">#2E3238</color>
+
+    <color name="profile_background">@color/nb_bg</color>
+    <color name="profile_card_background">@color/nb_gray_light</color>
+
+    <!-- Lighter bands so they stay legible against the dark background -->
+    <color name="nb_latency_good">#4ADE80</color>
+    <color name="nb_latency_high">#FACC15</color>
+    <color name="nb_transfer_rx">#38BDF8</color>
+
+    <!-- Segmented control (Cloud / Self-hosted), matching the desktop app -->
+    <color name="nb_segment_track">#101214</color>
+    <color name="nb_segment_track_border">#2C3138</color>
+    <color name="nb_segment_thumb">#3A414B</color>
+
+    <!-- Destructive actions (Remove); lighter so it stays legible on dark -->
+    <color name="nb_danger">#F87171</color>
 </resources>

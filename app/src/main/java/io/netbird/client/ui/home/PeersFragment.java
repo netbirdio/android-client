@@ -17,6 +17,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -63,9 +64,14 @@ public class PeersFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        model = new ViewModelProvider(this, PeersFragmentViewModel.getFactory(serviceAccessor))
-                .get(PeersFragmentViewModel.class);
+        model = new ViewModelProvider(this).get(PeersFragmentViewModel.class);
+        // The model survives configuration changes (e.g. language switch) while the
+        // Activity behind the accessor does not — hand it the current one every time.
+        model.setServiceAccessor(serviceAccessor);
         stateListenerRegistry.registerServiceStateListener(model.getStateListener());
+        // Load eagerly: a fresh fragment (e.g. returning to this tab) would otherwise
+        // sit on the zero-peers view until the next peer-change event happens to fire.
+        model.refreshPeers();
 
         boolean isRunningOnTV = false;
         if (getArguments() != null) {
@@ -84,7 +90,7 @@ public class PeersFragment extends Fragment {
             ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
         }
 
-        PeersAdapter adapter = new PeersAdapter(peers);
+        PeersAdapter adapter = new PeersAdapter(peers, this::showPeerDetail);
 
         RecyclerView peersRecyclerView = binding.peersRecyclerView;
         peersRecyclerView.setAdapter(adapter);
@@ -153,9 +159,17 @@ public class PeersFragment extends Fragment {
     public void onDestroyView() {
         if (model != null) {
             stateListenerRegistry.unregisterServiceStateListener(model.getStateListener());
+            // Drop the Activity reference so a retained model can't leak it or keep
+            // reading through a dead Activity's torn-down service connection.
+            model.setServiceAccessor(null);
         }
         binding = null;
         super.onDestroyView();
+    }
+
+    private void showPeerDetail(Peer peer) {
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.nav_peer_detail, PeerDetailFragment.argsFor(peer));
     }
 
     private void updatePeersCounter(List<Peer> peers) {

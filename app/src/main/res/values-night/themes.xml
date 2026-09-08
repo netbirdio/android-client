@@ -11,11 +11,11 @@
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/black</item>
 
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/nb_gray_dark</item>
-
         <!-- Default background color -->
         <item name="android:windowBackground">@color/nb_bg</item>
+
+        <item name="android:statusBarColor">@color/nb_bg</item>
+        <item name="android:navigationBarColor">@color/nb_bottom_nav_bg</item>
 
         <item name="android:textColor">@color/nb_txt</item>
 
@@ -23,6 +23,8 @@
         <!-- Peer and Network bottom Button background -->
         <item name="colorSurface">@color/nb_button_inactive</item>
         <item name="nbTabBackground">@color/nb_gray_bg</item>
+
+        <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
     </style>
 
     <style name="Theme.NetBird.NoActionBar">
@@ -32,15 +34,21 @@
 
     <style name="Theme.NetBird.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="colorPrimary">@color/nb_gray_dark</item>
-        <item name="android:textColorPrimary">@color/nb_orange</item>
+        <item name="android:textColorPrimary">@color/nb_txt</item>
     </style>
 
     <style name="Theme.NetBird.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <!-- for peers fragment -->
-    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+    <!-- Bottom sheet uses dark surface in night mode. -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Design.BottomSheetDialog">
         <item name="colorPrimary">@color/nb_orange</item>
+        <item name="colorSurface">@color/nb_sheet_bg</item>
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="bottomSheetStyle">@style/Widget.NetBird.BottomSheet</item>
+    </style>
+
+    <style name="Widget.NetBird.BottomSheet" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bottom_sheet_bg</item>
     </style>
 
 
@@ -53,8 +61,16 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
-    <style name="Widget.MyApp.SwitchMaterial.Custom" parent="Widget.MaterialComponents.CompoundButton.Switch">
-        <item name="thumbTint">@color/switch_thumb_color</item>
-        <item name="trackTint">@color/switch_track_color</item>
+
+    <style name="Theme.NetBird.Card" parent="ThemeOverlay.MaterialComponents.Dark" />
+
+    <!-- Dark counterpart of the day-mode dialog theme; without it the light
+         parent would force dark-on-dark text inside dialogs at night. -->
+    <style name="AlertDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="colorPrimary">@color/nb_orange</item>
+        <item name="colorAccent">@color/nb_orange</item>
+        <item name="colorSecondary">@color/nb_orange</item>
+        <item name="android:textColorPrimary">@color/nb_txt</item>
     </style>
 </resources>

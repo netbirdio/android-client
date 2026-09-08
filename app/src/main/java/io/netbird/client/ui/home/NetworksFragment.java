@@ -66,14 +66,14 @@ public class NetworksFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        model = new ViewModelProvider(this, NetworksFragmentViewModel.getFactory(serviceAccessor))
-                .get(NetworksFragmentViewModel.class);
+        model = new ViewModelProvider(this).get(NetworksFragmentViewModel.class);
+        // The model survives configuration changes (e.g. language switch) while the
+        // Activity behind the accessor does not — hand it the current one every time.
+        model.setServiceAccessor(serviceAccessor);
         stateListenerRegistry.registerServiceStateListener(model);
 
         if (PlatformUtils.isAndroidTV(requireContext())) {
             binding.zeroPeerLayout.btnLearnWhy.setVisibility(View.GONE);
-            binding.searchView.setFocusable(false);
-            binding.searchView.setFocusableInTouchMode(false);
         } else {
             ZeroPeerView.setupLearnWhyClick(binding.zeroPeerLayout, requireContext());
         }
@@ -119,6 +119,9 @@ public class NetworksFragment extends Fragment {
     @Override
     public void onDestroyView() {
         stateListenerRegistry.unregisterServiceStateListener(model);
+        // Drop the Activity reference so a retained model can't leak it or keep
+        // reading through a dead Activity's torn-down service connection.
+        model.setServiceAccessor(null);
         super.onDestroyView();
     }
 

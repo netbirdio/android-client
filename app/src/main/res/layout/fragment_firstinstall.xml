@@ -1,72 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/nb_bg"
-    tools:context=".ui.about.AboutFragment">
+    android:fillViewport="true"
+    tools:context=".ui.fistinstall.FirstInstallFragment">
 
+    <!-- ConstraintLayout, not LinearLayout: only the former honours maxWidth,
+         so the content column stays readable instead of stretching across a
+         tablet or TV screen. match_parent height (not wrap_content) because
+         fillViewport would otherwise stretch a wrap_content child to the
+         viewport, dragging the segmented control's full-height thumb with it. -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxWidth="400dp"
-        android:layout_gravity="center"
-        android:paddingLeft="50dp"
-        android:paddingRight="50dp">
+        android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/fragment_firstinstall_desc_logo"
-            android:src="@drawable/notification_icon"
+            android:animateLayoutChanges="true"
+            android:maxWidth="@dimen/dialog_max_width"
+            android:orientation="vertical"
+            android:padding="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_default="wrap"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintVertical_bias="0.5"
+            app:layout_constraintWidth_max="@dimen/dialog_max_width">
 
-        <TextView
-            android:id="@+id/txt_license"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:breakStrategy="simple"
-            android:layout_marginTop="16dp"
-            android:textAlignment="center"
-            android:linksClickable="true"
-            android:textColor="@color/nb_txt"
-            android:text="@string/fragment_firstinstall_txt"
-            app:layout_constraintTop_toBottomOf="@id/logo"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <!-- Full brand logo, as on Home and the desktop's welcome window.
+                 Not notification_icon: that is a 36dp monochrome status-bar
+                 glyph from the tool module with no dark-mode variant. -->
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/fragment_firstinstall_desc_logo"
+                android:scaleType="fitCenter"
+                android:src="@drawable/nb_logo_full" />
 
-        <TextView
-            android:id="@+id/txt_androidtv_beta"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textAlignment="center"
-            android:textColor="@color/nb_orange"
-            android:textStyle="italic"
-            android:text="@string/fragment_firstinstall_androidtv_beta"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/txt_license"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <TextView
+                android:id="@+id/txt_setup_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/firstinstall_setup_description"
+                android:textAlignment="center"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="14sp" />
 
-        <Button
-            android:id="@+id/btn_continue"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/fragment_firstinstall_continue"
-            android:textAllCaps="false"
-            android:background="@drawable/btn_bg_orange"
-            android:layout_marginTop="24dp"
-            android:focusable="true"
-            android:focusableInTouchMode="false"
-            android:foreground="@drawable/focus_highlight"
-            app:layout_constraintTop_toBottomOf="@id/txt_androidtv_beta"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <TextView
+                android:id="@+id/txt_androidtv_beta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/fragment_firstinstall_androidtv_beta"
+                android:textAlignment="center"
+                android:textColor="@color/nb_orange"
+                android:textStyle="italic"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
+            <!-- Same management-server control as the profile editor, so the
+                 first-run choice looks and behaves like every later one. -->
+            <FrameLayout
+                android:id="@+id/toggle_server_mode"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_segmented_track"
+                android:padding="4dp">
+
+                <View
+                    android:id="@+id/segment_thumb"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_segmented_thumb" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:id="@+id/btn_server_cloud"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:focusable="true">
+
+                        <TextView
+                            android:id="@+id/label_server_cloud"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:includeFontPadding="false"
+                            android:text="@string/profiles_dialog_server_cloud"
+                            android:textColor="@color/nb_txt"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/btn_server_self_hosted"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:focusable="true">
+
+                        <TextView
+                            android:id="@+id/label_server_self_hosted"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:includeFontPadding="false"
+                            android:text="@string/profiles_dialog_server_self_hosted"
+                            android:textColor="@color/nb_txt_light"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <EditText
+                android:id="@+id/edit_text_server_url"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:autofillHints=""
+                android:background="@drawable/edit_text_white_focusable"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/profiles_dialog_url_hint"
+                android:imeOptions="actionDone"
+                android:inputType="textUri"
+                android:padding="12dp"
+                android:textColor="@color/nb_txt"
+                android:textColorHint="@color/nb_txt_light"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_server_url_warning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/profiles_dialog_url_unreachable"
+                android:textColor="@color/nb_orange"
+                android:textSize="12sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- Optional setup-key enrolment. The desktop UI has no equivalent,
+                 but mobile devices are commonly provisioned this way. -->
+            <LinearLayout
+                android:id="@+id/row_setup_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/change_server_setup_key"
+                    android:textColor="@color/nb_txt"
+                    android:textSize="13sp" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_setup_key"
+                    style="@style/Widget.NetBird.Switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/edit_text_setup_key"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:autofillHints=""
+                android:background="@drawable/edit_text_white_focusable"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/change_server_setup_key_hint"
+                android:imeOptions="actionDone"
+                android:inputType="textCapCharacters|textNoSuggestions"
+                android:padding="12dp"
+                android:textColor="@color/nb_txt"
+                android:textColorHint="@color/nb_txt_light"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_setup_key_warning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/change_server_setup_key_warning"
+                android:textColor="@color/nb_orange"
+                android:textSize="12sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_continue"
+                style="@style/Widget.NetBird.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="24dp"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:text="@string/fragment_firstinstall_continue" />
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-</FrameLayout>
+</ScrollView>
