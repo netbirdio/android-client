@@ -311,7 +311,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
         }
         io.netbird.gomobile.android.Preferences preferences = new io.netbird.gomobile.android.Preferences(configFilePath);
         try {
-            return !preferences.getPreSharedKey().isEmpty();
+            return preferences.hasPreSharedKey();
         } catch (Exception e) {
             return false;
         }

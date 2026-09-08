@@ -188,7 +188,7 @@ public class FirstInstallFragment extends Fragment {
         setBusy(true);
         Auth auth;
         try {
-            auth = Android.newAuth(configPath, managementUrl);
+            auth = Android.newAuth(configPath, managementUrl, null);
         } catch (Exception e) {
             Log.e(TAG, "Failed to create authenticator", e);
             setBusy(false);
