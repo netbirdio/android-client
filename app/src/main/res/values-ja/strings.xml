@@ -54,6 +54,7 @@
     <string name="btn_close">閉じる</string>
     <string name="peers_connected"><![CDATA[<b>%2$d</b>台中<b>%1$d</b>台のピアが接続中]]></string>
     <string name="peers_hint_search_peers">ピアを検索</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">すべて</string>
     <string name="peer_filter_idle">アイドル</string>
     <string name="peer_filter_connecting">接続中</string>
@@ -137,6 +138,8 @@
     <string name="advanced_disable_ipv6_desc">トンネルインターフェースでの IPv6 オーバーレイアドレッシングを無効にします</string>
     <string name="advanced_allow_ssh">SSHを有効にする</string>
     <string name="advanced_allow_ssh_desc">このデバイスへの SSH 接続を許可します</string>
+    <string name="troubleshoot_allow_remote_jobs">リモートデバッグバンドルを許可</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">管理者が管理サービスを通じてこのデバイスからデバッグバンドルを要求できるようにします。次回の接続時に有効になります</string>
     <string name="advanced_block_inbound">受信接続をブロック</string>
     <string name="advanced_block_inbound_desc">このデバイスおよびルーティングされたネットワークへのすべての受信接続をブロックします。管理サービスから受信したポリシーより優先されます</string>
 
@@ -193,6 +196,7 @@
     <string name="profiles_error_cannot_remove_default">デフォルトのプロファイルは削除できません</string>
     <string name="profiles_success_logged_out">プロファイル「%s」からログアウトしました</string>
     <string name="profiles_success_removed">プロファイル「%s」を削除しました</string>
+    <string name="profiles_actions">プロファイル操作</string>
 
     <!-- Language picker -->
     <string name="settings_language">表示言語</string>
@@ -207,6 +211,7 @@
     <string name="troubleshoot_key_copied">デバッグバンドルのキーをクリップボードにコピーしました</string>
     <string name="troubleshoot_bundle_failed">デバッグバンドルを作成できませんでした: %s</string>
     <string name="settings_no_browser">%s を開けるブラウザアプリがありません</string>
+    <string name="error_vpn_dialog_unavailable">この端末では VPN 権限のダイアログを表示できないため、接続を開始できません</string>
     <string name="profiles_dialog_url_add_anyway">このまま追加</string>
     <string name="profiles_dialog_url_save_anyway">このまま保存</string>
     <string name="fragment_firstinstall_continue_anyway">このまま続行</string>
@@ -292,4 +297,16 @@
     <string name="ssh_copy_no_selection">先にターミナルでテキストを選択してください</string>
     <string name="ssh_copy_done">クリップボードにコピーしました</string>
     <string name="ssh_paste_empty">クリップボードが空です</string>
+    <string name="split_tunneling_mode_title">モード</string>
+    <string name="split_tunneling_mode_off">オフ</string>
+    <string name="split_tunneling_mode_off_description">すべてのアプリが VPN を使用します</string>
+    <string name="split_tunneling_mode_off_hint">現在すべてのアプリが VPN を使用しています。モードを選択して対象を指定してください。</string>
+    <string name="split_tunneling_mode_exclude">除外</string>
+    <string name="split_tunneling_mode_exclude_description">選択したアプリは VPN を経由しません</string>
+    <string name="split_tunneling_mode_include">対象に含める</string>
+    <string name="split_tunneling_mode_include_description">選択したアプリだけが VPN を使用します</string>
+    <string name="split_tunneling_hint_search_apps">アプリを検索</string>
+    <string name="split_tunneling_empty_include_warning">アプリが選択されていないため、すべてのアプリが VPN を使用したままです。1 つ以上選択してください。</string>
+    <string name="split_tunneling_always_excluded">常に VPN から除外されます</string>
+    <string name="split_tunneling_never_included">VPN を使用できません</string>
 </resources>

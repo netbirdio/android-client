@@ -54,6 +54,7 @@
     <string name="btn_close">Cerrar</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>de</b> <b>%2$d</b> peers conectados]]></string>
     <string name="peers_hint_search_peers">Buscar peers</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">Todos</string>
     <string name="peer_filter_idle">Inactivo</string>
     <string name="peer_filter_connecting">Conectando</string>
@@ -137,6 +138,8 @@
     <string name="advanced_disable_ipv6_desc">Deshabilita el direccionamiento IPv6 superpuesto en la interfaz del túnel</string>
     <string name="advanced_allow_ssh">Habilitar SSH</string>
     <string name="advanced_allow_ssh_desc">Permite conexiones SSH a este dispositivo</string>
+    <string name="troubleshoot_allow_remote_jobs">Permitir paquetes de depuración remotos</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Permite que el administrador solicite un paquete de depuración de este dispositivo a través del servicio de gestión. Se aplica en la próxima conexión</string>
     <string name="advanced_block_inbound">Bloquear conexiones entrantes</string>
     <string name="advanced_block_inbound_desc">Bloquea todas las conexiones entrantes a este dispositivo y a las redes enrutadas. Esto anula cualquier política recibida del servicio de gestión</string>
 
@@ -193,6 +196,7 @@
     <string name="profiles_error_cannot_remove_default">No se puede quitar el perfil predeterminado</string>
     <string name="profiles_success_logged_out">Sesión cerrada del perfil «%s»</string>
     <string name="profiles_success_removed">Perfil «%s» quitado correctamente</string>
+    <string name="profiles_actions">Acciones del perfil</string>
 
     <!-- Language picker -->
     <string name="settings_language">Idioma de la interfaz</string>
@@ -207,6 +211,7 @@
     <string name="troubleshoot_key_copied">Clave del paquete de diagnóstico copiada al portapapeles</string>
     <string name="troubleshoot_bundle_failed">No se pudo crear el paquete de diagnóstico: %s</string>
     <string name="settings_no_browser">No hay ningún navegador disponible para abrir %s</string>
+    <string name="error_vpn_dialog_unavailable">Este dispositivo no puede mostrar el diálogo de permiso de VPN, por lo que no se puede iniciar la conexión</string>
     <string name="profiles_dialog_url_add_anyway">Añadir de todos modos</string>
     <string name="profiles_dialog_url_save_anyway">Guardar de todos modos</string>
     <string name="fragment_firstinstall_continue_anyway">Continuar de todos modos</string>
@@ -294,4 +299,16 @@
     <string name="ssh_copy_no_selection">Primero selecciona texto en la terminal</string>
     <string name="ssh_copy_done">Copiado al portapapeles</string>
     <string name="ssh_paste_empty">El portapapeles está vacío</string>
+    <string name="split_tunneling_mode_title">Modo</string>
+    <string name="split_tunneling_mode_off">Desactivado</string>
+    <string name="split_tunneling_mode_off_description">Todas las aplicaciones usan la VPN</string>
+    <string name="split_tunneling_mode_off_hint">Actualmente todas las aplicaciones usan la VPN. Elija un modo para seleccionar cuáles lo hacen.</string>
+    <string name="split_tunneling_mode_exclude">Excluir</string>
+    <string name="split_tunneling_mode_exclude_description">Las aplicaciones seleccionadas omiten la VPN</string>
+    <string name="split_tunneling_mode_include">Incluir</string>
+    <string name="split_tunneling_mode_include_description">Solo las aplicaciones seleccionadas usan la VPN</string>
+    <string name="split_tunneling_hint_search_apps">Buscar aplicaciones</string>
+    <string name="split_tunneling_empty_include_warning">No hay ninguna aplicación seleccionada, así que todas siguen usando la VPN. Elija al menos una.</string>
+    <string name="split_tunneling_always_excluded">Siempre fuera de la VPN</string>
+    <string name="split_tunneling_never_included">No puede usar la VPN</string>
 </resources>

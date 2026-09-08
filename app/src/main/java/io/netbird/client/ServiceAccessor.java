@@ -23,6 +23,9 @@ public interface ServiceAccessor {
 
     void stopEngine();
 
+    /** Rebuilds the tunnel so a split tunnelling change applies without reconnecting. */
+    void applySplitTunneling();
+
     void selectRoute(String route) throws Exception;
     void deselectRoute(String route) throws Exception;
 

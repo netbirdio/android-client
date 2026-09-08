@@ -3,6 +3,7 @@ package io.netbird.client;
 import android.Manifest;
 import android.animation.StateListAnimator;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -131,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             for (RouteChangeListener listener : routeChangeListeners) {
                 mBinder.addRouteChangeListener(listener);
             }
+            mBinder.refreshForegroundState();
             // The engine can stop while we are unbound — most notably when the
             // management server expires the session, which tears the engine
             // down on its own. No connection callback reaches us then, so
@@ -204,10 +206,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         useDeviceCodeFlow = PlatformUtils.requiresDeviceCodeFlow(this);
         if (isRunningOnTV) {
             Log.i(LOGTAG, "Running on Android TV - optimizing for D-pad navigation");
-        } else {
-            // The phone UX is portrait-only, like the iOS app (which locks
-            // portrait in its project settings). TV stays unlocked: it is
-            // landscape by nature and uses the w960dp navigation-rail layout.
+        } else if (getResources().getBoolean(R.bool.lock_portrait)) {
+            // Phone-sized screens (sw < 600dp) are portrait-only, like the iOS
+            // app. Tablets, car head units and TV rotate freely: a portrait lock
+            // on a landscape-only display letterboxes the app into a narrow
+            // strip and clips the system keyboard with it.
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         if (useDeviceCodeFlow && !isRunningOnTV) {
@@ -574,10 +577,18 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         Intent prepareIntent = mBinder.prepareVpnIntent(this);
-        if (prepareIntent != null) {
-            vpnActivityResultLauncher.launch(prepareIntent);
-        } else {
+        if (prepareIntent == null) {
             mBinder.runEngine(urlOpener, useDeviceCodeFlow);
+            return;
+        }
+        try {
+            vpnActivityResultLauncher.launch(prepareIntent);
+        } catch (ActivityNotFoundException e) {
+            // Some stripped-down or custom ROMs ship without the system
+            // vpndialogs package, so the consent screen the platform asked us
+            // to show does not exist and the VPN cannot be enabled at all.
+            Log.e(LOGTAG, "VPN permission dialog is not available on this device", e);
+            Toast.makeText(this, R.string.error_vpn_dialog_unavailable, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -607,6 +618,17 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         }
 
         return mBinder.networks();
+    }
+
+    @Override
+    public void applySplitTunneling() {
+        if (mBinder == null) {
+            // Nothing is running to rebuild; the new selection is read when the
+            // tunnel is next created.
+            return;
+        }
+
+        mBinder.applySplitTunneling();
     }
 
     @Override
@@ -764,18 +786,23 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     private void startService() {
-        Log.i(LOGTAG, "start VPN service");
-        Intent intent = new Intent(this, VPNService.class);
-        intent.setAction(VPNService.INTENT_ACTION_START);
-        startService(intent);
-
-        Intent bindIntent = new Intent(this, VPNService.class);
+        Log.i(LOGTAG, "bind VPN service");
+        // Bind only, no startService: onStart also runs when the system
+        // rebuilds the activity without the process being in the foreground
+        // (procstate still cached after a long idle), and Android 12+ rejects
+        // a background startService with
+        // BackgroundServiceStartNotAllowedException. Binding is allowed from
+        // the background, and the foreground notification refresh the start
+        // intent used to trigger happens over the binder instead, once
+        // onServiceConnected runs.
+        //
         // AUTO_CREATE keeps the service alive for as long as this binding
         // exists. Without it a theme-change relaunch kills the connection for
         // good: the old instance's unbind reaches the service after the new
         // instance has already bound, its stopSelf destroys the service under
         // the fresh binding, and onServiceDisconnected leaves mBinder null
         // with nothing left to bring the service back.
+        Intent bindIntent = new Intent(this, VPNService.class);
         bindService(bindIntent, serviceIPC, Context.BIND_AUTO_CREATE | Context.BIND_ABOVE_CLIENT);
     }
 
@@ -810,7 +837,9 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         // color is transparent because the darker chrome against the lighter content
         // already separates them tonally. It follows the toolbar's visibility so
         // hidden-toolbar screens don't show a stray line.
-        binding.toolbarDivider.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (binding.toolbarDivider != null) {
+            binding.toolbarDivider.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
         // Ensure AppBarLayout re-measures itself so the content below shifts up correctly.
         binding.appbar.requestLayout();
     }

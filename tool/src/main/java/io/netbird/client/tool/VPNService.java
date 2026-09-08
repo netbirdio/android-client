@@ -8,6 +8,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.VpnService;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.util.Log;
@@ -79,6 +80,9 @@ public class VPNService extends android.net.VpnService {
     public void onCreate() {
         super.onCreate();
         Log.d(LOGTAG, "onCreate");
+
+        tunCreator.setPriority(Thread.MAX_PRIORITY);
+        tunCreator.start();
 
         var versionName = Version.getVersionName(this);
         var tunAdapter = new IFace(this);
@@ -196,10 +200,12 @@ public class VPNService extends android.net.VpnService {
             engineRunner.runWithoutAuth();
         }
         if (INTENT_ACTION_START.equals(intent.getAction())) {
-            // MainActivity.onStart fires this on every return to the
-            // foreground, not just when connecting, so take the state from the
-            // engine: the Go core only re-emits onConnected on an actual
-            // change, and assuming CONNECTING here would stick until then.
+            // The quick settings tile sends this via startForegroundService,
+            // which obliges us to call startForeground promptly. It arrives
+            // whether or not the engine is about to connect, so take the state
+            // from the engine: the Go core only re-emits onConnected on an
+            // actual change, and assuming CONNECTING here would stick until
+            // then.
             fgNotification.setState(currentState());
             fgNotification.startForeground();
         }
@@ -256,10 +262,7 @@ public class VPNService extends android.net.VpnService {
             this.notifier.removeRouteChangeListener(listener);
         }
 
-        if (tunCreator != null) {
-            tunCreator.getHandler().getLooper().quitSafely();
-            tunCreator = null;
-        }
+        tunCreator.getHandler().getLooper().quitSafely();
     }
 
     /**
@@ -345,6 +348,16 @@ public class VPNService extends android.net.VpnService {
             return engineRunner.isRunning();
         }
 
+        // Called on every activity bind. The notification may only be
+        // re-posted while the service is already in the foreground: with the
+        // engine stopped the service is not foreground, and a startForeground
+        // from a bind-only, background-started service is rejected on
+        // Android 12+ just like a background startService would be.
+        public void refreshForegroundState() {
+            fgNotification.setState(currentState());
+            fgNotification.refreshIfActive();
+        }
+
         public PeerInfoArray peersInfo() {
             return engineRunner.peersInfo();
         }
@@ -410,6 +423,15 @@ public class VPNService extends android.net.VpnService {
 
         public String debugBundle(boolean anonymize) throws Exception {
             return engineRunner.debugBundle(anonymize);
+        }
+
+        /**
+         * Rebuilds the tunnel so a split tunnelling change takes hold without
+         * asking the user to disconnect. A no-op while the engine is down: the
+         * new selection is read when the tunnel is next created.
+         */
+        public void applySplitTunneling() {
+            queueTUNRenewal(true);
         }
 
         public void selectRoute(String route) throws Exception {
@@ -588,22 +610,22 @@ public class VPNService extends android.net.VpnService {
         }
     };
 
-    private TUNCreatorLooperThread tunCreator;
+    private final TUNCreatorLooperThread tunCreator = new TUNCreatorLooperThread(this::recreateTUN);
 
     private void queueTUNRenewal(String ignoredPayload) {
-        if (tunCreator == null) {
-            tunCreator = new TUNCreatorLooperThread(this::recreateTUN);
-            tunCreator.setPriority(Thread.MAX_PRIORITY);
-            tunCreator.start();
-        }
-
-        var message = tunCreator.getHandler().obtainMessage(1);
-        boolean isQueued = tunCreator.getHandler().sendMessage(message);
-
-        Log.d(LOGTAG, String.format("is TUN renewal queued? %b", isQueued));
+        queueTUNRenewal(false);
     }
 
-    private void recreateTUN() {
+    private void queueTUNRenewal(boolean force) {
+        Handler handler = tunCreator.getHandler();
+        var message = handler.obtainMessage(TUNCreatorLooperThread.MSG_RENEW_TUN);
+        message.arg1 = force ? TUNCreatorLooperThread.ARG_FORCE : 0;
+        boolean isQueued = handler.sendMessage(message);
+
+        Log.d(LOGTAG, String.format("is TUN renewal queued? %b (forced: %b)", isQueued, force));
+    }
+
+    private void recreateTUN(boolean force) {
         if (!engineRunner.isRunning()) return;
         if (currentTUNParameters == null) return;
 
@@ -614,7 +636,9 @@ public class VPNService extends android.net.VpnService {
 
         String routes = settings.getRoutes();
         String searchDomains = settings.getSearchDomains();
-        if (!currentTUNParameters.didChange(routes, searchDomains)) {
+        // A changed app filter leaves routes and search domains untouched, so the
+        // usual guard would skip the very rebuild that applies it.
+        if (!force && !currentTUNParameters.didChange(routes, searchDomains)) {
             return;
         }
 

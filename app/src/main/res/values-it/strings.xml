@@ -54,6 +54,7 @@
     <string name="btn_close">Chiudi</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>di</b> <b>%2$d</b> peer connessi]]></string>
     <string name="peers_hint_search_peers">Cerca peer</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">Tutti</string>
     <string name="peer_filter_idle">Inattivo</string>
     <string name="peer_filter_connecting">Connessione</string>
@@ -137,6 +138,8 @@
     <string name="advanced_disable_ipv6_desc">Disabilita l’indirizzamento IPv6 overlay sull’interfaccia del tunnel</string>
     <string name="advanced_allow_ssh">Abilita SSH</string>
     <string name="advanced_allow_ssh_desc">Consente connessioni SSH a questo dispositivo</string>
+    <string name="troubleshoot_allow_remote_jobs">Consenti bundle di debug remoti</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Consente all\'amministratore di richiedere un bundle di debug da questo dispositivo tramite il servizio di gestione. Ha effetto alla prossima connessione</string>
     <string name="advanced_block_inbound">Blocca connessioni in entrata</string>
     <string name="advanced_block_inbound_desc">Blocca tutte le connessioni in entrata verso questo dispositivo e le reti instradate. Questo sovrascrive qualsiasi criterio ricevuto dal servizio di gestione</string>
 
@@ -193,6 +196,7 @@
     <string name="profiles_error_cannot_remove_default">Impossibile rimuovere il profilo predefinito</string>
     <string name="profiles_success_logged_out">Disconnesso dal profilo «%s»</string>
     <string name="profiles_success_removed">Profilo «%s» rimosso correttamente</string>
+    <string name="profiles_actions">Azioni del profilo</string>
 
     <!-- Language picker -->
     <string name="settings_language">Lingua dell’interfaccia</string>
@@ -207,6 +211,7 @@
     <string name="troubleshoot_key_copied">Chiave del pacchetto di debug copiata negli appunti</string>
     <string name="troubleshoot_bundle_failed">Impossibile creare il pacchetto di debug: %s</string>
     <string name="settings_no_browser">Nessun browser disponibile per aprire %s</string>
+    <string name="error_vpn_dialog_unavailable">Questo dispositivo non può mostrare la finestra di autorizzazione VPN, quindi la connessione non può essere avviata</string>
     <string name="profiles_dialog_url_add_anyway">Aggiungi comunque</string>
     <string name="profiles_dialog_url_save_anyway">Salva comunque</string>
     <string name="fragment_firstinstall_continue_anyway">Continua comunque</string>
@@ -294,4 +299,16 @@
     <string name="ssh_copy_no_selection">Seleziona prima del testo nel terminale</string>
     <string name="ssh_copy_done">Copiato negli appunti</string>
     <string name="ssh_paste_empty">Gli appunti sono vuoti</string>
+    <string name="split_tunneling_mode_title">Modalità</string>
+    <string name="split_tunneling_mode_off">Disattivato</string>
+    <string name="split_tunneling_mode_off_description">Tutte le app usano la VPN</string>
+    <string name="split_tunneling_mode_off_hint">Al momento tutte le app usano la VPN. Scegli una modalità per selezionare quali.</string>
+    <string name="split_tunneling_mode_exclude">Escludi</string>
+    <string name="split_tunneling_mode_exclude_description">Le app selezionate aggirano la VPN</string>
+    <string name="split_tunneling_mode_include">Includi</string>
+    <string name="split_tunneling_mode_include_description">Solo le app selezionate usano la VPN</string>
+    <string name="split_tunneling_hint_search_apps">Cerca app</string>
+    <string name="split_tunneling_empty_include_warning">Nessuna app selezionata, quindi tutte continuano a usare la VPN. Scegline almeno una.</string>
+    <string name="split_tunneling_always_excluded">Sempre esclusa dalla VPN</string>
+    <string name="split_tunneling_never_included">Non può usare la VPN</string>
 </resources>

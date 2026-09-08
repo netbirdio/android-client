@@ -47,10 +47,15 @@ runs:
           git fetch --tags
         fi
 
+    - name: Read the daemon JDK version
+      id: jdk
+      shell: bash
+      run: echo "version=$(sed -n 's/^toolchainVersion=//p' gradle/gradle-daemon-jvm.properties)" >> "$GITHUB_OUTPUT"
+
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
-        java-version: "17"
+        java-version: ${{ steps.jdk.outputs.version }}
         # AdoptOpenJDK became Eclipse Temurin; resolving "adopt" now fails
         # outright, so the build never gets as far as installing a JDK.
         distribution: "temurin"
@@ -62,31 +67,28 @@ runs:
         go-version-file: "netbird/go.mod"
         cache-dependency-path: "netbird/go.sum"
 
+    - name: Read the NDK version
+      id: ndk
+      shell: bash
+      run: echo "version=$(sed -n 's/^readonly NDK_VERSION=//p' build-android-lib.sh)" >> "$GITHUB_OUTPUT"
+
     - name: Cache Android NDK
       id: ndk-cache
       uses: actions/cache@v4
       with:
         # ANDROID_HOME is set by the runner image but not visible to ${{ env.X }}
         # in composite actions; the ubuntu-latest image pins it to this path.
-        path: /usr/local/lib/android/sdk/ndk/23.1.7779620
-        key: ndk-23.1.7779620
+        path: /usr/local/lib/android/sdk/ndk/${{ steps.ndk.outputs.version }}
+        key: ndk-${{ steps.ndk.outputs.version }}
 
     - name: Setup NDK
       if: steps.ndk-cache.outputs.cache-hit != 'true'
       shell: bash
-      run: ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.1.7779620"
+      run: ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "ndk;${{ steps.ndk.outputs.version }}"
 
-    - name: Set ANDROID_NDK_HOME
-      shell: bash
-      run: echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620" >> $GITHUB_ENV
-
-    # gomobile bind shells out to gobind, and gobind is the tool that actually
-    # generates the Java bindings and the JNI glue. Caching and installing only
-    # gomobile left gobind to `gomobile init`, which pulls it from @latest: the
-    # driver was pinned while the generator floated, so the generated API could
-    # change without a commit here. Taking the revision from the go.mod the
-    # submodule already carries keeps the two from drifting apart, and lets the
-    # cache key follow a submodule bump on its own.
+    # build-android-lib.sh installs gomobile and gobind at the revision the
+    # submodule's go.mod names; the cache below only spares the go install on a
+    # hit. Its key carries that revision so it follows a submodule bump on its own.
     - name: Resolve the gomobile revision
       id: gomobile-version
       shell: bash
@@ -112,18 +114,9 @@ runs:
           ~/go/bin/gobind
         key: gomobile-gobind-${{ steps.gomobile-version.outputs.version }}
 
-    - name: Install gomobile and gobind
-      if: steps.gomobile-cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        set -euo pipefail
-        version='${{ steps.gomobile-version.outputs.version }}'
-        go install "golang.org/x/mobile/cmd/gomobile@$version"
-        go install "golang.org/x/mobile/cmd/gobind@$version"
-
     - name: Build NetBird Go library
       shell: bash
-      run: PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh
+      run: bash -x build-android-lib.sh
 
     - name: Build APK and Bundle
       shell: bash

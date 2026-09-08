@@ -54,6 +54,7 @@
     <string name="btn_close">Bezárás</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> / <b>%2$d</b> Peer csatlakoztatva]]></string>
     <string name="peers_hint_search_peers">Peerek keresése</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">Összes</string>
     <string name="peer_filter_idle">Tétlen</string>
     <string name="peer_filter_connecting">Csatlakozás</string>
@@ -137,6 +138,8 @@
     <string name="advanced_disable_ipv6_desc">Letiltja az IPv6 overlay címzést a tunnel interfészen</string>
     <string name="advanced_allow_ssh">SSH engedélyezése</string>
     <string name="advanced_allow_ssh_desc">Engedélyezi az SSH-kapcsolatokat ehhez az eszközhöz</string>
+    <string name="troubleshoot_allow_remote_jobs">Távoli hibakeresési csomagok engedélyezése</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Lehetővé teszi, hogy a rendszergazda a felügyeleti szolgáltatáson keresztül hibakeresési csomagot kérjen ettől az eszköztől. A következő csatlakozáskor lép érvénybe</string>
     <string name="advanced_block_inbound">Bejövő kapcsolatok blokkolása</string>
     <string name="advanced_block_inbound_desc">Blokkol minden bejövő kapcsolatot ehhez az eszközhöz és az irányított hálózatokhoz. Ez felülírja a felügyeleti szolgáltatástól kapott házirendeket</string>
 
@@ -193,6 +196,7 @@
     <string name="profiles_error_cannot_remove_default">Az alapértelmezett profil nem távolítható el</string>
     <string name="profiles_success_logged_out">Kijelentkezett a(z) \"%s\" profilból</string>
     <string name="profiles_success_removed">A(z) \"%s\" profil sikeresen eltávolítva</string>
+    <string name="profiles_actions">Profilműveletek</string>
 
     <!-- Language picker -->
     <string name="settings_language">Megjelenítési nyelv</string>
@@ -207,6 +211,7 @@
     <string name="troubleshoot_key_copied">A hibakeresési csomag kulcsa a vágólapra másolva</string>
     <string name="troubleshoot_bundle_failed">A hibakeresési csomag létrehozása sikertelen: %s</string>
     <string name="settings_no_browser">Nincs elérhető böngésző a(z) %s megnyitásához</string>
+    <string name="error_vpn_dialog_unavailable">Ez az eszköz nem tudja megjeleníteni a VPN-engedély párbeszédablakot, így a kapcsolat nem indítható</string>
     <string name="profiles_dialog_url_add_anyway">Hozzáadás mindenképp</string>
     <string name="profiles_dialog_url_save_anyway">Mentés mindenképp</string>
     <string name="fragment_firstinstall_continue_anyway">Folytatás mindenképp</string>
@@ -291,4 +296,16 @@
     <string name="ssh_copy_no_selection">Előbb jelöljön ki szöveget a terminálban</string>
     <string name="ssh_copy_done">Vágólapra másolva</string>
     <string name="ssh_paste_empty">A vágólap üres</string>
+    <string name="split_tunneling_mode_title">Mód</string>
+    <string name="split_tunneling_mode_off">Ki</string>
+    <string name="split_tunneling_mode_off_description">Minden alkalmazás a VPN-t használja</string>
+    <string name="split_tunneling_mode_off_hint">Jelenleg minden alkalmazás a VPN-t használja. Válasszon módot, hogy kijelölhesse, melyek használják.</string>
+    <string name="split_tunneling_mode_exclude">Kizárás</string>
+    <string name="split_tunneling_mode_exclude_description">A kijelölt alkalmazások megkerülik a VPN-t</string>
+    <string name="split_tunneling_mode_include">Felvétel</string>
+    <string name="split_tunneling_mode_include_description">Csak a kijelölt alkalmazások használják a VPN-t</string>
+    <string name="split_tunneling_hint_search_apps">Alkalmazások keresése</string>
+    <string name="split_tunneling_empty_include_warning">Nincs kijelölt alkalmazás, ezért továbbra is mind a VPN-t használja. Jelöljön ki legalább egyet.</string>
+    <string name="split_tunneling_always_excluded">Mindig kimarad a VPN-ből</string>
+    <string name="split_tunneling_never_included">Nem használhatja a VPN-t</string>
 </resources>

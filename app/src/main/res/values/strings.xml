@@ -208,6 +208,8 @@
     <string name="advanced_disable_ipv6_desc">Disables IPv6 overlay addressing on the tunnel interface</string>
     <string name="advanced_allow_ssh">Enable SSH</string>
     <string name="advanced_allow_ssh_desc">Allows SSH connections to this device</string>
+    <string name="troubleshoot_allow_remote_jobs">Allow remote debug bundles</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Lets your administrator request a debug bundle from this device through the management server. Takes effect on the next connection</string>
     <string name="advanced_block_inbound">Block inbound connections</string>
     <string name="advanced_block_inbound_desc">Blocks all inbound connections to this device and routed networks. This overrides any policies received from the management service</string>
 
@@ -282,6 +284,7 @@
     <string name="troubleshoot_key_copied">Debug bundle key copied to clipboard</string>
     <string name="troubleshoot_bundle_failed">Failed to create debug bundle: %s</string>
     <string name="settings_no_browser">No browser app available to open %s</string>
+    <string name="error_vpn_dialog_unavailable">This device cannot show the VPN permission dialog, so the connection cannot be started</string>
     <string name="session_extended">Session extended</string>
     <string name="session_extend_failed">Failed to extend session: %1$s</string>
     <string name="session_banner_expired">Session expired</string>
@@ -368,4 +371,17 @@
         <item quantity="one">%1$d file</item>
         <item quantity="other">%1$d files</item>
     </plurals>
+    <string name="menu_split_tunneling" translatable="false">Split tunneling</string>
+    <string name="split_tunneling_mode_title">Mode</string>
+    <string name="split_tunneling_mode_off">Off</string>
+    <string name="split_tunneling_mode_off_description">All apps use the VPN</string>
+    <string name="split_tunneling_mode_off_hint">All apps currently use the VPN. Choose a mode to pick which ones do.</string>
+    <string name="split_tunneling_mode_exclude">Exclude</string>
+    <string name="split_tunneling_mode_exclude_description">Selected apps bypass the VPN</string>
+    <string name="split_tunneling_mode_include">Include</string>
+    <string name="split_tunneling_mode_include_description">Only selected apps use the VPN</string>
+    <string name="split_tunneling_hint_search_apps">Search apps</string>
+    <string name="split_tunneling_empty_include_warning">No app selected, so every app keeps using the VPN. Pick at least one.</string>
+    <string name="split_tunneling_always_excluded">Always kept out of the VPN</string>
+    <string name="split_tunneling_never_included">Cannot use the VPN</string>
 </resources>

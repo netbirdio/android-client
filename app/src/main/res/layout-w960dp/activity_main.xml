@@ -38,6 +38,12 @@
                 android:background="@color/nb_bg"
                 app:popupTheme="@style/Theme.NetBird.PopupOverlay" />
 
+            <View
+                android:id="@+id/toolbar_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/nb_toolbar_divider" />
+
         </com.google.android.material.appbar.AppBarLayout>
 
         <fragment

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -220,10 +221,10 @@ public class SSHTerminalFragment extends Fragment {
         });
         binding.keyEsc.setOnClickListener(v -> sendBytes(new byte[]{0x1b}));
         binding.keyTab.setOnClickListener(v -> sendBytes(new byte[]{0x09}));
-        binding.keyUp.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'A'}));
-        binding.keyDown.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'B'}));
-        binding.keyRight.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'C'}));
-        binding.keyLeft.setOnClickListener(v -> sendBytes(new byte[]{0x1b, '[', 'D'}));
+        binding.keyUp.setOnClickListener(v -> sendCursorKey('A'));
+        binding.keyDown.setOnClickListener(v -> sendCursorKey('B'));
+        binding.keyRight.setOnClickListener(v -> sendCursorKey('C'));
+        binding.keyLeft.setOnClickListener(v -> sendCursorKey('D'));
 
         // The three most common control codes get their own key: arming Ctrl and
         // then hitting a letter needs the soft keyboard to deliver that letter,
@@ -242,18 +243,25 @@ public class SSHTerminalFragment extends Fragment {
         binding.keyCtrl.setOnClickListener(v -> {
             ctrlArmed = !ctrlArmed;
             updateModifierStyle(binding.keyCtrl, ctrlArmed);
+            syncModifierArmed();
         });
         binding.keyAlt.setOnClickListener(v -> {
             altArmed = !altArmed;
             updateModifierStyle(binding.keyAlt, altArmed);
+            syncModifierArmed();
         });
 
         binding.keyCopy.setOnClickListener(v -> copySelection());
         binding.keyPaste.setOnClickListener(v -> pasteClipboard());
     }
 
+    /**
+     * An armed modifier is dimmed like a held-down key; released matches the
+     * full brightness of every other key. The released look is the view
+     * default, so no styling has to be applied up front.
+     */
     private void updateModifierStyle(Button btn, boolean armed) {
-        btn.setAlpha(armed ? 1f : 0.6f);
+        btn.setAlpha(armed ? 0.6f : 1f);
     }
 
     /**
@@ -359,6 +367,17 @@ public class SSHTerminalFragment extends Fragment {
         session.write(payload);
     }
 
+    /**
+     * Arrow keys go through the page rather than straight to the session:
+     * only xterm knows whether the application asked for application cursor
+     * keys mode, and the sequence differs between the two modes. The page
+     * routes the chosen sequence back through the input bridge, so armed
+     * modifiers apply the same way as to typed characters.
+     */
+    private void sendCursorKey(char ch) {
+        postToTerminal("window.sendCursorKey('" + ch + "');");
+    }
+
     private enum ModifierKey { ALT, CTRL }
 
     /**
@@ -372,7 +391,17 @@ public class SSHTerminalFragment extends Fragment {
                 return;
             }
             updateModifierStyle(key == ModifierKey.ALT ? binding.keyAlt : binding.keyCtrl, false);
+            syncModifierArmed();
         });
+    }
+
+    /**
+     * Mirrors the armed state into the page, which needs it to know when a
+     * letter must be pulled out of a keyboard's pending word composition
+     * instead of waiting for a commit that may never come.
+     */
+    private void syncModifierArmed() {
+        postToTerminal("window.setModifierArmed(" + (ctrlArmed || altArmed) + ");");
     }
 
     private void postToTerminal(String script) {
@@ -581,6 +610,10 @@ public class SSHTerminalFragment extends Fragment {
             // password would be shown in the clear.
             input.setSingleLine(true);
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            // The stock transformation briefly shows each typed character when
+            // the system "show passwords" setting is on; this one renders a
+            // bullet unconditionally so the password never appears on screen.
+            input.setTransformationMethod(new NoPeekPasswordTransformation());
             input.setHint(R.string.ssh_dialog_password);
 
             MaterialButton connect = dialogView.findViewById(R.id.btn_ok_dialog);
@@ -681,6 +714,37 @@ public class SSHTerminalFragment extends Fragment {
             dialog.show();
             hostKeyDialog = dialog;
         });
+    }
+
+    private static final class NoPeekPasswordTransformation extends PasswordTransformationMethod {
+        @Override
+        public CharSequence getTransformation(CharSequence source, View view) {
+            return new BulletSequence(source);
+        }
+
+        private static final class BulletSequence implements CharSequence {
+            private final CharSequence source;
+
+            BulletSequence(CharSequence source) {
+                this.source = source;
+            }
+
+            @Override
+            public int length() {
+                return source.length();
+            }
+
+            @Override
+            public char charAt(int index) {
+                return '•';
+            }
+
+            @NonNull
+            @Override
+            public CharSequence subSequence(int start, int end) {
+                return new BulletSequence(source.subSequence(start, end));
+            }
+        }
     }
 
     private final class SessionListener implements SshSession.Listener {

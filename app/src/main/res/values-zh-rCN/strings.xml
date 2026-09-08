@@ -54,6 +54,7 @@
     <string name="btn_close">关闭</string>
     <string name="peers_connected"><![CDATA[<b>%2$d</b> 个对等节点中已连接 <b>%1$d</b> 个]]></string>
     <string name="peers_hint_search_peers">搜索对等节点</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">全部</string>
     <string name="peer_filter_idle">空闲</string>
     <string name="peer_filter_connecting">正在连接</string>
@@ -137,6 +138,8 @@
     <string name="advanced_disable_ipv6_desc">在隧道接口上禁用 IPv6 叠加寻址</string>
     <string name="advanced_allow_ssh">启用 SSH</string>
     <string name="advanced_allow_ssh_desc">允许通过 SSH 连接到此设备</string>
+    <string name="troubleshoot_allow_remote_jobs">允许远程调试包</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">允许管理员通过管理服务从此设备请求调试包。将在下次连接时生效</string>
     <string name="advanced_block_inbound">阻止入站连接</string>
     <string name="advanced_block_inbound_desc">阻止到此设备和路由网络的所有入站连接。这将覆盖从管理服务接收的任何策略</string>
 
@@ -193,6 +196,7 @@
     <string name="profiles_error_cannot_remove_default">无法移除默认配置文件</string>
     <string name="profiles_success_logged_out">已退出配置文件“%s”</string>
     <string name="profiles_success_removed">已成功移除配置文件“%s”</string>
+    <string name="profiles_actions">配置文件操作</string>
 
     <!-- Language picker -->
     <string name="settings_language">显示语言</string>
@@ -207,6 +211,7 @@
     <string name="troubleshoot_key_copied">调试包密钥已复制到剪贴板</string>
     <string name="troubleshoot_bundle_failed">无法创建调试包：%s</string>
     <string name="settings_no_browser">没有可打开 %s 的浏览器应用</string>
+    <string name="error_vpn_dialog_unavailable">此设备无法显示 VPN 权限对话框，因此无法启动连接</string>
     <string name="profiles_dialog_url_add_anyway">仍然添加</string>
     <string name="profiles_dialog_url_save_anyway">仍然保存</string>
     <string name="fragment_firstinstall_continue_anyway">仍然继续</string>
@@ -291,4 +296,16 @@
     <string name="ssh_copy_no_selection">请先在终端中选择文本</string>
     <string name="ssh_copy_done">已复制到剪贴板</string>
     <string name="ssh_paste_empty">剪贴板为空</string>
+    <string name="split_tunneling_mode_title">模式</string>
+    <string name="split_tunneling_mode_off">关闭</string>
+    <string name="split_tunneling_mode_off_description">所有应用均使用 VPN</string>
+    <string name="split_tunneling_mode_off_hint">目前所有应用都在使用 VPN。请选择一种模式来指定使用范围。</string>
+    <string name="split_tunneling_mode_exclude">排除</string>
+    <string name="split_tunneling_mode_exclude_description">所选应用绕过 VPN</string>
+    <string name="split_tunneling_mode_include">包含</string>
+    <string name="split_tunneling_mode_include_description">仅所选应用使用 VPN</string>
+    <string name="split_tunneling_hint_search_apps">搜索应用</string>
+    <string name="split_tunneling_empty_include_warning">未选择任何应用，因此所有应用仍会使用 VPN。请至少选择一个。</string>
+    <string name="split_tunneling_always_excluded">始终不使用 VPN</string>
+    <string name="split_tunneling_never_included">无法使用 VPN</string>
 </resources>

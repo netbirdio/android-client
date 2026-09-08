@@ -59,11 +59,16 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Read the daemon JDK version
+        id: jdk
+        shell: bash
+        run: echo "version=$(sed -n 's/^toolchainVersion=//p' gradle/gradle-daemon-jvm.properties)" >> "$GITHUB_OUTPUT"
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
-          distribution: "adopt"
+          java-version: ${{ steps.jdk.outputs.version }}
+          distribution: "temurin"
           cache: "gradle"
 
       - name: Download AAR artifact
@@ -94,11 +99,16 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Read the daemon JDK version
+        id: jdk
+        shell: bash
+        run: echo "version=$(sed -n 's/^toolchainVersion=//p' gradle/gradle-daemon-jvm.properties)" >> "$GITHUB_OUTPUT"
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
-          distribution: "adopt"
+          java-version: ${{ steps.jdk.outputs.version }}
+          distribution: "temurin"
           cache: "gradle"
 
       - name: Download AAR artifact

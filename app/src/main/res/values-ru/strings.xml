@@ -54,6 +54,7 @@
     <string name="btn_close">Закрыть</string>
     <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>из</b> <b>%2$d</b> пиров подключено]]></string>
     <string name="peers_hint_search_peers">Поиск пиров</string>
+    <string name="peers_action_ssh">SSH</string>
     <string name="peer_filter_all">Все</string>
     <string name="peer_filter_idle">Неактивен</string>
     <string name="peer_filter_connecting">Подключение</string>
@@ -137,6 +138,8 @@
     <string name="advanced_disable_ipv6_desc">Отключает оверлейную IPv6-адресацию на туннельном интерфейсе</string>
     <string name="advanced_allow_ssh">Включить SSH</string>
     <string name="advanced_allow_ssh_desc">Разрешает SSH-подключения к этому устройству</string>
+    <string name="troubleshoot_allow_remote_jobs">Разрешить удалённые отладочные пакеты</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Позволяет администратору запрашивать отладочный пакет с этого устройства через сервис управления. Вступает в силу при следующем подключении</string>
     <string name="advanced_block_inbound">Блокировать входящие подключения</string>
     <string name="advanced_block_inbound_desc">Блокирует все входящие подключения к этому устройству и маршрутизируемым сетям. Это переопределяет любые политики, полученные от службы управления</string>
 
@@ -193,6 +196,7 @@
     <string name="profiles_error_cannot_remove_default">Профиль по умолчанию нельзя удалить</string>
     <string name="profiles_success_logged_out">Выполнен выход из профиля «%s»</string>
     <string name="profiles_success_removed">Профиль «%s» успешно удалён</string>
+    <string name="profiles_actions">Действия с профилем</string>
 
     <!-- Language picker -->
     <string name="settings_language">Язык интерфейса</string>
@@ -207,6 +211,7 @@
     <string name="troubleshoot_key_copied">Ключ отладочного пакета скопирован в буфер обмена</string>
     <string name="troubleshoot_bundle_failed">Не удалось создать отладочный пакет: %s</string>
     <string name="settings_no_browser">Нет браузера, чтобы открыть %s</string>
+    <string name="error_vpn_dialog_unavailable">Это устройство не может показать диалог разрешения VPN, поэтому подключение невозможно запустить</string>
     <string name="profiles_dialog_url_add_anyway">Всё равно добавить</string>
     <string name="profiles_dialog_url_save_anyway">Всё равно сохранить</string>
     <string name="fragment_firstinstall_continue_anyway">Всё равно продолжить</string>
@@ -300,4 +305,16 @@
     <string name="ssh_copy_no_selection">Сначала выделите текст в терминале</string>
     <string name="ssh_copy_done">Скопировано в буфер обмена</string>
     <string name="ssh_paste_empty">Буфер обмена пуст</string>
+    <string name="split_tunneling_mode_title">Режим</string>
+    <string name="split_tunneling_mode_off">Выключено</string>
+    <string name="split_tunneling_mode_off_description">Все приложения используют VPN</string>
+    <string name="split_tunneling_mode_off_hint">Сейчас VPN используют все приложения. Выберите режим, чтобы указать нужные.</string>
+    <string name="split_tunneling_mode_exclude">Исключить</string>
+    <string name="split_tunneling_mode_exclude_description">Выбранные приложения работают в обход VPN</string>
+    <string name="split_tunneling_mode_include">Включить</string>
+    <string name="split_tunneling_mode_include_description">VPN используют только выбранные приложения</string>
+    <string name="split_tunneling_hint_search_apps">Поиск приложений</string>
+    <string name="split_tunneling_empty_include_warning">Приложения не выбраны, поэтому VPN продолжают использовать все. Выберите хотя бы одно.</string>
+    <string name="split_tunneling_always_excluded">Всегда исключено из VPN</string>
+    <string name="split_tunneling_never_included">Не может использовать VPN</string>
 </resources>
