@@ -149,6 +149,39 @@ final class VpnTestHarness {
     }
 
     /**
+     * Wait until the Peers tab lists at least one peer, then return to Home.
+     *
+     * <p>The status reads Connected before the first network map is applied,
+     * and the DNS zones arrive with that map. A lookup fired in between is
+     * forwarded to the plain upstream, answered NXDOMAIN, and negative-cached
+     * by Android for the zone's SOA TTL — so later retries never reach the
+     * NetBird DNS at all and the check stays dead for the whole budget. The
+     * engine registers the DNS config before it adds the map's peers, so a
+     * listed peer proves the zones are in place.
+     *
+     * @return true if a peer row appeared within the timeout
+     */
+    boolean awaitPeerListed(long timeoutSec) {
+        UiObject2 peersTab = device.wait(
+                Until.findObject(By.res(LoginFlow.PACKAGE, "nav_peers")), UI_TIMEOUT_MS);
+        assertNotNull("nav_peers tab must be present", peersTab);
+        peersTab.click();
+
+        boolean listed = device.wait(
+                Until.hasObject(By.res(LoginFlow.PACKAGE, "fqdn")), timeoutSec * 1000L);
+        Log.i(TAG, listed ? "Peers tab lists a peer"
+                : "No peer listed within " + timeoutSec + "s");
+
+        UiObject2 homeTab = device.wait(
+                Until.findObject(By.res(LoginFlow.PACKAGE, "nav_home")), UI_TIMEOUT_MS);
+        assertNotNull("nav_home tab must be present", homeTab);
+        homeTab.click();
+        device.wait(Until.hasObject(By.res(LoginFlow.PACKAGE, "text_connection_status")),
+                UI_TIMEOUT_MS);
+        return listed;
+    }
+
+    /**
      * Toggle the emulator's virtual WiFi transport. {@code svc wifi} works on
      * the API 30 image the e2e workflow runs on (removed in API 31+, where
      * {@code cmd wifi set-wifi-enabled} replaces it).
