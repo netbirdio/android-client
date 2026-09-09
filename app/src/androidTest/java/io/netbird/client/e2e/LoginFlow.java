@@ -128,24 +128,23 @@ final class LoginFlow {
         return profileName;
     }
 
-    /** Make {@code profileName} the active profile via its row's Switch button. */
+    /** Make {@code profileName} the active profile by tapping its row. */
     private static void switchToProfile(MainActivity activity, UiDevice device, String profileName)
             throws InterruptedException {
         openProfiles(device);
 
-        UiObject2 switchBtn = rowAction(device, profileName, "btn_switch");
-        if (switchBtn == null) {
-            dumpScreenshot(device, "switch-button-missing");
+        UiObject2 row = profileRow(device, profileName);
+        if (row == null) {
+            dumpScreenshot(device, "switch-row-missing");
             dumpVisibleProfiles(device);
-            fail("btn_switch not found for profile " + profileName);
+            fail("profile row not found for " + profileName);
         }
-        if (!switchBtn.isEnabled()) {
-            // Already the active profile — the button reads "Active" and is
-            // disabled, so there is nothing to switch.
+        if (isActiveRow(row)) {
+            // The row's click listener is a no-op for the active profile.
             Log.i(TAG, "Profile " + profileName + " is already active");
             return;
         }
-        switchBtn.click();
+        row.click();
         confirmDialog(device);
         device.waitForIdle();
         Log.i(TAG, "Switched to profile " + profileName);
@@ -209,7 +208,7 @@ final class LoginFlow {
         // A rolled-back profile leaves no row behind, so its presence is the
         // proof that creation plus enrolment both went through.
         openProfiles(device);
-        if (rowAction(device, profileName, "btn_remove") == null) {
+        if (profileRow(device, profileName) == null) {
             dumpScreenshot(device, "login-profile-missing");
             dumpVisibleProfiles(device);
             fail("Profile " + profileName + " is not in the list after login —"
@@ -278,35 +277,47 @@ final class LoginFlow {
     /**
      * Remove a profile created by {@link #createProfileAndLogin}. A profile
      * can't be removed while active, so we switch to the built-in "default"
-     * profile first, then remove the test profile. We assert on the profile UI:
-     * a missing switch/remove button fails the test — it's a real UI defect,
-     * not something to swallow.
+     * profile first, then remove the test profile through its row's overflow
+     * menu. We assert on the profile UI: a missing row, menu button or menu
+     * item fails the test — it's a real UI defect, not something to swallow.
      */
     static void removeProfile(MainActivity activity, UiDevice device, String profileName)
             throws InterruptedException {
         openProfiles(device);
 
-        // The active profile shows a disabled "Active" chip where the inactive
-        // ones show "Switch", so a missing button here means default is already
-        // active — nothing to switch away from.
-        UiObject2 switchBtn = rowAction(device, DEFAULT_PROFILE, "btn_switch");
-        if (switchBtn != null && switchBtn.isEnabled()) {
-            switchBtn.click();
+        UiObject2 defaultRow = profileRow(device, DEFAULT_PROFILE);
+        if (defaultRow != null && !isActiveRow(defaultRow)) {
+            defaultRow.click();
             confirmDialog(device);
             device.waitForIdle();
 
-            // Switching profiles bounces back to Home, so return to the
-            // profiles screen before looking for the remove button.
+            // Switching profiles pops back to Settings, so return to the
+            // profiles screen before looking for the test profile.
             openProfiles(device);
         }
 
-        UiObject2 removeBtn = rowAction(device, profileName, "btn_remove");
-        if (removeBtn == null) {
-            dumpScreenshot(device, "remove-button-missing");
+        UiObject2 row = profileRow(device, profileName);
+        if (row == null) {
+            dumpScreenshot(device, "remove-row-missing");
             dumpVisibleProfiles(device);
-            fail("btn_remove not found for profile " + profileName);
+            fail("profile row not found for " + profileName);
         }
-        removeBtn.click();
+        UiObject2 menuBtn = row.findObject(By.res(PACKAGE, "btn_profile_menu"));
+        if (menuBtn == null) {
+            dumpScreenshot(device, "profile-menu-button-missing");
+            fail("btn_profile_menu not found for profile " + profileName);
+        }
+        menuBtn.click();
+
+        // Popup menu items carry no app resource id, so match the label; read
+        // it from the app's own resources to stay locale-independent.
+        String removeLabel = activity.getString(R.string.profiles_remove);
+        UiObject2 removeItem = device.wait(Until.findObject(By.text(removeLabel)), UI_TIMEOUT_MS);
+        if (removeItem == null) {
+            dumpScreenshot(device, "remove-menu-item-missing");
+            fail("'" + removeLabel + "' menu item not shown for profile " + profileName);
+        }
+        removeItem.click();
         confirmDialog(device);
         device.waitForIdle();
         Log.i(TAG, "Removed profile " + profileName);
@@ -446,11 +457,10 @@ final class LoginFlow {
     }
 
     /**
-     * Find the action button with {@code resId} inside the profile row whose
-     * {@code text_profile_name} matches {@code profileName}. Returns null if no
-     * such row/button is visible.
+     * Find the profile row whose {@code text_profile_name} matches
+     * {@code profileName}. Returns null if no such row is visible.
      */
-    private static UiObject2 rowAction(UiDevice device, String profileName, String resId) {
+    private static UiObject2 profileRow(UiDevice device, String profileName) {
         BySelector labelSel = By.res(PACKAGE, "text_profile_name").text(profileName);
         UiObject2 label = device.wait(Until.findObject(labelSel), UI_TIMEOUT_MS);
         if (label == null) {
@@ -462,17 +472,22 @@ final class LoginFlow {
         if (label == null) {
             return null;
         }
-        // The control lives in the same row; walk up and search within it.
+        // The row is the list item itself: it owns the click listener, the
+        // Active badge and the overflow menu button.
         UiObject2 row = label.getParent();
-        BySelector sel = By.res(PACKAGE, resId);
+        BySelector menuSel = By.res(PACKAGE, "btn_profile_menu");
         for (int i = 0; i < 5 && row != null; i++) {
-            UiObject2 ctrl = row.findObject(sel);
-            if (ctrl != null) {
-                return ctrl;
+            if (row.findObject(menuSel) != null) {
+                return row;
             }
             row = row.getParent();
         }
         return null;
+    }
+
+    /** The Active badge is only in the tree for the active profile's row. */
+    private static boolean isActiveRow(UiObject2 row) {
+        return row.findObject(By.res(PACKAGE, "badge_active")) != null;
     }
 
     /**

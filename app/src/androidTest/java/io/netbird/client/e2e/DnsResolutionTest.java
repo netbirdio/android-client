@@ -63,6 +63,8 @@ public class DnsResolutionTest {
      * peer-ready sequence).
      */
     private static final long CONNECT_TIMEOUT_SEC = 20;
+    /** Time budget for the first network map (and with it the DNS zones) to land. */
+    private static final long NETWORK_MAP_TIMEOUT_SEC = 30;
     /** Time budget for DNS to start resolving once the engine is connected. */
     private static final long RESOLVE_TIMEOUT_SEC = 90;
     private VpnTestHarness harness;
@@ -109,6 +111,17 @@ public class DnsResolutionTest {
         }
         assertTrue("VPN did not reach connected state within " + CONNECT_TIMEOUT_SEC + "s",
                 connected);
+
+        // Do not query before the zones exist: a miss in the gap between
+        // Connected and the first network map is negative-cached by Android and
+        // no retry below would ever reach the NetBird DNS again.
+        boolean mapApplied = harness.awaitPeerListed(NETWORK_MAP_TIMEOUT_SEC);
+        if (!mapApplied) {
+            LoginFlow.dumpScreenshot(harness.device(), "dns-network-map-timeout");
+        }
+        assertTrue("no peer was listed within " + NETWORK_MAP_TIMEOUT_SEC
+                + "s of connecting, so the network map (and its DNS config) never arrived",
+                mapApplied);
 
         // FQDN resolves to the peer's private address through the tunnel DNS.
         boolean fqdnResolved = harness.waitForResolve(PEER_FQDN, EXPECTED_IP, RESOLVE_TIMEOUT_SEC);
