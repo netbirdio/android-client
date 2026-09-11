@@ -188,6 +188,13 @@
     <string name="advanced_tracelog">Enable trace log level.</string>
     <string name="troubleshoot_debug_bundle">Upload debug bundle</string>
     <string name="troubleshoot_anonymize">Anonymize sensitive data</string>
+    <string name="troubleshoot_anonymize_desc">Hides IP addresses, domains, and other sensitive values.</string>
+    <string name="troubleshoot_anonymize_none">None</string>
+    <string name="troubleshoot_anonymize_none_description">Everything stays readable. Only share inside your organization.</string>
+    <string name="troubleshoot_anonymize_default">Default</string>
+    <string name="troubleshoot_anonymize_default_description">Hides public IP addresses and domains. Internal IPv4 addresses and peer names stay readable for support.</string>
+    <string name="troubleshoot_anonymize_strict">Strict</string>
+    <string name="troubleshoot_anonymize_strict_description">Also hides private, CGNAT and link-local addresses, peer names and WireGuard keys. Use it outside your organization.</string>
     <string name="troubleshoot_section_logging">Logging</string>
     <string name="troubleshoot_section_debug_bundle">Debug bundle</string>
     <string name="advanced_rosenpass">Enable Rosenpass</string>
