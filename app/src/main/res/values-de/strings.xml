@@ -119,6 +119,13 @@
     <string name="advanced_tracelog">Trace-Logs aktivieren.</string>
     <string name="troubleshoot_debug_bundle">Debug-Paket hochladen</string>
     <string name="troubleshoot_anonymize">Sensible Daten anonymisieren</string>
+    <string name="troubleshoot_anonymize_desc">Verbirgt IP-Adressen, Domains und andere sensible Werte.</string>
+    <string name="troubleshoot_anonymize_none">Keine</string>
+    <string name="troubleshoot_anonymize_none_description">Alles bleibt lesbar. Nur innerhalb Ihrer Organisation weitergeben.</string>
+    <string name="troubleshoot_anonymize_default">Standard</string>
+    <string name="troubleshoot_anonymize_default_description">Verbirgt öffentliche IP-Adressen und Domains. Interne IPv4-Adressen und Peer-Namen bleiben für den Support lesbar.</string>
+    <string name="troubleshoot_anonymize_strict">Strikt</string>
+    <string name="troubleshoot_anonymize_strict_description">Verbirgt zusätzlich private, CGNAT- und Link-Local-Adressen, Peer-Namen und WireGuard-Schlüssel. Außerhalb Ihrer Organisation verwenden.</string>
     <string name="troubleshoot_section_logging">Protokollierung</string>
     <string name="troubleshoot_section_debug_bundle">Debug-Paket</string>
     <string name="advanced_rosenpass">Rosenpass aktivieren</string>

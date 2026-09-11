@@ -436,15 +436,13 @@ class EngineRunner {
         }
     }
 
-    public String debugBundle(boolean anonymize) throws Exception {
+    public String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception {
         String configPath = profileManager.getActiveConfigPath();
         String statePath = profileManager.getActiveStateFilePath();
         String cacheDir = context.getCacheDir().getAbsolutePath();
         var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
         try {
-            // The strict level stays unused until the troubleshoot screen
-            // grows an option for it.
-            return goClient.debugBundle(platformFiles, anonymize, Android.AnonymizeLevelDefault);
+            return goClient.debugBundle(platformFiles, anonymize, anonymizeLevel);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             throw e;
