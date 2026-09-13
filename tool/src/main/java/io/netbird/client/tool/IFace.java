@@ -104,6 +104,10 @@ class IFace implements TunAdapter {
         }
     }
 
+    /**
+     * Adds the tunnel resolver unless Private DNS is pinned to a hostname, in
+     * which case the OS could not reach it.
+     */
     private void prepareDnsSetting(VpnService.Builder builder, String dns) {
         if(dns == null) {
             return;
@@ -119,10 +123,16 @@ class IFace implements TunAdapter {
         new Handler(Looper.getMainLooper()).post(() -> {
             DNSWatch dnsWatch = new DNSWatch(vpnService);
 
-            if (!dnsWatch.isPrivateDnsActive()) {
-                builder.addDnsServer(dns);
+            // Only a Private DNS hostname keeps the resolver out. With one set
+            // the OS talks TLS to that host exclusively, so a plain resolver in
+            // the tunnel would only make every lookup fail. Automatic mode
+            // falls back to plain DNS when a resolver has no TLS, and Off never
+            // asks, so in both the tunnel resolver works.
+            if (dnsWatch.isPrivateDnsStrict()) {
+                Log.i(LOGTAG, "private dns hostname " + dnsWatch.privateDnsServerName()
+                        + " is set, leaving the tunnel resolver out");
             } else {
-                Log.d(LOGTAG, "ignore DNS because private dns is active");
+                builder.addDnsServer(dns);
             }
 
             latch.countDown();
