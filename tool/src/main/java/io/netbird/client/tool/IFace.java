@@ -3,6 +3,7 @@ package io.netbird.client.tool;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Handler;
@@ -11,10 +12,14 @@ import android.os.ParcelFileDescriptor;
 import android.system.OsConstants;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.netbird.gomobile.android.TunAdapter;
+import io.netbird.client.tool.networks.NetworkDiagnostics;
 import io.netbird.client.tool.wg.BackendException;
 import io.netbird.client.tool.wg.InetNetwork;
 
@@ -42,7 +47,8 @@ class IFace implements TunAdapter {
         try {
             fd = createTun(addr.getAddress().getHostAddress(), addr.getMask(), addrV6, (int) mtu, dns, searchDomains, routes);
         } catch (Exception e) {
-            Log.e(LOGTAG, "failed to create tunnel", e);
+            Log.e(LOGTAG, "failed to create tunnel: addr=" + address + " addrV6=" + addressV6 + " mtu=" + mtu
+                    + " dns=" + dns + " searchDomains=" + searchDomainsString + " routes=" + routesString, e);
         }
 
         // only set the currently used TUN parameters if createTun didn't throw exceptions
@@ -71,7 +77,7 @@ class IFace implements TunAdapter {
         builder.allowFamily(OsConstants.AF_INET);
         builder.allowFamily(OsConstants.AF_INET6);
         builder.setMtu(mtu);
-        prepareDnsSetting(builder, dns);
+        boolean dnsApplied = prepareDnsSetting(builder, dns);
         for (String sd : searchDomains) {
             builder.addSearchDomain(sd);
             Log.d(LOGTAG,"add search domain: "+ sd);
@@ -98,31 +104,49 @@ class IFace implements TunAdapter {
         builder.setBlocking(true);
         try (final ParcelFileDescriptor tun = builder.establish()) {
             if (tun == null) {
+                // The platform contract for null: this app is not the prepared
+                // VPN any more, because consent was revoked or another VPN app
+                // took the slot. Not a parameter problem.
+                Log.e(LOGTAG, "establish() returned null: VPN permission missing or another VPN is active");
                 throw new BackendException(BackendException.Reason.TUN_CREATION_ERROR);
             }
-            return tun.detachFd();
+            int fd = tun.detachFd();
+            Log.i(LOGTAG, "tun established: fd=" + fd + " addr=" + ip + "/" + prefixLength
+                    + " addrV6=" + (addrV6 == null ? "none" : addrV6.getAddress().getHostAddress() + "/" + addrV6.getMask())
+                    + " mtu=" + mtu + " dns=" + (dnsApplied ? dns : "none")
+                    + " searchDomains=" + Arrays.toString(searchDomains) + " routes=" + formatRoutes(routes));
+            return fd;
         }
     }
 
-    private void prepareDnsSetting(VpnService.Builder builder, String dns) {
-        if(dns == null) {
-            return;
-        }
-
-        if(dns.isEmpty()) {
-            return;
+    /**
+     * Adds the NetBird resolver to the tunnel unless Android reports Private
+     * DNS in use on the active network, and returns whether it was added. The
+     * decision is logged together with the network it was taken on: it is
+     * re-evaluated on every tunnel rebuild and depends on whatever network is
+     * active at that moment, so a logcat dump has to show both.
+     */
+    private boolean prepareDnsSetting(VpnService.Builder builder, String dns) {
+        if (dns == null || dns.isEmpty()) {
+            Log.i(LOGTAG, "dns decision: no resolver requested by the engine");
+            return false;
         }
 
         CountDownLatch latch = new CountDownLatch(1);
+        AtomicBoolean added = new AtomicBoolean(false);
 
         // ConnectivityManager must to run on the main thread instead of a Go routine
         new Handler(Looper.getMainLooper()).post(() -> {
             DNSWatch dnsWatch = new DNSWatch(vpnService);
+            String network = NetworkDiagnostics.describeActiveNetwork(
+                    vpnService.getSystemService(ConnectivityManager.class));
 
             if (!dnsWatch.isPrivateDnsActive()) {
                 builder.addDnsServer(dns);
+                added.set(true);
+                Log.i(LOGTAG, "dns decision: netbird resolver " + dns + " added; " + network);
             } else {
-                Log.d(LOGTAG, "ignore DNS because private dns is active");
+                Log.i(LOGTAG, "dns decision: netbird resolver " + dns + " skipped, private dns active; " + network);
             }
 
             latch.countDown();
@@ -133,6 +157,7 @@ class IFace implements TunAdapter {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        return added.get();
     }
 
     /**
@@ -188,6 +213,17 @@ class IFace implements TunAdapter {
             return new String[0];
         }
         return searchDomains.split(";");
+    }
+
+    private static String formatRoutes(List<Route> routes) {
+        StringBuilder sb = new StringBuilder("[");
+        for (Route r : routes) {
+            if (sb.length() > 1) {
+                sb.append(", ");
+            }
+            sb.append(r.addr).append('/').append(r.prefixLength);
+        }
+        return sb.append(']').toString();
     }
 
     // Blackhole IPv6 when the tunnel has an IPv4 default route but no IPv6

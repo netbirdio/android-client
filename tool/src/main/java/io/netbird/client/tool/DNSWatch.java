@@ -16,6 +16,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.netbird.client.tool.networks.NetworkDiagnostics;
 import io.netbird.gomobile.android.DNSList;
 
 
@@ -92,13 +93,19 @@ public class DNSWatch {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            boolean wasPrivateDnsActive = isPrivateDnsActive;
             isPrivateDnsActive = linkProperties.isPrivateDnsActive();
+            if (wasPrivateDnsActive != isPrivateDnsActive) {
+                String server = linkProperties.getPrivateDnsServerName();
+                Log.i(LOGTAG, "private dns active changed: " + wasPrivateDnsActive + " -> " + isPrivateDnsActive
+                        + " server=" + (server == null ? "none" : server));
+            }
         }
 
         if(newDNSList.size() != dnsServers.size()) {
             DNSList dnsList = toDnsList(newDNSList);
             try {
-                notifyDnsWatcher(dnsList);
+                notifyDnsWatcher(dnsList, newDNSList);
                 dnsServers = dnsList;
             } catch (Exception e) {
                Log.e(LOGTAG, "failed to update dns servers", e);
@@ -110,7 +117,7 @@ public class DNSWatch {
             try {
                 if (!newDNSList.get(i).getHostAddress().equals(dnsServers.get(i))) {
                     DNSList dnsList = toDnsList(newDNSList);
-                    notifyDnsWatcher(dnsList);
+                    notifyDnsWatcher(dnsList, newDNSList);
                     dnsServers = dnsList;
                     return;
                 }
@@ -139,7 +146,9 @@ public class DNSWatch {
         return modifiableDnsServers;
     }
 
-    private void notifyDnsWatcher(DNSList dnsServers) throws Exception {
+    private void notifyDnsWatcher(DNSList dnsServers, List<InetAddress> addresses) throws Exception {
+        Log.i(LOGTAG, "host dns servers changed, updating core: " + NetworkDiagnostics.formatAddresses(addresses)
+                + " privateDnsActive=" + isPrivateDnsActive);
         listener.onChanged(dnsServers);
     }
 
