@@ -209,6 +209,9 @@
     <string name="error_config_path">No se pudo obtener la ruta de configuración: %s</string>
     <string name="troubleshoot_key_copied">Clave del paquete de diagnóstico copiada al portapapeles</string>
     <string name="troubleshoot_bundle_failed">No se pudo crear el paquete de diagnóstico: %s</string>
+    <string name="troubleshoot_debug_bundle_file">Guardar paquete de diagnóstico en un archivo</string>
+    <string name="troubleshoot_bundle_saved">Paquete de diagnóstico guardado</string>
+    <string name="troubleshoot_bundle_save_failed">No se pudo guardar el paquete de diagnóstico: %s</string>
     <string name="settings_no_browser">No hay ningún navegador disponible para abrir %s</string>
     <string name="error_vpn_dialog_unavailable">Este dispositivo no puede mostrar el diálogo de permiso de VPN, por lo que no se puede iniciar la conexión</string>
     <string name="profiles_dialog_url_add_anyway">Añadir de todos modos</string>
