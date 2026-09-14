@@ -11,7 +11,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Parcel;
 import android.os.PowerManager;
 import android.util.Log;
@@ -210,7 +209,6 @@ public class VPNService extends android.net.VpnService {
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
-        stopDiagnosticSnapshots();
 
         engineRunner.stop();
         stopForeground(true);
@@ -483,12 +481,10 @@ public class VPNService extends android.net.VpnService {
         @Override
         public void onStarted() {
             sessionMonitor.onStateChanged();
-            startDiagnosticSnapshots();
         }
 
         @Override
         public void onStopped() {
-            stopDiagnosticSnapshots();
             // Set before tearing the notification down: stopForeground can
             // leave the notification on screen briefly (and does leave it when
             // the service keeps running for a rebind), so it must not linger
@@ -560,7 +556,7 @@ public class VPNService extends android.net.VpnService {
         // A changed app filter leaves routes and search domains untouched, so the
         // usual guard would skip the very rebuild that applies it.
         if (!force && !current.didChange(routes, searchDomains)) {
-            Log.i(LOGTAG, "TUN renewal skipped: routes and search domains unchanged, routes=" + routes);
+            Log.d(LOGTAG, "TUN renewal skipped: routes and search domains unchanged, routes=" + routes);
             return;
         }
 
@@ -601,31 +597,9 @@ public class VPNService extends android.net.VpnService {
 
     // A one-line picture of what the OS holds on the tunnel versus what the
     // engine wants, plus the platform conditions that bear on background
-    // reliability. Written before every debug bundle and on a fixed cadence
-    // while the engine runs, so a logcat dump reveals a route or DNS mismatch
-    // even after the events that caused it have rolled out of the buffer.
-    private static final long DIAG_SNAPSHOT_INTERVAL_MS = 10 * 60 * 1000L;
-    private final Handler diagHandler = new Handler(Looper.getMainLooper());
-    private final Runnable diagSnapshotTask = new Runnable() {
-        @Override
-        public void run() {
-            if (!engineRunner.isRunning()) {
-                return;
-            }
-            logDiagnosticSnapshot("periodic");
-            diagHandler.postDelayed(this, DIAG_SNAPSHOT_INTERVAL_MS);
-        }
-    };
-
-    private void startDiagnosticSnapshots() {
-        diagHandler.removeCallbacks(diagSnapshotTask);
-        diagHandler.postDelayed(diagSnapshotTask, DIAG_SNAPSHOT_INTERVAL_MS);
-    }
-
-    private void stopDiagnosticSnapshots() {
-        diagHandler.removeCallbacks(diagSnapshotTask);
-    }
-
+    // reliability. Written before every debug bundle, so a logcat dump reveals
+    // a route or DNS mismatch even after the events that caused it have rolled
+    // out of the buffer.
     private void logDiagnosticSnapshot(String reason) {
         try {
             Log.i(LOGTAG, buildDiagnosticSnapshot(reason));
