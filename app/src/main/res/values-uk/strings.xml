@@ -305,7 +305,7 @@
     <string name="split_tunneling_mode_off_description">Усі додатки використовують VPN</string>
     <string name="split_tunneling_mode_off_hint">Наразі всі додатки використовують VPN. Виберіть режим, щоб вибрати потрібні додатки.</string>
     <string name="split_tunneling_mode_exclude">Виключити</string>
-    <string name="split_tunneling_mode_exclude_description">Вибрані додатки працюють вхідним трафіком вхідним трафіком вмикаючи VPN (поза VPN)</string>
+    <string name="split_tunneling_mode_exclude_description">Вибрані додатки працюють без VPN (поза VPN)</string>
     <string name="split_tunneling_mode_include">Включити</string>
     <string name="split_tunneling_mode_include_description">Лише вибрані додатки використовують VPN</string>
     <string name="split_tunneling_hint_search_apps">Пошук додатків</string>
