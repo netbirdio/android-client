@@ -166,6 +166,14 @@
                 android:focusable="true"
                 android:focusableInTouchMode="false"
                 android:text="@string/troubleshoot_debug_bundle_file" />
+
+            <ProgressBar
+                android:id="@+id/bundle_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>

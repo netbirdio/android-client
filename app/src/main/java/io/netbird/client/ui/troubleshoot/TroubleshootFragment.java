@@ -38,7 +38,14 @@ import io.netbird.client.tool.ProfileManagerWrapper;
 public class TroubleshootFragment extends Fragment {
 
     private static final String LOGTAG = "TroubleshootFragment";
+    private static final String STATE_PENDING_BUNDLE = "pendingBundlePath";
+
     private FragmentTroubleshootBinding binding;
+    // The zip generated before the file picker opened, waiting to be copied
+    // into the document the user picks. Kept across the picker round trip,
+    // during which the activity is stopped and the VPN service unbound.
+    @Nullable
+    private File pendingBundle;
 
     // The system file picker behind "save to file". Registered at construction
     // because the contract has to exist before the fragment is created.
@@ -75,10 +82,25 @@ public class TroubleshootFragment extends Fragment {
         });
 
         binding.buttonDebugBundleFile.setOnClickListener(v -> {
-            saveBundleLauncher.launch(suggestedBundleName());
+            generateDebugBundleFile();
         });
 
+        if (savedInstanceState != null) {
+            String path = savedInstanceState.getString(STATE_PENDING_BUNDLE);
+            if (path != null) {
+                pendingBundle = new File(path);
+            }
+        }
+
         return binding.getRoot();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (pendingBundle != null) {
+            outState.putString(STATE_PENDING_BUNDLE, pendingBundle.getPath());
+        }
     }
 
     @Override
@@ -142,15 +164,12 @@ public class TroubleshootFragment extends Fragment {
     }
 
     /**
-     * Generates the bundle and copies it into the document the user picked.
-     * The engine writes the zip into the app cache; it is removed once copied.
-     * On failure the picked document is deleted so no empty file is left behind.
+     * Generates the bundle into the app cache while the VPN service is still
+     * bound, then opens the file picker. The picker stops the activity, which
+     * unbinds the service, so the engine must not be needed once the user has
+     * picked a document: the result callback only copies the finished zip.
      */
-    private void saveDebugBundleTo(@Nullable Uri target) {
-        if (target == null) {
-            // picker dismissed
-            return;
-        }
+    private void generateDebugBundleFile() {
         Activity activity = getActivity();
         if (binding == null || !(activity instanceof ServiceAccessor)) {
             return;
@@ -161,7 +180,57 @@ public class TroubleshootFragment extends Fragment {
         new Thread(() -> {
             try {
                 String path = ((ServiceAccessor) activity).debugBundleFile(anonymize);
-                copyAndDelete(new File(path), activity.getContentResolver(), target);
+                activity.runOnUiThread(() -> {
+                    if (binding == null || !isAdded()) {
+                        deleteQuietly(new File(path));
+                        return;
+                    }
+                    pendingBundle = new File(path);
+                    saveBundleLauncher.launch(suggestedBundleName());
+                });
+            } catch (Exception e) {
+                Log.e(LOGTAG, "failed to create debug bundle", e);
+                activity.runOnUiThread(() -> {
+                    if (binding == null || !isAdded()) return;
+                    setBundleButtonsEnabled(true);
+                    Toast.makeText(activity, getString(R.string.troubleshoot_bundle_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * Copies the previously generated bundle into the document the user picked
+     * and removes the cached copy. On failure the picked document is deleted so
+     * no empty file is left behind.
+     */
+    private void saveDebugBundleTo(@Nullable Uri target) {
+        File source = pendingBundle;
+        pendingBundle = null;
+        if (target == null) {
+            // picker dismissed
+            if (source != null) {
+                deleteQuietly(source);
+            }
+            setBundleButtonsEnabled(true);
+            return;
+        }
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+        if (source == null) {
+            Log.e(LOGTAG, "no generated bundle to save");
+            deleteDocument(activity.getContentResolver(), target);
+            setBundleButtonsEnabled(true);
+            Toast.makeText(activity, getString(R.string.troubleshoot_bundle_save_failed, "bundle lost"), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        setBundleButtonsEnabled(false);
+        new Thread(() -> {
+            try {
+                copyAndDelete(source, activity.getContentResolver(), target);
                 activity.runOnUiThread(() -> {
                     if (binding == null || !isAdded()) return;
                     setBundleButtonsEnabled(true);
@@ -191,9 +260,13 @@ public class TroubleshootFragment extends Fragment {
                 out.write(buffer, 0, n);
             }
         } finally {
-            if (!source.delete()) {
-                Log.w(LOGTAG, "could not remove temporary bundle " + source);
-            }
+            deleteQuietly(source);
+        }
+    }
+
+    private static void deleteQuietly(File file) {
+        if (!file.delete()) {
+            Log.w(LOGTAG, "could not remove temporary bundle " + file);
         }
     }
 
@@ -206,12 +279,13 @@ public class TroubleshootFragment extends Fragment {
     }
 
     // Both actions run the same generator, so neither may start while the
-    // other is busy.
+    // other is busy; the spinner shows for as long as they are locked out.
     private void setBundleButtonsEnabled(boolean enabled) {
         if (binding == null) {
             return;
         }
         binding.buttonDebugBundle.setEnabled(enabled);
         binding.buttonDebugBundleFile.setEnabled(enabled);
+        binding.bundleProgress.setVisibility(enabled ? View.GONE : View.VISIBLE);
     }
 }
