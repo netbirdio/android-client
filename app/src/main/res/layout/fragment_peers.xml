@@ -42,11 +42,80 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Peers and Resources are two views of the same screen, as on
+             desktop, rather than separate tabs: BottomNavigationView is already
+             at its five-item limit and Files claims the freed slot. -->
+        <FrameLayout
+            android:id="@+id/toggle_peers_resources"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/bg_segmented_track"
+            android:padding="4dp"
+            app:layout_constraintTop_toBottomOf="@id/text_open_panel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <View
+                android:id="@+id/segment_thumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_segmented_thumb" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:id="@+id/btn_view_peers"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:focusable="true">
+
+                    <TextView
+                        android:id="@+id/label_view_peers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:text="@string/bottom_nav_peers"
+                        android:textColor="@color/nb_txt"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/btn_view_resources"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:focusable="true">
+
+                    <TextView
+                        android:id="@+id/label_view_resources"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:text="@string/bottom_nav_networks"
+                        android:textColor="@color/nb_txt_light"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+            </LinearLayout>
+        </FrameLayout>
+
         <EditText
             android:id="@+id/search_view"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginStart="20dp"
+            android:layout_marginTop="12dp"
             android:autofillHints=""
             android:hint="@string/peers_hint_search_peers"
             android:inputType="text"
@@ -60,7 +129,7 @@
             android:textColorHint="@color/nb_txt_light"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            app:layout_constraintTop_toBottomOf="@id/text_open_panel"
+            app:layout_constraintTop_toBottomOf="@id/toggle_peers_resources"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/filter_icon"/>
 
@@ -93,6 +162,18 @@
             android:layout_marginTop="16dp"
             android:dividerHeight="20dp"
             tools:listitem="@layout/list_item_peer"/>
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/resources_container"
+            android:name="io.netbird.client.ui.home.NetworksFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/toggle_peers_resources"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="12dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

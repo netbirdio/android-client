@@ -7,7 +7,6 @@
     <string name="menu_change_server">Сервер управления</string>
     <string name="menu_profiles">Профили</string>
     <string name="menu_troubleshoot">Диагностика</string>
-    <string name="menu_ssh">SSH</string>
 
     <string name="profile_picker_title">Активный профиль</string>
     <string name="profile_picker_add">Добавить профиль</string>
@@ -17,7 +16,9 @@
     <string name="bottom_nav_home">Главная</string>
     <string name="bottom_nav_peers">Пиры</string>
     <string name="bottom_nav_networks">Ресурсы</string>
+    <string name="bottom_nav_files">Файлы</string>
     <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_apps">Приложения</string>
     <string name="bottom_nav_settings">Настройки</string>
 
     <string name="settings_section_connection">Подключение</string>

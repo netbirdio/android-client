@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="20dp"
+    android:background="@color/nb_gray_bg"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="false"
+    android:foreground="@drawable/focus_highlight"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/transfer_direction"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:contentDescription="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <TextView
+        android:id="@+id/transfer_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt"
+        android:textSize="14sp"
+        tools:text="quarterly-report-2026-final.pdf"
+        app:layout_constraintEnd_toStartOf="@id/transfer_trailing"
+        app:layout_constraintStart_toEndOf="@id/transfer_direction"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/transfer_peer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="14sp"
+        tools:text="from office-mini.netbird.selfhosted"
+        app:layout_constraintEnd_toStartOf="@id/transfer_trailing"
+        app:layout_constraintStart_toStartOf="@id/transfer_label"
+        app:layout_constraintTop_toBottomOf="@id/transfer_label" />
+
+    <TextView
+        android:id="@+id/transfer_meta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="14sp"
+        tools:text="14:32 · 214 MB"
+        app:layout_constraintEnd_toStartOf="@id/transfer_trailing"
+        app:layout_constraintStart_toStartOf="@id/transfer_label"
+        app:layout_constraintTop_toBottomOf="@id/transfer_peer" />
+
+    <TextView
+        android:id="@+id/transfer_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        tools:text="Received"
+        tools:textColor="@color/nb_latency_good"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <ImageView
+        android:id="@+id/transfer_copy"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/file_drop_copy"
+        android:focusable="true"
+        android:src="@drawable/ic_content_copy"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        app:tint="@color/nb_txt_light" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/transfer_trailing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="transfer_status,transfer_copy" />
+
+    <!-- Rides the last line of the card so a transfer in flight does not make
+         the row any taller than a finished one. -->
+    <ProgressBar
+        android:id="@+id/transfer_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="96dp"
+        android:layout_height="6dp"
+        android:layout_marginStart="16dp"
+        android:max="100"
+        android:progressTint="@color/nb_orange"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/transfer_meta"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/transfer_meta"
+        app:layout_constraintTop_toTopOf="@id/transfer_meta" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
