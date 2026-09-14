@@ -1,0 +1,13 @@
+NetBird connects your Android device to your private network resources through a secure, WireGuard®-based peer-to-peer overlay network — without opening ports, configuring firewalls, or running a central VPN server.
+
+NetBird is fully open source. You can use it with the NetBird cloud service or connect the app to your own self-hosted NetBird management server.
+
+Features:
+
+• Peer-to-peer connections secured by WireGuard® with automatic NAT traversal
+• Single sign-on (SSO) and multi-factor authentication (MFA) through your identity provider
+• Access private resources like servers, databases, and internal services from anywhere
+• Network routes and DNS management handled by your NetBird network
+• Works with both the NetBird cloud and self-hosted deployments
+
+To use the app you need a NetBird account or your own self-hosted NetBird management server. Learn more at https://netbird.io and https://docs.netbird.io
