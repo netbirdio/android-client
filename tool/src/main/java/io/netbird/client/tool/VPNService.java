@@ -8,15 +8,18 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.VpnService;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
+import io.netbird.client.tool.networks.NetworkDiagnostics;
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.ConnectionListener;
 import io.netbird.gomobile.android.ErrListener;
@@ -47,7 +50,9 @@ public class VPNService extends android.net.VpnService {
     private ForegroundNotification fgNotification;
     private SessionNotification sessionNotification;
     private SessionMonitor sessionMonitor;
-    private TUNParameters currentTUNParameters;
+    // Written from the tunnel builder (Go thread or the TUN looper), read by
+    // the renewal path and the diagnostic snapshot on other threads.
+    private volatile TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
 
     private RouteChangeListener listener;
@@ -331,6 +336,9 @@ public class VPNService extends android.net.VpnService {
         }
 
         public String debugBundle(boolean anonymize) throws Exception {
+            // Lands in the bundle's logcat.txt: the Android-side picture the Go
+            // status cannot see, taken at the moment the user asked for help.
+            logDiagnosticSnapshot("debug bundle");
             return engineRunner.debugBundle(anonymize);
         }
 
@@ -525,42 +533,131 @@ public class VPNService extends android.net.VpnService {
     }
 
     private void recreateTUN(boolean force) {
-        if (!engineRunner.isRunning()) return;
-        if (currentTUNParameters == null) return;
+        if (!engineRunner.isRunning()) {
+            Log.i(LOGTAG, "TUN renewal skipped: engine not running");
+            return;
+        }
+        TUNParameters current = currentTUNParameters;
+        if (current == null) {
+            Log.i(LOGTAG, "TUN renewal skipped: no tunnel has been built yet");
+            return;
+        }
 
         // Pull the latest settings from the engine; the notification is only
         // a trigger and carries no state.
         TunSettings settings = engineRunner.getTunSettings();
-        if (settings == null) return;
+        if (settings == null) {
+            Log.w(LOGTAG, "TUN renewal skipped: engine returned no tun settings");
+            return;
+        }
 
         String routes = settings.getRoutes();
         String searchDomains = settings.getSearchDomains();
         // A changed app filter leaves routes and search domains untouched, so the
         // usual guard would skip the very rebuild that applies it.
-        if (!force && !currentTUNParameters.didChange(routes, searchDomains)) {
+        if (!force && !current.didChange(routes, searchDomains)) {
+            Log.d(LOGTAG, "TUN renewal skipped: routes and search domains unchanged, routes=" + routes);
             return;
         }
+
+        Log.i(LOGTAG, "TUN renewal: rebuilding (forced=" + force + ") wanted routes=" + routes
+                + " applied routes=" + current.routesString
+                + " wanted searchDomains=" + searchDomains
+                + " applied searchDomains=" + current.searchDomainsString);
 
         var iface = new IFace(VPNService.this);
         try {
             int fd = (int)iface.configureInterface(
-                    currentTUNParameters.address,
-                    currentTUNParameters.addressV6,
-                    currentTUNParameters.mtu,
-                    currentTUNParameters.dns,
+                    current.address,
+                    current.addressV6,
+                    current.mtu,
+                    current.dns,
                     searchDomains,
                     routes);
 
-            if (fd != -1) {
-                this.protect(fd);
-                this.engineRunner.renewTUN(fd);
+            if (fd == -1) {
+                // The engine has already applied the new route set on its side,
+                // so from here on the OS route table and the engine disagree
+                // until the next successful rebuild.
+                Log.w(LOGTAG, "TUN renewal failed, keeping old tunnel: wanted routes=" + routes
+                        + " applied routes=" + current.routesString);
+                return;
             }
+            this.protect(fd);
+            this.engineRunner.renewTUN(fd);
+            Log.i(LOGTAG, "TUN renewed: fd=" + fd + " handed to the engine, routes=" + routes);
         } catch (Exception e) {
-            Log.e(LOGTAG, "failed to recreate tunnel after settings changed", e);
+            Log.e(LOGTAG, "failed to recreate tunnel after settings changed: wanted routes=" + routes, e);
         }
     }
 
     public void setCurrentTUNParameters(TUNParameters currentTUNParameters) {
         this.currentTUNParameters = currentTUNParameters;
+    }
+
+    // A one-line picture of what the OS holds on the tunnel versus what the
+    // engine wants, plus the platform conditions that bear on background
+    // reliability. Written before every debug bundle, so a logcat dump reveals
+    // a route or DNS mismatch even after the events that caused it have rolled
+    // out of the buffer.
+    private void logDiagnosticSnapshot(String reason) {
+        try {
+            Log.i(LOGTAG, buildDiagnosticSnapshot(reason));
+        } catch (Exception e) {
+            // Diagnostics must never take the service down with them.
+            Log.w(LOGTAG, "diag snapshot [" + reason + "] failed", e);
+        }
+    }
+
+    private String buildDiagnosticSnapshot(String reason) {
+        boolean running = engineRunner.isRunning();
+        StringBuilder sb = new StringBuilder("diag snapshot [").append(reason).append("]:")
+                .append(" engine=").append(running ? "running" : "stopped")
+                .append(" status=").append(engineRunner.status())
+                .append(" peers=").append(describePeers(engineRunner.peersInfo()));
+
+        TUNParameters requested = currentTUNParameters;
+        if (requested == null) {
+            sb.append(" tunRequested=none");
+        } else {
+            sb.append(" tunRequested{addr=").append(requested.address)
+                    .append(" mtu=").append(requested.mtu)
+                    .append(" dns=").append(requested.dns)
+                    .append(" routes=").append(requested.routesString)
+                    .append(" searchDomains=").append(requested.searchDomainsString).append('}');
+        }
+
+        TunSettings wanted = running ? engineRunner.getTunSettings() : null;
+        if (wanted != null) {
+            sb.append(" engineWants{routes=").append(wanted.getRoutes())
+                    .append(" searchDomains=").append(wanted.getSearchDomains()).append('}')
+                    .append(" tunMatchesEngine=")
+                    .append(requested != null && !requested.didChange(wanted.getRoutes(), wanted.getSearchDomains()));
+        }
+
+        ConnectivityManager cm = getSystemService(ConnectivityManager.class);
+        sb.append(" vpnLink{").append(NetworkDiagnostics.describeVpnNetworks(cm)).append('}')
+                .append(" activeNetwork{").append(NetworkDiagnostics.describeActiveNetwork(cm)).append('}');
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            sb.append(" alwaysOn=").append(isAlwaysOn()).append(" lockdown=").append(isLockdownEnabled());
+        }
+        PowerManager pm = getSystemService(PowerManager.class);
+        sb.append(" batteryOptExempt=").append(pm != null && pm.isIgnoringBatteryOptimizations(getPackageName()));
+
+        return sb.toString();
+    }
+
+    private static String describePeers(PeerInfoArray peers) {
+        if (peers == null) {
+            return "unknown";
+        }
+        long connected = 0;
+        for (int i = 0; i < peers.size(); i++) {
+            if (peers.get(i).getConnStatus() == Android.ConnStatusConnected) {
+                connected++;
+            }
+        }
+        return connected + "/" + peers.size();
     }
 }

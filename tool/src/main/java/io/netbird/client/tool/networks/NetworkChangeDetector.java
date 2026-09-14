@@ -45,7 +45,7 @@ public class NetworkChangeDetector {
         var capabilities = connectivityManager.getNetworkCapabilities(network);
         if (capabilities == null) return TYPE_UNCLASSIFIED;
 
-        Log.d(LOGTAG, String.format("Network %s has capabilities: %s", network, capabilities));
+        Log.d(LOGTAG, "network " + network + " available: " + NetworkDiagnostics.describe(capabilities));
 
         if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             return Constants.NetworkType.WIFI;
@@ -100,20 +100,25 @@ public class NetworkChangeDetector {
             public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
                 super.onCapabilitiesChanged(network, networkCapabilities);
 
-                Log.d(LOGTAG, String.format("Network %s had their capabilities changed: %s", network, networkCapabilities));
+                // Verbose on purpose: this fires on every capability tweak, and
+                // the full NetworkCapabilities dump was the noisiest line in
+                // the logcat buffer.
+                Log.v(LOGTAG, "network " + network + " capabilities: " + NetworkDiagnostics.describe(networkCapabilities));
 
                 // Detect validation state transitions and forward them.
                 // Unlike onAvailable, this fires only after Android has
                 // confirmed the network actually reaches the internet.
                 boolean validated = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
                 Boolean wasValidated = validatedNetworks.put(network, validated);
+                boolean transition = wasValidated == null || wasValidated != validated;
+                if (transition) {
+                    Log.i(LOGTAG, "network " + network + " validated=" + validated);
+                }
 
                 NetworkAvailabilityListener localListener = listener;
                 Integer type = availableNetworks.get(network);
-                if (localListener != null && type != null && type != TYPE_UNCLASSIFIED) {
-                    if (wasValidated == null || wasValidated != validated) {
-                        localListener.onNetworkValidated(type, validated);
-                    }
+                if (localListener != null && type != null && type != TYPE_UNCLASSIFIED && transition) {
+                    localListener.onNetworkValidated(type, validated);
                 }
             }
         };
