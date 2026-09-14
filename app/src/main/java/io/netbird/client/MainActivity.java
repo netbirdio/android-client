@@ -621,10 +621,11 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     @Override
     public String debugBundleFile(boolean anonymize) throws Exception {
-        if (mBinder == null) {
+        VPNService.MyLocalBinder binder = mBinder;
+        if (binder == null) {
             throw new Exception("VPN service not connected");
         }
-        return mBinder.debugBundleFile(anonymize);
+        return binder.debugBundleFile(anonymize);
     }
 
     @Override
