@@ -1,0 +1,315 @@
+<resources>
+    <string name="app_name">NetBird</string>
+    <string name="quick_settings_tile_label">NetBird</string>
+
+    <string name="menu_advanced">Розширені</string>
+    <string name="menu_about">Про програму</string>
+    <string name="menu_change_server">Сервер управління</string>
+    <string name="menu_profiles">Профілі</string>
+    <string name="menu_troubleshoot">Діагностика</string>
+
+    <string name="profile_picker_title">Активний профіль</string>
+    <string name="profile_picker_add">Додати профіль</string>
+    <string name="profile_picker_manage">Керувати профілями</string>
+    <string name="profile_picker_show_all">Показати всі профілі (%1$d)</string>
+
+    <string name="bottom_nav_home">Головна</string>
+    <string name="bottom_nav_peers">Піри</string>
+    <string name="bottom_nav_networks">Ресурси</string>
+    <string name="bottom_nav_ssh">SSH</string>
+    <string name="bottom_nav_settings">Налаштування</string>
+
+    <string name="settings_section_connection">З\'єднання</string>
+    <string name="settings_section_settings">Налаштування</string>
+    <string name="settings_section_information">Інформація</string>
+    <string name="settings_documentation">Документація</string>
+
+    <string name="main_status_disconnected">Відключено</string>
+    <string name="main_status_connecting">Підключення…</string>
+    <string name="main_status_no_network">Мережа недоступна</string>
+    <string name="main_status_connected">Підключено</string>
+    <string name="main_status_disconnecting">Відключення…</string>
+    <string name="main_status_login_required">Потрібна авторизація</string>
+    <string name="main_desc_connect">підключити-відключити</string>
+    <string name="main_desc_logo">Логотип NetBird</string>
+    <string name="main_desc_copy">Скопіювати в буфер обміну</string>
+    <string name="main_copied">Скопійовано</string>
+    <string name="main_value_empty">–</string>
+
+    <string name="fragment_firstinstall_continue">Продовжити</string>
+    <string name="fragment_firstinstall_continue_anyway">Все одно продовжити</string>
+    <string name="firstinstall_setup_description">Натисніть "Продовжити" для NetBird Cloud або виберіть "Self-hosted" для власного сервера</string>
+    <string name="fragment_firstinstall_desc_logo">Логотип NetBird</string>
+    <string name="fragment_firstinstall_androidtv_beta">Підтримка Android TV наразі перебуває у фазі бета-тестування. Деякі функції можуть працювати некоректно.</string>
+
+    <string name="about_version">Версія:&#160;</string>
+    <string name="about_license"><u>Ліцензійна угода</u></string>
+    <string name="about_privacy_poliy"><u>Політика конфіденційності</u></string>
+    <string name="about_rights">© 2026 NetBird. Усі права захищені</string>
+
+    <string name="zero_peers_no_machines">Схоже, немає пристроїв, до яких можна підключитися…</string>
+    <string name="zero_peers_btn_learn_why">Дізнатися чому</string>
+
+    <string name="btn_close">Закрити</string>
+    <string name="peers_connected"><![CDATA[<b>%1$d</b> <b>з</b> <b>%2$d</b> пірів підключено]]></string>
+    <string name="peers_hint_search_peers">Пошук пірів</string>
+    <string name="peer_filter_all">Усі</string>
+    <string name="peer_filter_idle">Очікування</string>
+    <string name="peer_filter_connecting">Підключення</string>
+    <string name="peer_filter_connected">Підключено</string>
+    <string name="peer_status_idle">Очікування</string>
+    <string name="peer_status_connecting">Підключення</string>
+    <string name="peer_status_connected">Підключено</string>
+    <string name="peer_status_unknown">Невідомо</string>
+    <string name="peers_clipboard_copy_ip">Скопіювати IP</string>
+    <string name="peers_clipboard_copy_ipv6">Скопіювати IPv6</string>
+    <string name="peers_clipboard_copy_fqdn">Скопіювати FQDN</string>
+    <string name="peers_action_ssh">SSH</string>
+    <string name="ssh_terminal_title">Термінал SSH</string>
+    <string name="ssh_dialog_title">SSH до %1$s</string>
+    <string name="ssh_dialog_host">Хост (IP або FQDN)</string>
+    <string name="ssh_dialog_username">Ім\'я користувача</string>
+    <string name="ssh_dialog_username_required">Введіть ім\'я користувача</string>
+    <string name="ssh_dialog_host_required">Введіть хост</string>
+    <string name="ssh_dialog_port">Порт</string>
+    <string name="ssh_dialog_port_invalid">Введіть порт від 1 до 65535</string>
+    <string name="ssh_dialog_port_default">22</string>
+    <string name="ssh_dialog_port_default_peer">22</string>
+    <string name="ssh_dialog_password">Пароль</string>
+    <string name="ssh_password_prompt_title">Потрібен пароль</string>
+    <string name="ssh_dialog_connect">Підключитися</string>
+    <string name="ssh_dialog_save">Зберегти</string>
+    <string name="ssh_dialog_cancel">Скасувати</string>
+    <string name="ssh_hostkey_prompt_title">Невідомий ключ хоста</string>
+    <string name="ssh_hostkey_prompt_message">Сервер %1$s ще не є довіреним. Перевірте його відбиток перед підключенням:</string>
+    <string name="ssh_hostkey_trust">Довіряти</string>
+    <string name="menu_ssh">SSH</string>
+    <string name="ssh_sessions_title">Сесії SSH</string>
+    <string name="ssh_sessions_empty">Немає активних сесій SSH.\nНатисніть +, щоб розпочати.</string>
+    <string name="ssh_new_connection_title">Нове з\'єднання SSH</string>
+    <string name="ssh_session_delete">Видалити сесію</string>
+    <string name="ssh_session_reconnect">Перепідключитися</string>
+    <string name="ssh_session_disconnect">Відключитися</string>
+    <string name="ssh_session_duplicate">Дублювати сесію</string>
+    <string name="ssh_session_edit">Редагувати сесію</string>
+    <string name="ssh_session_edit_gone">Ця сесія більше не відкрита</string>
+    <string name="ssh_netbird_not_running">NetBird не запущено</string>
+    <string name="ssh_status_connecting">Підключення до %1$s …</string>
+    <string name="ssh_status_session_closed">Сесію закрито</string>
+    <string name="ssh_status_session_closed_reason">Сесію закрито: %1$s</string>
+    <string name="ssh_status_error">Помилка: %1$s</string>
+    <string name="ssh_status_session_gone">Сесію не знайдено (можливо, її було закрито).</string>
+    <string name="ssh_status_service_not_connected">Служба VPN не підключена</string>
+    <string name="ssh_status_missing_host">Відсутній хост</string>
+    <string name="ssh_status_missing_user">Відсутній користувач</string>
+    <string name="ssh_status_wrong_password">Невірний пароль</string>
+    <string name="ssh_state_connecting">підключення</string>
+    <string name="ssh_state_connected">підключено</string>
+    <string name="ssh_state_password_required">потрібен пароль</string>
+    <string name="ssh_state_closed">закрито</string>
+    <string name="ssh_state_error">помилка</string>
+    <string name="ssh_session_delete_confirm">Видалити %1$s та скинути вивід?</string>
+    <string name="ssh_session_delete_confirm_yes">Видалити</string>
+    <string name="ssh_key_copy">Скопіювати</string>
+    <string name="ssh_key_paste">Вставити</string>
+    <string name="ssh_key_desc_arrow_up">Стрілка вгору</string>
+    <string name="ssh_key_desc_arrow_down">Стрілка вниз</string>
+    <string name="ssh_key_desc_arrow_left">Стрілка ліворуч</string>
+    <string name="ssh_key_desc_arrow_right">Стрілка праворуч</string>
+    <string name="ssh_key_desc_ctrl_c">Control C</string>
+    <string name="ssh_key_desc_ctrl_d">Control D</string>
+    <string name="ssh_key_desc_ctrl_z">Control Z</string>
+    <string name="ssh_key_desc_pipe">Pipe</string>
+    <string name="ssh_key_desc_tilde">Тильда</string>
+    <string name="ssh_key_desc_slash">Слеш</string>
+    <string name="ssh_key_desc_dash">Дефіс</string>
+    <string name="ssh_key_desc_underscore">Підкреслення</string>
+    <string name="ssh_copy_no_selection">Спочатку виділіть текст у терміналі</string>
+    <string name="ssh_copy_done">Скопійовано в буфер обміну</string>
+    <string name="ssh_paste_empty">Буфер обміну порожній</string>
+    <string name="peers_desc_filter">Фільтр</string>
+
+    <!-- Peer detail screen -->
+    <string name="peer_detail_title">Пір</string>
+    <string name="peer_detail_refresh">Оновити</string>
+    <string name="peer_detail_copy">Скопіювати</string>
+    <string name="peer_detail_copied">Скопійовано в буфер обміну</string>
+    <string name="peer_detail_netbird_ip">NetBird IP</string>
+    <string name="peer_detail_netbird_ipv6">NetBird IPv6</string>
+    <string name="peer_detail_connection">З\'єднання</string>
+    <string name="peer_detail_connection_relayed">Relayed</string>
+    <string name="peer_detail_connection_p2p">P2P</string>
+    <string name="peer_detail_relay_address">Релей</string>
+    <string name="peer_detail_latency">Затримка</string>
+    <string name="peer_detail_latency_value">%1$d мс</string>
+    <string name="peer_detail_rosenpass">Rosenpass увімкнено</string>
+    <string name="peer_detail_transfer">Байти</string>
+    <string name="peer_detail_bytes_received">Отримано</string>
+    <string name="peer_detail_bytes_sent">Відправлено</string>
+    <string name="peer_detail_status_since">Останнє оновлення з\'єднання</string>
+    <string name="peer_detail_networks">Ресурси</string>
+    <string name="peer_detail_local_ice">Локальний ICE</string>
+    <string name="peer_detail_remote_ice">Віддалений ICE</string>
+    <string name="peer_detail_ice_with_type">%1$s (%2$s)</string>
+    <string name="peer_detail_public_key">Публічний ключ</string>
+    <string name="peer_detail_just_now">Щойно</string>
+    <string name="peer_detail_unknown">-</string>
+    <string name="peer_detail_yes">Так</string>
+    <string name="peer_detail_no">Ні</string>
+
+    <string name="resources_connected"><![CDATA[<b>%1$d</b> <b>з</b> <b>%2$d</b> ресурсів підключено]]></string>
+    <string name="networks_hint_search_networks">Пошук ресурсів</string>
+    <string name="networks_desc_exit_node">вихідний вузол</string>
+
+    <string name="exit_node_title">Вихідний вузол</string>
+    <string name="exit_node_none">Не вибрано</string>
+    <string name="exit_node_unavailable">Немає доступних вихідних вузлів</string>
+    <string name="exit_node_picker_none">Немає</string>
+    <string name="exit_node_switch_failed">Не вдалося змінити вихідний вузол: %1$s</string>
+
+    <string name="change_server_setup_key">Додати цей пристрій за допомогою ключа налаштування</string>
+    <string name="change_server_setup_key_hint">"0EF79C2F-DEE1-419B-BFC8-1BF529332998"</string>
+    <string name="change_server_error_invalid_setup_key">Невірний формат ключа налаштування</string>
+
+    <string name="advanced_section_presharedkey">Попередньо узгоджений ключ</string>
+    <string name="advanced_section_rosenpass">Rosenpass</string>
+    <string name="advanced_section_appearance">Зовнішній вигляд</string>
+    <string name="advanced_details">Ви зможете взаємодіяти лише з тими пірами, які використовують такий самий ключ.</string>
+    <string name="advanced_hint">Додати попередньо узгоджений ключ</string>
+    <string name="advanced_save">Зберегти</string>
+    <string name="advanced_presharedkey_saved_success">Попередньо узгоджений ключ успішно збережено</string>
+    <string name="advanced_presharedkey_save_error">Не вдалося зберегти попередньо узгоджений ключ</string>
+    <string name="advanced_tracelog">Увімкнути трасувальний рівень логування (trace log).</string>
+    <string name="troubleshoot_debug_bundle">Завантажити діагностичний пакет</string>
+    <string name="troubleshoot_anonymize">Анонімізувати конфіденційні дані</string>
+    <string name="troubleshoot_section_logging">Логування</string>
+    <string name="troubleshoot_section_debug_bundle">Діагностичний пакет</string>
+    <string name="advanced_rosenpass">Увімкнути Rosenpass</string>
+    <string name="advanced_rosenpass_permissive">Увімкнути режим сумісності Rosenpass (permissive mode).</string>
+    <string name="advanced_title_network_security">Мережа та безпека</string>
+
+    <string name="advanced_disable_client_routes">Вимкнути клієнтські маршрути</string>
+    <string name="advanced_disable_client_routes_desc">Запобігає обробці цим пристроєм клієнтських маршрутів, отриманих від служби управління</string>
+    <string name="advanced_disable_server_routes">Вимкнути серверні маршрути</string>
+    <string name="advanced_disable_server_routes_desc">Запобігає використанню цього пристрою як маршрутизатора для серверних маршрутів, отриманих від служби управління</string>
+    <string name="advanced_disable_dns">Вимкнути DNS</string>
+    <string name="advanced_disable_dns_desc">Вимикає налаштування DNS NetBird на цьому пристрої</string>
+    <string name="advanced_disable_firewall">Вимкнути брандмауер</string>
+    <string name="advanced_disable_firewall_desc">Вимикає брандмауер NetBird</string>
+    <string name="advanced_disable_ipv6">Вимкнути IPv6</string>
+    <string name="advanced_disable_ipv6_desc">Вимикає оверлейне адресування IPv6 на інтерфейсі тунелю</string>
+    <string name="advanced_allow_ssh">Увімкнути SSH</string>
+    <string name="advanced_allow_ssh_desc">Дозволяє підключення через SSH до цього пристрою</string>
+    <string name="troubleshoot_allow_remote_jobs">Дозволити віддалені діагностичні пакети</string>
+    <string name="troubleshoot_allow_remote_jobs_desc">Дозволяє вашому адміністратору запитувати діагностичний пакет з цього пристрою через сервер управління. Набуде чинності під час наступного підключення</string>
+    <string name="advanced_block_inbound">Блокувати вхідні з\'єднання</string>
+    <string name="advanced_block_inbound_desc">Блокує всі вхідні з\'єднання до цього пристрою та маршрутизованих мереж. Перевизначає будь-які політики, отримані від служби управління</string>
+
+    <string name="desc_logo">Логотип NetBird</string>
+    <string name="desc_exclamation_mark">знак оклику</string>
+    <string name="desc_peers_empty">порожня коробка</string>
+
+    <string name="dialog_always_on_desc"><![CDATA[У вас увімкнено функцію "Завжди активний VPN" для іншого додатка. Щоб увімкнути NetBird, спочатку перейдіть у <b>Налаштування мережі та Інтернету</b> → <b>Розширені</b> → натисніть на <b>значок шестірні</b> для всіх додатків у списку та вимкніть "Завжди активний VPN" для всіх додатків, окрім NetBird.]]></string>
+
+    <string name="theme_picker_selected">Вибрано</string>
+    <string name="theme_picker_announce">Вибрано тему %1$s</string>
+
+    <string name="advanced_theme_system">Системна</string>
+    <string name="advanced_theme_title">Тема оформлення</string>
+    <string name="advanced_theme_dark">Темна</string>
+    <string name="advanced_theme_light">Світла</string>
+    <string name="advanced_force_relay_conn">Примусове використання реле</string>
+    <string name="advanced_force_relay_conn_desc">Примусово використовує реле під час підключення до пірів</string>
+    <string name="exclamation_mark">знак оклику</string>
+    <string name="reconnectionNeededWarningMessage">Щоб застосувати налаштування, потрібно перепідключитися.</string>
+    <string name="change_server_setup_key_warning">Використання ключів налаштування для пристроїв користувачів не рекомендується. SSO з MFA забезпечує вищий рівень безпеки, належне зв\'язування пристрою з користувачем та періодичну повторну автентифікацію.</string>
+    <string name="device_code">Код пристрою: %s</string>
+
+    <!-- Profile strings -->
+    <string name="profiles_active">Активний</string>
+    <string name="profiles_add">Додати профіль</string>
+    <string name="profiles_switch">Переключити</string>
+    <string name="profiles_logout">Вийти</string>
+    <string name="profiles_remove">Видалити</string>
+    <string name="profiles_dialog_add_title">Новий профіль</string>
+    <string name="profiles_dialog_add_hint">наприклад, Робота</string>
+    <string name="profiles_dialog_edit_title">Редагувати профіль</string>
+    <string name="profiles_dialog_edit_submit">Зберегти зміни</string>
+    <string name="profiles_dialog_name_label">Назва профілю</string>
+    <string name="profiles_dialog_name_help">Задайте зрозумілу назву для вашого профілю.</string>
+    <string name="profiles_dialog_server_label">Сервер управління</string>
+    <string name="profiles_dialog_server_help">Використовуйте NetBird Cloud або власний сервер.</string>
+    <string name="profiles_dialog_server_cloud">Хмара</string>
+    <string name="profiles_dialog_server_self_hosted">Self-hosted</string>
+    <string name="profiles_dialog_url_invalid">Будь ласка, введіть коректну URL-адресу, наприклад: https://netbird.selfhosted.com:443</string>
+    <string name="profiles_dialog_url_unreachable">Не вдалося зв\'язатися з цим сервером. Перевірте URL-адресу або все одно додайте профіль, якщо впевнені у її правильності.</string>
+    <string name="profiles_dialog_url_add_anyway">Все одно додати</string>
+    <string name="profiles_dialog_url_save_anyway">Все одно зберегти</string>
+    <string name="profiles_dialog_checking">Перевірка…</string>
+    <string name="profiles_dialog_url_hint" translatable="false">https://netbird.selfhosted.com:443</string>
+    <string name="profiles_rename">Редагувати профіль</string>
+    <string name="profiles_actions">Дії з профілем</string>
+    <string name="profiles_dialog_switch_title">Переключити профіль</string>
+    <string name="profiles_dialog_switch_message">Переключитися на профіль \'%s\'?\n\nЦе розірве поточне з\'єднання.</string>
+    <string name="profiles_dialog_logout_title">Вийти з профілю</string>
+    <string name="profiles_dialog_logout_message">Вийти з профілю \'%s\'?\n\nВам потрібно буде повторно пройти автентифікацію, щоб використовувати цей профіль знову.</string>
+    <string name="profiles_dialog_remove_title">Видалити профіль</string>
+    <string name="profiles_dialog_remove_message">Ви впевнені, що хочете видалити профіль \'%s\'?\n\nЦю дію неможливо скасувати.</string>
+    <string name="profiles_error_empty_name">Назва профілю не може бути порожньою</string>
+    <string name="profiles_error_already_exists">Профіль \'%s\' вже існує</string>
+    <string name="profiles_error_cannot_remove_active">Неможливо видалити активний профіль. Спочатку переключіться на інший профіль.</string>
+    <string name="profiles_error_cannot_remove_default">Неможливо видалити профіль за замовчуванням</string>
+    <string name="profiles_success_logged_out">Здійснено вихід із профілю \'%s\'</string>
+    <string name="profiles_success_removed">Профіль \'%s\' успішно видалено</string>
+
+    <!-- Language picker -->
+    <string name="settings_language">Мова інтерфейсу</string>
+    <string name="language_system_default">За замовчуванням системи</string>
+    <string name="language_picker_announce">Встановлено мову: %1$s</string>
+
+    <!-- Error & Status messages -->
+    <string name="error_vpn_permission_required">Потрібен дозвіл на VPN</string>
+    <string name="about_version_unknown">невідомо</string>
+    <string name="error_generic">Помилка: %s</string>
+    <string name="error_config_path">Не вдалося отримати шлях до конфігурації: %s</string>
+    <string name="troubleshoot_key_copied">Ключ діагностичного пакета скопійовано в буфер обміну</string>
+    <string name="troubleshoot_bundle_failed">Не вдалося створити діагностичний пакет: %s</string>
+    <string name="settings_no_browser">Немає доступного браузера для відкриття %s</string>
+    <string name="error_vpn_dialog_unavailable">Цей пристрій не може відобразити діалогове вікно дозволу VPN, тому підключення неможливо розпочати</string>
+    <string name="session_extended">Сесію продовжено</string>
+    <string name="session_extend_failed">Не вдалося продовжить сесію: %1$s</string>
+    <string name="session_banner_expired">Термін дії сесії закінчився</string>
+    <string name="session_banner_expires_soon">Термін дії сесії закінчується менше ніж за хвилину</string>
+    <string name="session_banner_hint">Натисніть, щоб продовжити сесію</string>
+    <plurals name="session_banner_expires_minutes">
+        <item quantity="one">Термін дії сесії закінчується через %1$d хвилину</item>
+        <item quantity="few">Термін дії сесії закінчується через %1$d хвилини</item>
+        <item quantity="many">Термін дії сесії закінчується через %1$d хвилин</item>
+        <item quantity="other">Термін дії сесії закінчується через %1$d хвилин</item>
+    </plurals>
+    <plurals name="session_banner_expires_hours">
+        <item quantity="one">Термін дії сесії закінчується через %1$d годину</item>
+        <item quantity="few">Термін дії сесії закінчується через %1$d години</item>
+        <item quantity="many">Термін дії сесії закінчується через %1$d годин</item>
+        <item quantity="other">Термін дії сесії закінчується через %1$d годин</item>
+    </plurals>
+    <plurals name="session_banner_expires_days">
+        <item quantity="one">Термін дії сесії закінчується через %1$d день</item>
+        <item quantity="few">Термін дії сесії закінчується через %1$d дні</item>
+        <item quantity="many">Термін дії сесії закінчується через %1$d днів</item>
+        <item quantity="other">Термін дії сесії закінчується через %1$d днів</item>
+    </plurals>
+    <string name="menu_split_tunneling" translatable="false">Split tunneling</string>
+    <string name="split_tunneling_mode_title">Режим</string>
+    <string name="split_tunneling_mode_off">Вимкнено</string>
+    <string name="split_tunneling_mode_off_description">Усі додатки використовують VPN</string>
+    <string name="split_tunneling_mode_off_hint">Наразі всі додатки використовують VPN. Виберіть режим, щоб вибрати потрібні додатки.</string>
+    <string name="split_tunneling_mode_exclude">Виключити</string>
+    <string name="split_tunneling_mode_exclude_description">Вибрані додатки працюють вхідним трафіком вхідним трафіком вмикаючи VPN (поза VPN)</string>
+    <string name="split_tunneling_mode_include">Включити</string>
+    <string name="split_tunneling_mode_include_description">Лише вибрані додатки використовують VPN</string>
+    <string name="split_tunneling_hint_search_apps">Пошук додатків</string>
+    <string name="split_tunneling_empty_include_warning">Не вибрано жодного додатка, тому всі додатки продовжують використовувати VPN. Виберіть хоча б один.</string>
+    <string name="split_tunneling_always_excluded">Завжди виключено з VPN</string>
+    <string name="split_tunneling_never_included">Не може використовувати VPN</string>
+</resources>

@@ -1,0 +1,39 @@
+<resources>
+    <string name="service_name">NetBird</string>
+    <string name="fg_notification_channel_name">Служба NetBird</string>
+    <string name="fg_notification_connected">Підключено</string>
+    <string name="session_notification_channel_name">Завершення сесії</string>
+    <string name="session_notification_expiring_title">Завершується сесія NetBird</string>
+    <string name="session_notification_expiring_text">Ваша сесія входу закінчується приблизно через %1$d хв. Відкрийте додаток, щоб продовжити її.</string>
+    <string name="session_notification_expired_title">Сесія NetBird закінчилася</string>
+    <string name="session_notification_expired_text">Ваша сесія входу закінчилася. Відкрийте додаток, щоб увійти знову.</string>
+    <string name="session_notification_extend">Продовжити сесію</string>
+    <string name="fg_notification_connecting">Підключення…</string>
+    <string name="fg_notification_disconnected">Відключено</string>
+    <string name="fg_notification_no_network">Мережа недоступна</string>
+    <string name="fg_notification_needs_login">Потрібна авторизація</string>
+    <string name="fg_notification_error">Помилка</string>
+    <string name="fg_notification_session_expired">Сесію завершено</string>
+    <string name="fg_notification_session_expires_soon">Сесія закінчується менше ніж за хвилину</string>
+
+    <plurals name="fg_notification_session_expires_minutes">
+        <item quantity="one">Сесія закінчується через %1$d хвилину</item>
+        <item quantity="few">Сесія закінчується через %1$d хвилини</item>
+        <item quantity="many">Сесія закінчується через %1$d хвилин</item>
+        <item quantity="other">Сесія закінчується через %1$d хвилин</item>
+    </plurals>
+
+    <plurals name="fg_notification_session_expires_hours">
+        <item quantity="one">Сесія закінчується через %1$d годину</item>
+        <item quantity="few">Сесія закінчується через %1$d години</item>
+        <item quantity="many">Сесія закінчується через %1$d годин</item>
+        <item quantity="other">Сесія закінчується через %1$d годин</item>
+    </plurals>
+
+    <plurals name="fg_notification_session_expires_days">
+        <item quantity="one">Сесія закінчується через %1$d день</item>
+        <item quantity="few">Сесія закінчується через %1$d дні</item>
+        <item quantity="many">Сесія закінчується через %1$d днів</item>
+        <item quantity="other">Сесія закінчується через %1$d днів</item>
+    </plurals>
+</resources>
