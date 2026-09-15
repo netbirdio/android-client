@@ -47,8 +47,9 @@ public final class CoalescingWorker {
         }
     }
 
+    /** Stops the worker. Queued runs are dropped; a run in progress finishes. */
     public void shutdown() {
-        executor.shutdown();
+        executor.shutdownNow();
     }
 
     private void run() {
