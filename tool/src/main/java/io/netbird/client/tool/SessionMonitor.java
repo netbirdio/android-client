@@ -15,8 +15,10 @@ import java.util.function.Supplier;
  * publishes the warnings; this class only forwards them and edge-detects the
  * NeedsLogin status label, which the run loop sets outside the event stream.
  *
- * <p>All state lives on the main thread; {@link #onStateChanged()} and
- * {@link #onSessionExpiring} may be called from any thread.
+ * <p>The Go calls run on a single worker thread so a busy engine never stalls
+ * the main thread; listener callbacks are posted to the main thread.
+ * {@link #onStateChanged()} and {@link #onSessionExpiring} may be called from
+ * any thread.
  */
 public class SessionMonitor {
 
@@ -29,6 +31,7 @@ public class SessionMonitor {
     private final Supplier<String> status;
     private final LongSupplier deadlineUnixSeconds;
     private final Set<SessionEventListener> listeners = ConcurrentHashMap.newKeySet();
+    private final CoalescingWorker refresher = new CoalescingWorker("nb-session-monitor", this::refresh);
 
     private long lastDeadline;
     private boolean wasNeedsLogin;
@@ -40,7 +43,7 @@ public class SessionMonitor {
 
     /** Wake-up from the Go state-change signal. Safe to call from any thread. */
     public void onStateChanged() {
-        handler.post(this::refresh);
+        refresher.request();
     }
 
     /** Expiry warning from the engine's session watcher. Any thread. */
@@ -60,12 +63,16 @@ public class SessionMonitor {
         // moves the deadline), and a session can expire with no UI running at
         // all — the expiry is an edge the listener would never see otherwise.
         // Same pattern as the Go notifier's setListener.
-        handler.post(() -> {
+        refresher.submit(() -> {
             refresh();
-            notifySafely(() -> listener.onSessionDeadlineChanged(lastDeadline));
-            if (isLoginRequired()) {
-                notifySafely(listener::onSessionExpired);
-            }
+            long deadline = lastDeadline;
+            boolean needsLogin = wasNeedsLogin;
+            handler.post(() -> {
+                notifySafely(() -> listener.onSessionDeadlineChanged(deadline));
+                if (needsLogin) {
+                    notifySafely(listener::onSessionExpired);
+                }
+            });
         });
     }
 
@@ -80,20 +87,26 @@ public class SessionMonitor {
 
     private void refresh() {
         long deadline = deadlineUnixSeconds.getAsLong();
-        if (deadline != lastDeadline) {
-            lastDeadline = deadline;
-            for (SessionEventListener l : listeners) {
-                notifySafely(() -> l.onSessionDeadlineChanged(deadline));
-            }
-        }
+        boolean deadlineChanged = deadline != lastDeadline;
+        lastDeadline = deadline;
 
         boolean needsLogin = STATUS_NEEDS_LOGIN.equals(status.get());
-        if (needsLogin && !wasNeedsLogin) {
-            for (SessionEventListener l : listeners) {
-                notifySafely(l::onSessionExpired);
-            }
-        }
+        boolean expired = needsLogin && !wasNeedsLogin;
         wasNeedsLogin = needsLogin;
+
+        if (!deadlineChanged && !expired) {
+            return;
+        }
+        handler.post(() -> {
+            for (SessionEventListener l : listeners) {
+                if (deadlineChanged) {
+                    notifySafely(() -> l.onSessionDeadlineChanged(deadline));
+                }
+                if (expired) {
+                    notifySafely(l::onSessionExpired);
+                }
+            }
+        });
     }
 
     private void notifySafely(Runnable r) {

@@ -10,6 +10,7 @@ import java.util.List;
 
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
+import io.netbird.client.tool.CoalescingWorker;
 import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.gomobile.android.NetworkArray;
 import io.netbird.gomobile.android.NetworkDomains;
@@ -24,6 +25,9 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     // captured at construction would keep reading through a dead Activity's unbound
     // service connection forever.
     private volatile ServiceAccessor serviceAccessor;
+    // getNetworks()/getPeersList() are JNI calls into Go; keep them off the Go
+    // callback thread that delivers route and peer events.
+    private final CoalescingWorker resourcesRefresher = new CoalescingWorker("nb-networks", this::loadResources);
     private final MutableLiveData<NetworksFragmentUiState> uiState =
             new MutableLiveData<>(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
 
@@ -48,6 +52,7 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     @Override
     protected void onCleared() {
         super.onCleared();
+        resourcesRefresher.shutdown();
         setServiceAccessor(null);
     }
 
@@ -138,6 +143,10 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     }
 
     private void postResources() {
+        resourcesRefresher.request();
+    }
+
+    private void loadResources() {
         ServiceAccessor accessor = serviceAccessor;
         if (accessor == null) {
             return;
@@ -152,7 +161,6 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
             return;
         }
 
-        // This value will be set from a background thread.
         uiState.postValue(new NetworksFragmentUiState(getNetworks(networks), getRoutingPeers(peersFromEngine)));
     }
 

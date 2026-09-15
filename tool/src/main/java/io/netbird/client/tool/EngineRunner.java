@@ -2,6 +2,7 @@ package io.netbird.client.tool;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Looper;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
@@ -91,6 +92,7 @@ class EngineRunner {
 
     /** Session deadline as unix seconds, or 0 when none is known. */
     public long sessionExpiresAt() {
+        warnIfOnMainThread("sessionExpiresAt");
         return goClient.sessionExpiresAtUnix();
     }
 
@@ -351,11 +353,13 @@ class EngineRunner {
     }
 
     public PeerInfoArray peersInfo() {
+        warnIfOnMainThread("peersInfo");
         return goClient.peersList();
     }
 
     @Nullable
     public NetworkArray networks() {
+        warnIfOnMainThread("networks");
         NetworkArray networks = goClient.networks();
         if (networks == null) {
             Log.e(LOGTAG, "Failed to retrieve networks");
@@ -377,6 +381,16 @@ class EngineRunner {
                 s.onStopped();
             }
         }
+    }
+
+    // These calls take the engine's status lock, which a network map update or a
+    // peer storm can hold for a long time. Debug builds flag callers that would
+    // let that block the UI thread.
+    private void warnIfOnMainThread(String call) {
+        if (!isDebuggable || Looper.myLooper() != Looper.getMainLooper()) {
+            return;
+        }
+        Log.w(LOGTAG, "Go call " + call + " on the main thread", new Throwable());
     }
 
     private void updateLogLevel(boolean isTraceLogEnabled, boolean isDebuggable) {
