@@ -24,6 +24,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import java.util.function.IntSupplier;
+
 import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
@@ -109,7 +111,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     // Outlives the engine (and the app process), so it is reported on bind as
     // well as when it happens — and it overrides the disconnected label, which
     // on its own would suggest a plain reconnect is enough.
-    private boolean loginRequired;
+    private volatile boolean loginRequired;
     // Keeps the banner's relative text ("in 45 minutes") fresh while visible.
     private final Runnable sessionTicker = new Runnable() {
         @Override
@@ -399,7 +401,15 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     }
 
     private void setToggle(boolean checked, boolean enabled, int statusResId) {
-        Log.d(LOGTAG, "UI paint requested: status=" + statusResName(statusResId)
+        setToggle(checked, enabled, () -> statusResId);
+    }
+
+    // The label is resolved when the paint runs on the main thread, not when it
+    // is requested on the engine callback thread: a Disconnected paint queued a
+    // moment before onLoginRequired flipped the flag must not overwrite
+    // "Login required".
+    private void setToggle(boolean checked, boolean enabled, IntSupplier statusRes) {
+        Log.d(LOGTAG, "UI paint requested: status=" + statusResName(statusRes.getAsInt())
                 + " toggle=" + checked + " enabled=" + enabled);
         runOnUi(() -> {
             if (buttonConnect != null) {
@@ -417,7 +427,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 paintEnabledState(enabled);
             }
             if (textConnStatus != null) {
-                textConnStatus.setText(statusResId);
+                textConnStatus.setText(statusRes.getAsInt());
                 Log.d(LOGTAG, "UI painted: status=\"" + textConnStatus.getText() + "\"");
             }
         });
@@ -530,7 +540,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 break;
             case DISCONNECTED:
                 closeForceCancelWindow();
-                setToggle(false, true, loginRequired
+                setToggle(false, true, () -> loginRequired
                         ? R.string.main_status_login_required
                         : R.string.main_status_disconnected);
                 break;
