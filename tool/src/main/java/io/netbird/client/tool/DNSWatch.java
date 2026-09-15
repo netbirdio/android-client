@@ -23,7 +23,6 @@ public class DNSWatch {
     private static final String LOGTAG = "DNSWatch";
     private final ConnectivityManager connectivityManager;
     private DNSList dnsServers;
-    private boolean isPrivateDnsActive;
     private String privateDnsServerName;
     private DNSChangeListener listener;
 
@@ -37,24 +36,20 @@ public class DNSWatch {
         return dnsServers;
     }
 
-    public synchronized boolean isPrivateDnsActive() {
-        return isPrivateDnsActive;
-    }
-
-    /**
-     * True when Private DNS is set to a hostname. The OS then sends every
-     * query over TLS to that host and refuses plain DNS, so a resolver in the
-     * tunnel could not be reached at all. In Automatic mode the OS probes a
-     * resolver for TLS and falls back to plain DNS when the probe fails, which
-     * keeps the tunnel resolver usable, so that mode is not reported here.
-     */
-    public synchronized boolean isPrivateDnsStrict() {
-        return privateDnsServerName != null;
-    }
-
     /** The configured Private DNS hostname, or null unless strict mode is on. */
     public synchronized String privateDnsServerName() {
         return privateDnsServerName;
+    }
+
+    /**
+     * False when Private DNS is set to a hostname. The OS then sends every
+     * query over TLS to that host and refuses plain DNS, so a resolver in the
+     * tunnel could not be reached at all. In Automatic mode the OS probes a
+     * resolver for TLS and falls back to plain DNS when the probe fails, which
+     * keeps the tunnel resolver usable, so the name is null in that mode.
+     */
+    static boolean shouldAddTunnelResolver(String privateDnsServerName) {
+        return privateDnsServerName == null || privateDnsServerName.isEmpty();
     }
 
     synchronized public void setDNSChangeListener(DNSChangeListener listener) {
@@ -86,7 +81,6 @@ public class DNSWatch {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            isPrivateDnsActive = props.isPrivateDnsActive();
             privateDnsServerName = props.getPrivateDnsServerName();
         }
 
@@ -110,7 +104,6 @@ public class DNSWatch {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            isPrivateDnsActive = linkProperties.isPrivateDnsActive();
             privateDnsServerName = linkProperties.getPrivateDnsServerName();
         }
 

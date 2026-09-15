@@ -122,17 +122,18 @@ class IFace implements TunAdapter {
         // ConnectivityManager must to run on the main thread instead of a Go routine
         new Handler(Looper.getMainLooper()).post(() -> {
             DNSWatch dnsWatch = new DNSWatch(vpnService);
+            String privateDnsHost = dnsWatch.privateDnsServerName();
 
             // Only a Private DNS hostname keeps the resolver out. With one set
             // the OS talks TLS to that host exclusively, so a plain resolver in
             // the tunnel would only make every lookup fail. Automatic mode
             // falls back to plain DNS when a resolver has no TLS, and Off never
             // asks, so in both the tunnel resolver works.
-            if (dnsWatch.isPrivateDnsStrict()) {
-                Log.i(LOGTAG, "private dns hostname " + dnsWatch.privateDnsServerName()
-                        + " is set, leaving the tunnel resolver out");
-            } else {
+            if (DNSWatch.shouldAddTunnelResolver(privateDnsHost)) {
                 builder.addDnsServer(dns);
+            } else {
+                Log.d(LOGTAG, "private dns hostname " + privateDnsHost
+                        + " is set, leaving the tunnel resolver out");
             }
 
             latch.countDown();
