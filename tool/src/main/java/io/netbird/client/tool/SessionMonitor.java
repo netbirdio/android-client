@@ -36,9 +36,24 @@ public class SessionMonitor {
     private long lastDeadline;
     private boolean wasNeedsLogin;
 
+    private static final class Refresh {
+        final boolean deadlineChanged;
+        final boolean expired;
+
+        Refresh(boolean deadlineChanged, boolean expired) {
+            this.deadlineChanged = deadlineChanged;
+            this.expired = expired;
+        }
+    }
+
     public SessionMonitor(Supplier<String> status, LongSupplier deadlineUnixSeconds) {
         this.status = status;
         this.deadlineUnixSeconds = deadlineUnixSeconds;
+    }
+
+    /** Stops the worker thread. Call when the owning service is destroyed. */
+    public void shutdown() {
+        refresher.shutdown();
     }
 
     /** Wake-up from the Go state-change signal. Safe to call from any thread. */
@@ -64,12 +79,19 @@ public class SessionMonitor {
         // all — the expiry is an edge the listener would never see otherwise.
         // Same pattern as the Go notifier's setListener.
         refresher.submit(() -> {
-            refresh();
+            // The listener is already registered, so whatever this refresh
+            // dispatches reaches it; replay only what it did not.
+            Refresh dispatched = refresh();
             long deadline = lastDeadline;
             boolean needsLogin = wasNeedsLogin;
             handler.post(() -> {
-                notifySafely(() -> listener.onSessionDeadlineChanged(deadline));
-                if (needsLogin) {
+                if (!listeners.contains(listener)) {
+                    return;
+                }
+                if (!dispatched.deadlineChanged) {
+                    notifySafely(() -> listener.onSessionDeadlineChanged(deadline));
+                }
+                if (needsLogin && !dispatched.expired) {
                     notifySafely(listener::onSessionExpired);
                 }
             });
@@ -85,7 +107,7 @@ public class SessionMonitor {
         listeners.remove(listener);
     }
 
-    private void refresh() {
+    private Refresh refresh() {
         long deadline = deadlineUnixSeconds.getAsLong();
         boolean deadlineChanged = deadline != lastDeadline;
         lastDeadline = deadline;
@@ -94,8 +116,9 @@ public class SessionMonitor {
         boolean expired = needsLogin && !wasNeedsLogin;
         wasNeedsLogin = needsLogin;
 
+        Refresh result = new Refresh(deadlineChanged, expired);
         if (!deadlineChanged && !expired) {
-            return;
+            return result;
         }
         handler.post(() -> {
             for (SessionEventListener l : listeners) {
@@ -107,6 +130,7 @@ public class SessionMonitor {
                 }
             }
         });
+        return result;
     }
 
     private void notifySafely(Runnable r) {

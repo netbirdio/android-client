@@ -28,6 +28,10 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     // getNetworks()/getPeersList() are JNI calls into Go; keep them off the Go
     // callback thread that delivers route and peer events.
     private final CoalescingWorker resourcesRefresher = new CoalescingWorker("nb-networks", this::loadResources);
+    // Bumped by clearResources so a load that started before a disconnect cannot
+    // repopulate the list after it was cleared.
+    private final Object publishLock = new Object();
+    private int resourcesGeneration;
     private final MutableLiveData<NetworksFragmentUiState> uiState =
             new MutableLiveData<>(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
 
@@ -147,6 +151,10 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     }
 
     private void loadResources() {
+        int generation;
+        synchronized (publishLock) {
+            generation = resourcesGeneration;
+        }
         ServiceAccessor accessor = serviceAccessor;
         if (accessor == null) {
             return;
@@ -161,7 +169,14 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
             return;
         }
 
-        uiState.postValue(new NetworksFragmentUiState(getNetworks(networks), getRoutingPeers(peersFromEngine)));
+        NetworksFragmentUiState state =
+                new NetworksFragmentUiState(getNetworks(networks), getRoutingPeers(peersFromEngine));
+        synchronized (publishLock) {
+            if (generation != resourcesGeneration) {
+                return;
+            }
+            uiState.postValue(state);
+        }
     }
 
     @Override
@@ -170,7 +185,10 @@ public class NetworksFragmentViewModel extends ViewModel implements RouteChangeL
     }
 
     private void clearResources() {
-        uiState.postValue(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
+        synchronized (publishLock) {
+            resourcesGeneration++;
+            uiState.postValue(new NetworksFragmentUiState(new ArrayList<>(), new ArrayList<>()));
+        }
     }
 
     public void selectRoute(String route) throws Exception {
