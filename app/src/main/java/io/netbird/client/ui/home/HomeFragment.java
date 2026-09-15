@@ -648,7 +648,8 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             action.run();
             return;
         }
-        View root = binding != null ? binding.getRoot() : null;
+        FragmentHomeBinding current = binding;
+        View root = current != null ? current.getRoot() : null;
         if (root != null) {
             root.post(action);
         }

@@ -107,7 +107,8 @@ public class ExitNodePickerSheet extends BottomSheetDialogFragment {
         }
 
         final boolean selected = anySelected;
-        View root = binding != null ? binding.getRoot() : null;
+        SheetExitNodePickerBinding current = binding;
+        View root = current != null ? current.getRoot() : null;
         if (root != null) {
             root.post(() -> showExitNodes(nodes, selected));
         }
