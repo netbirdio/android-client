@@ -24,12 +24,15 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import java.util.function.IntSupplier;
+
 import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListener;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentHomeBinding;
+import io.netbird.client.tool.CoalescingWorker;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
 import io.netbird.client.tool.RouteChangeListener;
@@ -42,7 +45,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private FragmentHomeBinding binding;
     // Set only while the addresses are floating; see toggleInfoRows.
     private PopupWindow addressPopup;
-    private ServiceAccessor serviceAccessor;
+    private volatile ServiceAccessor serviceAccessor;
     private StateListenerRegistry stateListenerRegistry;
 
     private TextView textHostname;
@@ -51,7 +54,10 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private TextView textConnStatus;
 
     private SwitchMaterial buttonConnect;
-    private boolean isConnected;
+    private volatile boolean isConnected;
+    // getNetworks() and sessionExpiresAt() are JNI calls into Go; they must not run
+    // on the Go callback thread that delivers the state events, nor on the main thread.
+    private final CoalescingWorker engineQueries = new CoalescingWorker("nb-home-engine", this::refreshExitNodeRow);
 
     /**
      * Pulses the toggle while it is disabled, matching the desktop client. Held so it can
@@ -98,11 +104,14 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     private static final long DAY_MS = 24 * HOUR_MS;
 
     private long sessionDeadlineUnixSeconds;
+    // Bumped on every deadline push so a slower background seed cannot overwrite a
+    // newer value; an extend finishing during the SSO round-trip lands right at onResume.
+    private volatile int sessionDeadlineVersion;
     // The management server rejected the peer, so reconnecting needs a login.
     // Outlives the engine (and the app process), so it is reported on bind as
     // well as when it happens — and it overrides the disconnected label, which
     // on its own would suggest a plain reconnect is enough.
-    private boolean loginRequired;
+    private volatile boolean loginRequired;
     // Keeps the banner's relative text ("in 45 minutes") fresh while visible.
     private final Runnable sessionTicker = new Runnable() {
         @Override
@@ -239,9 +248,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         updateProfileChip();
         // Deadline changes arrive via onSessionDeadlineChanged while resumed;
         // this seeds the value after a (re)bind or a return to the screen.
-        if (serviceAccessor != null) {
-            sessionDeadlineUnixSeconds = serviceAccessor.sessionExpiresAt();
-        }
+        seedSessionDeadline();
         updateSessionRow();
         if (binding != null) {
             binding.getRoot().removeCallbacks(sessionTicker);
@@ -394,7 +401,15 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     }
 
     private void setToggle(boolean checked, boolean enabled, int statusResId) {
-        Log.d(LOGTAG, "UI paint requested: status=" + statusResName(statusResId)
+        setToggle(checked, enabled, () -> statusResId);
+    }
+
+    // The label is resolved when the paint runs on the main thread, not when it
+    // is requested on the engine callback thread: a Disconnected paint queued a
+    // moment before onLoginRequired flipped the flag must not overwrite
+    // "Login required".
+    private void setToggle(boolean checked, boolean enabled, IntSupplier statusRes) {
+        Log.d(LOGTAG, "UI paint requested: status=" + statusResName(statusRes.getAsInt())
                 + " toggle=" + checked + " enabled=" + enabled);
         runOnUi(() -> {
             if (buttonConnect != null) {
@@ -412,7 +427,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 paintEnabledState(enabled);
             }
             if (textConnStatus != null) {
-                textConnStatus.setText(statusResId);
+                textConnStatus.setText(statusRes.getAsInt());
                 Log.d(LOGTAG, "UI painted: status=\"" + textConnStatus.getText() + "\"");
             }
         });
@@ -525,7 +540,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
                 break;
             case DISCONNECTED:
                 closeForceCancelWindow();
-                setToggle(false, true, loginRequired
+                setToggle(false, true, () -> loginRequired
                         ? R.string.main_status_login_required
                         : R.string.main_status_disconnected);
                 break;
@@ -643,7 +658,8 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
             action.run();
             return;
         }
-        View root = binding != null ? binding.getRoot() : null;
+        FragmentHomeBinding current = binding;
+        View root = current != null ? current.getRoot() : null;
         if (root != null) {
             root.post(action);
         }
@@ -684,6 +700,12 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
     }
 
     @Override
+    public void onDestroy() {
+        engineQueries.shutdown();
+        super.onDestroy();
+    }
+
+    @Override
     public void onEngineStarted() {
 
     }
@@ -705,6 +727,10 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
      * The subtitle names the active exit node, if any.
      */
     private void updateExitNodeRow() {
+        engineQueries.request();
+    }
+
+    private void refreshExitNodeRow() {
         ServiceAccessor accessor = serviceAccessor;
         if (accessor == null || binding == null) {
             return;
@@ -838,6 +864,7 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
     @Override
     public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
+        sessionDeadlineVersion++;
         sessionDeadlineUnixSeconds = expiresAtUnixSeconds;
         runOnUi(this::updateSessionRow);
     }
@@ -851,6 +878,24 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
         if (lastEngineState == EngineState.DISCONNECTED) {
             setToggle(false, true, R.string.main_status_login_required);
         }
+    }
+
+    private void seedSessionDeadline() {
+        ServiceAccessor accessor = serviceAccessor;
+        if (accessor == null) {
+            return;
+        }
+        int version = sessionDeadlineVersion;
+        engineQueries.submit(() -> {
+            long deadline = accessor.sessionExpiresAt();
+            runOnUi(() -> {
+                if (sessionDeadlineVersion != version) {
+                    return;
+                }
+                sessionDeadlineUnixSeconds = deadline;
+                updateSessionRow();
+            });
+        });
     }
 
     private void updateSessionRow() {
