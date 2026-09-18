@@ -620,6 +620,15 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     @Override
+    public String debugBundleFile(boolean anonymize) throws Exception {
+        VPNService.MyLocalBinder binder = mBinder;
+        if (binder == null) {
+            throw new Exception("VPN service not connected");
+        }
+        return binder.debugBundleFile(anonymize);
+    }
+
+    @Override
     public SSHClient newSSHClient() {
         if (mBinder == null) {
             Log.w(LOGTAG, "VPN binder is null");
