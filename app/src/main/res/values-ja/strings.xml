@@ -119,6 +119,13 @@
     <string name="advanced_tracelog">トレースログレベルを有効にします。</string>
     <string name="troubleshoot_debug_bundle">デバッグバンドルをアップロード</string>
     <string name="troubleshoot_anonymize">機密データを匿名化</string>
+    <string name="troubleshoot_anonymize_desc">IP アドレス、ドメイン、その他の機密性の高い値を隠します。</string>
+    <string name="troubleshoot_anonymize_none">なし</string>
+    <string name="troubleshoot_anonymize_none_description">すべてそのまま残ります。組織内でのみ共有してください。</string>
+    <string name="troubleshoot_anonymize_default">デフォルト</string>
+    <string name="troubleshoot_anonymize_default_description">パブリック IP アドレスとドメインを隠します。内部 IPv4 アドレスとピア名はサポート向けに読める状態で残ります。</string>
+    <string name="troubleshoot_anonymize_strict">厳格</string>
+    <string name="troubleshoot_anonymize_strict_description">プライベート、CGNAT、リンクローカルのアドレス、ピア名、WireGuard 鍵も隠します。組織外へ共有する場合に使用します。</string>
     <string name="troubleshoot_section_logging">ログ</string>
     <string name="troubleshoot_section_debug_bundle">デバッグバンドル</string>
     <string name="advanced_rosenpass">Rosenpass を有効にする</string>

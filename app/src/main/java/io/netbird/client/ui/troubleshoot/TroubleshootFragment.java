@@ -20,16 +20,18 @@ import io.netbird.client.databinding.FragmentTroubleshootBinding;
 import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.ProfileManagerWrapper;
 
-public class TroubleshootFragment extends Fragment {
+public class TroubleshootFragment extends Fragment implements AnonymizeLevelSheet.OnLevelChangedListener {
 
     private static final String LOGTAG = "TroubleshootFragment";
+
     private FragmentTroubleshootBinding binding;
+    private Preferences preferences;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentTroubleshootBinding.inflate(inflater, container, false);
 
-        Preferences preferences = new Preferences(inflater.getContext());
+        preferences = new Preferences(inflater.getContext());
         binding.switchTraceLog.setChecked(preferences.isTraceLogEnabled());
 
         binding.switchTraceLog.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -44,9 +46,10 @@ public class TroubleshootFragment extends Fragment {
             binding.switchTraceLog.toggle();
         });
 
-        binding.anonymizeLayout.setOnClickListener(v -> {
-            binding.switchAnonymize.toggle();
-        });
+        updateAnonymizeValue();
+        binding.anonymizeLayout.setOnClickListener(v ->
+                AnonymizeLevelSheet.newInstance(preferences.getAnonymizeLevel())
+                        .show(getChildFragmentManager(), "anonymize_level"));
 
         initializeRemoteJobsSwitch(inflater.getContext());
 
@@ -61,6 +64,18 @@ public class TroubleshootFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onAnonymizeLevelChanged(String level) {
+        preferences.setAnonymizeLevel(level);
+        if (binding != null) {
+            updateAnonymizeValue();
+        }
+    }
+
+    private void updateAnonymizeValue() {
+        binding.anonymizeValue.setText(anonymizeLevelLabel(preferences.getAnonymizeLevel()));
     }
 
     private void initializeRemoteJobsSwitch(Context context) {
@@ -88,11 +103,15 @@ public class TroubleshootFragment extends Fragment {
             return;
         }
 
-        boolean anonymize = binding.switchAnonymize.isChecked();
+        String level = preferences.getAnonymizeLevel();
+        boolean anonymize = !Preferences.ANONYMIZE_LEVEL_NONE.equals(level);
+        String anonymizeLevel = Preferences.ANONYMIZE_LEVEL_STRICT.equals(level)
+                ? Preferences.ANONYMIZE_LEVEL_STRICT
+                : Preferences.ANONYMIZE_LEVEL_DEFAULT;
         binding.buttonDebugBundle.setEnabled(false);
         new Thread(() -> {
             try {
-                String key = ((ServiceAccessor) activity).debugBundle(anonymize);
+                String key = ((ServiceAccessor) activity).debugBundle(anonymize, anonymizeLevel);
                 activity.runOnUiThread(() -> {
                     if (binding == null || !isAdded()) return;
                     binding.buttonDebugBundle.setEnabled(true);
@@ -110,5 +129,16 @@ public class TroubleshootFragment extends Fragment {
                 });
             }
         }).start();
+    }
+
+    private static int anonymizeLevelLabel(String level) {
+        switch (level) {
+            case Preferences.ANONYMIZE_LEVEL_NONE:
+                return R.string.troubleshoot_anonymize_none;
+            case Preferences.ANONYMIZE_LEVEL_STRICT:
+                return R.string.troubleshoot_anonymize_strict;
+            default:
+                return R.string.troubleshoot_anonymize_default;
+        }
     }
 }

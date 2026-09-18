@@ -119,6 +119,13 @@
     <string name="advanced_tracelog">Activar el nivel de registro de seguimiento.</string>
     <string name="troubleshoot_debug_bundle">Subir paquete de diagnóstico</string>
     <string name="troubleshoot_anonymize">Anonimizar datos sensibles</string>
+    <string name="troubleshoot_anonymize_desc">Oculta direcciones IP, dominios y otros valores sensibles.</string>
+    <string name="troubleshoot_anonymize_none">Ninguno</string>
+    <string name="troubleshoot_anonymize_none_description">Todo permanece legible. Compártelo solo dentro de tu organización.</string>
+    <string name="troubleshoot_anonymize_default">Predeterminado</string>
+    <string name="troubleshoot_anonymize_default_description">Oculta las direcciones IP públicas y los dominios. Las direcciones IPv4 internas y los nombres de los peers siguen legibles para el soporte.</string>
+    <string name="troubleshoot_anonymize_strict">Estricto</string>
+    <string name="troubleshoot_anonymize_strict_description">Oculta además las direcciones privadas, CGNAT y de enlace local, los nombres de los peers y las claves WireGuard. Úsalo fuera de tu organización.</string>
     <string name="troubleshoot_section_logging">Registro</string>
     <string name="troubleshoot_section_debug_bundle">Paquete de diagnóstico</string>
     <string name="advanced_rosenpass">Habilitar Rosenpass</string>

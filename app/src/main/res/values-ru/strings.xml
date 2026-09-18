@@ -119,6 +119,13 @@
     <string name="advanced_tracelog">Включить уровень журналирования TRACE.</string>
     <string name="troubleshoot_debug_bundle">Загрузить отладочный пакет</string>
     <string name="troubleshoot_anonymize">Анонимизировать конфиденциальные данные</string>
+    <string name="troubleshoot_anonymize_desc">Скрывает IP-адреса, домены и другие конфиденциальные значения.</string>
+    <string name="troubleshoot_anonymize_none">Нет</string>
+    <string name="troubleshoot_anonymize_none_description">Всё остаётся читаемым. Передавайте только внутри вашей организации.</string>
+    <string name="troubleshoot_anonymize_default">По умолчанию</string>
+    <string name="troubleshoot_anonymize_default_description">Скрывает публичные IP-адреса и домены. Внутренние IPv4-адреса и имена пиров остаются читаемыми для поддержки.</string>
+    <string name="troubleshoot_anonymize_strict">Строгий</string>
+    <string name="troubleshoot_anonymize_strict_description">Скрывает также частные, CGNAT и link-local адреса, имена пиров и ключи WireGuard. Используйте за пределами вашей организации.</string>
     <string name="troubleshoot_section_logging">Журналирование</string>
     <string name="troubleshoot_section_debug_bundle">Отладочный пакет</string>
     <string name="advanced_rosenpass">Включить Rosenpass</string>
