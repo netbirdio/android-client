@@ -30,6 +30,7 @@ import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentAutoConnectBinding;
 import io.netbird.client.tool.autoconnect.AutoConnectArmer;
 import io.netbird.client.tool.autoconnect.AutoConnectPreferences;
+import io.netbird.client.ui.PermissionRequestState;
 
 public class AutoConnectFragment extends Fragment {
 
@@ -85,12 +86,14 @@ public class AutoConnectFragment extends Fragment {
         });
 
         binding.btnBannerEnableNotifications.setOnClickListener(v -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                    && !PermissionRequestState.isPermanentlyDenied(this, Manifest.permission.POST_NOTIFICATIONS)) {
+                PermissionRequestState.markRequested(requireContext(), Manifest.permission.POST_NOTIFICATIONS);
                 requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS);
             } else {
-                // No runtime permission to request pre-13; notifications were
-                // disabled some other way (e.g. the user turned them off in
-                // system settings), so the only way to fix it is there.
+                // Pre-13 there's no runtime permission to request at all, and
+                // on 13+ a permanent denial means the system dialog won't
+                // appear again — either way, Settings is the only fix left.
                 Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
                 intent.putExtra(Settings.EXTRA_APP_PACKAGE, requireContext().getPackageName());
                 startActivity(intent);

@@ -22,6 +22,7 @@ import io.netbird.client.tool.autoconnect.AutoConnectArmer;
 import io.netbird.client.tool.autoconnect.AutoConnectPreferences;
 import io.netbird.client.tool.autoconnect.TrustedNetwork;
 import io.netbird.client.tool.autoconnect.WifiInfoProvider;
+import io.netbird.client.ui.PermissionRequestState;
 
 public class AutoConnectWiFiFragment extends Fragment {
 
@@ -100,14 +101,16 @@ public class AutoConnectWiFiFragment extends Fragment {
         if (!WifiInfoProvider.hasPermission(requireContext())) {
             showLocationBanner(R.string.auto_connect_location_permission_warning,
                     R.string.auto_connect_grant_location_permission,
-                    () -> requestLocationPermissions.launch(new String[]{
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION}));
+                    () -> PermissionRequestState.performGrantAction(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                            () -> requestLocationPermissions.launch(new String[]{
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION})));
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
                 && !WifiInfoProvider.hasBackgroundCapablePermission(requireContext())) {
             showLocationBanner(R.string.auto_connect_background_location_warning,
                     R.string.auto_connect_allow_always,
-                    () -> requestBackgroundLocationPermission.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION));
+                    () -> PermissionRequestState.performGrantAction(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                            () -> requestBackgroundLocationPermission.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)));
         } else {
             binding.locationPermissionBanner.setVisibility(View.GONE);
         }

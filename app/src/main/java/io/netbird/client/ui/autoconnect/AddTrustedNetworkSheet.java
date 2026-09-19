@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import io.netbird.client.R;
 import io.netbird.client.databinding.SheetAddTrustedNetworkBinding;
 import io.netbird.client.tool.autoconnect.WifiInfoProvider;
+import io.netbird.client.ui.PermissionRequestState;
 
 public class AddTrustedNetworkSheet extends BottomSheetDialogFragment {
     public static final String RESULT_KEY = "trusted_network_added";
@@ -47,9 +48,10 @@ public class AddTrustedNetworkSheet extends BottomSheetDialogFragment {
         updateCurrentNetworkButton();
         binding.btnUseCurrentNetwork.setOnClickListener(v -> useCurrentNetwork());
         binding.btnGrantLocationPermission.setOnClickListener(v ->
-                requestLocationPermission.launch(new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION}));
+                PermissionRequestState.performGrantAction(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                        () -> requestLocationPermission.launch(new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION})));
 
         binding.btnCancel.setOnClickListener(v -> dismiss());
         binding.btnSave.setOnClickListener(v -> onSave());
