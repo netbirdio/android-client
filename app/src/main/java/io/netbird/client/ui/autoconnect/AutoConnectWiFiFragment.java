@@ -81,6 +81,12 @@ public class AutoConnectWiFiFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
     /**
      * Two-step flow: first ACCESS_FINE_LOCATION (a normal one-shot grant),
      * then — only once that's granted, and only on Android 10+ where the

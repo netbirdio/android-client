@@ -55,6 +55,12 @@ public class AddTrustedNetworkSheet extends BottomSheetDialogFragment {
         binding.btnSave.setOnClickListener(v -> onSave());
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
     private void updateCurrentNetworkButton() {
         boolean hasPermission = WifiInfoProvider.hasPermission(requireContext());
         binding.btnUseCurrentNetwork.setVisibility(hasPermission ? View.VISIBLE : View.GONE);

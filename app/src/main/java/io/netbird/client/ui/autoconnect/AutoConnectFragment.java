@@ -109,6 +109,12 @@ public class AutoConnectFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
     private void updatePermissionBanners() {
         updateBatteryOptimizationBanner();
         updateNotificationPermissionBanner();
