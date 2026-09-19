@@ -29,7 +29,13 @@ public class AutoConnectWiFiFragment extends Fragment {
     private AutoConnectPreferences preferences;
     private TrustedNetworkAdapter adapter;
 
-    private final ActivityResultLauncher<String> requestLocationPermission =
+    private final ActivityResultLauncher<String[]> requestLocationPermissions =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), grantResults -> {
+                updateLocationPermissionBanner();
+                AutoConnectArmer.sync(requireContext());
+            });
+
+    private final ActivityResultLauncher<String> requestBackgroundLocationPermission =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 updateLocationPermissionBanner();
                 AutoConnectArmer.sync(requireContext());
@@ -88,22 +94,24 @@ public class AutoConnectWiFiFragment extends Fragment {
         if (!WifiInfoProvider.hasPermission(requireContext())) {
             showLocationBanner(R.string.auto_connect_location_permission_warning,
                     R.string.auto_connect_grant_location_permission,
-                    Manifest.permission.ACCESS_FINE_LOCATION);
+                    () -> requestLocationPermissions.launch(new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION}));
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
                 && !WifiInfoProvider.hasBackgroundCapablePermission(requireContext())) {
             showLocationBanner(R.string.auto_connect_background_location_warning,
                     R.string.auto_connect_allow_always,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+                    () -> requestBackgroundLocationPermission.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION));
         } else {
             binding.locationPermissionBanner.setVisibility(View.GONE);
         }
     }
 
-    private void showLocationBanner(int textRes, int buttonRes, String permissionToRequest) {
+    private void showLocationBanner(int textRes, int buttonRes, Runnable onGrantClicked) {
         binding.locationPermissionBanner.setVisibility(View.VISIBLE);
         binding.locationPermissionBannerText.setText(textRes);
         binding.btnBannerGrantLocation.setText(buttonRes);
-        binding.btnBannerGrantLocation.setOnClickListener(v -> requestLocationPermission.launch(permissionToRequest));
+        binding.btnBannerGrantLocation.setOnClickListener(v -> onGrantClicked.run());
     }
 
     private void onRemoveNetwork(TrustedNetwork network) {

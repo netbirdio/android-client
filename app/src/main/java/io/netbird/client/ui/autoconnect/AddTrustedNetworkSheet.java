@@ -30,8 +30,8 @@ public class AddTrustedNetworkSheet extends BottomSheetDialogFragment {
 
     private SheetAddTrustedNetworkBinding binding;
 
-    private final ActivityResultLauncher<String> requestLocationPermission =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> updateCurrentNetworkButton());
+    private final ActivityResultLauncher<String[]> requestLocationPermission =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), grantResults -> updateCurrentNetworkButton());
 
     @Nullable
     @Override
@@ -47,7 +47,9 @@ public class AddTrustedNetworkSheet extends BottomSheetDialogFragment {
         updateCurrentNetworkButton();
         binding.btnUseCurrentNetwork.setOnClickListener(v -> useCurrentNetwork());
         binding.btnGrantLocationPermission.setOnClickListener(v ->
-                requestLocationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION));
+                requestLocationPermission.launch(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}));
 
         binding.btnCancel.setOnClickListener(v -> dismiss());
         binding.btnSave.setOnClickListener(v -> onSave());
