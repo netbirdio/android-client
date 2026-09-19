@@ -8,19 +8,21 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class NetworkChangeDetector {
     private static final String LOGTAG = NetworkChangeDetector.class.getSimpleName();
-    // Transport we do not classify (e.g. ethernet, bluetooth tethering); such
-    // networks still count as internet connectivity.
+    // Transport we do not classify (e.g. bluetooth tethering); such networks
+    // still count as internet connectivity.
     private static final int TYPE_UNCLASSIFIED = -1;
 
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
     private ConnectivityManager.NetworkCallback defaultNetworkCallback;
-    private volatile NetworkAvailabilityListener listener;
+    private final List<NetworkAvailabilityListener> listeners = new CopyOnWriteArrayList<>();
     private boolean defaultNetworkCallbackActive = false;
     private final Object networkCallbackLock = new Object();
 
@@ -53,6 +55,9 @@ public class NetworkChangeDetector {
         if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             return Constants.NetworkType.MOBILE;
         }
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+            return Constants.NetworkType.ETHERNET;
+        }
         return TYPE_UNCLASSIFIED;
     }
 
@@ -70,11 +75,12 @@ public class NetworkChangeDetector {
                         && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
                 Boolean wasValidated = validatedNetworks.put(network, validated);
 
-                NetworkAvailabilityListener localListener = listener;
-                if (localListener != null && type != TYPE_UNCLASSIFIED) {
-                    localListener.onNetworkAvailable(type);
-                    if (wasValidated == null || wasValidated != validated) {
-                        localListener.onNetworkValidated(type, validated);
+                if (type != TYPE_UNCLASSIFIED) {
+                    for (NetworkAvailabilityListener l : listeners) {
+                        l.onNetworkAvailable(type);
+                        if (wasValidated == null || wasValidated != validated) {
+                            l.onNetworkValidated(type, validated);
+                        }
                     }
                 }
                 updateInternetAvailability();
@@ -85,13 +91,14 @@ public class NetworkChangeDetector {
                 Integer type = availableNetworks.remove(network);
                 validatedNetworks.remove(network);
 
-                NetworkAvailabilityListener localListener = listener;
                 // During a same-type handover the replacement network is
                 // already tracked when the old one drops; the transport
                 // itself is not lost, so do not report it as such.
-                if (localListener != null && type != null && type != TYPE_UNCLASSIFIED
+                if (type != null && type != TYPE_UNCLASSIFIED
                         && !availableNetworks.containsValue(type)) {
-                    localListener.onNetworkLost(type);
+                    for (NetworkAvailabilityListener l : listeners) {
+                        l.onNetworkLost(type);
+                    }
                 }
                 updateInternetAvailability();
             }
@@ -108,11 +115,11 @@ public class NetworkChangeDetector {
                 boolean validated = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
                 Boolean wasValidated = validatedNetworks.put(network, validated);
 
-                NetworkAvailabilityListener localListener = listener;
                 Integer type = availableNetworks.get(network);
-                if (localListener != null && type != null && type != TYPE_UNCLASSIFIED) {
-                    if (wasValidated == null || wasValidated != validated) {
-                        localListener.onNetworkValidated(type, validated);
+                if (type != null && type != TYPE_UNCLASSIFIED
+                        && (wasValidated == null || wasValidated != validated)) {
+                    for (NetworkAvailabilityListener l : listeners) {
+                        l.onNetworkValidated(type, validated);
                     }
                 }
             }
@@ -139,9 +146,8 @@ public class NetworkChangeDetector {
             internetAvailable = available;
         }
         Log.i(LOGTAG, "internet availability changed: " + available);
-        NetworkAvailabilityListener localListener = listener;
-        if (localListener != null) {
-            localListener.onInternetAvailabilityChanged(available);
+        for (NetworkAvailabilityListener l : listeners) {
+            l.onInternetAvailabilityChanged(available);
         }
     }
 
@@ -172,7 +178,7 @@ public class NetworkChangeDetector {
         defaultNetworkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
-                NetworkAvailabilityListener listenerToNotify = null;
+                boolean notify = false;
                 int notifyType = 0;
                 long notifyHandle = network.getNetworkHandle();
                 synchronized (networkCallbackLock) {
@@ -193,16 +199,21 @@ public class NetworkChangeDetector {
                     // the active transport type; the per-network onAvailable/onLost
                     // pairing can miss seamless WiFi→cellular→WiFi handovers.
                     if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                        listenerToNotify = listener;
+                        notify = true;
                         notifyType = Constants.NetworkType.WIFI;
                     } else if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                        listenerToNotify = listener;
+                        notify = true;
                         notifyType = Constants.NetworkType.MOBILE;
+                    } else if (caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                        notify = true;
+                        notifyType = Constants.NetworkType.ETHERNET;
                     }
                     Log.d(LOGTAG, "default network became " + network);
                 }
-                if (listenerToNotify != null) {
-                    listenerToNotify.onDefaultNetworkTypeChanged(notifyType, notifyHandle);
+                if (notify) {
+                    for (NetworkAvailabilityListener l : listeners) {
+                        l.onDefaultNetworkTypeChanged(notifyType, notifyHandle);
+                    }
                 }
             }
         };
@@ -247,10 +258,10 @@ public class NetworkChangeDetector {
     }
 
     public void subscribe(NetworkAvailabilityListener listener) {
-        this.listener = listener;
+        listeners.add(listener);
     }
 
-    public void unsubscribe() {
-        this.listener = null;
+    public void unsubscribe(NetworkAvailabilityListener listener) {
+        listeners.remove(listener);
     }
 }

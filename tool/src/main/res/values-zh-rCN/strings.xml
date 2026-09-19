@@ -3,6 +3,7 @@
     <string name="fg_notification_connected">已连接</string>
     <string name="fg_notification_connecting">正在连接…</string>
     <string name="fg_notification_disconnected">已断开连接</string>
+    <string name="fg_notification_monitoring">已断开连接，等待网络变化</string>
     <string name="fg_notification_no_network">无可用网络</string>
     <string name="fg_notification_needs_login">需要登录</string>
     <string name="fg_notification_error">错误</string>
@@ -23,4 +24,7 @@
     <plurals name="fg_notification_session_expires_days">
         <item quantity="other">会话将在 %1$d 天后过期</item>
     </plurals>
+    <string name="auto_connect_notification_channel_name">自动连接</string>
+    <string name="auto_connect_consent_notification_title">自动连接需要你的授权</string>
+    <string name="auto_connect_consent_notification_text">检测到与自动连接设置匹配的网络，但 NetBird 需要 VPN 权限才能连接。请打开应用以授权。</string>
 </resources>

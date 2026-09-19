@@ -3,6 +3,7 @@
     <string name="fg_notification_connected">Verbunden</string>
     <string name="fg_notification_connecting">Wird verbunden…</string>
     <string name="fg_notification_disconnected">Nicht verbunden</string>
+    <string name="fg_notification_monitoring">Nicht verbunden, warte auf Netzwerkänderungen</string>
     <string name="fg_notification_no_network">Kein Netzwerk verfügbar</string>
     <string name="fg_notification_needs_login">Anmeldung erforderlich</string>
     <string name="fg_notification_error">Fehler</string>
@@ -27,4 +28,7 @@
         <item quantity="one">Sitzung läuft in %1$d Tag ab</item>
         <item quantity="other">Sitzung läuft in %1$d Tagen ab</item>
     </plurals>
+    <string name="auto_connect_notification_channel_name">Automatische Verbindung</string>
+    <string name="auto_connect_consent_notification_title">Automatische Verbindung benötigt deine Erlaubnis</string>
+    <string name="auto_connect_consent_notification_text">Ein Netzwerk, das deinen Einstellungen für die automatische Verbindung entspricht, wurde erkannt, aber NetBird benötigt die VPN-Berechtigung, um sich zu verbinden. Öffne die App, um sie zu erteilen.</string>
 </resources>

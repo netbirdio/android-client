@@ -192,6 +192,55 @@
         <include layout="@layout/list_item_setting_divider" />
 
         <LinearLayout
+            android:id="@+id/row_auto_connect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/settings_row_bg"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:minHeight="56dp"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_menu_auto_connect"
+                app:tint="@color/nb_txt_light" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"
+                android:text="@string/menu_auto_connect"
+                android:textColor="@color/nb_txt"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/auto_connect_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/auto_connect_status_inactive"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/nb_txt_light" />
+        </LinearLayout>
+
+        <include layout="@layout/list_item_setting_divider" />
+
+        <LinearLayout
             android:id="@+id/row_language"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
