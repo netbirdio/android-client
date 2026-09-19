@@ -396,6 +396,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             return;
         }
         if (VPNService.ACTION_EXTEND_SESSION.equals(intent.getAction())) {
+            // Consume the action so a later recreation of this activity
+            // (rotation, theme change, etc) doesn't see
+            // the same notification intent via getIntent() and repeat it.
+            intent.setAction(null);
             if (mBinder != null) {
                 extendSession();
             } else {
@@ -406,6 +410,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         if (VPNService.ACTION_LOGIN_REQUIRED.equals(intent.getAction())) {
             // Same interactive login the home screen's connect toggle runs;
             // switchConnection(true) checks VPN consent first as usual.
+            intent.setAction(null);
             if (mBinder != null) {
                 switchConnection(true);
             } else {
