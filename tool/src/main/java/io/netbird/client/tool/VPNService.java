@@ -15,6 +15,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import io.netbird.client.tool.autoconnect.AutoConnectArmer;
 import io.netbird.client.tool.autoconnect.AutoConnectController;
 import io.netbird.client.tool.autoconnect.AutoConnectHost;
 import io.netbird.client.tool.autoconnect.AutoConnectConsentNotification;
@@ -346,6 +347,13 @@ public class VPNService extends android.net.VpnService implements AutoConnectHos
             fgNotification.startForeground();
             sessionNotification.cancel();
             engineRunner.run(urlOpener, isAndroidTV);
+            // Re-derive monitoringActive from current preferences on every connect:
+            // this service instance may have been recreated (e.g. after a prior
+            // disconnect with the app closed) without going through one of
+            // the explicit arming paths, which would otherwise leave a
+            // still-armed auto-connect setup unmonitored after this session
+            // disconnects.
+            AutoConnectArmer.sync(VPNService.this);
         }
 
         public void stopEngine() {
