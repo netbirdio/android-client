@@ -9,6 +9,38 @@
     <string name="menu_troubleshoot">Solução de problemas</string>
     <string name="menu_ssh">SSH</string>
 
+    <string name="menu_auto_connect">Ligação automática</string>
+    <string name="title_auto_connect_wifi">Redes confiáveis</string>
+
+    <string name="auto_connect_networks_header">Redes</string>
+    <string name="auto_connect_connect_on_wifi">Conectar via Wi-Fi</string>
+    <string name="auto_connect_connect_on_mobile_data">Conectar via dados móveis</string>
+    <string name="auto_connect_connect_on_ethernet">Conectar via Ethernet</string>
+    <string name="auto_connect_disconnect_on_no_network">Desconectar sem rede</string>
+    <string name="auto_connect_status_active">Ativo</string>
+    <string name="auto_connect_status_inactive">Inativo</string>
+    <string name="auto_connect_trusted_networks_description">A VPN não se conectará automaticamente nessas redes Wi-Fi. Deixe em branco para conectar automaticamente a qualquer rede Wi-Fi.</string>
+    <string name="auto_connect_trusted_networks_empty">Nenhuma rede confiável adicionada ainda. Conecta automaticamente a qualquer rede Wi-Fi até que você adicione uma.</string>
+    <string name="auto_connect_add_network">Adicionar rede</string>
+    <string name="auto_connect_add_network_title">Adicionar rede confiável</string>
+    <string name="auto_connect_ssid_hint">Nome da rede (SSID)</string>
+    <string name="auto_connect_bssid_hint">Endereço MAC (BSSID), opcional</string>
+    <string name="auto_connect_use_current_network">Usar rede atual</string>
+    <string name="auto_connect_grant_location_permission">Conceda acesso à localização para usar a rede atual</string>
+    <string name="auto_connect_error_empty_entry">Digite um SSID ou um BSSID</string>
+    <string name="auto_connect_error_invalid_bssid">Digite um BSSID válido, por ex. 00:11:22:33:44:55</string>
+    <string name="auto_connect_remove_network_cd">Remover rede</string>
+    <string name="auto_connect_wifi_not_connected">No momento não conectado a nenhuma rede Wi-Fi</string>
+    <string name="auto_connect_location_permission_warning">O acesso à localização é necessário para identificar redes Wi-Fi. Sem ele, as redes confiáveis não podem ser verificadas e a VPN pode se conectar a redes que você queria excluir.</string>
+    <string name="auto_connect_background_location_warning">O acesso à localização está atualmente limitado ao uso do app em primeiro plano. As redes confiáveis são verificadas em segundo plano, então permita o acesso à localização \"O tempo todo\" para que isso funcione de forma confiável.</string>
+    <string name="auto_connect_allow_always">Permitir o tempo todo</string>
+    <string name="auto_connect_battery_optimization_warning">A otimização de bateria pode impedir que a conexão automática funcione de forma confiável em segundo plano. Permita que o NetBird seja executado sem restrições para detectar mudanças de rede de forma consistente.</string>
+    <string name="auto_connect_allow_unrestricted_battery">Permitir uso irrestrito de bateria</string>
+    <string name="auto_connect_notification_permission_warning">As notificações estão desativadas, então você não verá quando a conexão automática estiver aguardando uma mudança de rede ou tiver conectado. Ative as notificações do NetBird para ver o status.</string>
+    <string name="auto_connect_enable_notifications">Ativar notificações</string>
+    <string name="auto_connect_save">Salvar</string>
+    <string name="auto_connect_cancel">Cancelar</string>
+
     <string name="profile_picker_title">Perfil ativo</string>
     <string name="profile_picker_add">Adicionar perfil</string>
     <string name="profile_picker_manage">Gerenciar perfis</string>

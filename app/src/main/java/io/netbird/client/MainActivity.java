@@ -101,6 +101,9 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     // Set when the notification's "Extend session" action arrives before the
     // service binding is up; executed from onServiceConnected.
     private boolean pendingExtendRequest = false;
+    // Set when the login-required notification's tap action arrives before
+    // the service binding is up; executed from onServiceConnected.
+    private boolean pendingLoginRequest = false;
     // Guards the extend flow's cancel path: the SSO surface reports its
     // dismissal even after a successful login, which must not cancel.
     private volatile boolean extendInProgress = false;
@@ -151,6 +154,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             if (pendingExtendRequest) {
                 pendingExtendRequest = false;
                 extendSession();
+            }
+            if (pendingLoginRequest) {
+                pendingLoginRequest = false;
+                switchConnection(true);
             }
         }
 
@@ -381,16 +388,29 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         handleSessionIntent(intent);
     }
 
-    // The persistent notification's "Extend session" action lands here; the
-    // activity is singleTask, so a running instance gets it via onNewIntent.
+    // The persistent notification's "Extend session" action, and the
+    // login-required notification's tap action, land here; the activity is
+    // singleTask, so a running instance gets them via onNewIntent.
     private void handleSessionIntent(Intent intent) {
-        if (intent == null || !VPNService.ACTION_EXTEND_SESSION.equals(intent.getAction())) {
+        if (intent == null) {
             return;
         }
-        if (mBinder != null) {
-            extendSession();
-        } else {
-            pendingExtendRequest = true;
+        if (VPNService.ACTION_EXTEND_SESSION.equals(intent.getAction())) {
+            if (mBinder != null) {
+                extendSession();
+            } else {
+                pendingExtendRequest = true;
+            }
+            return;
+        }
+        if (VPNService.ACTION_LOGIN_REQUIRED.equals(intent.getAction())) {
+            // Same interactive login the home screen's connect toggle runs;
+            // switchConnection(true) checks VPN consent first as usual.
+            if (mBinder != null) {
+                switchConnection(true);
+            } else {
+                pendingLoginRequest = true;
+            }
         }
     }
 

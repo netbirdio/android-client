@@ -9,6 +9,38 @@
     <string name="menu_troubleshoot">Диагностика</string>
     <string name="menu_ssh">SSH</string>
 
+    <string name="menu_auto_connect">Автоматическое подключение</string>
+    <string name="title_auto_connect_wifi">Доверенные сети</string>
+
+    <string name="auto_connect_networks_header">Сети</string>
+    <string name="auto_connect_connect_on_wifi">Подключаться по Wi-Fi</string>
+    <string name="auto_connect_connect_on_mobile_data">Подключаться по мобильным данным</string>
+    <string name="auto_connect_connect_on_ethernet">Подключаться по Ethernet</string>
+    <string name="auto_connect_disconnect_on_no_network">Отключаться при отсутствии сети</string>
+    <string name="auto_connect_status_active">Активно</string>
+    <string name="auto_connect_status_inactive">Неактивно</string>
+    <string name="auto_connect_trusted_networks_description">VPN не будет подключаться автоматически в этих сетях Wi-Fi. Оставьте пустым, чтобы подключаться автоматически к любой сети Wi-Fi.</string>
+    <string name="auto_connect_trusted_networks_empty">Доверенные сети ещё не добавлены. Подключение выполняется автоматически к любой сети Wi-Fi, пока вы не добавите хотя бы одну.</string>
+    <string name="auto_connect_add_network">Добавить сеть</string>
+    <string name="auto_connect_add_network_title">Добавить доверенную сеть</string>
+    <string name="auto_connect_ssid_hint">Имя сети (SSID)</string>
+    <string name="auto_connect_bssid_hint">MAC-адрес (BSSID), необязательно</string>
+    <string name="auto_connect_use_current_network">Использовать текущую сеть</string>
+    <string name="auto_connect_grant_location_permission">Предоставьте доступ к геоположению, чтобы использовать текущую сеть</string>
+    <string name="auto_connect_error_empty_entry">Введите SSID или BSSID</string>
+    <string name="auto_connect_error_invalid_bssid">Введите корректный BSSID, например 00:11:22:33:44:55</string>
+    <string name="auto_connect_remove_network_cd">Удалить сеть</string>
+    <string name="auto_connect_wifi_not_connected">В данный момент нет подключения к сети Wi-Fi</string>
+    <string name="auto_connect_location_permission_warning">Для определения сетей Wi-Fi требуется доступ к геоположению. Без него доверенные сети нельзя сопоставить, и VPN может подключиться к сетям, которые вы хотели исключить.</string>
+    <string name="auto_connect_background_location_warning">Сейчас доступ к геоположению разрешён только при открытом приложении. Доверенные сети проверяются в фоновом режиме, поэтому для надёжной работы разрешите доступ к геоположению «Всегда».</string>
+    <string name="auto_connect_allow_always">Разрешить всегда</string>
+    <string name="auto_connect_battery_optimization_warning">Оптимизация батареи может помешать надёжной работе автоподключения в фоновом режиме. Разрешите NetBird работать без ограничений, чтобы изменения сети определялись стабильно.</string>
+    <string name="auto_connect_allow_unrestricted_battery">Разрешить неограниченное использование батареи</string>
+    <string name="auto_connect_notification_permission_warning">Уведомления отключены, поэтому вы не увидите, когда автоподключение ожидает смены сети или уже подключилось. Включите уведомления NetBird, чтобы видеть статус.</string>
+    <string name="auto_connect_enable_notifications">Включить уведомления</string>
+    <string name="auto_connect_save">Сохранить</string>
+    <string name="auto_connect_cancel">Отмена</string>
+
     <string name="profile_picker_title">Активный профиль</string>
     <string name="profile_picker_add">Добавить профиль</string>
     <string name="profile_picker_manage">Управление профилями</string>

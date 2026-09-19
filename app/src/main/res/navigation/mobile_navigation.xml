@@ -49,6 +49,18 @@
         tools:layout="@layout/fragment_split_tunneling" />
 
     <fragment
+        android:id="@+id/nav_auto_connect"
+        android:name="io.netbird.client.ui.autoconnect.AutoConnectFragment"
+        android:label="@string/menu_auto_connect"
+        tools:layout="@layout/fragment_auto_connect" />
+
+    <fragment
+        android:id="@+id/nav_auto_connect_wifi"
+        android:name="io.netbird.client.ui.autoconnect.AutoConnectWiFiFragment"
+        android:label="@string/title_auto_connect_wifi"
+        tools:layout="@layout/fragment_auto_connect_wifi" />
+
+    <fragment
         android:id="@+id/nav_troubleshoot"
         android:name="io.netbird.client.ui.troubleshoot.TroubleshootFragment"
         android:label="@string/menu_troubleshoot"
