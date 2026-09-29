@@ -120,11 +120,10 @@ class IFace implements TunAdapter {
     }
 
     /**
-     * Adds the NetBird resolver to the tunnel unless Android reports Private
-     * DNS in use on the active network, and returns whether it was added. The
-     * decision is logged together with the network it was taken on: it is
-     * re-evaluated on every tunnel rebuild and depends on whatever network is
-     * active at that moment, so a logcat dump has to show both.
+     * Adds the tunnel resolver unless Private DNS is pinned to a hostname, in
+     * which case the OS could not reach it, and returns whether it was added.
+     * The decision is logged together with the active network so a logcat
+     * dump shows the context of every tunnel rebuild.
      */
     private boolean prepareDnsSetting(VpnService.Builder builder, String dns) {
         if (dns == null || dns.isEmpty()) {
@@ -138,15 +137,22 @@ class IFace implements TunAdapter {
         // ConnectivityManager must to run on the main thread instead of a Go routine
         new Handler(Looper.getMainLooper()).post(() -> {
             DNSWatch dnsWatch = new DNSWatch(vpnService);
+            String privateDnsHost = dnsWatch.privateDnsServerName();
             String network = NetworkDiagnostics.describeActiveNetwork(
                     vpnService.getSystemService(ConnectivityManager.class));
 
-            if (!dnsWatch.isPrivateDnsActive()) {
+            // Only a Private DNS hostname keeps the resolver out. With one set
+            // the OS talks TLS to that host exclusively, so a plain resolver in
+            // the tunnel would only make every lookup fail. Automatic mode
+            // falls back to plain DNS when a resolver has no TLS, and Off never
+            // asks, so in both the tunnel resolver works.
+            if (DNSWatch.shouldAddTunnelResolver(privateDnsHost)) {
                 builder.addDnsServer(dns);
                 added.set(true);
                 Log.i(LOGTAG, "dns decision: netbird resolver " + dns + " added; " + network);
             } else {
-                Log.i(LOGTAG, "dns decision: netbird resolver " + dns + " skipped, private dns active; " + network);
+                Log.i(LOGTAG, "dns decision: netbird resolver " + dns + " skipped, private dns hostname "
+                        + privateDnsHost + " is set; " + network);
             }
 
             latch.countDown();

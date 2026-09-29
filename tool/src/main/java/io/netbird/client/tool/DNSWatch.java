@@ -15,6 +15,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.netbird.client.tool.networks.NetworkDiagnostics;
 import io.netbird.gomobile.android.DNSList;
@@ -24,7 +25,7 @@ public class DNSWatch {
     private static final String LOGTAG = "DNSWatch";
     private final ConnectivityManager connectivityManager;
     private DNSList dnsServers;
-    private boolean isPrivateDnsActive;
+    private String privateDnsServerName;
     private DNSChangeListener listener;
 
 
@@ -37,8 +38,20 @@ public class DNSWatch {
         return dnsServers;
     }
 
-    public synchronized boolean isPrivateDnsActive() {
-        return isPrivateDnsActive;
+    /** The configured Private DNS hostname, or null unless strict mode is on. */
+    public synchronized String privateDnsServerName() {
+        return privateDnsServerName;
+    }
+
+    /**
+     * False when Private DNS is set to a hostname. The OS then sends every
+     * query over TLS to that host and refuses plain DNS, so a resolver in the
+     * tunnel could not be reached at all. In Automatic mode the OS probes a
+     * resolver for TLS and falls back to plain DNS when the probe fails, which
+     * keeps the tunnel resolver usable, so the name is null in that mode.
+     */
+    static boolean shouldAddTunnelResolver(String privateDnsServerName) {
+        return privateDnsServerName == null || privateDnsServerName.isEmpty();
     }
 
     synchronized public void setDNSChangeListener(DNSChangeListener listener) {
@@ -70,7 +83,7 @@ public class DNSWatch {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            isPrivateDnsActive = props.isPrivateDnsActive();
+            privateDnsServerName = props.getPrivateDnsServerName();
         }
 
         List<InetAddress>  list = extendWithFallbackDNS(props.getDnsServers());
@@ -93,12 +106,13 @@ public class DNSWatch {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            boolean wasPrivateDnsActive = isPrivateDnsActive;
-            isPrivateDnsActive = linkProperties.isPrivateDnsActive();
-            if (wasPrivateDnsActive != isPrivateDnsActive) {
-                String server = linkProperties.getPrivateDnsServerName();
-                Log.i(LOGTAG, "private dns active changed: " + wasPrivateDnsActive + " -> " + isPrivateDnsActive
-                        + " server=" + (server == null ? "none" : server));
+            String previousServerName = privateDnsServerName;
+            privateDnsServerName = linkProperties.getPrivateDnsServerName();
+            if (!Objects.equals(previousServerName, privateDnsServerName)) {
+                Log.i(LOGTAG, "private dns hostname changed: "
+                        + (previousServerName == null ? "none" : previousServerName) + " -> "
+                        + (privateDnsServerName == null ? "none" : privateDnsServerName)
+                        + " active=" + linkProperties.isPrivateDnsActive());
             }
         }
 
@@ -148,7 +162,7 @@ public class DNSWatch {
 
     private void notifyDnsWatcher(DNSList dnsServers, List<InetAddress> addresses) throws Exception {
         Log.i(LOGTAG, "host dns servers changed, updating core: " + NetworkDiagnostics.formatAddresses(addresses)
-                + " privateDnsActive=" + isPrivateDnsActive);
+                + " privateDnsHost=" + (privateDnsServerName == null ? "none" : privateDnsServerName));
         listener.onChanged(dnsServers);
     }
 
