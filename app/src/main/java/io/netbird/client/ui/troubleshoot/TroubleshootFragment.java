@@ -250,7 +250,7 @@ public class TroubleshootFragment extends Fragment {
 
     private static void copyAndDelete(File source, ContentResolver resolver, Uri target) throws IOException {
         try (InputStream in = new FileInputStream(source);
-             OutputStream out = resolver.openOutputStream(target, "w")) {
+             OutputStream out = resolver.openOutputStream(target, "wt")) {
             if (out == null) {
                 throw new IOException("cannot open " + target);
             }
