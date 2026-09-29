@@ -17,6 +17,10 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 import io.netbird.client.tool.networks.ConcreteNetworkAvailabilityListener;
 import io.netbird.client.tool.networks.NetworkChangeDetector;
 import io.netbird.client.tool.networks.NetworkDiagnostics;
@@ -534,12 +538,12 @@ public class VPNService extends android.net.VpnService {
 
     private void recreateTUN(boolean force) {
         if (!engineRunner.isRunning()) {
-            Log.i(LOGTAG, "TUN renewal skipped: engine not running");
+            Log.d(LOGTAG, "TUN renewal skipped: engine not running");
             return;
         }
         TUNParameters current = currentTUNParameters;
         if (current == null) {
-            Log.i(LOGTAG, "TUN renewal skipped: no tunnel has been built yet");
+            Log.d(LOGTAG, "TUN renewal skipped: no tunnel has been built yet");
             return;
         }
 
@@ -556,14 +560,13 @@ public class VPNService extends android.net.VpnService {
         // A changed app filter leaves routes and search domains untouched, so the
         // usual guard would skip the very rebuild that applies it.
         if (!force && !current.didChange(routes, searchDomains)) {
-            Log.d(LOGTAG, "TUN renewal skipped: routes and search domains unchanged, routes=" + routes);
+            Log.d(LOGTAG, "TUN renewal skipped: routes and search domains unchanged");
             return;
         }
 
-        Log.i(LOGTAG, "TUN renewal: rebuilding (forced=" + force + ") wanted routes=" + routes
-                + " applied routes=" + current.routesString
-                + " wanted searchDomains=" + searchDomains
-                + " applied searchDomains=" + current.searchDomainsString);
+        Log.i(LOGTAG, "TUN renewal: rebuilding (forced=" + force + ") routes "
+                + describeRouteChange(current.routesString, routes)
+                + " searchDomainsChanged=" + !Objects.equals(current.searchDomainsString, searchDomains));
 
         var iface = new IFace(VPNService.this);
         try {
@@ -579,15 +582,14 @@ public class VPNService extends android.net.VpnService {
                 // The engine has already applied the new route set on its side,
                 // so from here on the OS route table and the engine disagree
                 // until the next successful rebuild.
-                Log.w(LOGTAG, "TUN renewal failed, keeping old tunnel: wanted routes=" + routes
-                        + " applied routes=" + current.routesString);
+                Log.w(LOGTAG, "TUN renewal failed, keeping old tunnel");
                 return;
             }
             this.protect(fd);
             this.engineRunner.renewTUN(fd);
-            Log.i(LOGTAG, "TUN renewed: fd=" + fd + " handed to the engine, routes=" + routes);
+            Log.i(LOGTAG, "TUN renewed: fd=" + fd + " handed to the engine");
         } catch (Exception e) {
-            Log.e(LOGTAG, "failed to recreate tunnel after settings changed: wanted routes=" + routes, e);
+            Log.e(LOGTAG, "failed to recreate tunnel after settings changed", e);
         }
     }
 
@@ -659,5 +661,36 @@ public class VPNService extends android.net.VpnService {
             }
         }
         return connected + "/" + peers.size();
+    }
+
+    private static String describeRouteChange(String applied, String wanted) {
+        Set<String> before = splitRoutes(applied);
+        Set<String> after = splitRoutes(wanted);
+        int added = 0;
+        for (String route : after) {
+            if (!before.contains(route)) {
+                added++;
+            }
+        }
+        int removed = 0;
+        for (String route : before) {
+            if (!after.contains(route)) {
+                removed++;
+            }
+        }
+        return before.size() + "->" + after.size() + " (+" + added + " -" + removed + ")";
+    }
+
+    private static Set<String> splitRoutes(String routes) {
+        Set<String> out = new HashSet<>();
+        if (routes == null || routes.isEmpty()) {
+            return out;
+        }
+        for (String route : routes.split(";")) {
+            if (!route.isEmpty()) {
+                out.add(route);
+            }
+        }
+        return out;
     }
 }

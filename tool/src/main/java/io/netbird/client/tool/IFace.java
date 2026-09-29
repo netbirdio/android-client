@@ -48,7 +48,7 @@ class IFace implements TunAdapter {
             fd = createTun(addr.getAddress().getHostAddress(), addr.getMask(), addrV6, (int) mtu, dns, searchDomains, routes);
         } catch (Exception e) {
             Log.e(LOGTAG, "failed to create tunnel: addr=" + address + " addrV6=" + addressV6 + " mtu=" + mtu
-                    + " dns=" + dns + " searchDomains=" + searchDomainsString + " routes=" + routesString, e);
+                    + " dns=" + dns + " searchDomains=" + searchDomainsString + " routes=" + routes.size(), e);
         }
 
         // only set the currently used TUN parameters if createTun didn't throw exceptions
