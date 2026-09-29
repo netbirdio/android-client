@@ -46,11 +46,18 @@ public class TroubleshootFragment extends Fragment {
     // during which the activity is stopped and the VPN service unbound.
     @Nullable
     private File pendingBundle;
+    private Context appContext;
 
     // The system file picker behind "save to file". Registered at construction
     // because the contract has to exist before the fragment is created.
     private final ActivityResultLauncher<String> saveBundleLauncher = registerForActivityResult(
             new ActivityResultContracts.CreateDocument("application/zip"), this::saveDebugBundleTo);
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        appContext = context.getApplicationContext();
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -217,6 +224,10 @@ public class TroubleshootFragment extends Fragment {
         }
         Activity activity = getActivity();
         if (activity == null) {
+            if (source != null) {
+                deleteQuietly(source);
+            }
+            deleteDocument(appContext.getContentResolver(), target);
             return;
         }
         if (source == null) {
