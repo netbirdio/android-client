@@ -23,7 +23,10 @@ import java.util.concurrent.Executors;
 import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentFirstinstallBinding;
+import io.netbird.client.tool.MDMBridge;
+import io.netbird.client.tool.MDMRestrictions;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.MDMLock;
 import io.netbird.client.ui.PreferenceUI;
 import io.netbird.client.ui.server.ManagementServerSwitch;
 import io.netbird.client.ui.server.ManagementUrl;
@@ -85,6 +88,28 @@ public class FirstInstallFragment extends Fragment {
             binding.txtAndroidtvBeta.setVisibility(View.VISIBLE);
             binding.btnContinue.postDelayed(() -> binding.btnContinue.requestFocus(), 200);
         }
+
+        applyMDMPolicy(view);
+    }
+
+    /**
+     * On a device that is enrolled before it is handed over, the server is
+     * already decided. Showing it and locking it is more honest than an empty
+     * field the user fills in only for the policy to overrule them at the first
+     * connection.
+     */
+    private void applyMDMPolicy(View root) {
+        MDMRestrictions restrictions = MDMBridge.restrictions(requireContext());
+        if (!restrictions.mdm.managesManagementURL()) {
+            return;
+        }
+        if (!ManagementUrl.isCloud(restrictions.mdm.managementURL)) {
+            serverSwitch.setSelfHostedSilently(true);
+            binding.editTextServerUrl.setText(restrictions.mdm.managementURL);
+            binding.editTextServerUrl.setVisibility(View.VISIBLE);
+        }
+        serverSwitch.setEnabled(false);
+        MDMLock.lockControls(root.findViewById(R.id.toggle_server_mode), binding.editTextServerUrl);
     }
 
     private void onModeChanged(boolean selfHosted) {
@@ -170,7 +195,7 @@ public class FirstInstallFragment extends Fragment {
         }
 
         try {
-            Preferences preferences = Android.newPreferences(configPath);
+            Preferences preferences = MDMBridge.openPreferences(requireContext(), configPath);
             preferences.setManagementURL(managementUrl);
             preferences.commit();
         } catch (Exception e) {
@@ -188,7 +213,7 @@ public class FirstInstallFragment extends Fragment {
         setBusy(true);
         Auth auth;
         try {
-            auth = Android.newAuth(configPath, managementUrl);
+            auth = MDMBridge.newAuth(requireContext(), configPath, managementUrl);
         } catch (Exception e) {
             Log.e(TAG, "Failed to create authenticator", e);
             setBusy(false);

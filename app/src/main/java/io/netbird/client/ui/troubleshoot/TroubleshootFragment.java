@@ -66,7 +66,8 @@ public class TroubleshootFragment extends Fragment {
     private void initializeRemoteJobsSwitch(Context context) {
         try {
             String configFilePath = new ProfileManagerWrapper(context).getActiveConfigPath();
-            io.netbird.gomobile.android.Preferences goPreferences = new io.netbird.gomobile.android.Preferences(configFilePath);
+            io.netbird.gomobile.android.Preferences goPreferences =
+                    io.netbird.client.tool.MDMBridge.openPreferences(requireContext(), configFilePath);
             binding.switchAllowRemoteJobs.setChecked(goPreferences.getRemoteJobsAllowed());
             binding.switchAllowRemoteJobs.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 try {

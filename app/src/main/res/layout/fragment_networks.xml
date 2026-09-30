@@ -18,6 +18,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Shown instead of the resource list when the policy switches client
+         routes off: the switches below would toggle a selection the engine is
+         not going to use. -->
+    <TextView
+        android:id="@+id/routes_managed_notice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="@string/mdm_routes_managed"
+        android:textAlignment="center"
+        android:textColor="@color/nb_txt"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/networks_list"
         android:layout_width="match_parent"

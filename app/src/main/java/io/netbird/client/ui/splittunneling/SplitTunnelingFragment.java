@@ -22,8 +22,10 @@ import java.util.Set;
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentSplitTunnelingBinding;
+import io.netbird.client.tool.MDMBridge;
 import io.netbird.client.tool.SplitTunnelConfig;
 import io.netbird.client.tool.SplitTunnelStore;
+import io.netbird.client.ui.MDMLock;
 
 /**
  * Lets the user say which applications the tunnel carries.
@@ -46,6 +48,8 @@ public class SplitTunnelingFragment extends Fragment
     private SplitTunnelConfig.Mode mode = SplitTunnelConfig.Mode.OFF;
     private final Set<String> excluded = new HashSet<>();
     private final Set<String> included = new HashSet<>();
+    /** True while an administrator decides the selection instead of the user. */
+    private boolean managed;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -70,18 +74,23 @@ public class SplitTunnelingFragment extends Fragment
         super.onViewCreated(view, savedInstanceState);
 
         store = new SplitTunnelStore(requireContext());
-        SplitTunnelConfig stored = store.load();
+        SplitTunnelConfig stored = managedOrStored();
         mode = stored.getMode();
         excluded.addAll(stored.getExcluded());
         included.addAll(stored.getIncluded());
         pruneAlwaysExcluded();
 
         adapter = new AppListAdapter(activeSelection(), mode, this);
+        adapter.setReadOnly(managed);
         binding.appsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.appsRecyclerView.setAdapter(adapter);
 
-        binding.rowMode.setOnClickListener(v ->
-                SplitTunnelModeSheet.newInstance(mode).show(getChildFragmentManager(), "split_tunnel_mode"));
+        if (managed) {
+            MDMLock.lock(binding.rowMode);
+        } else {
+            binding.rowMode.setOnClickListener(v ->
+                    SplitTunnelModeSheet.newInstance(mode).show(getChildFragmentManager(), "split_tunnel_mode"));
+        }
 
         binding.searchView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -123,7 +132,7 @@ public class SplitTunnelingFragment extends Fragment
 
     @Override
     public void onAppToggled(String packageName, boolean selected) {
-        if (SplitTunnelConfig.ALWAYS_EXCLUDED.contains(packageName)) {
+        if (managed || SplitTunnelConfig.ALWAYS_EXCLUDED.contains(packageName)) {
             return;
         }
         Set<String> selection = activeSelection();
@@ -140,7 +149,23 @@ public class SplitTunnelingFragment extends Fragment
         return mode == SplitTunnelConfig.Mode.INCLUDE ? included : excluded;
     }
 
+    /**
+     * The policy's selection when an administrator decided it, the user's own
+     * otherwise — the same answer the tunnel acts on, so the screen shows what
+     * is actually applied rather than a stored choice that is being overruled.
+     */
+    private SplitTunnelConfig managedOrStored() {
+        SplitTunnelConfig policy = MDMBridge.managedSplitTunnel(requireContext());
+        managed = policy != null;
+        return managed ? policy : store.load();
+    }
+
     private void save() {
+        // A managed selection is not the user's to keep: writing it into their
+        // store would leave it behind as their own choice once the policy goes.
+        if (managed) {
+            return;
+        }
         if (persist()) {
             serviceAccessor.applySplitTunneling();
         }

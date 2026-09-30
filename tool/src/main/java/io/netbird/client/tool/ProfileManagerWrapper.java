@@ -25,6 +25,9 @@ public class ProfileManagerWrapper {
         // Android always uses app's files directory for config
         String configDir = context.getFilesDir().getPath();
         this.profileManager = io.netbird.gomobile.android.Android.newProfileManager(configDir);
+        // Profile operations read the policy too: a managed management URL has to
+        // win over whatever a profile has stored for it.
+        this.profileManager.setMDMPolicyFetcher(MDMBridge.fetcher(context));
     }
 
     /**

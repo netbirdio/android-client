@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netbird.client.R;
+import io.netbird.client.tool.MDMBridge;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
 
@@ -35,6 +36,8 @@ public class ProfilesFragment extends Fragment {
     private ProfileManagerWrapper profileManager;
     private ProfileUsageTracker usageTracker;
     private final List<Profile> profiles = new ArrayList<>();
+    /** True while the organisation pins one profile and offers no others. */
+    private boolean managed;
 
     @Nullable
     @Override
@@ -48,24 +51,30 @@ public class ProfilesFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_profiles);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        managed = MDMBridge.restrictions(requireContext()).features.disableProfiles;
+
         adapter = new ProfilesAdapter(profiles, new ProfilesAdapter.ProfileActionListener() {
             @Override
             public void onSwitchProfile(Profile profile) {
+                if (refused()) return;
                 showSwitchDialog(profile);
             }
 
             @Override
             public void onEditProfile(Profile profile) {
+                if (refused()) return;
                 showEditDialog(profile);
             }
 
             @Override
             public void onLogoutProfile(Profile profile) {
+                if (refused()) return;
                 showLogoutDialog(profile);
             }
 
             @Override
             public void onRemoveProfile(Profile profile) {
+                if (refused()) return;
                 showRemoveDialog(profile);
             }
         });
@@ -73,10 +82,26 @@ public class ProfilesFragment extends Fragment {
 
         FloatingActionButton btnAdd = view.findViewById(R.id.btn_add_profile);
         btnAdd.setOnClickListener(v -> showAddDialog());
+        if (managed) {
+            btnAdd.setVisibility(GONE);
+        }
 
         loadProfiles();
 
         return view;
+    }
+
+    /**
+     * Settings does not offer this screen under the policy, but the back stack
+     * can still land on it, and switching or deleting a profile is not an action
+     * to leave half-guarded.
+     */
+    private boolean refused() {
+        if (!managed) {
+            return false;
+        }
+        Toast.makeText(requireContext(), R.string.mdm_managed_setting, Toast.LENGTH_SHORT).show();
+        return true;
     }
 
     private void loadProfiles() {

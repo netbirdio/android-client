@@ -23,10 +23,13 @@ import java.util.concurrent.Executors;
 import io.netbird.client.R;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.MDMLock;
 import io.netbird.client.ui.server.ManagementServerSwitch;
 import io.netbird.client.ui.server.ManagementUrl;
 import io.netbird.client.ui.server.SetupKeySection;
 import io.netbird.gomobile.android.Android;
+import io.netbird.client.tool.MDMBridge;
+import io.netbird.client.tool.MDMRestrictions;
 import io.netbird.gomobile.android.Auth;
 import io.netbird.gomobile.android.ErrListener;
 import io.netbird.gomobile.android.Preferences;
@@ -132,10 +135,32 @@ public final class ProfileEditorDialog {
         cancelButton.setOnClickListener(v -> dialog.dismiss());
         okButton.setOnClickListener(v -> onSubmit());
 
+        applyMDMPolicy(dialogView);
+
         dialog.show();
         nameInput.requestFocus();
         // Editing usually means overwriting the name, so pre-select it.
         nameInput.selectAll();
+    }
+
+    /**
+     * A management server the organisation decided is not the profile's to
+     * change. The field already shows the enforced value — the Go preferences
+     * answer with it for a managed key — so this only ends the editing of it
+     * and says why.
+     */
+    private void applyMDMPolicy(View dialogView) {
+        MDMRestrictions restrictions = MDMBridge.restrictions(context);
+        if (!restrictions.mdm.managesManagementURL()) {
+            return;
+        }
+        if (!ManagementUrl.isCloud(restrictions.mdm.managementURL)) {
+            serverSwitch.setSelfHostedSilently(true);
+            urlInput.setText(restrictions.mdm.managementURL);
+            urlInput.setVisibility(View.VISIBLE);
+        }
+        serverSwitch.setEnabled(false);
+        MDMLock.lockControls(dialogView.findViewById(R.id.toggle_server_mode), urlInput);
     }
 
     private int submitLabel() {
@@ -177,7 +202,7 @@ public final class ProfileEditorDialog {
     private String readManagementUrl() {
         try {
             String configPath = profileManager.getConfigPath(editing.getID());
-            return Android.newPreferences(configPath).getManagementURL();
+            return MDMBridge.openPreferences(context, configPath).getManagementURL();
         } catch (Exception e) {
             // A profile that has never connected may not have a URL stored yet;
             // fall back to Cloud rather than blocking the edit.
@@ -282,8 +307,7 @@ public final class ProfileEditorDialog {
                 Log.e(TAG, "Failed to update management URL", e);
                 // The rename above may already have gone through; report the
                 // server failure rather than silently keeping the old URL.
-                urlInput.setError(context.getString(R.string.profiles_dialog_url_invalid));
-                urlInput.requestFocus();
+                showUrlWriteFailure(e);
                 return;
             }
         }
@@ -294,9 +318,22 @@ public final class ProfileEditorDialog {
         }
     }
 
+    /**
+     * A URL the policy refused is not a malformed one. Saying which it was is
+     * the difference between the user hunting for a typo that is not there and
+     * understanding that the server is not theirs to choose.
+     */
+    private void showUrlWriteFailure(Exception e) {
+        boolean refused = MDMRestrictions.rejectedKeys(e.getMessage()) != null;
+        urlInput.setError(context.getString(refused
+                ? R.string.mdm_managed_setting
+                : R.string.profiles_dialog_url_invalid));
+        urlInput.requestFocus();
+    }
+
     private void writeManagementUrl(String profileId, String managementUrl) throws Exception {
         String configPath = profileManager.getConfigPath(profileId);
-        Preferences preferences = Android.newPreferences(configPath);
+        Preferences preferences = MDMBridge.openPreferences(context, configPath);
         preferences.setManagementURL(managementUrl);
         preferences.commit();
     }
@@ -319,8 +356,7 @@ public final class ProfileEditorDialog {
                 // Roll back: don't leave behind a profile pointing at the
                 // cloud server when the user asked for a self-hosted one.
                 rollBack(created);
-                urlInput.setError(context.getString(R.string.profiles_dialog_url_invalid));
-                urlInput.requestFocus();
+                showUrlWriteFailure(e);
                 return;
             }
         }
@@ -357,7 +393,7 @@ public final class ProfileEditorDialog {
         setChecking(true);
         Auth auth;
         try {
-            auth = Android.newAuth(configPath, managementUrl);
+            auth = MDMBridge.newAuth(context, configPath, managementUrl);
         } catch (Exception e) {
             Log.e(TAG, "Failed to create authenticator", e);
             setChecking(false);

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The split-tunnelling modes an administrator can pick, and the values the
+         Go MDM layer reads them as. -->
+    <string-array name="restriction_split_tunnel_mode_entries">
+        <item>@string/restriction_split_tunnel_mode_allow</item>
+        <item>@string/restriction_split_tunnel_mode_disallow</item>
+    </string-array>
+    <string-array name="restriction_split_tunnel_mode_values" translatable="false">
+        <item>allow</item>
+        <item>disallow</item>
+    </string-array>
+</resources>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Titles and descriptions for the managed configuration an administrator fills
+    in, in their EMM console. Kept apart from the app's own strings: the audience
+    is the administrator, not the user of the device.
+-->
+<resources>
+    <string name="restriction_management_url_title" translatable="false">Management server URL</string>
+    <string name="restriction_management_url_description" translatable="false">The NetBird management server every profile connects to. Leave unset to let the user choose.</string>
+
+    <string name="restriction_preshared_key_title" translatable="false">Pre-shared key</string>
+    <string name="restriction_preshared_key_description" translatable="false">WireGuard pre-shared key applied to peer connections. The user never sees the value.</string>
+
+    <string name="restriction_rosenpass_enabled_title" translatable="false">Post-quantum encryption</string>
+    <string name="restriction_rosenpass_enabled_description" translatable="false">Enables Rosenpass key exchange in addition to WireGuard.</string>
+
+    <string name="restriction_rosenpass_permissive_title" translatable="false">Allow peers without post-quantum encryption</string>
+    <string name="restriction_rosenpass_permissive_description" translatable="false">Connects to peers that do not offer Rosenpass, instead of refusing them.</string>
+
+    <string name="restriction_disable_client_routes_title" translatable="false">Disable client routes</string>
+    <string name="restriction_disable_client_routes_description" translatable="false">Stops the device from using routes other peers advertise.</string>
+
+    <string name="restriction_disable_server_routes_title" translatable="false">Disable server routes</string>
+    <string name="restriction_disable_server_routes_description" translatable="false">Stops the device from advertising routes to other peers.</string>
+
+    <string name="restriction_block_inbound_title" translatable="false">Block inbound connections</string>
+    <string name="restriction_block_inbound_description" translatable="false">Drops connections opened by other peers towards this device.</string>
+
+    <string name="restriction_allow_server_ssh_title" translatable="false">Allow the SSH server</string>
+    <string name="restriction_allow_server_ssh_description" translatable="false">Lets other peers open an SSH session to this device.</string>
+
+    <string name="restriction_allow_remote_jobs_title" translatable="false">Allow remote debug bundles</string>
+    <string name="restriction_allow_remote_jobs_description" translatable="false">Lets the management server ask this device for a debug bundle.</string>
+
+    <string name="restriction_split_tunnel_mode_title" translatable="false">Split tunnelling mode</string>
+    <string name="restriction_split_tunnel_mode_description" translatable="false">Whether the applications listed below are the only ones in the tunnel (allow), or the only ones kept out of it (disallow).</string>
+    <string name="restriction_split_tunnel_mode_allow" translatable="false">Only the listed applications use the VPN</string>
+    <string name="restriction_split_tunnel_mode_disallow" translatable="false">The listed applications bypass the VPN</string>
+
+    <string name="restriction_split_tunnel_apps_title" translatable="false">Split tunnelling applications</string>
+    <string name="restriction_split_tunnel_apps_description" translatable="false">Package names, separated by commas. Applications not installed on the device are ignored.</string>
+
+    <string name="restriction_disable_profiles_title" translatable="false">Hide profiles</string>
+    <string name="restriction_disable_profiles_description" translatable="false">Removes profile switching, creation and removal from the app.</string>
+
+    <string name="restriction_disable_networks_title" translatable="false">Hide networks</string>
+    <string name="restriction_disable_networks_description" translatable="false">Removes the Networks tab, leaving routing to the policy.</string>
+
+    <string name="restriction_disable_advanced_view_title" translatable="false">Hide advanced settings</string>
+    <string name="restriction_disable_advanced_view_description" translatable="false">Removes the advanced settings screen from the app.</string>
+
+    <string name="restriction_disable_update_settings_title" translatable="false">Prevent changing settings</string>
+    <string name="restriction_disable_update_settings_description" translatable="false">Leaves every setting visible but read-only.</string>
+</resources>

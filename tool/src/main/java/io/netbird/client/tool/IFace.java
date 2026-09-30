@@ -152,12 +152,13 @@ class IFace implements TunAdapter {
      * The selection is read here rather than passed in because the tunnel is
      * also rebuilt from VPNService without going through the Go engine, and both
      * paths must see the same stored answer. It belongs to the active profile,
-     * so switching profile switches which applications the tunnel carries.
+     * so switching profile switches which applications the tunnel carries —
+     * unless an administrator has decided it, in which case the policy's
+     * selection is the one that reaches the interface.
      */
     private void applyAppFilter(VpnService.Builder builder) {
         PackageManager packageManager = vpnService.getPackageManager();
-        SplitTunnelConfig.Resolution resolution = new SplitTunnelStore(vpnService)
-                .load()
+        SplitTunnelConfig.Resolution resolution = effectiveSplitTunnel()
                 .resolve(vpnService.getPackageName(), packageName -> {
                     try {
                         packageManager.getApplicationInfo(packageName, 0);
@@ -183,6 +184,22 @@ class IFace implements TunAdapter {
 
         Log.d(LOGTAG, "app filter: " + (allow ? "allow " : "disallow ")
                 + resolution.getPackages().size() + " package(s)");
+    }
+
+    /**
+     * The selection a policy imposes, or the user's own when it imposes none.
+     *
+     * Read on every tunnel build rather than cached: the tunnel is rebuilt when
+     * the policy changes, and that rebuild is the moment the new list has to take
+     * effect.
+     */
+    private SplitTunnelConfig effectiveSplitTunnel() {
+        SplitTunnelConfig managed = MDMBridge.managedSplitTunnel(vpnService);
+        if (managed != null) {
+            Log.d(LOGTAG, "app filter is managed by the MDM policy");
+            return managed;
+        }
+        return new SplitTunnelStore(vpnService).load();
     }
 
     @SuppressLint("DefaultLocale")
