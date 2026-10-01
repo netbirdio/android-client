@@ -59,6 +59,10 @@ public class FirstInstallFragment extends Fragment {
     // Set after a failed reachability check so a second tap continues anyway.
     private boolean unreachable;
 
+    // True once the policy has taken the management server over, so the
+    // busy-state helper below cannot hand it back when a login finishes.
+    private boolean serverLocked;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -108,6 +112,7 @@ public class FirstInstallFragment extends Fragment {
             binding.editTextServerUrl.setText(restrictions.mdm.managementURL);
             binding.editTextServerUrl.setVisibility(View.VISIBLE);
         }
+        serverLocked = true;
         serverSwitch.setEnabled(false);
         MDMLock.lockControls(root.findViewById(R.id.toggle_server_mode), binding.editTextServerUrl);
     }
@@ -258,8 +263,8 @@ public class FirstInstallFragment extends Fragment {
         binding.btnContinue.setText(busy
                 ? R.string.profiles_dialog_checking
                 : R.string.fragment_firstinstall_continue);
-        binding.editTextServerUrl.setEnabled(!busy);
-        serverSwitch.setEnabled(!busy);
+        binding.editTextServerUrl.setEnabled(!busy && !serverLocked);
+        serverSwitch.setEnabled(!busy && !serverLocked);
         setupKeySection.setEnabled(!busy);
     }
 

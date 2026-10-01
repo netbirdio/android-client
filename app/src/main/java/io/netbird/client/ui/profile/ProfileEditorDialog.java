@@ -74,6 +74,10 @@ public final class ProfileEditorDialog {
     // the user can save anyway (soft warning, desktop parity).
     private boolean unreachable;
 
+    // True once the policy has taken the management server over, so the
+    // busy-state helper below cannot hand it back when a check finishes.
+    private boolean serverLocked;
+
     private ProfileEditorDialog(Context context, ProfileManagerWrapper profileManager,
                                 Profile editing, OnProfileSavedListener listener) {
         this.context = context;
@@ -159,6 +163,7 @@ public final class ProfileEditorDialog {
             urlInput.setText(restrictions.mdm.managementURL);
             urlInput.setVisibility(View.VISIBLE);
         }
+        serverLocked = true;
         serverSwitch.setEnabled(false);
         MDMLock.lockControls(dialogView.findViewById(R.id.toggle_server_mode), urlInput);
     }
@@ -463,8 +468,8 @@ public final class ProfileEditorDialog {
         okButton.setEnabled(!checking);
         cancelButton.setEnabled(!checking);
         nameInput.setEnabled(!checking);
-        urlInput.setEnabled(!checking);
-        serverSwitch.setEnabled(!checking);
+        urlInput.setEnabled(!checking && !serverLocked);
+        serverSwitch.setEnabled(!checking && !serverLocked);
         setupKeySection.setEnabled(!checking);
 
         // Pin the width before swapping in the shorter "Checking…" label so the
