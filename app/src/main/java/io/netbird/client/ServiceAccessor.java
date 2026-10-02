@@ -31,7 +31,7 @@ public interface ServiceAccessor {
     void addRouteChangeListener(RouteChangeListener listener);
     void removeRouteChangeListener(RouteChangeListener listener);
 
-    String debugBundle(boolean anonymize) throws Exception;
+    String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception;
 
     /** SSO session deadline as unix seconds; 0 when unknown or not bound. */
     long sessionExpiresAt();
