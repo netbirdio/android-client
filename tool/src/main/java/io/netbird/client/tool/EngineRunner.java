@@ -55,25 +55,16 @@ class EngineRunner {
 
         updateLogLevel(isTraceLogEnabled, isDebuggable);
 
-        // The Go-side subscriptions are client-scoped and survive engine
+        // The Go-side subscription is client-scoped and survives engine
         // restarts, so one registration at construction time is enough. The
         // state signal carries no payload; consumers pull the fresh state via
-        // status() / sessionExpiresAt(). Expiry warnings arrive with their
-        // deadline, timed by the engine's own session watcher.
+        // status() / sessionExpiresAt().
         goClient.setStateChangeListener(new StateChangeListener() {
             @Override
             public void onStateChanged() {
                 SessionMonitor monitor = sessionMonitor;
                 if (monitor != null) {
                     monitor.onStateChanged();
-                }
-            }
-
-            @Override
-            public void onSessionExpiring(long expiresAtUnix, long leadMinutes, boolean finalWarning) {
-                SessionMonitor monitor = sessionMonitor;
-                if (monitor != null) {
-                    monitor.onSessionExpiring(expiresAtUnix, leadMinutes, finalWarning);
                 }
             }
         });
