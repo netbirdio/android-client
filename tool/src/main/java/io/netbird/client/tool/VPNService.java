@@ -334,6 +334,10 @@ public class VPNService extends android.net.VpnService {
             return engineRunner.debugBundle(anonymize);
         }
 
+        public String debugBundleFile(boolean anonymize) throws Exception {
+            return engineRunner.debugBundleFile(anonymize);
+        }
+
         /**
          * Rebuilds the tunnel so a split tunnelling change takes hold without
          * asking the user to disconnect. A no-op while the engine is down: the

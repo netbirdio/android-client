@@ -209,6 +209,9 @@
     <string name="error_config_path">Impossible d’obtenir le chemin de configuration : %s</string>
     <string name="troubleshoot_key_copied">Clé du lot de diagnostic copiée dans le presse-papiers</string>
     <string name="troubleshoot_bundle_failed">Impossible de créer le lot de diagnostic : %s</string>
+    <string name="troubleshoot_debug_bundle_file">Enregistrer le lot de diagnostic dans un fichier</string>
+    <string name="troubleshoot_bundle_saved">Lot de diagnostic enregistré</string>
+    <string name="troubleshoot_bundle_save_failed">Impossible d\'enregistrer le lot de diagnostic : %s</string>
     <string name="settings_no_browser">Aucun navigateur disponible pour ouvrir %s</string>
     <string name="error_vpn_dialog_unavailable">Cet appareil ne peut pas afficher la boîte de dialogue d\'autorisation VPN, la connexion ne peut donc pas démarrer</string>
     <string name="profiles_dialog_url_add_anyway">Ajouter quand même</string>

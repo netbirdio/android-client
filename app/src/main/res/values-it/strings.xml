@@ -209,6 +209,9 @@
     <string name="error_config_path">Impossibile ottenere il percorso di configurazione: %s</string>
     <string name="troubleshoot_key_copied">Chiave del pacchetto di debug copiata negli appunti</string>
     <string name="troubleshoot_bundle_failed">Impossibile creare il pacchetto di debug: %s</string>
+    <string name="troubleshoot_debug_bundle_file">Salva pacchetto di debug in un file</string>
+    <string name="troubleshoot_bundle_saved">Pacchetto di debug salvato</string>
+    <string name="troubleshoot_bundle_save_failed">Impossibile salvare il pacchetto di debug: %s</string>
     <string name="settings_no_browser">Nessun browser disponibile per aprire %s</string>
     <string name="error_vpn_dialog_unavailable">Questo dispositivo non può mostrare la finestra di autorizzazione VPN, quindi la connessione non può essere avviata</string>
     <string name="profiles_dialog_url_add_anyway">Aggiungi comunque</string>

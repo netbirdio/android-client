@@ -209,6 +209,9 @@
     <string name="error_config_path">Konfigurationspfad konnte nicht ermittelt werden: %s</string>
     <string name="troubleshoot_key_copied">Debug-Paket-Schlüssel in die Zwischenablage kopiert</string>
     <string name="troubleshoot_bundle_failed">Debug-Paket konnte nicht erstellt werden: %s</string>
+    <string name="troubleshoot_debug_bundle_file">Debug-Paket als Datei speichern</string>
+    <string name="troubleshoot_bundle_saved">Debug-Paket gespeichert</string>
+    <string name="troubleshoot_bundle_save_failed">Debug-Paket konnte nicht gespeichert werden: %s</string>
     <string name="settings_no_browser">Keine Browser-App verfügbar, um %s zu öffnen</string>
     <string name="error_vpn_dialog_unavailable">Dieses Gerät kann den VPN-Berechtigungsdialog nicht anzeigen, daher kann die Verbindung nicht gestartet werden</string>
     <string name="profiles_dialog_url_add_anyway">Trotzdem hinzufügen</string>

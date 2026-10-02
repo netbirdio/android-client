@@ -209,6 +209,9 @@
     <string name="error_config_path">Falha ao obter o caminho da configuração: %s</string>
     <string name="troubleshoot_key_copied">Chave do pacote de depuração copiada para a área de transferência</string>
     <string name="troubleshoot_bundle_failed">Falha ao criar o pacote de depuração: %s</string>
+    <string name="troubleshoot_debug_bundle_file">Salvar pacote de depuração em arquivo</string>
+    <string name="troubleshoot_bundle_saved">Pacote de depuração salvo</string>
+    <string name="troubleshoot_bundle_save_failed">Falha ao salvar o pacote de depuração: %s</string>
     <string name="settings_no_browser">Nenhum navegador disponível para abrir %s</string>
     <string name="error_vpn_dialog_unavailable">Este dispositivo não consegue mostrar a caixa de diálogo de permissão de VPN, por isso a ligação não pode ser iniciada</string>
     <string name="profiles_dialog_url_add_anyway">Adicionar mesmo assim</string>
