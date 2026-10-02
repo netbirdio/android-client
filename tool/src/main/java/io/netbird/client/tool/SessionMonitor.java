@@ -4,6 +4,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongSupplier;
@@ -15,8 +17,10 @@ import java.util.function.Supplier;
  * publishes the warnings; this class only forwards them and edge-detects the
  * NeedsLogin status label, which the run loop sets outside the event stream.
  *
- * <p>All state lives on the main thread; {@link #onStateChanged()} and
- * {@link #onSessionExpiring} may be called from any thread.
+ * <p>The Go calls run on a single worker thread so a busy engine never stalls
+ * the main thread; listener callbacks are posted to the main thread.
+ * {@link #onStateChanged()} and {@link #onSessionExpiring} may be called from
+ * any thread.
  */
 public class SessionMonitor {
 
@@ -29,6 +33,8 @@ public class SessionMonitor {
     private final Supplier<String> status;
     private final LongSupplier deadlineUnixSeconds;
     private final Set<SessionEventListener> listeners = ConcurrentHashMap.newKeySet();
+    private final CoalescingWorker refresher = new CoalescingWorker("nb-session-monitor", this::refresh);
+    private volatile boolean closed;
 
     private long lastDeadline;
     private boolean wasNeedsLogin;
@@ -38,14 +44,24 @@ public class SessionMonitor {
         this.deadlineUnixSeconds = deadlineUnixSeconds;
     }
 
+    /** Stops the worker and drops every listener. Call when the owning service is destroyed. */
+    public void shutdown() {
+        closed = true;
+        listeners.clear();
+        refresher.shutdown();
+    }
+
     /** Wake-up from the Go state-change signal. Safe to call from any thread. */
     public void onStateChanged() {
-        handler.post(this::refresh);
+        refresher.request();
     }
 
     /** Expiry warning from the engine's session watcher. Any thread. */
     public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
         handler.post(() -> {
+            if (closed) {
+                return;
+            }
             for (SessionEventListener l : listeners) {
                 notifySafely(() -> l.onSessionExpiring(expiresAtUnixSeconds, leadMinutes, finalWarning));
             }
@@ -53,19 +69,31 @@ public class SessionMonitor {
     }
 
     public void addListener(SessionEventListener listener) {
-        listeners.add(listener);
         // Replay the current state so a late-binding UI doesn't miss what
         // happened while it was detached. Both cases are real: the activity
         // unbinds for the SSO browser round-trip (which is when an extend
         // moves the deadline), and a session can expire with no UI running at
         // all — the expiry is an edge the listener would never see otherwise.
         // Same pattern as the Go notifier's setListener.
-        handler.post(() -> {
+        //
+        // Registration happens on the worker, after any refresh queued ahead
+        // of it. A change that such a refresh dispatches does not reach the
+        // new listener yet, so the replay below hands over the current state
+        // exactly once.
+        refresher.submit(() -> {
             refresh();
-            notifySafely(() -> listener.onSessionDeadlineChanged(lastDeadline));
-            if (isLoginRequired()) {
-                notifySafely(listener::onSessionExpired);
-            }
+            listeners.add(listener);
+            long deadline = lastDeadline;
+            boolean needsLogin = wasNeedsLogin;
+            handler.post(() -> {
+                if (closed || !listeners.contains(listener)) {
+                    return;
+                }
+                notifySafely(() -> listener.onSessionDeadlineChanged(deadline));
+                if (needsLogin) {
+                    notifySafely(listener::onSessionExpired);
+                }
+            });
         });
     }
 
@@ -75,25 +103,38 @@ public class SessionMonitor {
     }
 
     public void removeListener(SessionEventListener listener) {
-        listeners.remove(listener);
+        refresher.submit(() -> listeners.remove(listener));
     }
 
     private void refresh() {
-        long deadline = deadlineUnixSeconds.getAsLong();
-        if (deadline != lastDeadline) {
-            lastDeadline = deadline;
-            for (SessionEventListener l : listeners) {
-                notifySafely(() -> l.onSessionDeadlineChanged(deadline));
-            }
+        if (closed) {
+            return;
         }
+        long deadline = deadlineUnixSeconds.getAsLong();
+        boolean deadlineChanged = deadline != lastDeadline;
+        lastDeadline = deadline;
 
         boolean needsLogin = STATUS_NEEDS_LOGIN.equals(status.get());
-        if (needsLogin && !wasNeedsLogin) {
-            for (SessionEventListener l : listeners) {
-                notifySafely(l::onSessionExpired);
-            }
-        }
+        boolean expired = needsLogin && !wasNeedsLogin;
         wasNeedsLogin = needsLogin;
+
+        if (!deadlineChanged && !expired) {
+            return;
+        }
+        List<SessionEventListener> targets = new ArrayList<>(listeners);
+        handler.post(() -> {
+            if (closed) {
+                return;
+            }
+            for (SessionEventListener l : targets) {
+                if (deadlineChanged) {
+                    notifySafely(() -> l.onSessionDeadlineChanged(deadline));
+                }
+                if (expired) {
+                    notifySafely(l::onSessionExpired);
+                }
+            }
+        });
     }
 
     private void notifySafely(Runnable r) {
