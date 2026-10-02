@@ -7,6 +7,11 @@
     Go MDM layer's job, and it reads whatever arrives — but it turns the console
     into a form with types and descriptions instead of hand-written JSON.
 
+    The set mirrors what this client actually honours. Keys the Go layer reads
+    for the desktop clients but nothing on Android acts on — disableAutoConnect,
+    enableLocalMetrics, localMetricsAddress — are left out rather than offered to
+    an administrator as controls that would do nothing here.
+
     No key carries a default value on purpose. A declared default is delivered by
     some consoles as though an administrator had set it, and a key that arrives
     is a key the client treats as managed: every setting would lock itself to its
@@ -80,6 +85,24 @@
         android:key="splitTunnelApps"
         android:title="@string/restriction_split_tunnel_apps_title"
         android:description="@string/restriction_split_tunnel_apps_description"
+        android:restrictionType="string" />
+
+    <restriction
+        android:key="wireguardPort"
+        android:title="@string/restriction_wireguard_port_title"
+        android:description="@string/restriction_wireguard_port_description"
+        android:restrictionType="integer" />
+
+    <restriction
+        android:key="lazyConnection"
+        android:title="@string/restriction_lazy_connection_title"
+        android:description="@string/restriction_lazy_connection_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="debugBundleUploadURL"
+        android:title="@string/restriction_bundle_upload_url_title"
+        android:description="@string/restriction_bundle_upload_url_description"
         android:restrictionType="string" />
 
     <restriction

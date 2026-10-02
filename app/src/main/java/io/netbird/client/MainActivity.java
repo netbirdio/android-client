@@ -526,15 +526,28 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         mdmPolicyReceiver = new android.content.BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Toast.makeText(MainActivity.this, R.string.mdm_policy_applied, Toast.LENGTH_LONG).show();
                 MDMBridge.refresh(MainActivity.this);
+                boolean announced = VPNService.ACTION_MDM_POLICY_APPLIED.equals(intent.getAction());
+                if (!announced && appliedMDMSnapshot.equals(MDMBridge.snapshotToken(MainActivity.this))) {
+                    // The OS pushed a policy that changes nothing this screen
+                    // shows; saying so would be noise.
+                    return;
+                }
+                Toast.makeText(MainActivity.this, R.string.mdm_policy_applied, Toast.LENGTH_LONG).show();
                 rebuildIfMDMPolicyChanged();
             }
         };
+        android.content.IntentFilter mdmFilter =
+                new android.content.IntentFilter(VPNService.ACTION_MDM_POLICY_APPLIED);
+        // The service announces a policy it has applied to the engine, but it is
+        // only alive while the tunnel is. Listening for the OS notification as
+        // well means a screen reacts to a policy pushed with the VPN off, rather
+        // than waiting for the next time it comes into view.
+        mdmFilter.addAction(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
         ContextCompat.registerReceiver(
                 this,
                 mdmPolicyReceiver,
-                new android.content.IntentFilter(VPNService.ACTION_MDM_POLICY_APPLIED),
+                mdmFilter,
                 ContextCompat.RECEIVER_NOT_EXPORTED
         );
     }

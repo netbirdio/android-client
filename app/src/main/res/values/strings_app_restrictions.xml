@@ -49,6 +49,15 @@
     <string name="restriction_disable_advanced_view_title" translatable="false">Hide advanced settings</string>
     <string name="restriction_disable_advanced_view_description" translatable="false">Removes the advanced settings screen from the app.</string>
 
+    <string name="restriction_wireguard_port_title" translatable="false">WireGuard port</string>
+    <string name="restriction_wireguard_port_description" translatable="false">UDP port the tunnel binds to. Must be between 1 and 65535.</string>
+
+    <string name="restriction_lazy_connection_title" translatable="false">Lazy connections</string>
+    <string name="restriction_lazy_connection_description" translatable="false">Connects to a peer on first use instead of at startup, overriding the setting the management server sends.</string>
+
+    <string name="restriction_bundle_upload_url_title" translatable="false">Debug bundle upload URL</string>
+    <string name="restriction_bundle_upload_url_description" translatable="false">Where remote debug bundles are uploaded. Must be an https URL. Leave unset to use the service the management server names.</string>
+
     <string name="restriction_disable_update_settings_title" translatable="false">Prevent changing settings</string>
     <string name="restriction_disable_update_settings_description" translatable="false">Leaves every setting visible but read-only.</string>
 </resources>

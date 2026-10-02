@@ -155,10 +155,11 @@ public final class ProfileEditorDialog {
      */
     private void applyMDMPolicy(View dialogView) {
         MDMRestrictions restrictions = MDMBridge.restrictions(context);
-        if (!restrictions.mdm.managesManagementURL()) {
+        if (!restrictions.mdm.managesManagementURL() && !restrictions.features.disableUpdateSettings) {
             return;
         }
-        if (!ManagementUrl.isCloud(restrictions.mdm.managementURL)) {
+        if (restrictions.mdm.managesManagementURL()
+                && !ManagementUrl.isCloud(restrictions.mdm.managementURL)) {
             serverSwitch.setSelfHostedSilently(true);
             urlInput.setText(restrictions.mdm.managementURL);
             urlInput.setVisibility(View.VISIBLE);

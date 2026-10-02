@@ -3,6 +3,8 @@ package io.netbird.client.tool;
 import android.content.Context;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import io.netbird.gomobile.android.Android;
 import io.netbird.gomobile.android.Auth;
 import io.netbird.gomobile.android.Preferences;
@@ -90,6 +92,26 @@ public final class MDMBridge {
     public static String snapshotToken(Context context) {
         restrictions(context);
         return cachedToken;
+    }
+
+    /**
+     * Whether the managed configuration carries this key at all.
+     *
+     * The Go snapshot is the authority for every key it reports, and screens
+     * should use it. This is for the few keys it does not carry — the ones the
+     * desktop clients enforce without a control of their own — and it reads the
+     * same managed configuration Go is handed, so the two cannot disagree.
+     */
+    public static boolean manages(Context context, String key) {
+        String json = fetcher(context).fetchJSON();
+        if (json.isEmpty()) {
+            return false;
+        }
+        try {
+            return new JSONObject(json).has(key);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**

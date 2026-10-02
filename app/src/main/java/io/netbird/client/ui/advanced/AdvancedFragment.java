@@ -31,6 +31,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
 
     private FragmentAdvancedBinding binding;
     private io.netbird.gomobile.android.Preferences goPreferences;
+    private String configFilePath;
     private MDMRestrictions mdm = MDMRestrictions.EMPTY;
 
     private void showReconnectionNeededWarningDialog() {
@@ -64,7 +65,6 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
 
         // Get config path from ProfileManager instead of constructing it
         ProfileManagerWrapper profileManager = new ProfileManagerWrapper(inflater.getContext());
-        String configFilePath;
         try {
             configFilePath = profileManager.getActiveConfigPath();
         } catch (Exception e) {
@@ -118,7 +118,9 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
         binding.switchRosenpass.setOnCheckedChangeListener((buttonView, isChecked) -> {
             goPreferences.setRosenpassEnabled(isChecked);
             setPermissiveEnabled(isChecked);
-            if (!isChecked) {
+            // Only when it is ours to drive: toggling a managed switch would fire
+            // its listener and stage a write the policy is about to refuse.
+            if (!isChecked && !permissiveManaged()) {
                 binding.switchRosenpassPermissive.setChecked(false);
             }
             commit();
@@ -201,8 +203,11 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
      * unless the policy holds it, in which case it stays where the policy put it.
      */
     private void setPermissiveEnabled(boolean enabled) {
-        boolean managed = mdm.features.disableUpdateSettings || mdm.mdm.rosenpassPermissive;
-        binding.switchRosenpassPermissive.setEnabled(enabled && !managed);
+        binding.switchRosenpassPermissive.setEnabled(enabled && !permissiveManaged());
+    }
+
+    private boolean permissiveManaged() {
+        return mdm.features.disableUpdateSettings || mdm.mdm.rosenpassPermissive;
     }
 
     /** Writes the staged settings, reporting a policy refusal as one. */
@@ -210,6 +215,11 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
         try {
             goPreferences.commit();
         } catch (Exception e) {
+            // A refused write stays staged on the Go side, so every later commit
+            // through this instance would be refused for the same reason, long
+            // after the user moved on to another setting. Start again from what
+            // is actually on disk.
+            goPreferences = MDMBridge.openPreferences(requireContext(), configFilePath);
             reportWriteFailure(requireContext(), e);
         }
     }

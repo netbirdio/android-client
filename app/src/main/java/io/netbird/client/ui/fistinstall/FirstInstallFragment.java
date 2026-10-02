@@ -104,10 +104,11 @@ public class FirstInstallFragment extends Fragment {
      */
     private void applyMDMPolicy(View root) {
         MDMRestrictions restrictions = MDMBridge.restrictions(requireContext());
-        if (!restrictions.mdm.managesManagementURL()) {
+        if (!restrictions.mdm.managesManagementURL() && !restrictions.features.disableUpdateSettings) {
             return;
         }
-        if (!ManagementUrl.isCloud(restrictions.mdm.managementURL)) {
+        if (restrictions.mdm.managesManagementURL()
+                && !ManagementUrl.isCloud(restrictions.mdm.managementURL)) {
             serverSwitch.setSelfHostedSilently(true);
             binding.editTextServerUrl.setText(restrictions.mdm.managementURL);
             binding.editTextServerUrl.setVisibility(View.VISIBLE);

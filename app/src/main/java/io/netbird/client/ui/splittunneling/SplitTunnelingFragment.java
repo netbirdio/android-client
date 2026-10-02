@@ -156,8 +156,11 @@ public class SplitTunnelingFragment extends Fragment
      */
     private SplitTunnelConfig managedOrStored() {
         SplitTunnelConfig policy = MDMBridge.managedSplitTunnel(requireContext());
-        managed = policy != null;
-        return managed ? policy : store.load();
+        // disableUpdateSettings leaves the user's own selection on screen but
+        // takes the editing away, the same as it does on the advanced screen.
+        managed = policy != null
+                || MDMBridge.restrictions(requireContext()).features.disableUpdateSettings;
+        return policy != null ? policy : store.load();
     }
 
     private void save() {

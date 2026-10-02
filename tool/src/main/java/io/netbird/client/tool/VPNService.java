@@ -60,6 +60,11 @@ public class VPNService extends android.net.VpnService {
     private NetworkSwitchNotifier networkSwitchNotifier;
     private android.content.BroadcastReceiver stopEngineReceiver;
     private android.content.BroadcastReceiver mdmPolicyReceiver;
+    // Set while a policy change brings the engine back up. The stop in between
+    // tears the foreground notification down, and nothing else on the restart
+    // path would raise it again — unlike every other start, which goes through
+    // onStartCommand or the binder.
+    private volatile boolean restoreForegroundAfterRestart;
 
     @Override
     public void onCreate() {
@@ -185,7 +190,9 @@ public class VPNService extends android.net.VpnService {
         sendBroadcast(applied);
 
         // Rebuilds the tunnel with it, which is also what applies a changed
-        // application filter. A no-op while the engine is down.
+        // application filter. A no-op while the engine is down, which is also
+        // when there is no foreground state to restore.
+        restoreForegroundAfterRestart = engineRunner.isRunning();
         engineRunner.restart();
     }
 
@@ -527,6 +534,11 @@ public class VPNService extends android.net.VpnService {
     public ServiceStateListener serviceStateListener = new ServiceStateListener() {
         @Override
         public void onStarted() {
+            if (restoreForegroundAfterRestart) {
+                restoreForegroundAfterRestart = false;
+                fgNotification.setState(ForegroundNotification.State.CONNECTING);
+                fgNotification.startForeground();
+            }
             sessionMonitor.onStateChanged();
         }
 
