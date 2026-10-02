@@ -3,6 +3,7 @@
     <string name="fg_notification_connected">Подключено</string>
     <string name="fg_notification_connecting">Подключение…</string>
     <string name="fg_notification_disconnected">Отключено</string>
+    <string name="fg_notification_monitoring">Отключено, ожидание изменений сети</string>
     <string name="fg_notification_no_network">Сеть недоступна</string>
     <string name="fg_notification_needs_login">Требуется вход</string>
     <string name="fg_notification_error">Ошибка</string>
@@ -33,4 +34,7 @@
         <item quantity="many">Сеанс истекает через %1$d дней</item>
         <item quantity="other">Сеанс истекает через %1$d дня</item>
     </plurals>
+    <string name="auto_connect_notification_channel_name">Автоподключение</string>
+    <string name="auto_connect_consent_notification_title">Автоподключению требуется ваше разрешение</string>
+    <string name="auto_connect_consent_notification_text">Обнаружена сеть, соответствующая вашим настройкам автоподключения, но для подключения NetBird требуется разрешение VPN. Откройте приложение, чтобы предоставить его.</string>
 </resources>

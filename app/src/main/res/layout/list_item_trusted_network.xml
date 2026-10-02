@@ -1,0 +1,73 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:layout_marginBottom="12dp"
+    android:padding="16dp"
+    android:background="@color/nb_gray_bg">
+
+    <ImageView
+        android:id="@+id/icon_trusted_network"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_wifi"
+        android:contentDescription="@null"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="@color/nb_txt_light" />
+
+    <TextView
+        android:id="@+id/text_network_primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt"
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/text_network_secondary"
+        app:layout_constraintStart_toEndOf="@id/icon_trusted_network"
+        app:layout_constraintEnd_toStartOf="@id/btn_remove_network"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="MyHomeWiFi" />
+
+    <TextView
+        android:id="@+id/text_network_secondary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/nb_txt_light"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/text_network_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/icon_trusted_network"
+        app:layout_constraintEnd_toStartOf="@id/btn_remove_network"
+        tools:text="00:11:22:33:44:55"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/btn_remove_network"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="@string/auto_connect_remove_network_cd"
+        android:padding="8dp"
+        android:src="@drawable/remove_24px"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/nb_txt_light" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

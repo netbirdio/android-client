@@ -9,6 +9,38 @@
     <string name="menu_troubleshoot">Dépannage</string>
     <string name="menu_ssh">SSH</string>
 
+    <string name="menu_auto_connect">Connexion automatique</string>
+    <string name="title_auto_connect_wifi">Réseaux de confiance</string>
+
+    <string name="auto_connect_networks_header">Réseaux</string>
+    <string name="auto_connect_connect_on_wifi">Se connecter en Wi-Fi</string>
+    <string name="auto_connect_connect_on_mobile_data">Se connecter en données mobiles</string>
+    <string name="auto_connect_connect_on_ethernet">Se connecter en Ethernet</string>
+    <string name="auto_connect_disconnect_on_no_network">Se déconnecter en l\'absence de réseau</string>
+    <string name="auto_connect_status_active">Actif</string>
+    <string name="auto_connect_status_inactive">Inactif</string>
+    <string name="auto_connect_trusted_networks_description">Le VPN ne se connectera pas automatiquement sur ces réseaux Wi-Fi. Laissez vide pour vous connecter automatiquement à n\'importe quel réseau Wi-Fi.</string>
+    <string name="auto_connect_trusted_networks_empty">Aucun réseau de confiance ajouté pour le moment. Se connecte automatiquement à n\'importe quel réseau Wi-Fi tant que vous n\'en ajoutez pas.</string>
+    <string name="auto_connect_add_network">Ajouter un réseau</string>
+    <string name="auto_connect_add_network_title">Ajouter un réseau de confiance</string>
+    <string name="auto_connect_ssid_hint">Nom du réseau (SSID)</string>
+    <string name="auto_connect_bssid_hint">Adresse MAC (BSSID), facultatif</string>
+    <string name="auto_connect_use_current_network">Utiliser le réseau actuel</string>
+    <string name="auto_connect_grant_location_permission">Autoriser l\'accès à la localisation pour utiliser le réseau actuel</string>
+    <string name="auto_connect_error_empty_entry">Saisissez un SSID ou un BSSID</string>
+    <string name="auto_connect_error_invalid_bssid">Saisissez un BSSID valide, par ex. 00:11:22:33:44:55</string>
+    <string name="auto_connect_remove_network_cd">Supprimer le réseau</string>
+    <string name="auto_connect_wifi_not_connected">Actuellement non connecté à un réseau Wi-Fi</string>
+    <string name="auto_connect_location_permission_warning">L\'accès à la localisation est nécessaire pour identifier les réseaux Wi-Fi. Sans cela, les réseaux de confiance ne peuvent pas être vérifiés et le VPN risque de se connecter à des réseaux que vous vouliez exclure.</string>
+    <string name="auto_connect_background_location_warning">L\'accès à la localisation est actuellement limité à l\'utilisation de l\'application au premier plan. Les réseaux de confiance sont vérifiés en arrière-plan ; autorisez l\'accès à la localisation « Toujours » pour que cela fonctionne de manière fiable.</string>
+    <string name="auto_connect_allow_always">Toujours autoriser</string>
+    <string name="auto_connect_battery_optimization_warning">L\'optimisation de la batterie peut empêcher la connexion automatique de fonctionner de manière fiable en arrière-plan. Autorisez NetBird à s\'exécuter sans restriction pour détecter les changements de réseau de façon constante.</string>
+    <string name="auto_connect_allow_unrestricted_battery">Autoriser une utilisation illimitée de la batterie</string>
+    <string name="auto_connect_notification_permission_warning">Les notifications sont désactivées : vous ne verrez donc pas quand la connexion automatique attend un changement de réseau ou s\'est connectée. Activez les notifications de NetBird pour voir son état.</string>
+    <string name="auto_connect_enable_notifications">Activer les notifications</string>
+    <string name="auto_connect_save">Enregistrer</string>
+    <string name="auto_connect_cancel">Annuler</string>
+
     <string name="profile_picker_title">Profil actif</string>
     <string name="profile_picker_add">Ajouter un profil</string>
     <string name="profile_picker_manage">Gérer les profils</string>

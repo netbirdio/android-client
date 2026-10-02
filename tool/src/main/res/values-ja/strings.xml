@@ -3,6 +3,7 @@
     <string name="fg_notification_connected">接続済み</string>
     <string name="fg_notification_connecting">接続中…</string>
     <string name="fg_notification_disconnected">未接続</string>
+    <string name="fg_notification_monitoring">未接続、ネットワークの変化を待機中</string>
     <string name="fg_notification_no_network">ネットワークがありません</string>
     <string name="fg_notification_needs_login">ログインが必要</string>
     <string name="fg_notification_error">エラー</string>
@@ -23,4 +24,7 @@
     <plurals name="fg_notification_session_expires_days">
         <item quantity="other">セッションは %1$d 日後に期限切れになります</item>
     </plurals>
+    <string name="auto_connect_notification_channel_name">自動接続</string>
+    <string name="auto_connect_consent_notification_title">自動接続には許可が必要です</string>
+    <string name="auto_connect_consent_notification_text">自動接続の設定に一致するネットワークが検出されましたが、接続するにはNetBirdにVPNの許可が必要です。アプリを開いて許可してください。</string>
 </resources>

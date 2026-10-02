@@ -3,6 +3,7 @@
     <string name="fg_notification_connected">Connecté</string>
     <string name="fg_notification_connecting">Connexion…</string>
     <string name="fg_notification_disconnected">Déconnecté</string>
+    <string name="fg_notification_monitoring">Déconnecté, en attente d\'un changement de réseau</string>
     <string name="fg_notification_no_network">Aucun réseau disponible</string>
     <string name="fg_notification_needs_login">Connexion requise</string>
     <string name="fg_notification_error">Erreur</string>
@@ -27,4 +28,7 @@
         <item quantity="one">La session expire dans %1$d jour</item>
         <item quantity="other">La session expire dans %1$d jours</item>
     </plurals>
+    <string name="auto_connect_notification_channel_name">Connexion automatique</string>
+    <string name="auto_connect_consent_notification_title">La connexion automatique nécessite votre autorisation</string>
+    <string name="auto_connect_consent_notification_text">Un réseau correspondant à vos paramètres de connexion automatique a été détecté, mais NetBird a besoin de l\'autorisation VPN pour se connecter. Ouvrez l\'application pour l\'accorder.</string>
 </resources>
