@@ -2,6 +2,7 @@
 agp = "8.13.0"
 browser = "1.8.0"
 junit = "4.13.2"
+json = "20240303"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 uiautomator = "2.3.0"
@@ -21,6 +22,8 @@ zxing = "4.3.0"
 [libraries]
 browser = { module = "androidx.browser:browser", version.ref = "browser" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+# Real org.json for JVM unit tests: the one in android.jar is a stub that throws.
+json = { group = "org.json", name = "json", version.ref = "json" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }

@@ -47,6 +47,8 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.netbird.client.databinding.ActivityMainBinding;
+import io.netbird.client.tool.MDMBridge;
+import io.netbird.client.tool.MDMRestrictions;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
 import io.netbird.client.tool.RouteChangeListener;
@@ -107,6 +109,12 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     // Set when the user abandoned the extend browser while the service was
     // unbound; the cancel is issued from onServiceConnected.
     private boolean pendingExtendCancel = false;
+
+    // The MDM snapshot this screen was built from. The gating below is applied
+    // in code and only goes one way, so a policy that changed under us is
+    // answered by building the screen again rather than by unpicking it.
+    private String appliedMDMSnapshot = "";
+    private android.content.BroadcastReceiver mdmPolicyReceiver;
 
     // Last known state for UI updates
     private ConnectionState lastKnownState = ConnectionState.UNKNOWN;
@@ -235,6 +243,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             }
             return NavigationUI.onNavDestinationSelected(item, navController);
         });
+
+        applyMDMPolicy(bottomNav);
 
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             int destId = destination.getId();
@@ -451,6 +461,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     @Override
     protected void onPause() {
         super.onPause();
+        if (mdmPolicyReceiver != null) {
+            unregisterReceiver(mdmPolicyReceiver);
+            mdmPolicyReceiver = null;
+        }
     }
 
     @Override
@@ -459,6 +473,83 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         // Profiles are switched and deleted from a fragment, which reports
         // neither, so re-read the active one whenever we come back into view.
         syncSshSessionProfile();
+
+        // A policy can change while the app is in the background, where the
+        // service's receiver acts on the engine but no screen is there to react.
+        listenForMDMPolicy();
+        MDMBridge.refresh(this);
+        rebuildIfMDMPolicyChanged();
+    }
+
+    /**
+     * Takes the screen down to what the policy leaves of it.
+     *
+     * Networks is a whole tab, so it goes from the bar rather than staying as a
+     * destination the user can reach and find empty. Everything finer-grained is
+     * each screen's own business.
+     */
+    private void applyMDMPolicy(NavigationBarView bottomNav) {
+        appliedMDMSnapshot = MDMBridge.snapshotToken(this);
+        MDMRestrictions restrictions = MDMBridge.restrictions(this);
+        if (!restrictions.features.disableNetworks) {
+            return;
+        }
+        bottomNav.getMenu().findItem(R.id.nav_networks).setVisible(false);
+        NavDestination current = navController.getCurrentDestination();
+        if (current != null && current.getId() == R.id.nav_networks) {
+            navController.navigate(R.id.nav_home);
+        }
+    }
+
+    /**
+     * Rebuilds the screen when the policy is not the one it was built from —
+     * which is also how a withdrawn policy gives the user their settings back.
+     */
+    private void rebuildIfMDMPolicyChanged() {
+        if (appliedMDMSnapshot.equals(MDMBridge.snapshotToken(this))) {
+            return;
+        }
+        Log.d(LOGTAG, "MDM policy changed, rebuilding the screen");
+        recreate();
+    }
+
+    /**
+     * The service applies a changed policy to the engine and says so; this is
+     * the half the user sees. Registered only while the screen is in view — a
+     * toast has nobody to reach otherwise, and onResume catches up on anything
+     * missed.
+     */
+    private void listenForMDMPolicy() {
+        if (mdmPolicyReceiver != null) {
+            return;
+        }
+        mdmPolicyReceiver = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                MDMBridge.refresh(MainActivity.this);
+                boolean announced = VPNService.ACTION_MDM_POLICY_APPLIED.equals(intent.getAction());
+                if (!announced && appliedMDMSnapshot.equals(MDMBridge.snapshotToken(MainActivity.this))) {
+                    // The OS pushed a policy that changes nothing this screen
+                    // shows; saying so would be noise.
+                    return;
+                }
+                Toast.makeText(MainActivity.this, R.string.mdm_policy_applied, Toast.LENGTH_LONG).show();
+                rebuildIfMDMPolicyChanged();
+            }
+        };
+        android.content.IntentFilter mdmFilter =
+                new android.content.IntentFilter(VPNService.ACTION_MDM_POLICY_APPLIED);
+        // The service announces a policy it has applied to the engine, but it is
+        // only alive while the tunnel is. Listening for the OS notification as
+        // well means a screen reacts to a policy pushed with the VPN off, rather
+        // than waiting for the next time it comes into view.
+        mdmFilter.addAction(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+        ContextCompat.registerReceiver(
+                this,
+                mdmPolicyReceiver,
+                mdmFilter,
+                ContextCompat.RECEIVER_NOT_EXPORTED
+        );
     }
 
     private void syncSshSessionProfile() {

@@ -18,8 +18,11 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentSettingsBinding;
+import io.netbird.client.tool.MDMBridge;
+import io.netbird.client.tool.MDMRestrictions;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.MDMLock;
 import io.netbird.client.ui.profile.ProfileEditorDialog;
 
 public class SettingsFragment extends Fragment {
@@ -77,6 +80,31 @@ public class SettingsFragment extends Fragment {
         });
 
         setVersionText();
+
+        // After the listeners above: locking a row takes its listener away.
+        applyMDMPolicy();
+    }
+
+    /**
+     * What an administrator has taken off this screen.
+     *
+     * Profiles and the advanced section go away entirely — an organisation that
+     * pins one configuration has no use for a screen offering others. The server
+     * row stays: it is where the user sees which server they are on, so it is
+     * locked rather than hidden.
+     */
+    private void applyMDMPolicy() {
+        MDMRestrictions restrictions = MDMBridge.restrictions(requireContext());
+
+        if (restrictions.features.disableProfiles) {
+            MDMLock.hide(binding.rowProfiles);
+        }
+        if (restrictions.mdm.hidesAdvancedView()) {
+            MDMLock.hide(binding.rowAdvanced);
+        }
+        if (restrictions.mdm.managesManagementURL() || restrictions.features.disableUpdateSettings) {
+            MDMLock.lock(binding.rowChangeServer);
+        }
     }
 
     @Override

@@ -307,4 +307,11 @@
     <string name="split_tunneling_empty_include_warning">未选择任何应用，因此所有应用仍会使用 VPN。请至少选择一个。</string>
     <string name="split_tunneling_always_excluded">始终不使用 VPN</string>
     <string name="split_tunneling_never_included">无法使用 VPN</string>
+
+    <!-- Managed configuration (MDM) -->
+    <string name="mdm_managed_by_organization">由您的组织管理</string>
+    <string name="mdm_managed_setting">此设置由您的组织管理，无法更改。</string>
+    <string name="mdm_managed_setting_keys">此设置由您的组织管理，无法更改。(%s)</string>
+    <string name="mdm_routes_managed">网络路由由您的组织管理</string>
+    <string name="mdm_policy_applied">NetBird 配置已由您的 IT 策略更新。</string>
 </resources>

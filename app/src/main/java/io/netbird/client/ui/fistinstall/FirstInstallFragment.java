@@ -23,7 +23,10 @@ import java.util.concurrent.Executors;
 import io.netbird.client.PlatformUtils;
 import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentFirstinstallBinding;
+import io.netbird.client.tool.MDMBridge;
+import io.netbird.client.tool.MDMRestrictions;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.MDMLock;
 import io.netbird.client.ui.PreferenceUI;
 import io.netbird.client.ui.server.ManagementServerSwitch;
 import io.netbird.client.ui.server.ManagementUrl;
@@ -56,6 +59,10 @@ public class FirstInstallFragment extends Fragment {
     // Set after a failed reachability check so a second tap continues anyway.
     private boolean unreachable;
 
+    // True once the policy has taken the management server over, so the
+    // busy-state helper below cannot hand it back when a login finishes.
+    private boolean serverLocked;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -85,6 +92,30 @@ public class FirstInstallFragment extends Fragment {
             binding.txtAndroidtvBeta.setVisibility(View.VISIBLE);
             binding.btnContinue.postDelayed(() -> binding.btnContinue.requestFocus(), 200);
         }
+
+        applyMDMPolicy(view);
+    }
+
+    /**
+     * On a device that is enrolled before it is handed over, the server is
+     * already decided. Showing it and locking it is more honest than an empty
+     * field the user fills in only for the policy to overrule them at the first
+     * connection.
+     */
+    private void applyMDMPolicy(View root) {
+        MDMRestrictions restrictions = MDMBridge.restrictions(requireContext());
+        if (!restrictions.mdm.managesManagementURL() && !restrictions.features.disableUpdateSettings) {
+            return;
+        }
+        if (restrictions.mdm.managesManagementURL()
+                && !ManagementUrl.isCloud(restrictions.mdm.managementURL)) {
+            serverSwitch.setSelfHostedSilently(true);
+            binding.editTextServerUrl.setText(restrictions.mdm.managementURL);
+            binding.editTextServerUrl.setVisibility(View.VISIBLE);
+        }
+        serverLocked = true;
+        serverSwitch.setEnabled(false);
+        MDMLock.lockControls(root.findViewById(R.id.toggle_server_mode), binding.editTextServerUrl);
     }
 
     private void onModeChanged(boolean selfHosted) {
@@ -170,7 +201,7 @@ public class FirstInstallFragment extends Fragment {
         }
 
         try {
-            Preferences preferences = Android.newPreferences(configPath);
+            Preferences preferences = MDMBridge.openPreferences(requireContext(), configPath);
             preferences.setManagementURL(managementUrl);
             preferences.commit();
         } catch (Exception e) {
@@ -188,7 +219,7 @@ public class FirstInstallFragment extends Fragment {
         setBusy(true);
         Auth auth;
         try {
-            auth = Android.newAuth(configPath, managementUrl);
+            auth = MDMBridge.newAuth(requireContext(), configPath, managementUrl);
         } catch (Exception e) {
             Log.e(TAG, "Failed to create authenticator", e);
             setBusy(false);
@@ -233,8 +264,8 @@ public class FirstInstallFragment extends Fragment {
         binding.btnContinue.setText(busy
                 ? R.string.profiles_dialog_checking
                 : R.string.fragment_firstinstall_continue);
-        binding.editTextServerUrl.setEnabled(!busy);
-        serverSwitch.setEnabled(!busy);
+        binding.editTextServerUrl.setEnabled(!busy && !serverLocked);
+        serverSwitch.setEnabled(!busy && !serverLocked);
         setupKeySection.setEnabled(!busy);
     }
 
