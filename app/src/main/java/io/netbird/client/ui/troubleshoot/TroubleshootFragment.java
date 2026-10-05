@@ -47,6 +47,9 @@ public class TroubleshootFragment extends Fragment implements AnonymizeLevelShee
     // during which the activity is stopped and the VPN service unbound.
     @Nullable
     private File pendingBundle;
+    // Set when the bundle finished after the state was saved: the picker is
+    // opened on the next resume so the path lands in the saved state with it.
+    private boolean launchPickerOnResume;
     private Context appContext;
 
     // The system file picker behind "save to file". Registered at construction
@@ -109,6 +112,24 @@ public class TroubleshootFragment extends Fragment implements AnonymizeLevelShee
         super.onSaveInstanceState(outState);
         if (pendingBundle != null) {
             outState.putString(STATE_PENDING_BUNDLE, pendingBundle.getPath());
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (launchPickerOnResume) {
+            launchPickerOnResume = false;
+            saveBundleLauncher.launch(suggestedBundleName());
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (launchPickerOnResume && pendingBundle != null) {
+            deleteQuietly(pendingBundle);
+            pendingBundle = null;
         }
     }
 
@@ -215,6 +236,10 @@ public class TroubleshootFragment extends Fragment implements AnonymizeLevelShee
                         return;
                     }
                     pendingBundle = new File(path);
+                    if (isStateSaved()) {
+                        launchPickerOnResume = true;
+                        return;
+                    }
                     saveBundleLauncher.launch(suggestedBundleName());
                 });
             } catch (Exception e) {
