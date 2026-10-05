@@ -88,8 +88,8 @@ public class SessionWarningSchedulerInstrumentedTest {
     }
 
     @Test
-    public void workerFiresInsideWarningWindow() {
-        long deadline = nowSeconds() + 300;
+    public void workerFiresForCurrentDeadline() {
+        long deadline = nowSeconds() + 3600;
         SessionWarningScheduler.schedule(getContext(), deadline, PROFILE);
 
         runWorker(deadline, SessionWarningScheduler.WARNING_LEAD_MINUTES, PROFILE);
@@ -112,7 +112,7 @@ public class SessionWarningSchedulerInstrumentedTest {
 
     @Test
     public void workerSkipsOtherProfile() {
-        long deadline = nowSeconds() + 300;
+        long deadline = nowSeconds() + 3600;
         SessionWarningScheduler.schedule(getContext(), deadline, PROFILE);
 
         runWorker(deadline, SessionWarningScheduler.WARNING_LEAD_MINUTES, "profile-b");
@@ -124,10 +124,10 @@ public class SessionWarningSchedulerInstrumentedTest {
     @Test
     public void lateWarningYieldsToFinalWarning() {
         long deadline = nowSeconds() + 60;
-        SessionWarningScheduler.schedule(getContext(), deadline, PROFILE);
 
-        runWorker(deadline, SessionWarningScheduler.WARNING_LEAD_MINUTES, PROFILE);
-        runWorker(deadline, SessionWarningScheduler.FINAL_WARNING_LEAD_MINUTES, PROFILE);
+        // Both leads are already past, so both jobs get a zero delay and the
+        // SynchronousExecutor runs the real workers inside schedule().
+        SessionWarningScheduler.schedule(getContext(), deadline, PROFILE);
 
         Assert.assertFalse(SessionWarningScheduler.wasFired(getContext(),
                 SessionWarningScheduler.WARNING_LEAD_MINUTES, deadline));
@@ -137,7 +137,7 @@ public class SessionWarningSchedulerInstrumentedTest {
 
     @Test
     public void cancelAllKeepsFiredMarks() throws Exception {
-        long deadline = nowSeconds() + 300;
+        long deadline = nowSeconds() + 3600;
         SessionWarningScheduler.schedule(getContext(), deadline, PROFILE);
         runWorker(deadline, SessionWarningScheduler.WARNING_LEAD_MINUTES, PROFILE);
 
