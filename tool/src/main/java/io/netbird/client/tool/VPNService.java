@@ -330,12 +330,12 @@ public class VPNService extends android.net.VpnService {
             }
         }
 
-        public String debugBundle(boolean anonymize) throws Exception {
-            return engineRunner.debugBundle(anonymize);
+        public String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception {
+            return engineRunner.debugBundle(anonymize, anonymizeLevel);
         }
 
-        public String debugBundleFile(boolean anonymize) throws Exception {
-            return engineRunner.debugBundleFile(anonymize);
+        public String debugBundleFile(boolean anonymize, String anonymizeLevel) throws Exception {
+            return engineRunner.debugBundleFile(anonymize, anonymizeLevel);
         }
 
         /**

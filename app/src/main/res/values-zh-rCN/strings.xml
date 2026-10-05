@@ -119,6 +119,13 @@
     <string name="advanced_tracelog">启用跟踪日志级别。</string>
     <string name="troubleshoot_debug_bundle">上传调试包</string>
     <string name="troubleshoot_anonymize">匿名化敏感数据</string>
+    <string name="troubleshoot_anonymize_desc">隐藏 IP 地址、域名和其他敏感值。</string>
+    <string name="troubleshoot_anonymize_none">无</string>
+    <string name="troubleshoot_anonymize_none_description">所有内容均保持可读。请仅在组织内部分享。</string>
+    <string name="troubleshoot_anonymize_default">默认</string>
+    <string name="troubleshoot_anonymize_default_description">隐藏公网 IP 地址和域名。内部 IPv4 地址和对等节点名称保持可读，便于支持人员查看。</string>
+    <string name="troubleshoot_anonymize_strict">严格</string>
+    <string name="troubleshoot_anonymize_strict_description">同时隐藏私有、CGNAT 和链路本地地址、对等节点名称以及 WireGuard 密钥。向组织外分享时请使用。</string>
     <string name="troubleshoot_section_logging">日志</string>
     <string name="troubleshoot_section_debug_bundle">调试包</string>
     <string name="advanced_rosenpass">启用 Rosenpass</string>

@@ -436,11 +436,9 @@ class EngineRunner {
         }
     }
 
-    public String debugBundle(boolean anonymize) throws Exception {
+    public String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception {
         try {
-            // The strict level stays unused until the troubleshoot screen
-            // grows an option for it.
-            return goClient.debugBundle(activePlatformFiles(), anonymize, Android.AnonymizeLevelDefault);
+            return goClient.debugBundle(activePlatformFiles(), anonymize, anonymizeLevel);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             throw e;
@@ -451,9 +449,9 @@ class EngineRunner {
      * Like debugBundle, but leaves the zip in the app cache and returns its
      * path instead of uploading it. The caller removes the file once copied.
      */
-    public String debugBundleFile(boolean anonymize) throws Exception {
+    public String debugBundleFile(boolean anonymize, String anonymizeLevel) throws Exception {
         try {
-            return goClient.debugBundleFile(activePlatformFiles(), anonymize, Android.AnonymizeLevelDefault);
+            return goClient.debugBundleFile(activePlatformFiles(), anonymize, anonymizeLevel);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             throw e;

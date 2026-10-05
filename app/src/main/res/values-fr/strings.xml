@@ -119,6 +119,13 @@
     <string name="advanced_tracelog">Activer le niveau de journalisation trace.</string>
     <string name="troubleshoot_debug_bundle">Envoyer le lot de diagnostic</string>
     <string name="troubleshoot_anonymize">Anonymiser les données sensibles</string>
+    <string name="troubleshoot_anonymize_desc">Masque les adresses IP, les domaines et d\'autres valeurs sensibles.</string>
+    <string name="troubleshoot_anonymize_none">Aucune</string>
+    <string name="troubleshoot_anonymize_none_description">Tout reste lisible. À partager uniquement au sein de votre organisation.</string>
+    <string name="troubleshoot_anonymize_default">Par défaut</string>
+    <string name="troubleshoot_anonymize_default_description">Masque les adresses IP publiques et les domaines. Les adresses IPv4 internes et les noms des pairs restent lisibles pour le support.</string>
+    <string name="troubleshoot_anonymize_strict">Strict</string>
+    <string name="troubleshoot_anonymize_strict_description">Masque aussi les adresses privées, CGNAT et de lien local, les noms des pairs et les clés WireGuard. À utiliser hors de votre organisation.</string>
     <string name="troubleshoot_section_logging">Journalisation</string>
     <string name="troubleshoot_section_debug_bundle">Lot de diagnostic</string>
     <string name="advanced_rosenpass">Activer Rosenpass</string>

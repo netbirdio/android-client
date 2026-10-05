@@ -31,13 +31,13 @@ public interface ServiceAccessor {
     void addRouteChangeListener(RouteChangeListener listener);
     void removeRouteChangeListener(RouteChangeListener listener);
 
-    String debugBundle(boolean anonymize) throws Exception;
+    String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception;
 
     /**
      * Generates the debug bundle into the app cache and returns the zip path
      * instead of uploading it. The caller removes the file once copied.
      */
-    String debugBundleFile(boolean anonymize) throws Exception;
+    String debugBundleFile(boolean anonymize, String anonymizeLevel) throws Exception;
 
     /** SSO session deadline as unix seconds; 0 when unknown or not bound. */
     long sessionExpiresAt();
