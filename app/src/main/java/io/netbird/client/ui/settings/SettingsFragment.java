@@ -20,6 +20,7 @@ import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentSettingsBinding;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.DialogFragments;
 import io.netbird.client.ui.profile.ProfileEditorDialog;
 
 public class SettingsFragment extends Fragment {
@@ -55,8 +56,8 @@ public class SettingsFragment extends Fragment {
         binding.rowSplitTunneling.setOnClickListener(v ->
                 navController.navigate(R.id.nav_split_tunneling));
 
-        binding.rowLanguage.setOnClickListener(v ->
-                new LanguagePickerSheet().show(getChildFragmentManager(), "language_picker"));
+        binding.rowLanguage.setOnClickListener(v -> DialogFragments.showNow(
+                this, getChildFragmentManager(), new LanguagePickerSheet(), "language_picker"));
 
         binding.rowTroubleshoot.setOnClickListener(v ->
                 navController.navigate(R.id.nav_troubleshoot));

@@ -24,6 +24,7 @@ import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentSplitTunnelingBinding;
 import io.netbird.client.tool.SplitTunnelConfig;
 import io.netbird.client.tool.SplitTunnelStore;
+import io.netbird.client.ui.DialogFragments;
 
 /**
  * Lets the user say which applications the tunnel carries.
@@ -80,8 +81,8 @@ public class SplitTunnelingFragment extends Fragment
         binding.appsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.appsRecyclerView.setAdapter(adapter);
 
-        binding.rowMode.setOnClickListener(v ->
-                SplitTunnelModeSheet.newInstance(mode).show(getChildFragmentManager(), "split_tunnel_mode"));
+        binding.rowMode.setOnClickListener(v -> DialogFragments.showNow(
+                this, getChildFragmentManager(), SplitTunnelModeSheet.newInstance(mode), "split_tunnel_mode"));
 
         binding.searchView.addTextChangedListener(new TextWatcher() {
             @Override

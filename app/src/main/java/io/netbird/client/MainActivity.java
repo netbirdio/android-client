@@ -53,6 +53,7 @@ import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.SessionEventListener;
 import io.netbird.client.tool.VPNService;
+import io.netbird.client.ui.DialogFragments;
 import io.netbird.client.ui.PreferenceUI;
 import io.netbird.client.ui.ssh.SshSessionManager;
 import io.netbird.gomobile.android.Android;
@@ -298,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                 @Override
                 public void open(String url, String userCode) {
                     runOnUiThread(() -> {
-                        qrCodeDialog = QrCodeDialog.newInstance(url, userCode, () -> {
+                        showQrCodeDialog(QrCodeDialog.newInstance(url, userCode, () -> {
                             if (isSSOFinishedWell) {
                                 return;
                             }
@@ -306,8 +307,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                                 return;
                             }
                             mBinder.stopEngine();
-                        });
-                        qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+                        }));
 
                         if (!isRunningOnTV) {
                             try {
@@ -987,6 +987,14 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         });
     }
 
+    private boolean showQrCodeDialog(QrCodeDialog dialog) {
+        if (!DialogFragments.showNow(this, getSupportFragmentManager(), dialog, "QrCodeDialog")) {
+            return false;
+        }
+        qrCodeDialog = dialog;
+        return true;
+    }
+
     // The login urlOpener stops the engine when the SSO surface is dismissed
     // without success, which also kills its pending PKCE wait. An extend must
     // keep the tunnel up, so it cancels just the extend flow instead —
@@ -1000,16 +1008,22 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             @Override
             public void open(String url, String userCode) {
                 runOnUiThread(() -> {
-                    qrCodeDialog = QrCodeDialog.newInstance(url, userCode,
-                            MainActivity.this::cancelExtendSession);
-                    qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+                    boolean dialogShown = showQrCodeDialog(QrCodeDialog.newInstance(url, userCode,
+                            MainActivity.this::cancelExtendSession));
 
+                    boolean browserOpened = false;
                     if (!isRunningOnTV) {
                         try {
                             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                            browserOpened = true;
                         } catch (Exception e) {
                             Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
                         }
+                    }
+                    // Without a dialog there is nobody to dismiss, so the extend would
+                    // otherwise sit on its loopback port until it times out.
+                    if (!dialogShown && !browserOpened) {
+                        cancelExtendSession();
                     }
                 });
             }
