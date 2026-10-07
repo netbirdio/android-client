@@ -19,6 +19,7 @@ import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentAdvancedBinding;
 import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.DialogFragments;
 
 
 public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThemeChangedListener {
@@ -156,7 +157,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
 
         binding.rowTheme.setOnClickListener(v -> {
             ThemePickerSheet sheet = new ThemePickerSheet();
-            sheet.showNow(getChildFragmentManager(), "ThemePickerSheet");
+            DialogFragments.showNow(this, getChildFragmentManager(), sheet, "ThemePickerSheet");
         });
 
         return root;

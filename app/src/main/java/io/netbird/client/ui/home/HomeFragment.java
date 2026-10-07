@@ -33,6 +33,7 @@ import io.netbird.client.databinding.FragmentHomeBinding;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
 import io.netbird.client.tool.RouteChangeListener;
+import io.netbird.client.ui.DialogFragments;
 import io.netbird.gomobile.android.NetworkArray;
 
 public class HomeFragment extends Fragment implements StateListener, RouteChangeListener, ProfilePickerSheet.OnProfileSwitchedListener {
@@ -200,12 +201,12 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
         binding.profileChip.setOnClickListener(v -> {
             ProfilePickerSheet sheet = new ProfilePickerSheet();
-            sheet.showNow(getChildFragmentManager(), "ProfilePickerSheet");
+            DialogFragments.showNow(this, getChildFragmentManager(), sheet, "ProfilePickerSheet");
         });
 
         binding.exitNodeRow.setOnClickListener(v -> {
             ExitNodePickerSheet sheet = new ExitNodePickerSheet();
-            sheet.showNow(getChildFragmentManager(), "ExitNodePickerSheet");
+            DialogFragments.showNow(this, getChildFragmentManager(), sheet, "ExitNodePickerSheet");
         });
         binding.sessionExpiryRow.setOnClickListener(v -> {
             if (serviceAccessor != null) {

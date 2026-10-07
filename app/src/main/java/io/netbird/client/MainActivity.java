@@ -53,6 +53,7 @@ import io.netbird.client.tool.RouteChangeListener;
 import io.netbird.client.tool.ServiceStateListener;
 import io.netbird.client.tool.SessionEventListener;
 import io.netbird.client.tool.VPNService;
+import io.netbird.client.ui.DialogFragments;
 import io.netbird.client.ui.PreferenceUI;
 import io.netbird.client.ui.ssh.SshSessionManager;
 import io.netbird.gomobile.android.Android;
@@ -995,15 +996,10 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         });
     }
 
-    // The opener fires from the engine, so by the time this runs the activity
-    // may already be finishing or past onSaveInstanceState; neither can host a
-    // dialog, and a deferred show() would be flushed by the pause itself.
     private void showQrCodeDialog(QrCodeDialog dialog) {
-        if (isFinishing() || isDestroyed() || getSupportFragmentManager().isStateSaved()) {
-            return;
+        if (DialogFragments.showNow(this, getSupportFragmentManager(), dialog, "QrCodeDialog")) {
+            qrCodeDialog = dialog;
         }
-        qrCodeDialog = dialog;
-        dialog.showNow(getSupportFragmentManager(), "QrCodeDialog");
     }
 
     // The login urlOpener stops the engine when the SSO surface is dismissed
