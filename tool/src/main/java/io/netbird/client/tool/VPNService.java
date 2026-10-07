@@ -47,6 +47,7 @@ public class VPNService extends android.net.VpnService {
     private ForegroundNotification fgNotification;
     private SessionNotification sessionNotification;
     private SessionMonitor sessionMonitor;
+    private ProfileManagerWrapper profileManager;
     private TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
 
@@ -77,7 +78,7 @@ public class VPNService extends android.net.VpnService {
         Preferences preferences = new Preferences(this);
 
         // Create profile manager for managing profiles
-        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
+        profileManager = new ProfileManagerWrapper(this);
 
         // Create foreground notification before initializing engine
         fgNotification = new ForegroundNotification(this);
@@ -94,7 +95,7 @@ public class VPNService extends android.net.VpnService {
         sessionMonitor = new SessionMonitor(engineRunner::status, engineRunner::sessionExpiresAt);
         engineRunner.setSessionMonitor(sessionMonitor);
         sessionMonitor.addListener(sessionEventListener);
-        engineRunner.addOnConnectedObserver(() -> sessionNotification.cancel());
+        engineRunner.addOnConnectedObserver(() -> sessionNotification.cancelExpired());
 
         // Drive the status-bar icon from the tunnel's own phase rather than
         // the engine start/stop edges, so "connecting" is visible while the
@@ -245,7 +246,7 @@ public class VPNService extends android.net.VpnService {
         public void runEngine(URLOpener urlOpener, boolean isAndroidTV) {
             fgNotification.setState(ForegroundNotification.State.CONNECTING);
             fgNotification.startForeground();
-            sessionNotification.cancel();
+            sessionNotification.cancelExpired();
             engineRunner.run(urlOpener, isAndroidTV);
         }
 
@@ -381,11 +382,6 @@ public class VPNService extends android.net.VpnService {
 
     private final SessionEventListener sessionEventListener = new SessionEventListener() {
         @Override
-        public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
-            sessionNotification.showExpiring(leadMinutes);
-        }
-
-        @Override
         public void onSessionExpired() {
             sessionNotification.showExpired();
         }
@@ -393,8 +389,17 @@ public class VPNService extends android.net.VpnService {
         @Override
         public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
             fgNotification.updateSessionDeadline(expiresAtUnixSeconds);
+            SessionWarningScheduler.schedule(VPNService.this, expiresAtUnixSeconds, activeProfileId());
         }
     };
+
+    private String activeProfileId() {
+        try {
+            return profileManager.getActiveProfile().getID();
+        } catch (IllegalStateException e) {
+            return "";
+        }
+    }
 
     /**
      * The icon state implied by the engine's current status label, for the
@@ -491,6 +496,7 @@ public class VPNService extends android.net.VpnService {
                     : ForegroundNotification.State.DISCONNECTED);
             fgNotification.stopForeground();
             sessionMonitor.onStateChanged();
+            SessionWarningScheduler.cancelAll(VPNService.this);
         }
 
         @Override
