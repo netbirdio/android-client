@@ -996,10 +996,12 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         });
     }
 
-    private void showQrCodeDialog(QrCodeDialog dialog) {
-        if (DialogFragments.showNow(this, getSupportFragmentManager(), dialog, "QrCodeDialog")) {
-            qrCodeDialog = dialog;
+    private boolean showQrCodeDialog(QrCodeDialog dialog) {
+        if (!DialogFragments.showNow(this, getSupportFragmentManager(), dialog, "QrCodeDialog")) {
+            return false;
         }
+        qrCodeDialog = dialog;
+        return true;
     }
 
     // The login urlOpener stops the engine when the SSO surface is dismissed
@@ -1015,15 +1017,22 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             @Override
             public void open(String url, String userCode) {
                 runOnUiThread(() -> {
-                    showQrCodeDialog(QrCodeDialog.newInstance(url, userCode,
+                    boolean dialogShown = showQrCodeDialog(QrCodeDialog.newInstance(url, userCode,
                             MainActivity.this::cancelExtendSession));
 
+                    boolean browserOpened = false;
                     if (!isRunningOnTV) {
                         try {
                             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                            browserOpened = true;
                         } catch (Exception e) {
                             Log.e(LOGTAG, "Failed to open browser for device code flow: " + e.getMessage());
                         }
+                    }
+                    // Without a dialog there is nobody to dismiss, so the extend would
+                    // otherwise sit on its loopback port until it times out.
+                    if (!dialogShown && !browserOpened) {
+                        cancelExtendSession();
                     }
                 });
             }
