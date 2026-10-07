@@ -103,6 +103,7 @@ public class SessionMonitor {
     }
 
     public void removeListener(SessionEventListener listener) {
+        listeners.remove(listener);
         refresher.submit(() -> listeners.remove(listener));
     }
 
@@ -127,6 +128,9 @@ public class SessionMonitor {
                 return;
             }
             for (SessionEventListener l : targets) {
+                if (!listeners.contains(l)) {
+                    continue;
+                }
                 if (deadlineChanged) {
                     notifySafely(() -> l.onSessionDeadlineChanged(deadline));
                 }
