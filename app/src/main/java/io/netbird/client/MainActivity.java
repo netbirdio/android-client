@@ -948,15 +948,6 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
 
     private final SessionEventListener sessionEventListener = new SessionEventListener() {
         @Override
-        public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
-            // Nothing to do in the UI: the notification carries the warning
-            // from the background, and the home screen's session row states the
-            // deadline continuously with the same extend action. A dialog would
-            // be a third copy of that, and an interruption an event known ten
-            // minutes ahead does not warrant.
-        }
-
-        @Override
         public void onSessionExpired() {
             // No dialog: the home screen states it where the connection status
             // lives, and the connect toggle already runs the interactive login.

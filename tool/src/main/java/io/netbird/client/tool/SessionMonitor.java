@@ -10,13 +10,13 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 /**
- * Fans the Go client's session notifications out to the app, mirroring what
- * the desktop daemon feeds its tray. The engine owns the expiry timers and
- * publishes the warnings; this class only forwards them and edge-detects the
- * NeedsLogin status label, which the run loop sets outside the event stream.
+ * Fans the Go client's session state out to the app, mirroring what the
+ * desktop daemon feeds its tray. It edge-detects the deadline and the
+ * NeedsLogin status label; the expiry warnings themselves are scheduled from
+ * the deadline by {@link SessionWarningScheduler}.
  *
- * <p>All state lives on the main thread; {@link #onStateChanged()} and
- * {@link #onSessionExpiring} may be called from any thread.
+ * <p>All state lives on the main thread; {@link #onStateChanged()} may be
+ * called from any thread.
  */
 public class SessionMonitor {
 
@@ -41,15 +41,6 @@ public class SessionMonitor {
     /** Wake-up from the Go state-change signal. Safe to call from any thread. */
     public void onStateChanged() {
         handler.post(this::refresh);
-    }
-
-    /** Expiry warning from the engine's session watcher. Any thread. */
-    public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
-        handler.post(() -> {
-            for (SessionEventListener l : listeners) {
-                notifySafely(() -> l.onSessionExpiring(expiresAtUnixSeconds, leadMinutes, finalWarning));
-            }
-        });
     }
 
     public void addListener(SessionEventListener listener) {
