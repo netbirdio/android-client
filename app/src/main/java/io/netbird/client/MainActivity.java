@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                 @Override
                 public void open(String url, String userCode) {
                     runOnUiThread(() -> {
-                        qrCodeDialog = QrCodeDialog.newInstance(url, userCode, () -> {
+                        showQrCodeDialog(QrCodeDialog.newInstance(url, userCode, () -> {
                             if (isSSOFinishedWell) {
                                 return;
                             }
@@ -306,8 +306,7 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
                                 return;
                             }
                             mBinder.stopEngine();
-                        });
-                        qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+                        }));
 
                         if (!isRunningOnTV) {
                             try {
@@ -996,6 +995,17 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
         });
     }
 
+    // The opener fires from the engine, so by the time this runs the activity
+    // may already be finishing or past onSaveInstanceState; neither can host a
+    // dialog, and a deferred show() would be flushed by the pause itself.
+    private void showQrCodeDialog(QrCodeDialog dialog) {
+        if (isFinishing() || isDestroyed() || getSupportFragmentManager().isStateSaved()) {
+            return;
+        }
+        qrCodeDialog = dialog;
+        dialog.showNow(getSupportFragmentManager(), "QrCodeDialog");
+    }
+
     // The login urlOpener stops the engine when the SSO surface is dismissed
     // without success, which also kills its pending PKCE wait. An extend must
     // keep the tunnel up, so it cancels just the extend flow instead —
@@ -1009,9 +1019,8 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             @Override
             public void open(String url, String userCode) {
                 runOnUiThread(() -> {
-                    qrCodeDialog = QrCodeDialog.newInstance(url, userCode,
-                            MainActivity.this::cancelExtendSession);
-                    qrCodeDialog.show(getSupportFragmentManager(), "QrCodeDialog");
+                    showQrCodeDialog(QrCodeDialog.newInstance(url, userCode,
+                            MainActivity.this::cancelExtendSession));
 
                     if (!isRunningOnTV) {
                         try {

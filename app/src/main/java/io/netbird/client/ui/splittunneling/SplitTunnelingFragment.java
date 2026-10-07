@@ -81,7 +81,7 @@ public class SplitTunnelingFragment extends Fragment
         binding.appsRecyclerView.setAdapter(adapter);
 
         binding.rowMode.setOnClickListener(v ->
-                SplitTunnelModeSheet.newInstance(mode).show(getChildFragmentManager(), "split_tunnel_mode"));
+                SplitTunnelModeSheet.newInstance(mode).showNow(getChildFragmentManager(), "split_tunnel_mode"));
 
         binding.searchView.addTextChangedListener(new TextWatcher() {
             @Override

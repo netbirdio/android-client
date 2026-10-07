@@ -49,7 +49,7 @@ public class TroubleshootFragment extends Fragment implements AnonymizeLevelShee
         updateAnonymizeValue();
         binding.anonymizeLayout.setOnClickListener(v ->
                 AnonymizeLevelSheet.newInstance(preferences.getAnonymizeLevel())
-                        .show(getChildFragmentManager(), "anonymize_level"));
+                        .showNow(getChildFragmentManager(), "anonymize_level"));
 
         initializeRemoteJobsSwitch(inflater.getContext());
 

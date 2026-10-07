@@ -200,12 +200,12 @@ public class HomeFragment extends Fragment implements StateListener, RouteChange
 
         binding.profileChip.setOnClickListener(v -> {
             ProfilePickerSheet sheet = new ProfilePickerSheet();
-            sheet.show(getChildFragmentManager(), "ProfilePickerSheet");
+            sheet.showNow(getChildFragmentManager(), "ProfilePickerSheet");
         });
 
         binding.exitNodeRow.setOnClickListener(v -> {
             ExitNodePickerSheet sheet = new ExitNodePickerSheet();
-            sheet.show(getChildFragmentManager(), "ExitNodePickerSheet");
+            sheet.showNow(getChildFragmentManager(), "ExitNodePickerSheet");
         });
         binding.sessionExpiryRow.setOnClickListener(v -> {
             if (serviceAccessor != null) {

@@ -156,7 +156,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
 
         binding.rowTheme.setOnClickListener(v -> {
             ThemePickerSheet sheet = new ThemePickerSheet();
-            sheet.show(getChildFragmentManager(), "ThemePickerSheet");
+            sheet.showNow(getChildFragmentManager(), "ThemePickerSheet");
         });
 
         return root;
