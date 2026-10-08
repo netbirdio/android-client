@@ -442,15 +442,31 @@ class EngineRunner {
     }
 
     public String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception {
-        String configPath = profileManager.getActiveConfigPath();
-        String statePath = profileManager.getActiveStateFilePath();
-        String cacheDir = context.getCacheDir().getAbsolutePath();
-        var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
         try {
-            return goClient.debugBundle(platformFiles, anonymize, anonymizeLevel);
+            return goClient.debugBundle(activePlatformFiles(), anonymize, anonymizeLevel);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             throw e;
         }
+    }
+
+    /**
+     * Like debugBundle, but leaves the zip in the app cache and returns its
+     * path instead of uploading it. The caller removes the file once copied.
+     */
+    public String debugBundleFile(boolean anonymize, String anonymizeLevel) throws Exception {
+        try {
+            return goClient.debugBundleFile(activePlatformFiles(), anonymize, anonymizeLevel);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "goClient error", e);
+            throw e;
+        }
+    }
+
+    private AndroidPlatformFiles activePlatformFiles() throws Exception {
+        String configPath = profileManager.getActiveConfigPath();
+        String statePath = profileManager.getActiveStateFilePath();
+        String cacheDir = context.getCacheDir().getAbsolutePath();
+        return new AndroidPlatformFiles(configPath, statePath, cacheDir);
     }
 }
