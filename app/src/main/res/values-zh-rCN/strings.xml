@@ -9,6 +9,38 @@
     <string name="menu_troubleshoot">故障排除</string>
     <string name="menu_ssh">SSH</string>
 
+    <string name="menu_auto_connect">自动连接</string>
+    <string name="title_auto_connect_wifi">受信任的网络</string>
+
+    <string name="auto_connect_networks_header">网络</string>
+    <string name="auto_connect_connect_on_wifi">在 Wi-Fi 下连接</string>
+    <string name="auto_connect_connect_on_mobile_data">在移动数据下连接</string>
+    <string name="auto_connect_connect_on_ethernet">在以太网下连接</string>
+    <string name="auto_connect_disconnect_on_no_network">无网络时断开连接</string>
+    <string name="auto_connect_status_active">已启用</string>
+    <string name="auto_connect_status_inactive">未启用</string>
+    <string name="auto_connect_trusted_networks_description">VPN 不会在这些 Wi-Fi 网络下自动连接。留空则在任意 Wi-Fi 网络下自动连接。</string>
+    <string name="auto_connect_trusted_networks_empty">尚未添加受信任的网络。在你添加之前，将在任意 Wi-Fi 网络下自动连接。</string>
+    <string name="auto_connect_add_network">添加网络</string>
+    <string name="auto_connect_add_network_title">添加受信任的网络</string>
+    <string name="auto_connect_ssid_hint">网络名称(SSID)</string>
+    <string name="auto_connect_bssid_hint">MAC 地址(BSSID)，可选</string>
+    <string name="auto_connect_use_current_network">使用当前网络</string>
+    <string name="auto_connect_grant_location_permission">授予位置权限以使用当前网络</string>
+    <string name="auto_connect_error_empty_entry">请输入 SSID 或 BSSID</string>
+    <string name="auto_connect_error_invalid_bssid">请输入有效的 BSSID，例如 00:11:22:33:44:55</string>
+    <string name="auto_connect_remove_network_cd">移除网络</string>
+    <string name="auto_connect_wifi_not_connected">当前未连接到任何 Wi-Fi 网络</string>
+    <string name="auto_connect_location_permission_warning">需要位置权限才能识别 Wi-Fi 网络。如果没有该权限，将无法匹配受信任的网络，VPN 可能会连接到你想排除的网络。</string>
+    <string name="auto_connect_background_location_warning">目前位置权限仅在应用打开时可用。受信任的网络会在后台进行检查，因此请将位置权限设置为"始终允许"，以确保功能可靠运行。</string>
+    <string name="auto_connect_allow_always">始终允许</string>
+    <string name="auto_connect_battery_optimization_warning">电池优化可能会导致自动连接无法在后台可靠运行。请允许 NetBird 不受限制地运行，以便持续检测网络变化。</string>
+    <string name="auto_connect_allow_unrestricted_battery">允许无限制使用电池</string>
+    <string name="auto_connect_notification_permission_warning">通知已关闭，因此你不会看到自动连接何时在等待网络变化或已连接。请启用 NetBird 的通知以查看其状态。</string>
+    <string name="auto_connect_enable_notifications">启用通知</string>
+    <string name="auto_connect_save">保存</string>
+    <string name="auto_connect_cancel">取消</string>
+
     <string name="profile_picker_title">当前配置文件</string>
     <string name="profile_picker_add">添加配置文件</string>
     <string name="profile_picker_manage">管理配置文件</string>

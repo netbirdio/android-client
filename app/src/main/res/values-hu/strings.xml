@@ -9,6 +9,38 @@
     <string name="menu_troubleshoot">Hibaelhárítás</string>
     <string name="menu_ssh">SSH</string>
 
+    <string name="menu_auto_connect">Automatikus csatlakozás</string>
+    <string name="title_auto_connect_wifi">Megbízható hálózatok</string>
+
+    <string name="auto_connect_networks_header">Hálózatok</string>
+    <string name="auto_connect_connect_on_wifi">Csatlakozás Wi-Fin</string>
+    <string name="auto_connect_connect_on_mobile_data">Csatlakozás mobiladatokon</string>
+    <string name="auto_connect_connect_on_ethernet">Csatlakozás Etherneten</string>
+    <string name="auto_connect_disconnect_on_no_network">Bontás, ha nincs hálózat</string>
+    <string name="auto_connect_status_active">Aktív</string>
+    <string name="auto_connect_status_inactive">Inaktív</string>
+    <string name="auto_connect_trusted_networks_description">A VPN nem csatlakozik automatikusan ezeken a Wi-Fi hálózatokon. Hagyd üresen, hogy bármely Wi-Fi hálózaton automatikusan csatlakozzon.</string>
+    <string name="auto_connect_trusted_networks_empty">Még nincs hozzáadva megbízható hálózat. Bármely Wi-Fi hálózaton automatikusan csatlakozik, amíg nem adsz hozzá egyet.</string>
+    <string name="auto_connect_add_network">Hálózat hozzáadása</string>
+    <string name="auto_connect_add_network_title">Megbízható hálózat hozzáadása</string>
+    <string name="auto_connect_ssid_hint">Hálózat neve (SSID)</string>
+    <string name="auto_connect_bssid_hint">MAC-cím (BSSID), opcionális</string>
+    <string name="auto_connect_use_current_network">Jelenlegi hálózat használata</string>
+    <string name="auto_connect_grant_location_permission">Helyhozzáférés engedélyezése a jelenlegi hálózat használatához</string>
+    <string name="auto_connect_error_empty_entry">Adj meg egy SSID-t vagy egy BSSID-t</string>
+    <string name="auto_connect_error_invalid_bssid">Adj meg egy érvényes BSSID-t, pl. 00:11:22:33:44:55</string>
+    <string name="auto_connect_remove_network_cd">Hálózat eltávolítása</string>
+    <string name="auto_connect_wifi_not_connected">Jelenleg nincs Wi-Fi hálózathoz csatlakozva</string>
+    <string name="auto_connect_location_permission_warning">A Wi-Fi hálózatok azonosításához helyhozzáférés szükséges. Enélkül a megbízható hálózatok nem egyeztethetők, és a VPN olyan hálózatokhoz is csatlakozhat, amelyeket ki szerettél volna zárni.</string>
+    <string name="auto_connect_background_location_warning">A helyhozzáférés jelenleg csak az alkalmazás használata közben érhető el. A megbízható hálózatok ellenőrzése a háttérben történik, ezért engedélyezd a helyhozzáférést „Mindig engedélyezve” móddal a megbízható működéshez.</string>
+    <string name="auto_connect_allow_always">Mindig engedélyezve</string>
+    <string name="auto_connect_battery_optimization_warning">Az akkumulátor-optimalizálás megakadályozhatja, hogy az automatikus csatlakozás megbízhatóan működjön a háttérben. Engedélyezd a NetBird korlátozás nélküli futtatását, hogy folyamatosan érzékelje a hálózatváltozásokat.</string>
+    <string name="auto_connect_allow_unrestricted_battery">Korlátlan akkumulátorhasználat engedélyezése</string>
+    <string name="auto_connect_notification_permission_warning">Az értesítések ki vannak kapcsolva, ezért nem fogod látni, amikor az automatikus csatlakozás hálózatváltozásra vár, vagy már csatlakozott. Kapcsold be a NetBird értesítéseit az állapot megtekintéséhez.</string>
+    <string name="auto_connect_enable_notifications">Értesítések bekapcsolása</string>
+    <string name="auto_connect_save">Mentés</string>
+    <string name="auto_connect_cancel">Mégse</string>
+
     <string name="profile_picker_title">Aktív profil</string>
     <string name="profile_picker_add">Profil hozzáadása</string>
     <string name="profile_picker_manage">Profilok kezelése</string>

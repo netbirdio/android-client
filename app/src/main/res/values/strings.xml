@@ -8,6 +8,39 @@
     <string name="menu_profiles">Profiles</string>
     <string name="menu_troubleshoot">Troubleshoot</string>
 
+    <string name="menu_auto_connect">Automatic connection</string>
+    <string name="title_auto_connect_wifi">Trusted networks</string>
+
+    <string name="auto_connect_networks_header">Networks</string>
+    <string name="auto_connect_connect_on_wifi">Connect on Wi-Fi</string>
+    <string name="auto_connect_connect_on_mobile_data">Connect on mobile data</string>
+    <string name="auto_connect_connect_on_ethernet">Connect on ethernet</string>
+    <string name="auto_connect_disconnect_on_no_network">Disconnect on no network</string>
+    <string name="auto_connect_status_active">Active</string>
+    <string name="auto_connect_status_inactive">Inactive</string>
+
+    <string name="auto_connect_trusted_networks_description">The VPN won\'t auto-connect on these Wi-Fi networks. Leave empty to auto-connect on any Wi-Fi network.</string>
+    <string name="auto_connect_trusted_networks_empty">No trusted networks added yet. Auto-connects on any Wi-Fi network until you add one.</string>
+    <string name="auto_connect_add_network">Add network</string>
+    <string name="auto_connect_add_network_title">Add trusted network</string>
+    <string name="auto_connect_ssid_hint">Network name (SSID)</string>
+    <string name="auto_connect_bssid_hint">MAC address (BSSID), optional</string>
+    <string name="auto_connect_use_current_network">Use current network</string>
+    <string name="auto_connect_grant_location_permission">Grant location access to use current network</string>
+    <string name="auto_connect_error_empty_entry">Enter an SSID or a BSSID</string>
+    <string name="auto_connect_error_invalid_bssid">Enter a valid BSSID, e.g. 00:11:22:33:44:55</string>
+    <string name="auto_connect_remove_network_cd">Remove network</string>
+    <string name="auto_connect_wifi_not_connected">Not currently connected to a Wi-Fi network</string>
+    <string name="auto_connect_location_permission_warning">Location access is needed to identify Wi-Fi networks. Without it, trusted networks can\'t be matched and the VPN may connect on networks you meant to exclude.</string>
+    <string name="auto_connect_background_location_warning">Location access is currently limited to when the app is open. Trusted networks are checked in the background, so allow location access \"All the time\" for this to work reliably.</string>
+    <string name="auto_connect_allow_always">Allow all the time</string>
+    <string name="auto_connect_battery_optimization_warning">Battery optimization may stop auto-connect from working reliably in the background. Allow NetBird to run unrestricted for it to detect network changes consistently.</string>
+    <string name="auto_connect_allow_unrestricted_battery">Allow unrestricted battery usage</string>
+    <string name="auto_connect_notification_permission_warning">Notifications are off, so you won\'t see when auto-connect is waiting for a network change or has connected. Enable notifications for NetBird to see its status.</string>
+    <string name="auto_connect_enable_notifications">Enable notifications</string>
+    <string name="auto_connect_save">Save</string>
+    <string name="auto_connect_cancel">Cancel</string>
+
     <string name="profile_picker_title">Active profile</string>
     <string name="profile_picker_add">Add profile</string>
     <string name="profile_picker_manage">Manage profiles</string>

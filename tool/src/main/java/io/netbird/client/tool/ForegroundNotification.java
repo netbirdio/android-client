@@ -32,6 +32,7 @@ class ForegroundNotification {
         CONNECTING(R.drawable.notification_icon_connecting),
         CONNECTED(R.drawable.notification_icon_connected),
         DISCONNECTED(R.drawable.notification_icon_disconnected),
+        MONITORING(R.drawable.notification_icon_disconnected),
         NO_NETWORK(R.drawable.notification_icon_disconnected),
         NEEDS_LOGIN(R.drawable.notification_icon_error),
         ERROR(R.drawable.notification_icon_error);
@@ -165,6 +166,13 @@ class ForegroundNotification {
 
         Intent notificationIntent = new Intent();
         notificationIntent.setClassName("io.netbird.client", "io.netbird.client.MainActivity");
+        if (state == State.NEEDS_LOGIN) {
+            // Tapping while login is required goes straight into the same
+            // interactive login the home screen's connect toggle runs,
+            // instead of just opening the app to whatever screen it was on.
+            notificationIntent.setAction(VPNService.ACTION_LOGIN_REQUIRED);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        }
 
         int flags = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -206,6 +214,8 @@ class ForegroundNotification {
                 return R.string.fg_notification_connecting;
             case DISCONNECTED:
                 return R.string.fg_notification_disconnected;
+            case MONITORING:
+                return R.string.fg_notification_monitoring;
             case NO_NETWORK:
                 return R.string.fg_notification_no_network;
             case NEEDS_LOGIN:

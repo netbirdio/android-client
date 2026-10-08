@@ -20,6 +20,7 @@ import io.netbird.client.R;
 import io.netbird.client.databinding.FragmentSettingsBinding;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.tool.autoconnect.AutoConnectPreferences;
 import io.netbird.client.ui.profile.ProfileEditorDialog;
 
 public class SettingsFragment extends Fragment {
@@ -55,6 +56,9 @@ public class SettingsFragment extends Fragment {
         binding.rowSplitTunneling.setOnClickListener(v ->
                 navController.navigate(R.id.nav_split_tunneling));
 
+        binding.rowAutoConnect.setOnClickListener(v ->
+                navController.navigate(R.id.nav_auto_connect));
+
         binding.rowLanguage.setOnClickListener(v ->
                 new LanguagePickerSheet().show(getChildFragmentManager(), "language_picker"));
 
@@ -84,6 +88,7 @@ public class SettingsFragment extends Fragment {
         super.onResume();
         updateActiveProfileName();
         binding.currentLanguageName.setText(LanguagePickerSheet.currentLanguageLabel(requireContext()));
+        updateAutoConnectStatus();
     }
 
     @Override
@@ -102,6 +107,14 @@ public class SettingsFragment extends Fragment {
             Log.e(LOGTAG, "Failed to read active profile", e);
             binding.activeProfileName.setText("");
         }
+    }
+
+    private void updateAutoConnectStatus() {
+        if (binding == null) return;
+        boolean armed = new AutoConnectPreferences(requireContext()).isAnyTriggerArmed();
+        binding.autoConnectStatus.setText(armed
+                ? R.string.auto_connect_status_active
+                : R.string.auto_connect_status_inactive);
     }
 
     private void showActiveProfileEditor() {

@@ -3,6 +3,7 @@
     <string name="fg_notification_connected">Csatlakozva</string>
     <string name="fg_notification_connecting">Csatlakozás…</string>
     <string name="fg_notification_disconnected">Lecsatlakozva</string>
+    <string name="fg_notification_monitoring">Lecsatlakozva, várakozás hálózatváltozásra</string>
     <string name="fg_notification_no_network">Nincs elérhető hálózat</string>
     <string name="fg_notification_needs_login">Bejelentkezés szükséges</string>
     <string name="fg_notification_error">Hiba</string>
@@ -23,4 +24,7 @@
     <plurals name="fg_notification_session_expires_days">
         <item quantity="other">A munkamenet %1$d nap múlva lejár</item>
     </plurals>
+    <string name="auto_connect_notification_channel_name">Automatikus csatlakozás</string>
+    <string name="auto_connect_consent_notification_title">Az automatikus csatlakozáshoz engedélyed szükséges</string>
+    <string name="auto_connect_consent_notification_text">Egy, az automatikus csatlakozási beállításaidnak megfelelő hálózatot észleltünk, de a NetBirdnek VPN-engedélyre van szüksége a csatlakozáshoz. Nyisd meg az alkalmazást az engedélyezéshez.</string>
 </resources>

@@ -10,6 +10,7 @@
     <string name="session_notification_extend">Extend session</string>
     <string name="fg_notification_connecting">Connecting…</string>
     <string name="fg_notification_disconnected">Disconnected</string>
+    <string name="fg_notification_monitoring">Disconnected, waiting for network changes</string>
     <string name="fg_notification_no_network">No network available</string>
     <string name="fg_notification_needs_login">Login required</string>
     <string name="fg_notification_error">Error</string>
@@ -27,4 +28,7 @@
         <item quantity="one">Session expires in %1$d day</item>
         <item quantity="other">Session expires in %1$d days</item>
     </plurals>
+    <string name="auto_connect_notification_channel_name">Auto connect</string>
+    <string name="auto_connect_consent_notification_title">Auto connect needs your permission</string>
+    <string name="auto_connect_consent_notification_text">A network matching your auto-connect settings was detected, but NetBird needs VPN permission to connect. Open the app to grant it.</string>
 </resources>

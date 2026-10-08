@@ -9,6 +9,38 @@
     <string name="menu_troubleshoot">トラブルシューティング</string>
     <string name="menu_ssh">SSH</string>
 
+    <string name="menu_auto_connect">自動接続</string>
+    <string name="title_auto_connect_wifi">信頼できるネットワーク</string>
+
+    <string name="auto_connect_networks_header">ネットワーク</string>
+    <string name="auto_connect_connect_on_wifi">Wi-Fi接続時に接続</string>
+    <string name="auto_connect_connect_on_mobile_data">モバイルデータ接続時に接続</string>
+    <string name="auto_connect_connect_on_ethernet">イーサネット接続時に接続</string>
+    <string name="auto_connect_disconnect_on_no_network">ネットワークがない場合に切断</string>
+    <string name="auto_connect_status_active">有効</string>
+    <string name="auto_connect_status_inactive">無効</string>
+    <string name="auto_connect_trusted_networks_description">これらのWi-FiネットワークではVPNが自動接続しません。空欄のままにすると、どのWi-Fiネットワークでも自動接続します。</string>
+    <string name="auto_connect_trusted_networks_empty">信頼できるネットワークはまだ追加されていません。追加するまでは、どのWi-Fiネットワークでも自動接続します。</string>
+    <string name="auto_connect_add_network">ネットワークを追加</string>
+    <string name="auto_connect_add_network_title">信頼できるネットワークを追加</string>
+    <string name="auto_connect_ssid_hint">ネットワーク名(SSID)</string>
+    <string name="auto_connect_bssid_hint">MACアドレス(BSSID)、任意</string>
+    <string name="auto_connect_use_current_network">現在のネットワークを使用</string>
+    <string name="auto_connect_grant_location_permission">現在のネットワークを使用するには位置情報のアクセスを許可してください</string>
+    <string name="auto_connect_error_empty_entry">SSIDまたはBSSIDを入力してください</string>
+    <string name="auto_connect_error_invalid_bssid">有効なBSSIDを入力してください(例: 00:11:22:33:44:55)</string>
+    <string name="auto_connect_remove_network_cd">ネットワークを削除</string>
+    <string name="auto_connect_wifi_not_connected">現在Wi-Fiネットワークに接続していません</string>
+    <string name="auto_connect_location_permission_warning">Wi-Fiネットワークを識別するには位置情報のアクセスが必要です。これがないと信頼できるネットワークを照合できず、除外したいネットワークにVPNが接続してしまう可能性があります。</string>
+    <string name="auto_connect_background_location_warning">現在、位置情報のアクセスはアプリを開いている間のみに制限されています。信頼できるネットワークはバックグラウンドで確認されるため、確実に機能させるには位置情報のアクセスを「常に許可」に設定してください。</string>
+    <string name="auto_connect_allow_always">常に許可</string>
+    <string name="auto_connect_battery_optimization_warning">バッテリー最適化により、バックグラウンドでの自動接続が正しく動作しない場合があります。ネットワークの変化を確実に検出できるよう、NetBirdを制限なしで実行することを許可してください。</string>
+    <string name="auto_connect_allow_unrestricted_battery">バッテリー使用を無制限に許可</string>
+    <string name="auto_connect_notification_permission_warning">通知がオフになっているため、自動接続がネットワークの変化を待っているときや接続したときに表示されません。状態を確認するにはNetBirdの通知を有効にしてください。</string>
+    <string name="auto_connect_enable_notifications">通知を有効にする</string>
+    <string name="auto_connect_save">保存</string>
+    <string name="auto_connect_cancel">キャンセル</string>
+
     <string name="profile_picker_title">使用中のプロファイル</string>
     <string name="profile_picker_add">プロファイルを追加</string>
     <string name="profile_picker_manage">プロファイルの管理</string>
