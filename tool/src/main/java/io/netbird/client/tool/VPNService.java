@@ -206,6 +206,7 @@ public class VPNService extends android.net.VpnService {
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
 
+        sessionMonitor.shutdown();
         engineRunner.stop();
         stopForeground(true);
 
