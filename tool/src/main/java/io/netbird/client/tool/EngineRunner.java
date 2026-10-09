@@ -191,20 +191,39 @@ class EngineRunner {
             } finally {
                 engineIsRunning = false;
                 dnsWatch.removeDNSChangeListener();
-                notifyServiceStateListeners(false);
             }
             Log.e(LOGTAG, "service stopped");
 
-            if (restartPending) {
-                restartPending = false;
-                // Deliberately not an interactive start: a policy change must not
-                // pop a browser at a user who did nothing. If the new policy needs
-                // a login the run loop reports NeedsLogin, and the notification
-                // says so.
-                runClient(null, false);
-            }
+            finishRun();
         };
         new Thread(r).start();
+    }
+
+    /**
+     * Ends a run, in one step: either the engine goes back up for a pending
+     * restart, or the stop is announced.
+     *
+     * Both halves are decided here, under the same lock {@link #stop()} takes,
+     * because they are one lifecycle transition and splitting them leaves two
+     * ways to go wrong. A stop that arrives while the run is winding down either
+     * lands before the decision, cancelling the restart so the stop is announced
+     * like any other, or after the new run has begun, where it stops that run.
+     * Neither order can start an engine the user has just turned off.
+     *
+     * Listeners therefore never see a stop that is about to be undone, which is
+     * what let a notification sit on "connecting" with nothing coming.
+     */
+    private synchronized void finishRun() {
+        if (restartPending) {
+            restartPending = false;
+            // Deliberately not an interactive start: a policy change must not
+            // pop a browser at a user who did nothing. If the new policy needs
+            // a login the run loop reports NeedsLogin, and the notification
+            // says so.
+            runClient(null, false);
+            return;
+        }
+        notifyServiceStateListeners(false);
     }
 
     private void changed(DNSList dnsServers) throws Exception {
@@ -368,17 +387,6 @@ class EngineRunner {
      */
     public boolean hasMDMPolicyChanged() {
         return goClient.hasMDMPolicyChanged();
-    }
-
-    /**
-     * True between a restart request and the start that answers it, including
-     * the moment the engine reports itself stopped in between. The service asks
-     * this rather than tracking the restart itself: a stop the user asked for
-     * cancels the restart here, and a second flag elsewhere would not hear about
-     * it.
-     */
-    public boolean isRestartPending() {
-        return restartPending;
     }
 
     /**

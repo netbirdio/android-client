@@ -187,6 +187,15 @@ public class VPNService extends android.net.VpnService {
 
         // Rebuilds the tunnel with it, which is also what applies a changed
         // application filter. A no-op while the engine is down.
+        //
+        // The engine does not report itself stopped in between, so the service
+        // stays in the foreground across the restart: dropping out and promoting
+        // again would be a startForeground from the background, which Android 12
+        // and later can refuse outright. Only the wording changes, and only while
+        // there is a tunnel to say it about.
+        if (engineRunner.isRunning()) {
+            fgNotification.setState(ForegroundNotification.State.CONNECTING);
+        }
         engineRunner.restart();
     }
 
@@ -542,18 +551,6 @@ public class VPNService extends android.net.VpnService {
 
         @Override
         public void onStopped() {
-            if (engineRunner.isRestartPending()) {
-                // Our own stop, with the start already queued behind it. The
-                // service stays in the foreground across it: dropping out and
-                // promoting again would be a startForeground from the
-                // background, which Android 12 and later can refuse outright.
-                // The engine owns this answer — a stop the user asked for in the
-                // meantime cancels the restart, and then this is an ordinary
-                // stop again.
-                fgNotification.setState(ForegroundNotification.State.CONNECTING);
-                sessionMonitor.onStateChanged();
-                return;
-            }
             // Set before tearing the notification down: stopForeground can
             // leave the notification on screen briefly (and does leave it when
             // the service keeps running for a rebind), so it must not linger
