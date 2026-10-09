@@ -44,6 +44,11 @@
         android:theme="@style/Theme.NetBird"
         tools:targetApi="33">
 
+        <!-- The managed configuration an EMM can set for this app. -->
+        <meta-data
+            android:name="android.content.APP_RESTRICTIONS"
+            android:resource="@xml/app_restrictions" />
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"

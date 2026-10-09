@@ -38,6 +38,7 @@ class EngineRunner {
     private volatile SessionMonitor sessionMonitor;
     private final Client goClient;
     private ConnectionListener connectionListener;
+    private volatile boolean restartPending;
 
     public EngineRunner(Context context, NetworkChangeListener networkChangeListener, TunAdapter tunAdapter,
                         IFaceDiscover iFaceDiscover, String versionName, boolean isTraceLogEnabled, boolean isDebuggable,
@@ -53,6 +54,11 @@ class EngineRunner {
                 tunAdapter,
                 iFaceDiscover,
                 networkChangeListener);
+
+        // The engine reads MDM-managed values through this. Registering it on the
+        // client covers every config read the run loop makes, including the ones
+        // that happen before any screen has asked about the policy.
+        goClient.setMDMPolicyFetcher(MDMBridge.fetcher(context));
 
         updateLogLevel(isTraceLogEnabled, isDebuggable);
 
@@ -185,12 +191,39 @@ class EngineRunner {
             } finally {
                 engineIsRunning = false;
                 dnsWatch.removeDNSChangeListener();
-                notifyServiceStateListeners(false);
             }
             Log.e(LOGTAG, "service stopped");
 
+            finishRun();
         };
         new Thread(r).start();
+    }
+
+    /**
+     * Ends a run, in one step: either the engine goes back up for a pending
+     * restart, or the stop is announced.
+     *
+     * Both halves are decided here, under the same lock {@link #stop()} takes,
+     * because they are one lifecycle transition and splitting them leaves two
+     * ways to go wrong. A stop that arrives while the run is winding down either
+     * lands before the decision, cancelling the restart so the stop is announced
+     * like any other, or after the new run has begun, where it stops that run.
+     * Neither order can start an engine the user has just turned off.
+     *
+     * Listeners therefore never see a stop that is about to be undone, which is
+     * what let a notification sit on "connecting" with nothing coming.
+     */
+    private synchronized void finishRun() {
+        if (restartPending) {
+            restartPending = false;
+            // Deliberately not an interactive start: a policy change must not
+            // pop a browser at a user who did nothing. If the new policy needs
+            // a login the run loop reports NeedsLogin, and the notification
+            // says so.
+            runClient(null, false);
+            return;
+        }
+        notifyServiceStateListeners(false);
     }
 
     private void changed(DNSList dnsServers) throws Exception {
@@ -340,6 +373,33 @@ class EngineRunner {
     }
 
     public synchronized void stop() {
+        // A stop the user asked for outranks a restart waiting to happen: the
+        // engine coming back by itself after they turned it off would be the
+        // worst way to find out a policy had changed.
+        restartPending = false;
+        goClient.stop();
+    }
+
+    /**
+     * Re-reads the managed configuration and reports whether it changed since it
+     * was last asked. The comparison is the Go side's, so what counts as a change
+     * is decided in one place for every platform.
+     */
+    public boolean hasMDMPolicyChanged() {
+        return goClient.hasMDMPolicyChanged();
+    }
+
+    /**
+     * Stops the engine and brings it back up, so a changed policy takes hold on a
+     * running tunnel. A no-op while the engine is down: the policy is read again
+     * when it next starts.
+     */
+    public synchronized void restart() {
+        if (!engineIsRunning) {
+            return;
+        }
+        Log.d(LOGTAG, "restarting the engine to apply a new MDM policy");
+        restartPending = true;
         goClient.stop();
     }
 

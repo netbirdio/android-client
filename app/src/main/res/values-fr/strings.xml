@@ -320,4 +320,11 @@
     <string name="split_tunneling_empty_include_warning">Aucune application sélectionnée, toutes continuent donc d\'utiliser le VPN. Choisissez-en au moins une.</string>
     <string name="split_tunneling_always_excluded">Toujours exclu du VPN</string>
     <string name="split_tunneling_never_included">Ne peut pas utiliser le VPN</string>
+
+    <!-- Managed configuration (MDM) -->
+    <string name="mdm_managed_by_organization">Géré par votre organisation</string>
+    <string name="mdm_managed_setting">Ce paramètre est géré par votre organisation et ne peut pas être modifié.</string>
+    <string name="mdm_managed_setting_keys">Ce paramètre est géré par votre organisation et ne peut pas être modifié. (%s)</string>
+    <string name="mdm_routes_managed">Les routes réseau sont gérées par votre organisation</string>
+    <string name="mdm_policy_applied">La configuration NetBird a été mise à jour par votre politique informatique.</string>
 </resources>

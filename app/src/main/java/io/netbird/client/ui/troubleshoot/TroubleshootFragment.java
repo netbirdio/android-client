@@ -32,12 +32,16 @@ import java.util.Locale;
 import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.FragmentTroubleshootBinding;
+import io.netbird.client.tool.MDMBridge;
 import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.MDMLock;
 
 public class TroubleshootFragment extends Fragment implements AnonymizeLevelSheet.OnLevelChangedListener {
 
     private static final String LOGTAG = "TroubleshootFragment";
+    // Not in the Go enforcement snapshot; see initializeRemoteJobsSwitch.
+    private static final String KEY_ALLOW_REMOTE_JOBS = "allowRemoteJobs";
     private static final String STATE_PENDING_BUNDLE = "pendingBundlePath";
 
     private FragmentTroubleshootBinding binding;
@@ -154,7 +158,8 @@ public class TroubleshootFragment extends Fragment implements AnonymizeLevelShee
     private void initializeRemoteJobsSwitch(Context context) {
         try {
             String configFilePath = new ProfileManagerWrapper(context).getActiveConfigPath();
-            io.netbird.gomobile.android.Preferences goPreferences = new io.netbird.gomobile.android.Preferences(configFilePath);
+            io.netbird.gomobile.android.Preferences goPreferences =
+                    MDMBridge.openPreferences(requireContext(), configFilePath);
             binding.switchAllowRemoteJobs.setChecked(goPreferences.getRemoteJobsAllowed());
             binding.switchAllowRemoteJobs.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 try {
@@ -165,6 +170,18 @@ public class TroubleshootFragment extends Fragment implements AnonymizeLevelShee
                 }
             });
             binding.allowRemoteJobsLayout.setOnClickListener(v -> binding.switchAllowRemoteJobs.toggle());
+
+            // Last: locking the row takes the listeners above away. The switch
+            // already shows the enforced value — the Go preferences answer with
+            // the policy's — so this only ends the editing of it.
+            //
+            // allowRemoteJobs is asked of the managed configuration directly
+            // because the Go enforcement snapshot has no field for it: the
+            // desktop clients apply the key without offering a control.
+            if (MDMBridge.restrictions(context).features.disableUpdateSettings
+                    || MDMBridge.manages(context, KEY_ALLOW_REMOTE_JOBS)) {
+                MDMLock.lock(binding.allowRemoteJobsLayout, binding.switchAllowRemoteJobs);
+            }
         } catch (Exception e) {
             Log.e(LOGTAG, "Failed to initialize remote jobs switch", e);
         }

@@ -34,6 +34,9 @@ public class VPNService extends android.net.VpnService {
     // Launches MainActivity to run the interactive session-extend flow; set
     // on the persistent notification's "Extend session" action.
     public static final String ACTION_EXTEND_SESSION = "io.netbird.client.intent.action.EXTEND_SESSION";
+    // Announces that a changed MDM policy has been applied, so a bound UI can
+    // say so and re-read what it is now allowed to show.
+    public static final String ACTION_MDM_POLICY_APPLIED = "io.netbird.client.intent.action.MDM_POLICY_APPLIED";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
     // Run-loop status labels, as returned by EngineRunner.status(); they come
     // from internal.StatusType on the Go side.
@@ -57,6 +60,7 @@ public class VPNService extends android.net.VpnService {
     private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
     private NetworkSwitchNotifier networkSwitchNotifier;
     private android.content.BroadcastReceiver stopEngineReceiver;
+    private android.content.BroadcastReceiver mdmPolicyReceiver;
 
     @Override
     public void onCreate() {
@@ -141,6 +145,58 @@ public class VPNService extends android.net.VpnService {
                 filter,
                 Context.RECEIVER_NOT_EXPORTED
         );
+
+        // The OS reports a changed managed configuration only to a registered
+        // receiver, and only while the process is alive. This is the process that
+        // owns the engine, so it is the one that can act on it; a policy that
+        // changes while nothing runs is picked up when the engine next starts and
+        // when a screen next reads the snapshot.
+        mdmPolicyReceiver = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onManagedConfigurationChanged();
+            }
+        };
+        androidx.core.content.ContextCompat.registerReceiver(
+                this,
+                mdmPolicyReceiver,
+                new android.content.IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED),
+                Context.RECEIVER_NOT_EXPORTED
+        );
+    }
+
+    /**
+     * Applies a changed managed configuration.
+     *
+     * Whether anything actually changed is the Go side's answer: the broadcast
+     * fires on every push, and dropping the tunnel because an administrator
+     * re-saved an unchanged configuration would be a disconnection the user
+     * cannot explain.
+     */
+    private void onManagedConfigurationChanged() {
+        if (engineRunner == null || !engineRunner.hasMDMPolicyChanged()) {
+            Log.d(LOGTAG, "managed configuration pushed, nothing changed");
+            return;
+        }
+        Log.d(LOGTAG, "managed configuration changed, applying the new policy");
+        MDMBridge.refresh(this);
+
+        Intent applied = new Intent(ACTION_MDM_POLICY_APPLIED);
+        applied.setPackage(getPackageName());
+        sendBroadcast(applied);
+
+        // Rebuilds the tunnel with it, which is also what applies a changed
+        // application filter. A no-op while the engine is down.
+        //
+        // The engine does not report itself stopped in between, so the service
+        // stays in the foreground across the restart: dropping out and promoting
+        // again would be a startForeground from the background, which Android 12
+        // and later can refuse outright. Only the wording changes, and only while
+        // there is a tunnel to say it about.
+        if (engineRunner.isRunning()) {
+            fgNotification.setState(ForegroundNotification.State.CONNECTING);
+        }
+        engineRunner.restart();
     }
 
     @Override
@@ -199,6 +255,14 @@ public class VPNService extends android.net.VpnService {
                 unregisterReceiver(stopEngineReceiver);
             } catch (IllegalArgumentException e) {
                 Log.w(LOGTAG, "Receiver not registered", e);
+            }
+        }
+
+        if (mdmPolicyReceiver != null) {
+            try {
+                unregisterReceiver(mdmPolicyReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.w(LOGTAG, "MDM receiver not registered", e);
             }
         }
 

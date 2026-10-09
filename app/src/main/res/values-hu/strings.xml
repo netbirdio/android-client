@@ -317,4 +317,11 @@
     <string name="split_tunneling_empty_include_warning">Nincs kijelölt alkalmazás, ezért továbbra is mind a VPN-t használja. Jelöljön ki legalább egyet.</string>
     <string name="split_tunneling_always_excluded">Mindig kimarad a VPN-ből</string>
     <string name="split_tunneling_never_included">Nem használhatja a VPN-t</string>
+
+    <!-- Managed configuration (MDM) -->
+    <string name="mdm_managed_by_organization">A szervezete kezeli</string>
+    <string name="mdm_managed_setting">Ezt a beállítást a szervezete kezeli, ezért nem módosítható.</string>
+    <string name="mdm_managed_setting_keys">Ezt a beállítást a szervezete kezeli, ezért nem módosítható. (%s)</string>
+    <string name="mdm_routes_managed">A hálózati útvonalakat a szervezete kezeli</string>
+    <string name="mdm_policy_applied">A NetBird beállításait az informatikai szabályzat frissítette.</string>
 </resources>
