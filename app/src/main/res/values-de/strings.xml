@@ -119,6 +119,13 @@
     <string name="advanced_tracelog">Trace-Logs aktivieren.</string>
     <string name="troubleshoot_debug_bundle">Debug-Paket hochladen</string>
     <string name="troubleshoot_anonymize">Sensible Daten anonymisieren</string>
+    <string name="troubleshoot_anonymize_desc">Verbirgt IP-Adressen, Domains und andere sensible Werte.</string>
+    <string name="troubleshoot_anonymize_none">Keine</string>
+    <string name="troubleshoot_anonymize_none_description">Alles bleibt lesbar. Nur innerhalb Ihrer Organisation weitergeben.</string>
+    <string name="troubleshoot_anonymize_default">Standard</string>
+    <string name="troubleshoot_anonymize_default_description">Verbirgt öffentliche IP-Adressen und Domains. Interne IPv4-Adressen und Peer-Namen bleiben für den Support lesbar.</string>
+    <string name="troubleshoot_anonymize_strict">Strikt</string>
+    <string name="troubleshoot_anonymize_strict_description">Verbirgt zusätzlich private, CGNAT- und Link-Local-Adressen, Peer-Namen und WireGuard-Schlüssel. Außerhalb Ihrer Organisation verwenden.</string>
     <string name="troubleshoot_section_logging">Protokollierung</string>
     <string name="troubleshoot_section_debug_bundle">Debug-Paket</string>
     <string name="advanced_rosenpass">Rosenpass aktivieren</string>
@@ -209,6 +216,9 @@
     <string name="error_config_path">Konfigurationspfad konnte nicht ermittelt werden: %s</string>
     <string name="troubleshoot_key_copied">Debug-Paket-Schlüssel in die Zwischenablage kopiert</string>
     <string name="troubleshoot_bundle_failed">Debug-Paket konnte nicht erstellt werden: %s</string>
+    <string name="troubleshoot_debug_bundle_file">Debug-Paket als Datei speichern</string>
+    <string name="troubleshoot_bundle_saved">Debug-Paket gespeichert</string>
+    <string name="troubleshoot_bundle_save_failed">Debug-Paket konnte nicht gespeichert werden: %s</string>
     <string name="settings_no_browser">Keine Browser-App verfügbar, um %s zu öffnen</string>
     <string name="error_vpn_dialog_unavailable">Dieses Gerät kann den VPN-Berechtigungsdialog nicht anzeigen, daher kann die Verbindung nicht gestartet werden</string>
     <string name="profiles_dialog_url_add_anyway">Trotzdem hinzufügen</string>

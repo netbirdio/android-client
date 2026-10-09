@@ -2,6 +2,7 @@ package io.netbird.client.tool;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Looper;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
@@ -61,25 +62,16 @@ class EngineRunner {
 
         updateLogLevel(isTraceLogEnabled, isDebuggable);
 
-        // The Go-side subscriptions are client-scoped and survive engine
+        // The Go-side subscription is client-scoped and survives engine
         // restarts, so one registration at construction time is enough. The
         // state signal carries no payload; consumers pull the fresh state via
-        // status() / sessionExpiresAt(). Expiry warnings arrive with their
-        // deadline, timed by the engine's own session watcher.
+        // status() / sessionExpiresAt().
         goClient.setStateChangeListener(new StateChangeListener() {
             @Override
             public void onStateChanged() {
                 SessionMonitor monitor = sessionMonitor;
                 if (monitor != null) {
                     monitor.onStateChanged();
-                }
-            }
-
-            @Override
-            public void onSessionExpiring(long expiresAtUnix, long leadMinutes, boolean finalWarning) {
-                SessionMonitor monitor = sessionMonitor;
-                if (monitor != null) {
-                    monitor.onSessionExpiring(expiresAtUnix, leadMinutes, finalWarning);
                 }
             }
         });
@@ -97,6 +89,7 @@ class EngineRunner {
 
     /** Session deadline as unix seconds, or 0 when none is known. */
     public long sessionExpiresAt() {
+        warnIfOnMainThread("sessionExpiresAt");
         return goClient.sessionExpiresAtUnix();
     }
 
@@ -378,6 +371,17 @@ class EngineRunner {
     }
 
     /**
+     * True between a restart request and the start that answers it, including
+     * the moment the engine reports itself stopped in between. The service asks
+     * this rather than tracking the restart itself: a stop the user asked for
+     * cancels the restart here, and a second flag elsewhere would not hear about
+     * it.
+     */
+    public boolean isRestartPending() {
+        return restartPending;
+    }
+
+    /**
      * Stops the engine and brings it back up, so a changed policy takes hold on a
      * running tunnel. A no-op while the engine is down: the policy is read again
      * when it next starts.
@@ -392,11 +396,13 @@ class EngineRunner {
     }
 
     public PeerInfoArray peersInfo() {
+        warnIfOnMainThread("peersInfo");
         return goClient.peersList();
     }
 
     @Nullable
     public NetworkArray networks() {
+        warnIfOnMainThread("networks");
         NetworkArray networks = goClient.networks();
         if (networks == null) {
             Log.e(LOGTAG, "Failed to retrieve networks");
@@ -418,6 +424,16 @@ class EngineRunner {
                 s.onStopped();
             }
         }
+    }
+
+    // These calls take the engine's status lock, which a network map update or a
+    // peer storm can hold for a long time. Debug builds flag callers that would
+    // let that block the UI thread.
+    private void warnIfOnMainThread(String call) {
+        if (!isDebuggable || Looper.myLooper() != Looper.getMainLooper()) {
+            return;
+        }
+        Log.w(LOGTAG, "Go call " + call + " on the main thread", new Throwable());
     }
 
     private void updateLogLevel(boolean isTraceLogEnabled, boolean isDebuggable) {
@@ -477,18 +493,32 @@ class EngineRunner {
         }
     }
 
-    public String debugBundle(boolean anonymize) throws Exception {
-        String configPath = profileManager.getActiveConfigPath();
-        String statePath = profileManager.getActiveStateFilePath();
-        String cacheDir = context.getCacheDir().getAbsolutePath();
-        var platformFiles = new AndroidPlatformFiles(configPath, statePath, cacheDir);
+    public String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception {
         try {
-            // The strict level stays unused until the troubleshoot screen
-            // grows an option for it.
-            return goClient.debugBundle(platformFiles, anonymize, Android.AnonymizeLevelDefault);
+            return goClient.debugBundle(activePlatformFiles(), anonymize, anonymizeLevel);
         } catch (Exception e) {
             Log.e(LOGTAG, "goClient error", e);
             throw e;
         }
+    }
+
+    /**
+     * Like debugBundle, but leaves the zip in the app cache and returns its
+     * path instead of uploading it. The caller removes the file once copied.
+     */
+    public String debugBundleFile(boolean anonymize, String anonymizeLevel) throws Exception {
+        try {
+            return goClient.debugBundleFile(activePlatformFiles(), anonymize, anonymizeLevel);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "goClient error", e);
+            throw e;
+        }
+    }
+
+    private AndroidPlatformFiles activePlatformFiles() throws Exception {
+        String configPath = profileManager.getActiveConfigPath();
+        String statePath = profileManager.getActiveStateFilePath();
+        String cacheDir = context.getCacheDir().getAbsolutePath();
+        return new AndroidPlatformFiles(configPath, statePath, cacheDir);
     }
 }

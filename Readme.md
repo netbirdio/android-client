@@ -45,6 +45,23 @@ You can download and install the app from the Google Play Store:
 
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=io.netbird.client)
 
+## Reporting bugs and requesting features
+
+NetBird uses a discussion-first workflow across all its repositories. Bug reports and
+feature requests for the Android client start in
+[netbird Discussions](https://github.com/netbirdio/netbird/discussions), not as issues here.
+
+| What you want to do | Where to go |
+| --- | --- |
+| Report a bug, regression, or unexpected behavior | [Issue Triage](https://github.com/netbirdio/netbird/discussions/new?category=issue-triage) |
+| Request a feature or share an idea | [Ideas & Feature Requests](https://github.com/netbirdio/netbird/discussions/new?category=ideas-feature-requests) |
+| Ask about setup, configuration, or self-hosting | [Q&A / Support](https://github.com/netbirdio/netbird/discussions/new?category=q-a-support) |
+| Report a security vulnerability | [Security policy](https://github.com/netbirdio/netbird/security/policy), never a public thread |
+
+Our team triages each discussion. Validated reports become issues in this repository,
+linked back to the discussion. See
+[How to use Discussions, Issues, and Pull Requests](https://github.com/netbirdio/netbird/discussions/6075)
+for the full workflow.
 
 ## Building from source
 ### Requirements

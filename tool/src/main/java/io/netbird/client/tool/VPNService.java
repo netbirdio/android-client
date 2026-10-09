@@ -50,6 +50,7 @@ public class VPNService extends android.net.VpnService {
     private ForegroundNotification fgNotification;
     private SessionNotification sessionNotification;
     private SessionMonitor sessionMonitor;
+    private ProfileManagerWrapper profileManager;
     private TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
 
@@ -60,12 +61,6 @@ public class VPNService extends android.net.VpnService {
     private NetworkSwitchNotifier networkSwitchNotifier;
     private android.content.BroadcastReceiver stopEngineReceiver;
     private android.content.BroadcastReceiver mdmPolicyReceiver;
-    // Set while a policy change takes the engine down and brings it straight
-    // back. The service stays in the foreground across it: dropping out and
-    // promoting again would be a startForeground from the background, which
-    // Android 12 and later can refuse outright and would leave the tunnel down
-    // with nothing to restart it.
-    private volatile boolean policyRestartInProgress;
 
     @Override
     public void onCreate() {
@@ -87,7 +82,7 @@ public class VPNService extends android.net.VpnService {
         Preferences preferences = new Preferences(this);
 
         // Create profile manager for managing profiles
-        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
+        profileManager = new ProfileManagerWrapper(this);
 
         // Create foreground notification before initializing engine
         fgNotification = new ForegroundNotification(this);
@@ -104,7 +99,7 @@ public class VPNService extends android.net.VpnService {
         sessionMonitor = new SessionMonitor(engineRunner::status, engineRunner::sessionExpiresAt);
         engineRunner.setSessionMonitor(sessionMonitor);
         sessionMonitor.addListener(sessionEventListener);
-        engineRunner.addOnConnectedObserver(() -> sessionNotification.cancel());
+        engineRunner.addOnConnectedObserver(() -> sessionNotification.cancelExpired());
 
         // Drive the status-bar icon from the tunnel's own phase rather than
         // the engine start/stop edges, so "connecting" is visible while the
@@ -191,9 +186,7 @@ public class VPNService extends android.net.VpnService {
         sendBroadcast(applied);
 
         // Rebuilds the tunnel with it, which is also what applies a changed
-        // application filter. A no-op while the engine is down, which is also
-        // when there is no foreground state to hold on to.
-        policyRestartInProgress = engineRunner.isRunning();
+        // application filter. A no-op while the engine is down.
         engineRunner.restart();
     }
 
@@ -268,6 +261,7 @@ public class VPNService extends android.net.VpnService {
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
 
+        sessionMonitor.shutdown();
         engineRunner.stop();
         stopForeground(true);
 
@@ -308,7 +302,7 @@ public class VPNService extends android.net.VpnService {
         public void runEngine(URLOpener urlOpener, boolean isAndroidTV) {
             fgNotification.setState(ForegroundNotification.State.CONNECTING);
             fgNotification.startForeground();
-            sessionNotification.cancel();
+            sessionNotification.cancelExpired();
             engineRunner.run(urlOpener, isAndroidTV);
         }
 
@@ -393,8 +387,12 @@ public class VPNService extends android.net.VpnService {
             }
         }
 
-        public String debugBundle(boolean anonymize) throws Exception {
-            return engineRunner.debugBundle(anonymize);
+        public String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception {
+            return engineRunner.debugBundle(anonymize, anonymizeLevel);
+        }
+
+        public String debugBundleFile(boolean anonymize, String anonymizeLevel) throws Exception {
+            return engineRunner.debugBundleFile(anonymize, anonymizeLevel);
         }
 
         /**
@@ -444,11 +442,6 @@ public class VPNService extends android.net.VpnService {
 
     private final SessionEventListener sessionEventListener = new SessionEventListener() {
         @Override
-        public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
-            sessionNotification.showExpiring(leadMinutes);
-        }
-
-        @Override
         public void onSessionExpired() {
             sessionNotification.showExpired();
         }
@@ -456,8 +449,17 @@ public class VPNService extends android.net.VpnService {
         @Override
         public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
             fgNotification.updateSessionDeadline(expiresAtUnixSeconds);
+            SessionWarningScheduler.schedule(VPNService.this, expiresAtUnixSeconds, activeProfileId());
         }
     };
+
+    private String activeProfileId() {
+        try {
+            return profileManager.getActiveProfile().getID();
+        } catch (IllegalStateException e) {
+            return "";
+        }
+    }
 
     /**
      * The icon state implied by the engine's current status label, for the
@@ -535,17 +537,19 @@ public class VPNService extends android.net.VpnService {
     public ServiceStateListener serviceStateListener = new ServiceStateListener() {
         @Override
         public void onStarted() {
-            policyRestartInProgress = false;
             sessionMonitor.onStateChanged();
         }
 
         @Override
         public void onStopped() {
-            if (policyRestartInProgress) {
+            if (engineRunner.isRestartPending()) {
                 // Our own stop, with the start already queued behind it. The
-                // notification stays up and only says what is happening; the
-                // tunnel is coming back without the user having asked for
-                // anything.
+                // service stays in the foreground across it: dropping out and
+                // promoting again would be a startForeground from the
+                // background, which Android 12 and later can refuse outright.
+                // The engine owns this answer — a stop the user asked for in the
+                // meantime cancels the restart, and then this is an ordinary
+                // stop again.
                 fgNotification.setState(ForegroundNotification.State.CONNECTING);
                 sessionMonitor.onStateChanged();
                 return;
@@ -564,13 +568,11 @@ public class VPNService extends android.net.VpnService {
                     : ForegroundNotification.State.DISCONNECTED);
             fgNotification.stopForeground();
             sessionMonitor.onStateChanged();
+            SessionWarningScheduler.cancelAll(VPNService.this);
         }
 
         @Override
         public void onError(String msg) {
-            // The engine is not coming back on its own, so the stop that follows
-            // has to tear the notification down like any other failure.
-            policyRestartInProgress = false;
             // An expired session surfaces here first (the run loop gives up
             // with PermissionDenied), so sample the status right away instead
             // of waiting for the monitor's next tick.

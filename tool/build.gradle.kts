@@ -33,8 +33,10 @@ dependencies {
     implementation(project(":gomobile"))
     implementation(libs.appcompat)
     implementation(libs.material)
+    implementation(libs.work.runtime)
     testImplementation(libs.junit)
     testImplementation(libs.json)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.work.testing)
 }

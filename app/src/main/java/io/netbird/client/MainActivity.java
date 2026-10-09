@@ -703,11 +703,20 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     }
 
     @Override
-    public String debugBundle(boolean anonymize) throws Exception {
+    public String debugBundle(boolean anonymize, String anonymizeLevel) throws Exception {
         if (mBinder == null) {
             throw new Exception("VPN service not connected");
         }
-        return mBinder.debugBundle(anonymize);
+        return mBinder.debugBundle(anonymize, anonymizeLevel);
+    }
+
+    @Override
+    public String debugBundleFile(boolean anonymize, String anonymizeLevel) throws Exception {
+        VPNService.MyLocalBinder binder = mBinder;
+        if (binder == null) {
+            throw new Exception("VPN service not connected");
+        }
+        return binder.debugBundleFile(anonymize, anonymizeLevel);
     }
 
     @Override
@@ -1029,15 +1038,6 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
     };
 
     private final SessionEventListener sessionEventListener = new SessionEventListener() {
-        @Override
-        public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
-            // Nothing to do in the UI: the notification carries the warning
-            // from the background, and the home screen's session row states the
-            // deadline continuously with the same extend action. A dialog would
-            // be a third copy of that, and an interruption an event known ten
-            // minutes ahead does not warrant.
-        }
-
         @Override
         public void onSessionExpired() {
             // No dialog: the home screen states it where the connection status

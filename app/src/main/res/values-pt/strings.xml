@@ -119,6 +119,13 @@
     <string name="advanced_tracelog">Habilitar o nível de log de trace.</string>
     <string name="troubleshoot_debug_bundle">Enviar pacote de depuração</string>
     <string name="troubleshoot_anonymize">Anonimizar dados sensíveis</string>
+    <string name="troubleshoot_anonymize_desc">Oculta endereços IP, domínios e outros valores sensíveis.</string>
+    <string name="troubleshoot_anonymize_none">Nenhum</string>
+    <string name="troubleshoot_anonymize_none_description">Tudo permanece legível. Compartilhe apenas dentro da sua organização.</string>
+    <string name="troubleshoot_anonymize_default">Padrão</string>
+    <string name="troubleshoot_anonymize_default_description">Oculta os endereços IP públicos e os domínios. Os endereços IPv4 internos e os nomes dos peers continuam legíveis para o suporte.</string>
+    <string name="troubleshoot_anonymize_strict">Estrito</string>
+    <string name="troubleshoot_anonymize_strict_description">Oculta também os endereços privados, CGNAT e link-local, os nomes dos peers e as chaves WireGuard. Use fora da sua organização.</string>
     <string name="troubleshoot_section_logging">Registro</string>
     <string name="troubleshoot_section_debug_bundle">Pacote de depuração</string>
     <string name="advanced_rosenpass">Ativar Rosenpass</string>
@@ -209,6 +216,9 @@
     <string name="error_config_path">Falha ao obter o caminho da configuração: %s</string>
     <string name="troubleshoot_key_copied">Chave do pacote de depuração copiada para a área de transferência</string>
     <string name="troubleshoot_bundle_failed">Falha ao criar o pacote de depuração: %s</string>
+    <string name="troubleshoot_debug_bundle_file">Salvar pacote de depuração em arquivo</string>
+    <string name="troubleshoot_bundle_saved">Pacote de depuração salvo</string>
+    <string name="troubleshoot_bundle_save_failed">Falha ao salvar o pacote de depuração: %s</string>
     <string name="settings_no_browser">Nenhum navegador disponível para abrir %s</string>
     <string name="error_vpn_dialog_unavailable">Este dispositivo não consegue mostrar a caixa de diálogo de permissão de VPN, por isso a ligação não pode ser iniciada</string>
     <string name="profiles_dialog_url_add_anyway">Adicionar mesmo assim</string>

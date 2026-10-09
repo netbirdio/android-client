@@ -54,39 +54,6 @@
         <include layout="@layout/list_item_setting_divider" />
 
         <LinearLayout
-            android:id="@+id/anonymize_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/settings_row_bg"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:minHeight="56dp"
-            android:orientation="horizontal"
-            android:paddingStart="20dp"
-            android:paddingEnd="16dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/troubleshoot_anonymize"
-                android:textColor="@color/nb_txt"
-                android:textSize="16sp" />
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                style="@style/Widget.NetBird.Switch"
-                android:id="@+id/switch_anonymize"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:clickable="false"
-                android:focusable="false" />
-        </LinearLayout>
-
-        <include layout="@layout/list_item_setting_divider" />
-
-        <LinearLayout
             android:id="@+id/allow_remote_jobs_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -139,6 +106,53 @@
             android:text="@string/troubleshoot_section_debug_bundle" />
 
         <LinearLayout
+            android:id="@+id/anonymize_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/settings_row_bg"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:minHeight="56dp"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/troubleshoot_anonymize"
+                    android:textColor="@color/nb_txt"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/troubleshoot_anonymize_desc"
+                    android:textColor="@color/nb_txt_light"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/anonymize_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textColor="@color/nb_txt_light"
+                android:textSize="14sp"
+                tools:text="@string/troubleshoot_anonymize_default" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/nb_bg_peers"
@@ -156,6 +170,24 @@
                 android:focusable="true"
                 android:focusableInTouchMode="false"
                 android:text="@string/troubleshoot_debug_bundle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_debug_bundle_file"
+                style="@style/Widget.NetBird.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:text="@string/troubleshoot_debug_bundle_file" />
+
+            <ProgressBar
+                android:id="@+id/bundle_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>

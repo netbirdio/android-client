@@ -78,6 +78,7 @@ public class ProfileManagerWrapper {
 
         // Stop VPN service before switching profile
         stopEngine();
+        SessionWarningScheduler.cancelAll(context);
 
         profileManager.switchProfile(id);
     }
@@ -121,6 +122,7 @@ public class ProfileManagerWrapper {
         if (activeProfile.getID().equals(id)) {
             // Stop VPN service if logging out from active profile
             stopEngine();
+            SessionWarningScheduler.cancelAll(context);
         }
 
         profileManager.logoutProfile(id);
