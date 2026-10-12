@@ -29,6 +29,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.AppViewH
     private Set<String> selected;
     private SplitTunnelConfig.Mode mode;
     private String filterQueryString = "";
+    private boolean readOnly;
 
     public AppListAdapter(Set<String> selected, SplitTunnelConfig.Mode mode,
                           OnAppToggledListener toggleListener) {
@@ -47,6 +48,15 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.AppViewH
     public void setSelected(Set<String> selected, SplitTunnelConfig.Mode mode) {
         this.selected = selected;
         this.mode = mode;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Shows the selection without offering to change it, for when an
+     * administrator decided which applications the tunnel carries.
+     */
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
         notifyDataSetChanged();
     }
 
@@ -112,10 +122,21 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.AppViewH
             }
 
             binding.switchControl.setChecked(selected.contains(app.getPackageName()));
+            binding.appNote.setVisibility(View.GONE);
+
+            if (readOnly) {
+                // The selection belongs to the policy: the row reports what the
+                // tunnel does with this app instead of offering a choice.
+                binding.switchControl.setEnabled(false);
+                binding.getRoot().setAlpha(0.6f);
+                binding.getRoot().setOnClickListener(null);
+                binding.getRoot().setClickable(false);
+                return;
+            }
+
             binding.switchControl.setEnabled(true);
             binding.switchControl.setOnCheckedChangeListener((buttonView, isChecked) ->
                     toggleListener.onAppToggled(app.getPackageName(), isChecked));
-            binding.appNote.setVisibility(View.GONE);
             binding.getRoot().setAlpha(1f);
             binding.getRoot().setOnClickListener(v -> binding.switchControl.toggle());
         }

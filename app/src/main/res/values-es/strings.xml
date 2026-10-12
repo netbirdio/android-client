@@ -216,6 +216,9 @@
     <string name="error_config_path">No se pudo obtener la ruta de configuración: %s</string>
     <string name="troubleshoot_key_copied">Clave del paquete de diagnóstico copiada al portapapeles</string>
     <string name="troubleshoot_bundle_failed">No se pudo crear el paquete de diagnóstico: %s</string>
+    <string name="troubleshoot_debug_bundle_file">Guardar paquete de diagnóstico en un archivo</string>
+    <string name="troubleshoot_bundle_saved">Paquete de diagnóstico guardado</string>
+    <string name="troubleshoot_bundle_save_failed">No se pudo guardar el paquete de diagnóstico: %s</string>
     <string name="settings_no_browser">No hay ningún navegador disponible para abrir %s</string>
     <string name="error_vpn_dialog_unavailable">Este dispositivo no puede mostrar el diálogo de permiso de VPN, por lo que no se puede iniciar la conexión</string>
     <string name="profiles_dialog_url_add_anyway">Añadir de todos modos</string>
@@ -317,4 +320,11 @@
     <string name="split_tunneling_empty_include_warning">No hay ninguna aplicación seleccionada, así que todas siguen usando la VPN. Elija al menos una.</string>
     <string name="split_tunneling_always_excluded">Siempre fuera de la VPN</string>
     <string name="split_tunneling_never_included">No puede usar la VPN</string>
+
+    <!-- Managed configuration (MDM) -->
+    <string name="mdm_managed_by_organization">Gestionado por su organización</string>
+    <string name="mdm_managed_setting">Esta configuración está gestionada por su organización y no se puede cambiar.</string>
+    <string name="mdm_managed_setting_keys">Esta configuración está gestionada por su organización y no se puede cambiar. (%s)</string>
+    <string name="mdm_routes_managed">Las rutas de red están gestionadas por su organización</string>
+    <string name="mdm_policy_applied">La configuración de NetBird se actualizó según su política de TI.</string>
 </resources>

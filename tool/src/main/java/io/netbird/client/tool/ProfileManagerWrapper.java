@@ -25,6 +25,9 @@ public class ProfileManagerWrapper {
         // Android always uses app's files directory for config
         String configDir = context.getFilesDir().getPath();
         this.profileManager = io.netbird.gomobile.android.Android.newProfileManager(configDir);
+        // Profile operations read the policy too: a managed management URL has to
+        // win over whatever a profile has stored for it.
+        this.profileManager.setMDMPolicyFetcher(MDMBridge.fetcher(context));
     }
 
     /**
@@ -75,6 +78,7 @@ public class ProfileManagerWrapper {
 
         // Stop VPN service before switching profile
         stopEngine();
+        SessionWarningScheduler.cancelAll(context);
 
         profileManager.switchProfile(id);
     }
@@ -118,6 +122,7 @@ public class ProfileManagerWrapper {
         if (activeProfile.getID().equals(id)) {
             // Stop VPN service if logging out from active profile
             stopEngine();
+            SessionWarningScheduler.cancelAll(context);
         }
 
         profileManager.logoutProfile(id);

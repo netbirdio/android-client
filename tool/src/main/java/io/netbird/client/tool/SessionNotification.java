@@ -11,14 +11,16 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 /**
- * Posts the auth-session warnings on their own high-importance channel so the
- * user learns about an expiring or expired session even when no UI is running
- * (always-on VPN, boot start). MainActivity shows its own dialog for the
- * foreground case; this notification is the background fallback.
+ * Posts the auth-session notifications on their own high-importance channel so
+ * the user learns about an expiring or expired session even when no UI is
+ * running (always-on VPN, boot start). The "expiring" one is posted by
+ * {@link SessionWarningWorker} and the "expired" one by the service when the
+ * run loop reports NeedsLogin.
  */
 class SessionNotification {
     private static final String LOGTAG = "SessionNotification";
-    private static final int NOTIFICATION_ID = 103;
+    private static final int EXPIRED_NOTIFICATION_ID = 103;
+    private static final int EXPIRING_NOTIFICATION_ID = 104;
     private static final String CHANNEL_ID = "netbird_session";
 
     private final Context context;
@@ -27,23 +29,35 @@ class SessionNotification {
         this.context = context;
     }
 
-    void showExpiring(long leadMinutes) {
-        show(context.getString(R.string.session_notification_expiring_title),
-                context.getString(R.string.session_notification_expiring_text, leadMinutes));
+    void showExpiring(long minutesLeft, long deadlineMs) {
+        show(EXPIRING_NOTIFICATION_ID,
+                context.getString(R.string.session_notification_expiring_title),
+                context.getString(R.string.session_notification_expiring_text, minutesLeft),
+                deadlineMs - System.currentTimeMillis());
     }
 
     void showExpired() {
-        show(context.getString(R.string.session_notification_expired_title),
-                context.getString(R.string.session_notification_expired_text));
+        cancelExpiring();
+        show(EXPIRED_NOTIFICATION_ID,
+                context.getString(R.string.session_notification_expired_title),
+                context.getString(R.string.session_notification_expired_text),
+                0);
     }
 
-    void cancel() {
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.cancel(NOTIFICATION_ID);
+    void cancelExpiring() {
+        manager().cancel(EXPIRING_NOTIFICATION_ID);
     }
 
-    private void show(String title, String text) {
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    void cancelExpired() {
+        manager().cancel(EXPIRED_NOTIFICATION_ID);
+    }
+
+    private NotificationManager manager() {
+        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    private void show(int id, String title, String text, long timeoutMs) {
+        NotificationManager manager = manager();
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 context.getString(R.string.session_notification_channel_name),
@@ -55,16 +69,19 @@ class SessionNotification {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification_icon_error)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .build();
+                .setAutoCancel(true);
+        if (timeoutMs > 0) {
+            builder.setTimeoutAfter(timeoutMs);
+        }
+        Notification notification = builder.build();
         try {
-            manager.notify(NOTIFICATION_ID, notification);
+            manager.notify(id, notification);
         } catch (SecurityException e) {
             // POST_NOTIFICATIONS runtime permission not granted (API 33+)
             Log.w(LOGTAG, "cannot post session notification", e);

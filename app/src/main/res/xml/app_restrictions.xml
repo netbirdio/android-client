@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The managed configuration this app accepts, as an administrator sees it in
+    their EMM console or in TestDPC.
+
+    Declaring the keys changes nothing about how they are honoured — that is the
+    Go MDM layer's job, and it reads whatever arrives — but it turns the console
+    into a form with types and descriptions instead of hand-written JSON.
+
+    The set mirrors what this client actually honours. Keys the Go layer reads
+    for the desktop clients but nothing on Android acts on — disableAutoConnect,
+    enableLocalMetrics, localMetricsAddress — are left out rather than offered to
+    an administrator as controls that would do nothing here.
+
+    No key carries a default value on purpose. A declared default is delivered by
+    some consoles as though an administrator had set it, and a key that arrives
+    is a key the client treats as managed: every setting would lock itself to its
+    own default on an enrolled device that configured nothing.
+-->
+<restrictions xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <restriction
+        android:key="managementURL"
+        android:title="@string/restriction_management_url_title"
+        android:description="@string/restriction_management_url_description"
+        android:restrictionType="string" />
+
+    <restriction
+        android:key="preSharedKey"
+        android:title="@string/restriction_preshared_key_title"
+        android:description="@string/restriction_preshared_key_description"
+        android:restrictionType="string" />
+
+    <restriction
+        android:key="rosenpassEnabled"
+        android:title="@string/restriction_rosenpass_enabled_title"
+        android:description="@string/restriction_rosenpass_enabled_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="rosenpassPermissive"
+        android:title="@string/restriction_rosenpass_permissive_title"
+        android:description="@string/restriction_rosenpass_permissive_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="disableClientRoutes"
+        android:title="@string/restriction_disable_client_routes_title"
+        android:description="@string/restriction_disable_client_routes_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="disableServerRoutes"
+        android:title="@string/restriction_disable_server_routes_title"
+        android:description="@string/restriction_disable_server_routes_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="blockInbound"
+        android:title="@string/restriction_block_inbound_title"
+        android:description="@string/restriction_block_inbound_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="allowServerSSH"
+        android:title="@string/restriction_allow_server_ssh_title"
+        android:description="@string/restriction_allow_server_ssh_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="allowRemoteJobs"
+        android:title="@string/restriction_allow_remote_jobs_title"
+        android:description="@string/restriction_allow_remote_jobs_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="splitTunnelMode"
+        android:title="@string/restriction_split_tunnel_mode_title"
+        android:description="@string/restriction_split_tunnel_mode_description"
+        android:restrictionType="choice"
+        android:entries="@array/restriction_split_tunnel_mode_entries"
+        android:entryValues="@array/restriction_split_tunnel_mode_values" />
+
+    <restriction
+        android:key="splitTunnelApps"
+        android:title="@string/restriction_split_tunnel_apps_title"
+        android:description="@string/restriction_split_tunnel_apps_description"
+        android:restrictionType="string" />
+
+    <restriction
+        android:key="wireguardPort"
+        android:title="@string/restriction_wireguard_port_title"
+        android:description="@string/restriction_wireguard_port_description"
+        android:restrictionType="integer" />
+
+    <restriction
+        android:key="lazyConnection"
+        android:title="@string/restriction_lazy_connection_title"
+        android:description="@string/restriction_lazy_connection_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="debugBundleUploadURL"
+        android:title="@string/restriction_bundle_upload_url_title"
+        android:description="@string/restriction_bundle_upload_url_description"
+        android:restrictionType="string" />
+
+    <restriction
+        android:key="disableProfiles"
+        android:title="@string/restriction_disable_profiles_title"
+        android:description="@string/restriction_disable_profiles_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="disableNetworks"
+        android:title="@string/restriction_disable_networks_title"
+        android:description="@string/restriction_disable_networks_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="disableAdvancedView"
+        android:title="@string/restriction_disable_advanced_view_title"
+        android:description="@string/restriction_disable_advanced_view_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="disableUpdateSettings"
+        android:title="@string/restriction_disable_update_settings_title"
+        android:description="@string/restriction_disable_update_settings_description"
+        android:restrictionType="bool" />
+
+</restrictions>

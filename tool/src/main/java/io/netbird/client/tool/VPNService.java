@@ -34,6 +34,9 @@ public class VPNService extends android.net.VpnService {
     // Launches MainActivity to run the interactive session-extend flow; set
     // on the persistent notification's "Extend session" action.
     public static final String ACTION_EXTEND_SESSION = "io.netbird.client.intent.action.EXTEND_SESSION";
+    // Announces that a changed MDM policy has been applied, so a bound UI can
+    // say so and re-read what it is now allowed to show.
+    public static final String ACTION_MDM_POLICY_APPLIED = "io.netbird.client.intent.action.MDM_POLICY_APPLIED";
     private static final String INTENT_ALWAYS_ON_START = "android.net.VpnService";
     // Run-loop status labels, as returned by EngineRunner.status(); they come
     // from internal.StatusType on the Go side.
@@ -47,6 +50,7 @@ public class VPNService extends android.net.VpnService {
     private ForegroundNotification fgNotification;
     private SessionNotification sessionNotification;
     private SessionMonitor sessionMonitor;
+    private ProfileManagerWrapper profileManager;
     private TUNParameters currentTUNParameters;
     private NetworkChangeNotifier notifier;
 
@@ -56,6 +60,7 @@ public class VPNService extends android.net.VpnService {
     private ConcreteNetworkAvailabilityListener networkAvailabilityListener;
     private NetworkSwitchNotifier networkSwitchNotifier;
     private android.content.BroadcastReceiver stopEngineReceiver;
+    private android.content.BroadcastReceiver mdmPolicyReceiver;
 
     @Override
     public void onCreate() {
@@ -77,7 +82,7 @@ public class VPNService extends android.net.VpnService {
         Preferences preferences = new Preferences(this);
 
         // Create profile manager for managing profiles
-        ProfileManagerWrapper profileManager = new ProfileManagerWrapper(this);
+        profileManager = new ProfileManagerWrapper(this);
 
         // Create foreground notification before initializing engine
         fgNotification = new ForegroundNotification(this);
@@ -94,7 +99,7 @@ public class VPNService extends android.net.VpnService {
         sessionMonitor = new SessionMonitor(engineRunner::status, engineRunner::sessionExpiresAt);
         engineRunner.setSessionMonitor(sessionMonitor);
         sessionMonitor.addListener(sessionEventListener);
-        engineRunner.addOnConnectedObserver(() -> sessionNotification.cancel());
+        engineRunner.addOnConnectedObserver(() -> sessionNotification.cancelExpired());
 
         // Drive the status-bar icon from the tunnel's own phase rather than
         // the engine start/stop edges, so "connecting" is visible while the
@@ -140,6 +145,58 @@ public class VPNService extends android.net.VpnService {
                 filter,
                 Context.RECEIVER_NOT_EXPORTED
         );
+
+        // The OS reports a changed managed configuration only to a registered
+        // receiver, and only while the process is alive. This is the process that
+        // owns the engine, so it is the one that can act on it; a policy that
+        // changes while nothing runs is picked up when the engine next starts and
+        // when a screen next reads the snapshot.
+        mdmPolicyReceiver = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onManagedConfigurationChanged();
+            }
+        };
+        androidx.core.content.ContextCompat.registerReceiver(
+                this,
+                mdmPolicyReceiver,
+                new android.content.IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED),
+                Context.RECEIVER_NOT_EXPORTED
+        );
+    }
+
+    /**
+     * Applies a changed managed configuration.
+     *
+     * Whether anything actually changed is the Go side's answer: the broadcast
+     * fires on every push, and dropping the tunnel because an administrator
+     * re-saved an unchanged configuration would be a disconnection the user
+     * cannot explain.
+     */
+    private void onManagedConfigurationChanged() {
+        if (engineRunner == null || !engineRunner.hasMDMPolicyChanged()) {
+            Log.d(LOGTAG, "managed configuration pushed, nothing changed");
+            return;
+        }
+        Log.d(LOGTAG, "managed configuration changed, applying the new policy");
+        MDMBridge.refresh(this);
+
+        Intent applied = new Intent(ACTION_MDM_POLICY_APPLIED);
+        applied.setPackage(getPackageName());
+        sendBroadcast(applied);
+
+        // Rebuilds the tunnel with it, which is also what applies a changed
+        // application filter. A no-op while the engine is down.
+        //
+        // The engine does not report itself stopped in between, so the service
+        // stays in the foreground across the restart: dropping out and promoting
+        // again would be a startForeground from the background, which Android 12
+        // and later can refuse outright. Only the wording changes, and only while
+        // there is a tunnel to say it about.
+        if (engineRunner.isRunning()) {
+            fgNotification.setState(ForegroundNotification.State.CONNECTING);
+        }
+        engineRunner.restart();
     }
 
     @Override
@@ -201,10 +258,19 @@ public class VPNService extends android.net.VpnService {
             }
         }
 
+        if (mdmPolicyReceiver != null) {
+            try {
+                unregisterReceiver(mdmPolicyReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.w(LOGTAG, "MDM receiver not registered", e);
+            }
+        }
+
         networkAvailabilityListener.unsubscribe();
         networkChangeDetector.unsubscribe();
         networkChangeDetector.unregisterNetworkCallback();
 
+        sessionMonitor.shutdown();
         engineRunner.stop();
         stopForeground(true);
 
@@ -245,7 +311,7 @@ public class VPNService extends android.net.VpnService {
         public void runEngine(URLOpener urlOpener, boolean isAndroidTV) {
             fgNotification.setState(ForegroundNotification.State.CONNECTING);
             fgNotification.startForeground();
-            sessionNotification.cancel();
+            sessionNotification.cancelExpired();
             engineRunner.run(urlOpener, isAndroidTV);
         }
 
@@ -334,6 +400,10 @@ public class VPNService extends android.net.VpnService {
             return engineRunner.debugBundle(anonymize, anonymizeLevel);
         }
 
+        public String debugBundleFile(boolean anonymize, String anonymizeLevel) throws Exception {
+            return engineRunner.debugBundleFile(anonymize, anonymizeLevel);
+        }
+
         /**
          * Rebuilds the tunnel so a split tunnelling change takes hold without
          * asking the user to disconnect. A no-op while the engine is down: the
@@ -381,11 +451,6 @@ public class VPNService extends android.net.VpnService {
 
     private final SessionEventListener sessionEventListener = new SessionEventListener() {
         @Override
-        public void onSessionExpiring(long expiresAtUnixSeconds, long leadMinutes, boolean finalWarning) {
-            sessionNotification.showExpiring(leadMinutes);
-        }
-
-        @Override
         public void onSessionExpired() {
             sessionNotification.showExpired();
         }
@@ -393,8 +458,17 @@ public class VPNService extends android.net.VpnService {
         @Override
         public void onSessionDeadlineChanged(long expiresAtUnixSeconds) {
             fgNotification.updateSessionDeadline(expiresAtUnixSeconds);
+            SessionWarningScheduler.schedule(VPNService.this, expiresAtUnixSeconds, activeProfileId());
         }
     };
+
+    private String activeProfileId() {
+        try {
+            return profileManager.getActiveProfile().getID();
+        } catch (IllegalStateException e) {
+            return "";
+        }
+    }
 
     /**
      * The icon state implied by the engine's current status label, for the
@@ -491,6 +565,7 @@ public class VPNService extends android.net.VpnService {
                     : ForegroundNotification.State.DISCONNECTED);
             fgNotification.stopForeground();
             sessionMonitor.onStateChanged();
+            SessionWarningScheduler.cancelAll(VPNService.this);
         }
 
         @Override

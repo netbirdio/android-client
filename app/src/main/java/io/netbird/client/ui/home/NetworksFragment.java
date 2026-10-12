@@ -27,6 +27,8 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.StateListenerRegistry;
 import io.netbird.client.databinding.FragmentNetworksBinding;
+import io.netbird.client.tool.MDMBridge;
+import io.netbird.client.tool.ProfileManagerWrapper;
 
 public class NetworksFragment extends Fragment {
 
@@ -84,6 +86,11 @@ public class NetworksFragment extends Fragment {
         resourcesRecyclerView.setAdapter(adapter);
         resourcesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        if (clientRoutesDisabledByPolicy()) {
+            showRoutesManagedByPolicy();
+            return;
+        }
+
         model.getUiState().observe(getViewLifecycleOwner(), uiState -> {
             resources.clear();
             resources.addAll(uiState.getResources());
@@ -123,6 +130,35 @@ public class NetworksFragment extends Fragment {
         // reading through a dead Activity's torn-down service connection.
         model.setServiceAccessor(null);
         super.onDestroyView();
+    }
+
+    /**
+     * Whether the policy has turned client routes off altogether.
+     *
+     * The managed flag alone is not enough: an administrator can manage the key
+     * and leave routes on, and the list is perfectly useful then. The value is
+     * read through the Go preferences, which answer with the policy's.
+     */
+    private boolean clientRoutesDisabledByPolicy() {
+        if (!MDMBridge.restrictions(requireContext()).mdm.disableClientRoutes) {
+            return false;
+        }
+        try {
+            String configPath = new ProfileManagerWrapper(requireContext()).getActiveConfigPath();
+            return MDMBridge.openPreferences(requireContext(), configPath).getDisableClientRoutes();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Says so instead of offering switches that select routes the engine has
+     * been told not to use.
+     */
+    private void showRoutesManagedByPolicy() {
+        binding.networksList.setVisibility(View.GONE);
+        binding.zeroPeerLayout.getRoot().setVisibility(View.GONE);
+        binding.routesManagedNotice.setVisibility(View.VISIBLE);
     }
 
     private void updateResourcesCounter(List<Resource> resources) {

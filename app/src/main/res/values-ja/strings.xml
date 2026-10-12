@@ -216,6 +216,9 @@
     <string name="error_config_path">設定ファイルのパスを取得できませんでした: %s</string>
     <string name="troubleshoot_key_copied">デバッグバンドルのキーをクリップボードにコピーしました</string>
     <string name="troubleshoot_bundle_failed">デバッグバンドルを作成できませんでした: %s</string>
+    <string name="troubleshoot_debug_bundle_file">デバッグバンドルをファイルに保存</string>
+    <string name="troubleshoot_bundle_saved">デバッグバンドルを保存しました</string>
+    <string name="troubleshoot_bundle_save_failed">デバッグバンドルを保存できませんでした: %s</string>
     <string name="settings_no_browser">%s を開けるブラウザアプリがありません</string>
     <string name="error_vpn_dialog_unavailable">この端末では VPN 権限のダイアログを表示できないため、接続を開始できません</string>
     <string name="profiles_dialog_url_add_anyway">このまま追加</string>
@@ -315,4 +318,11 @@
     <string name="split_tunneling_empty_include_warning">アプリが選択されていないため、すべてのアプリが VPN を使用したままです。1 つ以上選択してください。</string>
     <string name="split_tunneling_always_excluded">常に VPN から除外されます</string>
     <string name="split_tunneling_never_included">VPN を使用できません</string>
+
+    <!-- Managed configuration (MDM) -->
+    <string name="mdm_managed_by_organization">組織によって管理されています</string>
+    <string name="mdm_managed_setting">この設定は組織によって管理されているため、変更できません。</string>
+    <string name="mdm_managed_setting_keys">この設定は組織によって管理されているため、変更できません。(%s)</string>
+    <string name="mdm_routes_managed">ネットワークルートは組織によって管理されています</string>
+    <string name="mdm_policy_applied">NetBird の設定が IT ポリシーによって更新されました。</string>
 </resources>

@@ -216,6 +216,9 @@
     <string name="error_config_path">Не удалось получить путь к конфигурации: %s</string>
     <string name="troubleshoot_key_copied">Ключ отладочного пакета скопирован в буфер обмена</string>
     <string name="troubleshoot_bundle_failed">Не удалось создать отладочный пакет: %s</string>
+    <string name="troubleshoot_debug_bundle_file">Сохранить отладочный пакет в файл</string>
+    <string name="troubleshoot_bundle_saved">Отладочный пакет сохранён</string>
+    <string name="troubleshoot_bundle_save_failed">Не удалось сохранить отладочный пакет: %s</string>
     <string name="settings_no_browser">Нет браузера, чтобы открыть %s</string>
     <string name="error_vpn_dialog_unavailable">Это устройство не может показать диалог разрешения VPN, поэтому подключение невозможно запустить</string>
     <string name="profiles_dialog_url_add_anyway">Всё равно добавить</string>
@@ -323,4 +326,11 @@
     <string name="split_tunneling_empty_include_warning">Приложения не выбраны, поэтому VPN продолжают использовать все. Выберите хотя бы одно.</string>
     <string name="split_tunneling_always_excluded">Всегда исключено из VPN</string>
     <string name="split_tunneling_never_included">Не может использовать VPN</string>
+
+    <!-- Managed configuration (MDM) -->
+    <string name="mdm_managed_by_organization">Управляется вашей организацией</string>
+    <string name="mdm_managed_setting">Эта настройка управляется вашей организацией и не может быть изменена.</string>
+    <string name="mdm_managed_setting_keys">Эта настройка управляется вашей организацией и не может быть изменена. (%s)</string>
+    <string name="mdm_routes_managed">Сетевые маршруты управляются вашей организацией</string>
+    <string name="mdm_policy_applied">Конфигурация NetBird обновлена ИТ-политикой.</string>
 </resources>
