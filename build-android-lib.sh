@@ -3,15 +3,21 @@
 # Usage: ./script.sh [version]
 #
 # Version resolution (first match wins):
-#   1. explicit argument            -> the argument ('v' prefix stripped)
-#   2. local build (any HEAD)       -> dev-<sha>
-#   3. CI, HEAD on a release tag    -> that tag, e.g. 0.77.0
-#   4. CI, commits on top of a tag  -> 0.77.0+<sha>
-#   5. CI, no reachable tag         -> ci-<sha>
+#   1. explicit argument               -> the argument ('v' prefix stripped)
+#   2. local build (any HEAD)          -> dev-<sha>
+#   3. CI, HEAD on a release tag       -> that tag, e.g. 0.79.0
+#   4. CI, HEAD contains a release tag -> 0.79.0+<sha>
+#   5. CI, no release tag contained    -> ci-<sha>
 #
-# The base tag is the last stable release tag (vX.Y.Z, no pre-release) found
-# walking back HEAD's ancestry in the netbird submodule — the last tag on this
-# branch, not the newest tag in the repository. <sha> is the submodule commit.
+# The base tag is the highest stable release tag (vX.Y.Z, no pre-release) whose
+# changes are all in HEAD of the netbird submodule. <sha> is the submodule
+# commit. NetBird tags releases on release branches, so the tagged commit is
+# often not an ancestor of main: its release-only commits are cherry-picks of
+# main commits. A tag counts as contained when each commit it has on top of
+# HEAD is in HEAD's history as an equivalent patch (git cherry) or under the
+# same pull request number, since cherry-picks are sometimes adjusted and main
+# commits sometimes renamed. A tag that fails the check is skipped for the next
+# lower one, so a miss under-reports the version rather than over-reporting it.
 
 set -euo pipefail
 
@@ -37,8 +43,35 @@ normalize_version() {
   echo "$ver"
 }
 
-describe_release_tag() {
-  git describe --tags "$@" --match "$RELEASE_TAG_MATCH" --exclude "$RELEASE_TAG_EXCLUDE" 2>/dev/null || true
+release_tags_newest_first() {
+  local tag
+  git tag -l "$RELEASE_TAG_MATCH" --sort=-v:refname | while read -r tag; do
+    # shellcheck disable=SC2254
+    case "$tag" in
+      $RELEASE_TAG_EXCLUDE) ;;
+      *) echo "$tag" ;;
+    esac
+  done
+}
+
+pr_number() {
+  grep -oE '\(#[0-9]+\)' <<< "$1" | head -n 1 || true
+}
+
+# Prints the first commit of the tag that HEAD lacks, or nothing when HEAD has
+# all of the tag's changes.
+missing_tag_change() {
+  local tag="$1" head_subjects="$2"
+  local mark sha subject pr
+  while read -r mark sha subject; do
+    [ "$mark" = "-" ] && continue
+    pr=$(pr_number "$subject")
+    if [ -n "$pr" ] && grep -qF "$pr" <<< "$head_subjects"; then
+      continue
+    fi
+    echo "$sha $subject"
+    return
+  done < <(git cherry -v HEAD "$tag")
 }
 
 get_version() {
@@ -55,22 +88,25 @@ get_version() {
     return
   fi
 
-  local tag
-  tag=$(describe_release_tag --exact-match)
-  if [ -n "$tag" ]; then
-    normalize_version "$tag"
+  local head head_subjects tag missing
+  head=$(git rev-parse HEAD)
+  head_subjects=$(git log --format=%s HEAD)
+  while read -r tag; do
+    missing=$(missing_tag_change "$tag" "$head_subjects")
+    if [ -n "$missing" ]; then
+      echo "Skipping $tag: HEAD lacks $missing" >&2
+      continue
+    fi
+    echo "Base release tag: $tag" >&2
+    if [ "$(git rev-parse "$tag^{commit}")" = "$head" ]; then
+      normalize_version "$tag"
+    else
+      echo "$(normalize_version "$tag")+$short_hash"
+    fi
     return
-  fi
+  done < <(release_tags_newest_first)
 
-  # Walks HEAD's ancestry, so this is the last release tag on this branch,
-  # not the most recently created tag in the repository.
-  tag=$(describe_release_tag --abbrev=0)
-  if [ -n "$tag" ]; then
-    echo "$(normalize_version "$tag")+$short_hash"
-    return
-  fi
-
-  echo "WARNING: no release tag reachable from HEAD; using ci-$short_hash" >&2
+  echo "WARNING: HEAD contains no release tag; using ci-$short_hash" >&2
   if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
     echo "WARNING: the submodule is a shallow clone; the tag lookup needs full history" >&2
   fi
