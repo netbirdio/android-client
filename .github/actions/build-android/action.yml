@@ -36,11 +36,11 @@ runs:
       shell: bash
       run: |
         cd netbird
-        # build-android-lib.sh resolves the version by walking HEAD's ancestry
-        # back to the last release tag. actions/checkout clones submodules
-        # shallow, which fetches the tags but not the commits between HEAD and
-        # the tag, so without full history the walk comes up empty and the
-        # build silently falls back to a ci-<sha> version.
+        # build-android-lib.sh resolves the version from the highest release
+        # tag whose changes are all in HEAD's history. actions/checkout clones
+        # submodules shallow, which fetches the tags but not the history, so
+        # without it the check fails for every tag and the build silently
+        # falls back to a ci-<sha> version.
         if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
           git fetch --unshallow --tags
         else
