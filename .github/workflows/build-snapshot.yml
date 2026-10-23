@@ -2,6 +2,11 @@ name: build snapshot
 
 on:
   workflow_dispatch:
+    inputs:
+      application_id:
+        description: 'Application ID to build under, e.g. io.netbird.client.private for a private Managed Google Play app. Leave empty for io.netbird.client.'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -19,6 +24,7 @@ jobs:
       NETBIRD_UPLOAD_KEY_ALIAS: ${{ secrets.NETBIRD_UPLOAD_KEY_ALIAS }}
       NETBIRD_UPLOAD_KEY_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_KEY_PASSWORD }}
       NETBIRD_UPLOAD_STORE_PASSWORD: ${{ secrets.NETBIRD_UPLOAD_STORE_PASSWORD }}
+      NETBIRD_APPLICATION_ID: ${{ inputs.application_id }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -82,7 +88,11 @@ jobs:
           echo "Release runs: $release_runs, snapshot runs: $snapshot_runs -> version_code=$version_code"
           echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
 
+      # google-services.json only registers io.netbird.client; any other
+      # application ID would fail the Google Services plugin, so those builds
+      # go without Firebase.
       - name: Write google-services.json
+        if: inputs.application_id == ''
         run: |
           echo "${{ secrets.GOOGLE_JSON }}" | base64 -d > app/google-services.json
 

@@ -65,7 +65,7 @@ class SessionNotification {
         manager.createNotificationChannel(channel);
 
         Intent intent = new Intent();
-        intent.setClassName("io.netbird.client", "io.netbird.client.MainActivity");
+        intent.setClassName(context.getPackageName(), "io.netbird.client.MainActivity");
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 

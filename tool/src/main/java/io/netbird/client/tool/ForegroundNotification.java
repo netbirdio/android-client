@@ -164,7 +164,7 @@ class ForegroundNotification {
         ((NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 
         Intent notificationIntent = new Intent();
-        notificationIntent.setClassName("io.netbird.client", "io.netbird.client.MainActivity");
+        notificationIntent.setClassName(service.getPackageName(), "io.netbird.client.MainActivity");
 
         int flags = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -253,7 +253,7 @@ class ForegroundNotification {
 
     private PendingIntent extendIntent() {
         Intent intent = new Intent();
-        intent.setClassName("io.netbird.client", "io.netbird.client.MainActivity");
+        intent.setClassName(service.getPackageName(), "io.netbird.client.MainActivity");
         intent.setAction(VPNService.ACTION_EXTEND_SESSION);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return PendingIntent.getActivity(service, 1, intent,

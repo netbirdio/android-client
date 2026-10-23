@@ -38,7 +38,7 @@ android {
     compileSdk = rootProject.extra["compileSdkVersion"] as Int
 
     defaultConfig {
-        applicationId = "io.netbird.client"
+        applicationId = getPropertyOrEnv("NETBIRD_APPLICATION_ID")?.takeIf { it.isNotBlank() } ?: "io.netbird.client"
         minSdk = rootProject.extra["minSdkVersion"] as Int
         targetSdk = rootProject.extra["targetSdkVersion"] as Int
         versionCode = rootProject.extra["appVersionCode"] as Int
