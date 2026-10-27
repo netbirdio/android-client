@@ -130,6 +130,7 @@
     <string name="troubleshoot_section_debug_bundle">Pacote de depuração</string>
     <string name="advanced_rosenpass">Ativar Rosenpass</string>
     <string name="advanced_rosenpass_permissive">Ativar o modo permissivo do Rosenpass.</string>
+    <string name="advanced_rosenpass_deprecated">Obsoleto: o suporte ao Rosenpass poderá ser removido numa versão futura.</string>
     <string name="advanced_title_network_security">Rede e segurança</string>
 
     <string name="advanced_disable_client_routes">Desativar rotas de cliente</string>

@@ -130,6 +130,7 @@
     <string name="troubleshoot_section_debug_bundle">Debug-Paket</string>
     <string name="advanced_rosenpass">Rosenpass aktivieren</string>
     <string name="advanced_rosenpass_permissive">Permissiven Rosenpass-Modus aktivieren.</string>
+    <string name="advanced_rosenpass_deprecated">Veraltet: Die Rosenpass-Unterstützung wird möglicherweise in einer zukünftigen Version entfernt.</string>
     <string name="advanced_title_network_security">Netzwerk &amp; Sicherheit</string>
 
     <string name="advanced_disable_client_routes">Client-Routen deaktivieren</string>

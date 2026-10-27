@@ -130,6 +130,7 @@
     <string name="troubleshoot_section_debug_bundle">Отладочный пакет</string>
     <string name="advanced_rosenpass">Включить Rosenpass</string>
     <string name="advanced_rosenpass_permissive">Включить разрешающий режим Rosenpass.</string>
+    <string name="advanced_rosenpass_deprecated">Устарело: поддержка Rosenpass может быть удалена в одном из будущих выпусков.</string>
     <string name="advanced_title_network_security">Сеть и безопасность</string>
 
     <string name="advanced_disable_client_routes">Отключить клиентские маршруты</string>

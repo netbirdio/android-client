@@ -130,6 +130,7 @@
     <string name="troubleshoot_section_debug_bundle">调试包</string>
     <string name="advanced_rosenpass">启用 Rosenpass</string>
     <string name="advanced_rosenpass_permissive">启用 Rosenpass 宽松模式。</string>
+    <string name="advanced_rosenpass_deprecated">已弃用：Rosenpass 支持可能会在未来的版本中移除。</string>
     <string name="advanced_title_network_security">网络与安全</string>
 
     <string name="advanced_disable_client_routes">禁用客户端路由</string>

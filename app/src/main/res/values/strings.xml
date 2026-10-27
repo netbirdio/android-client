@@ -199,6 +199,7 @@
     <string name="troubleshoot_section_debug_bundle">Debug bundle</string>
     <string name="advanced_rosenpass">Enable Rosenpass</string>
     <string name="advanced_rosenpass_permissive">Enable Rosenpass permissive mode.</string>
+    <string name="advanced_rosenpass_deprecated">Deprecated: Rosenpass support may be removed in a future release.</string>
     <string name="advanced_title_network_security">Network &amp; Security</string>
 
     <string name="advanced_disable_client_routes">Disable client routes</string>
