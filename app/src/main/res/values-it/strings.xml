@@ -130,6 +130,7 @@
     <string name="troubleshoot_section_debug_bundle">Pacchetto di debug</string>
     <string name="advanced_rosenpass">Abilita Rosenpass</string>
     <string name="advanced_rosenpass_permissive">Abilita la modalità permissiva di Rosenpass.</string>
+    <string name="advanced_rosenpass_deprecated">Deprecato: il supporto a Rosenpass potrebbe essere rimosso in una versione futura.</string>
     <string name="advanced_title_network_security">Rete e sicurezza</string>
 
     <string name="advanced_disable_client_routes">Disabilita route client</string>

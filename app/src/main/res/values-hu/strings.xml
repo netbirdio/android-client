@@ -130,6 +130,7 @@
     <string name="troubleshoot_section_debug_bundle">Hibakeresési csomag</string>
     <string name="advanced_rosenpass">Rosenpass engedélyezése</string>
     <string name="advanced_rosenpass_permissive">Rosenpass engedékeny mód engedélyezése.</string>
+    <string name="advanced_rosenpass_deprecated">Elavult: a Rosenpass-támogatás egy jövőbeli kiadásban eltávolításra kerülhet.</string>
     <string name="advanced_title_network_security">Hálózat és biztonság</string>
 
     <string name="advanced_disable_client_routes">Kliens útvonalak letiltása</string>

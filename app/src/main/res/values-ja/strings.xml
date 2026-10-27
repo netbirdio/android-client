@@ -130,6 +130,7 @@
     <string name="troubleshoot_section_debug_bundle">デバッグバンドル</string>
     <string name="advanced_rosenpass">Rosenpass を有効にする</string>
     <string name="advanced_rosenpass_permissive">Rosenpass の寛容モードを有効にします。</string>
+    <string name="advanced_rosenpass_deprecated">非推奨: Rosenpass のサポートは今後のリリースで削除される可能性があります。</string>
     <string name="advanced_title_network_security">ネットワークとセキュリティ</string>
 
     <string name="advanced_disable_client_routes">クライアントルートを無効にする</string>
