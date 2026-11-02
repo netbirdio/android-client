@@ -161,6 +161,26 @@ ensure_ndk() {
   fi
 }
 
+# gomobile bind compiles in a temporary module whose go.mod carries the
+# submodule's go directive but not its toolchain directive, so under
+# GOTOOLCHAIN=auto the bindings are built with the go-directive release
+# (go1.26.0) rather than the toolchain go.mod pins. actions/setup-go reads only
+# the go directive as well, so CI installs that release too. Go 1.26.0-1.26.2
+# probe futex_time64 on 32-bit Linux, and the Android 8-10 seccomp filter
+# answers with SIGSYS instead of ENOSYS, so armeabi-v7a devices on those
+# releases crash at launch (golang/go#77621). Exporting the pin makes every go
+# invocation, including the one inside gomobile bind, use it.
+#
+# Must run inside the submodule: the pin comes from its go.mod.
+pin_go_toolchain() {
+  local toolchain
+  toolchain=$(sed -n 's/^toolchain[[:space:]]*//p' go.mod)
+  if [ -n "$toolchain" ]; then
+    echo "Pinning GOTOOLCHAIN to the go.mod toolchain $toolchain"
+    export GOTOOLCHAIN="$toolchain"
+  fi
+}
+
 cd netbird
 
 # Get version using the function
@@ -168,6 +188,7 @@ version=$(get_version "${1:-}")
 echo "Using version: $version"
 
 ensure_ndk
+pin_go_toolchain
 ensure_gomobile_tools
 
 # -androidapi must match minSdkVersion in build.gradle.kts. Without it gomobile
