@@ -1,0 +1,4 @@
+• Added IPv6 dual-stack support
+• Updated the embedded NetBird core to v0.71.0
+
+Full changelog: https://github.com/netbirdio/android-client/releases/tag/v0.5.0
