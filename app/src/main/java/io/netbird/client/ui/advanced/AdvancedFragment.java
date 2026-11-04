@@ -21,6 +21,7 @@ import io.netbird.client.tool.MDMBridge;
 import io.netbird.client.tool.MDMRestrictions;
 import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.DialogFragments;
 import io.netbird.client.ui.MDMLock;
 
 
@@ -147,7 +148,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
 
         binding.rowTheme.setOnClickListener(v -> {
             ThemePickerSheet sheet = new ThemePickerSheet();
-            sheet.show(getChildFragmentManager(), "ThemePickerSheet");
+            DialogFragments.showNow(this, getChildFragmentManager(), sheet, "ThemePickerSheet");
         });
 
         // Last: locking a row takes away the listeners installed above.
