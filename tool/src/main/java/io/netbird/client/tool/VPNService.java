@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -61,6 +62,7 @@ public class VPNService extends android.net.VpnService {
     private NetworkSwitchNotifier networkSwitchNotifier;
     private android.content.BroadcastReceiver stopEngineReceiver;
     private android.content.BroadcastReceiver mdmPolicyReceiver;
+    private android.content.BroadcastReceiver devicePowerReceiver;
 
     @Override
     public void onCreate() {
@@ -163,6 +165,23 @@ public class VPNService extends android.net.VpnService {
                 new android.content.IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED),
                 Context.RECEIVER_NOT_EXPORTED
         );
+
+        devicePowerReceiver = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onDevicePowerEvent(intent.getAction());
+            }
+        };
+        android.content.IntentFilter powerFilter = new android.content.IntentFilter();
+        powerFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        powerFilter.addAction(Intent.ACTION_SCREEN_ON);
+        powerFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        androidx.core.content.ContextCompat.registerReceiver(
+                this,
+                devicePowerReceiver,
+                powerFilter,
+                Context.RECEIVER_NOT_EXPORTED
+        );
     }
 
     /**
@@ -197,6 +216,18 @@ public class VPNService extends android.net.VpnService {
             fgNotification.setState(ForegroundNotification.State.CONNECTING);
         }
         engineRunner.restart();
+    }
+
+    private void onDevicePowerEvent(String action) {
+        if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+            Log.d(LOGTAG, "Device sleep: screen off");
+        } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+            Log.d(LOGTAG, "Device wake: screen on");
+        } else if (PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)) {
+            PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            boolean idle = powerManager != null && powerManager.isDeviceIdleMode();
+            Log.d(LOGTAG, idle ? "Device sleep: doze entered" : "Device wake: doze exited");
+        }
     }
 
     @Override
@@ -263,6 +294,14 @@ public class VPNService extends android.net.VpnService {
                 unregisterReceiver(mdmPolicyReceiver);
             } catch (IllegalArgumentException e) {
                 Log.w(LOGTAG, "MDM receiver not registered", e);
+            }
+        }
+
+        if (devicePowerReceiver != null) {
+            try {
+                unregisterReceiver(devicePowerReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.w(LOGTAG, "Device power receiver not registered", e);
             }
         }
 
