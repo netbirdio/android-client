@@ -148,8 +148,6 @@ class EngineRunner {
         Runnable r = () -> {
             DNSWatch dnsWatch = new DNSWatch(context);
 
-            var envList = EnvVarPackager.getEnvironmentVariables(preferences);
-
             // Initialize engine with current active profile
             // Get paths from Go ProfileManager instead of constructing them in Java
             String configurationFilePath;
@@ -171,6 +169,8 @@ class EngineRunner {
                 notifyServiceStateListeners(false);
                 return;
             }
+
+            var envList = EnvVarPackager.getEnvironmentVariables(preferences, context, configurationFilePath);
 
             // Create fresh PlatformFiles with current config/state paths
             // This allows profile switching without recreating the entire Client
