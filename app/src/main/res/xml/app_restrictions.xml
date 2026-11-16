@@ -94,6 +94,12 @@
         android:restrictionType="integer" />
 
     <restriction
+        android:key="extraIFaceBlackList"
+        android:title="@string/restriction_extra_iface_blacklist_title"
+        android:description="@string/restriction_extra_iface_blacklist_description"
+        android:restrictionType="string" />
+
+    <restriction
         android:key="lazyConnection"
         android:title="@string/restriction_lazy_connection_title"
         android:description="@string/restriction_lazy_connection_description"
