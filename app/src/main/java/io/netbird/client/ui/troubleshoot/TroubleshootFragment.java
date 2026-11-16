@@ -35,6 +35,7 @@ import io.netbird.client.databinding.FragmentTroubleshootBinding;
 import io.netbird.client.tool.MDMBridge;
 import io.netbird.client.tool.Preferences;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.DialogFragments;
 import io.netbird.client.ui.MDMLock;
 
 public class TroubleshootFragment extends Fragment implements AnonymizeLevelSheet.OnLevelChangedListener {
@@ -87,9 +88,9 @@ public class TroubleshootFragment extends Fragment implements AnonymizeLevelShee
         });
 
         updateAnonymizeValue();
-        binding.anonymizeLayout.setOnClickListener(v ->
-                AnonymizeLevelSheet.newInstance(preferences.getAnonymizeLevel())
-                        .show(getChildFragmentManager(), "anonymize_level"));
+        binding.anonymizeLayout.setOnClickListener(v -> DialogFragments.showNow(
+                this, getChildFragmentManager(),
+                AnonymizeLevelSheet.newInstance(preferences.getAnonymizeLevel()), "anonymize_level"));
 
         initializeRemoteJobsSwitch(inflater.getContext());
 
