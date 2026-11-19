@@ -76,6 +76,9 @@
     <string name="restriction_dns_route_interval_title" translatable="false">DNS route update interval</string>
     <string name="restriction_dns_route_interval_description" translatable="false">How often routes for domain-based networks are refreshed, as a duration such as 30s, 1m or 1m30s.</string>
 
+    <string name="restriction_force_relay_title" translatable="false">Force relay</string>
+    <string name="restriction_force_relay_description" translatable="false">Never tries a direct connection and reaches every peer through a relay. All traffic of the device then goes through the relay servers.</string>
+
     <string name="restriction_lazy_connection_title" translatable="false">Lazy connections</string>
     <string name="restriction_lazy_connection_description" translatable="false">Connects to a peer on first use instead of at startup, overriding the setting the management server sends.</string>
 

@@ -46,7 +46,7 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
     }
 
     private void configureForceRelayConnectionSwitch(@NonNull Preferences preferences) {
-        binding.switchForceRelayConnection.setChecked(preferences.isConnectionForceRelayed());
+        binding.switchForceRelayConnection.setChecked(forceRelayShown(preferences));
         binding.switchForceRelayConnection.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 preferences.enableForcedRelayConnection();
@@ -192,7 +192,23 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
                 binding.layoutDisableFirewall, binding.switchDisableFirewall);
         lockRow(everything || mdm.mdm.disableIPv6,
                 binding.layoutDisableIpv6, binding.switchDisableIpv6);
-        lockRow(everything, binding.layoutForceRelayConnection, binding.switchForceRelayConnection);
+        lockRow(everything || mdm.mdm.forceRelay,
+                binding.layoutForceRelayConnection, binding.switchForceRelayConnection);
+    }
+
+    /**
+     * The switch stores the user's choice in the app, but a policy-held value
+     * wins over it, so a managed switch shows what the policy enforces.
+     */
+    private boolean forceRelayShown(@NonNull Preferences preferences) {
+        if (mdm.mdm.forceRelay) {
+            try {
+                return goPreferences.getForceRelay();
+            } catch (Exception e) {
+                Log.w(LOGTAG, "Could not read the enforced force relay value", e);
+            }
+        }
+        return preferences.isConnectionForceRelayed();
     }
 
     private void lockRow(boolean managed, View row, View control) {

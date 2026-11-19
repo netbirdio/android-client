@@ -111,4 +111,10 @@ public class MDMRestrictionsTest {
         assertFalse(MDMRestrictions.EMPTY.mdm.disableFirewall);
         assertFalse(MDMRestrictions.EMPTY.mdm.disableIPv6);
     }
+
+    @Test
+    public void readsForceRelay() {
+        assertTrue(MDMRestrictions.decode("{\"mdm\":{\"forceRelay\":true}}").mdm.forceRelay);
+        assertFalse(MDMRestrictions.EMPTY.mdm.forceRelay);
+    }
 }

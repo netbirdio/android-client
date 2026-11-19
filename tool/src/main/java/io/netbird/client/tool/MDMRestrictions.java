@@ -51,6 +51,7 @@ public final class MDMRestrictions {
         public final boolean disableDNS;
         public final boolean disableFirewall;
         public final boolean disableIPv6;
+        public final boolean forceRelay;
         /**
          * Tri-state, like {@link #allowServerSSH}: null means the key is not
          * managed, and an explicit false means the section is allowed — only
@@ -79,6 +80,7 @@ public final class MDMRestrictions {
             disableDNS = json.optBoolean("disableDNS", false);
             disableFirewall = json.optBoolean("disableFirewall", false);
             disableIPv6 = json.optBoolean("disableIPv6", false);
+            forceRelay = json.optBoolean("forceRelay", false);
             disableAdvancedView = triState(json, "disableAdvancedView");
         }
 

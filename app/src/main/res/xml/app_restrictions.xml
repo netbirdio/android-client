@@ -142,6 +142,12 @@
         android:restrictionType="string" />
 
     <restriction
+        android:key="forceRelay"
+        android:title="@string/restriction_force_relay_title"
+        android:description="@string/restriction_force_relay_description"
+        android:restrictionType="bool" />
+
+    <restriction
         android:key="lazyConnection"
         android:title="@string/restriction_lazy_connection_title"
         android:description="@string/restriction_lazy_connection_description"
