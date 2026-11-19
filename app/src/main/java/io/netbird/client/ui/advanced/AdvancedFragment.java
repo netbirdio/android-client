@@ -186,9 +186,12 @@ public class AdvancedFragment extends Fragment implements ThemePickerSheet.OnThe
                 binding.layoutDisableServerRoutes, binding.switchDisableServerRoutes);
         lockRow(everything || mdm.mdm.blockInbound,
                 binding.layoutBlockInbound, binding.switchBlockInbound);
-        lockRow(everything, binding.layoutDisableDns, binding.switchDisableDns);
-        lockRow(everything, binding.layoutDisableFirewall, binding.switchDisableFirewall);
-        lockRow(everything, binding.layoutDisableIpv6, binding.switchDisableIpv6);
+        lockRow(everything || mdm.mdm.disableDNS,
+                binding.layoutDisableDns, binding.switchDisableDns);
+        lockRow(everything || mdm.mdm.disableFirewall,
+                binding.layoutDisableFirewall, binding.switchDisableFirewall);
+        lockRow(everything || mdm.mdm.disableIPv6,
+                binding.layoutDisableIpv6, binding.switchDisableIpv6);
         lockRow(everything, binding.layoutForceRelayConnection, binding.switchForceRelayConnection);
     }
 

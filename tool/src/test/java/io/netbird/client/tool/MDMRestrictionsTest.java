@@ -98,4 +98,17 @@ public class MDMRestrictionsTest {
         assertNull(MDMRestrictions.rejectedKeys("permission denied: /data/config.json"));
         assertNull(MDMRestrictions.rejectedKeys(null));
     }
+
+    @Test
+    public void readsTheNetworkOverrides() {
+        MDMRestrictions managed = MDMRestrictions.decode(
+                "{\"mdm\":{\"disableDNS\":true,\"disableFirewall\":true,\"disableIPv6\":true}}");
+        assertTrue(managed.mdm.disableDNS);
+        assertTrue(managed.mdm.disableFirewall);
+        assertTrue(managed.mdm.disableIPv6);
+
+        assertFalse(MDMRestrictions.EMPTY.mdm.disableDNS);
+        assertFalse(MDMRestrictions.EMPTY.mdm.disableFirewall);
+        assertFalse(MDMRestrictions.EMPTY.mdm.disableIPv6);
+    }
 }
