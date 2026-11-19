@@ -100,6 +100,48 @@
         android:restrictionType="string" />
 
     <restriction
+        android:key="disableDNS"
+        android:title="@string/restriction_disable_dns_title"
+        android:description="@string/restriction_disable_dns_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="disableFirewall"
+        android:title="@string/restriction_disable_firewall_title"
+        android:description="@string/restriction_disable_firewall_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="disableIPv6"
+        android:title="@string/restriction_disable_ipv6_title"
+        android:description="@string/restriction_disable_ipv6_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="blockLANAccess"
+        android:title="@string/restriction_block_lan_access_title"
+        android:description="@string/restriction_block_lan_access_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="mtu"
+        android:title="@string/restriction_mtu_title"
+        android:description="@string/restriction_mtu_description"
+        android:restrictionType="integer" />
+
+    <restriction
+        android:key="disableIPv6Discovery"
+        android:title="@string/restriction_disable_ipv6_discovery_title"
+        android:description="@string/restriction_disable_ipv6_discovery_description"
+        android:restrictionType="bool" />
+
+    <restriction
+        android:key="dnsRouteInterval"
+        android:title="@string/restriction_dns_route_interval_title"
+        android:description="@string/restriction_dns_route_interval_description"
+        android:restrictionType="string" />
+
+    <restriction
         android:key="lazyConnection"
         android:title="@string/restriction_lazy_connection_title"
         android:description="@string/restriction_lazy_connection_description"

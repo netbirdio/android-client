@@ -55,6 +55,27 @@
     <string name="restriction_extra_iface_blacklist_title" translatable="false">Extra interface blacklist</string>
     <string name="restriction_extra_iface_blacklist_description" translatable="false">Interface name prefixes, separated by commas, whose local addresses are never offered as connection candidates. Case-sensitive, no wildcards. Added to the built-in list; does not change which network the device routes through.</string>
 
+    <string name="restriction_disable_dns_title" translatable="false">Disable DNS</string>
+    <string name="restriction_disable_dns_description" translatable="false">Stops the app from managing the device DNS. Names served by NetBird no longer resolve.</string>
+
+    <string name="restriction_disable_firewall_title" translatable="false">Disable firewall</string>
+    <string name="restriction_disable_firewall_description" translatable="false">The app no longer applies firewall rules on this device.</string>
+
+    <string name="restriction_disable_ipv6_title" translatable="false">Disable IPv6</string>
+    <string name="restriction_disable_ipv6_description" translatable="false">The device neither requests nor uses an IPv6 address on the NetBird network.</string>
+
+    <string name="restriction_block_lan_access_title" translatable="false">Block LAN access</string>
+    <string name="restriction_block_lan_access_description" translatable="false">Stops traffic routed through this device, as a router or exit node, from reaching its local network.</string>
+
+    <string name="restriction_mtu_title" translatable="false">Tunnel MTU</string>
+    <string name="restriction_mtu_description" translatable="false">MTU of the NetBird tunnel, between 576 and 8192. An out-of-range value is ignored.</string>
+
+    <string name="restriction_disable_ipv6_discovery_title" translatable="false">Disable IPv6 discovery</string>
+    <string name="restriction_disable_ipv6_discovery_description" translatable="false">Never offers IPv6 addresses as connection candidates to other peers.</string>
+
+    <string name="restriction_dns_route_interval_title" translatable="false">DNS route update interval</string>
+    <string name="restriction_dns_route_interval_description" translatable="false">How often routes for domain-based networks are refreshed, as a duration such as 30s, 1m or 1m30s.</string>
+
     <string name="restriction_lazy_connection_title" translatable="false">Lazy connections</string>
     <string name="restriction_lazy_connection_description" translatable="false">Connects to a peer on first use instead of at startup, overriding the setting the management server sends.</string>
 
