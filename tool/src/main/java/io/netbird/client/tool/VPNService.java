@@ -61,6 +61,7 @@ public class VPNService extends android.net.VpnService {
     private NetworkSwitchNotifier networkSwitchNotifier;
     private android.content.BroadcastReceiver stopEngineReceiver;
     private android.content.BroadcastReceiver mdmPolicyReceiver;
+    private ScreenOnNotifier screenOnNotifier;
 
     @Override
     public void onCreate() {
@@ -163,6 +164,9 @@ public class VPNService extends android.net.VpnService {
                 new android.content.IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED),
                 Context.RECEIVER_NOT_EXPORTED
         );
+
+        screenOnNotifier = new ScreenOnNotifier(this);
+        screenOnNotifier.register();
     }
 
     /**
@@ -264,6 +268,10 @@ public class VPNService extends android.net.VpnService {
             } catch (IllegalArgumentException e) {
                 Log.w(LOGTAG, "MDM receiver not registered", e);
             }
+        }
+
+        if (screenOnNotifier != null) {
+            screenOnNotifier.unregister();
         }
 
         networkAvailabilityListener.unsubscribe();
