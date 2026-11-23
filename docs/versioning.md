@@ -1,6 +1,6 @@
 # Android client build and versioning
 
-## The three workflows
+## The two workflows
 
 ### `build-debug.yml` — the CI gate
 
@@ -13,42 +13,55 @@ Its product is a pass/fail signal, plus the `netbird-aar` artifact that the two
 test jobs consume. The debug APK it uploads is a convenience for humans; nothing
 in CI reads it.
 
-### `build-release.yml` — the published release
+### `build-release.yml` — the signed builds
 
-Triggered by `release: published`, which fires for pre-releases too. It builds
-the signed APK and AAB and attaches them to the GitHub release. This is the
-source of anything that goes to the Play Store.
+Produces every release-signed build, in one of two modes chosen by the trigger.
 
-Release candidates run through this workflow: they are ordinary GitHub
-pre-releases tagged `vX.Y.Z-rc.N` (for example `v0.6.0-rc.1`, `v0.3.3-rc.2`).
+**Published release** — triggered by `release: published`, which fires for
+pre-releases too. It builds the signed APK and AAB and attaches them to the
+GitHub release. This is the source of anything that goes to the Play Store.
 
-### `build-snapshot.yml` — the hand-distributed build
+Release candidates run in this mode: they are ordinary GitHub pre-releases
+tagged `vX.Y.Z-rc.N` (for example `v0.6.0-rc.1`, `v0.3.3-rc.2`).
 
-Manually dispatched. Produces a release-signed build from an arbitrary untagged
-commit, uploaded as a 14-day artifact rather than published. The version name
-anchors that commit to the last release it descends from, so a build off the
-`v0.6.0-rc.1` line reads `v0.6.0-rc.1-snapshot-4d10386`.
+**Snapshot** — triggered by a manual run (Actions → "build release" → "Run
+workflow", or `gh workflow run build-release.yml --ref <branch>`). Produces a
+release-signed build from an arbitrary untagged commit, uploaded as a 14-day
+artifact rather than published. The version name anchors that commit to the last
+release it descends from, so a build off the `v0.6.0-rc.1` line reads
+`v0.6.0-rc.1-snapshot-4d10386`.
 
 Use it when someone needs a real, installable build of work in progress and you
-do not want a public pre-release for it. Every run consumes a version code from
-the shared counter, so it is not something to run per pull request.
+do not want a public pre-release for it. Every run consumes a version code, so
+it is not something to run per pull request.
+
+### Version code
+
+Both modes feed the same Play Store listing, so they share one counter: the
+version code is `github.run_number + 41` of `build-release.yml`. GitHub hands
+that number to the run and it only ever grows, whichever branch, tag or trigger
+started it.
+
+- Do not rename `build-release.yml`: the run number restarts at 1 for a new
+  file name, which would send version codes backwards.
+- Re-running a run keeps its number. A build that already reached the Play Store
+  has to be repeated as a new run, not re-run.
 
 ---
 
 ## Differences
 
-| | `build-debug` | `build-release` | `build-snapshot` |
+| | `build-debug` | `build-release` (release) | `build-release` (snapshot) |
 |---|---|---|---|
 | Trigger | `pull_request`, `push` → `main` | `release: published` | `workflow_dispatch` |
 | Build type | debug | release | release |
 | **Version name** | `ci-<sha>` | the release tag verbatim (`v0.5.0`, `v0.6.0-rc.1`) | `<tag>-snapshot-<sha>` |
-| **Version code** | `9999` (fallback from `version.properties`) | `release_runs + snapshot_runs + 40` | `release_runs + snapshot_runs + 40` |
+| **Version code** | `9999` (fallback from `version.properties`) | `run_number + 41` | `run_number + 41` |
 | **Signing key** | default Android debug keystore | Play upload keystore (`gplay.keystore`) | Play upload keystore (`gplay.keystore`) |
-| **Firebase Crashlytics + Analytics** | **absent** | present | present |
+| **Firebase Crashlytics + Analytics** | **absent** | present | present, absent under a custom application ID |
 | Runs tests | yes (unit + instrumented) | no | no |
 | Artifact | `debug-artifacts-<name>`, 3 days; `netbird-aar`, 1 day | attached to the GitHub release | `<tag>-snapshot-<sha>`, 14 days |
-| Permissions | `contents: read` | `contents: write`, `actions: read` | `contents: read`, `actions: read` |
-| Concurrency group | none | `android-version-code-lock` | `android-version-code-lock` |
+| Permissions | `contents: read` | `contents: write` | `contents: write` |
 
 `<sha>` is the short commit hash of the `android-client` repository, not of the
 submodule.
