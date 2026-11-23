@@ -168,6 +168,12 @@ version=$(get_version "${1:-}")
 echo "Using version: $version"
 
 ensure_ndk
+
+# gomobile bind builds in a temporary module that lacks the toolchain directive
+# of go.mod, so hand it the toolchain Go selects here.
+GOTOOLCHAIN=$(go env GOVERSION)
+export GOTOOLCHAIN
+
 ensure_gomobile_tools
 
 # -androidapi must match minSdkVersion in build.gradle.kts. Without it gomobile
