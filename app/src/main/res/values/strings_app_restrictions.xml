@@ -52,6 +52,9 @@
     <string name="restriction_wireguard_port_title" translatable="false">WireGuard port</string>
     <string name="restriction_wireguard_port_description" translatable="false">UDP port the tunnel binds to. Must be between 1 and 65535.</string>
 
+    <string name="restriction_extra_iface_blacklist_title" translatable="false">Extra interface blacklist</string>
+    <string name="restriction_extra_iface_blacklist_description" translatable="false">Interface name prefixes, separated by commas, whose local addresses are never offered as connection candidates. Case-sensitive, no wildcards. Added to the built-in list; does not change which network the device routes through.</string>
+
     <string name="restriction_lazy_connection_title" translatable="false">Lazy connections</string>
     <string name="restriction_lazy_connection_description" translatable="false">Connects to a peer on first use instead of at startup, overriding the setting the management server sends.</string>
 
