@@ -8,6 +8,7 @@
     <dimen name="dialog_horizontal_margin">16dp</dimen>
     <dimen name="dialog_max_width">560dp</dimen>
     <dimen name="fragment_max_width">500dp</dimen>
+    <dimen name="side_sheet_width">360dp</dimen>
     <!-- List bottom padding on screens with a FAB: the button (56dp), its margin
          (16dp) and a gap so the last card clears it. -->
     <dimen name="fab_content_inset">88dp</dimen>

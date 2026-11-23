@@ -13,8 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +20,7 @@ import io.netbird.client.R;
 import io.netbird.client.ServiceAccessor;
 import io.netbird.client.databinding.SheetExitNodePickerBinding;
 import io.netbird.client.tool.CoalescingWorker;
+import io.netbird.client.ui.AdaptiveSheetDialogFragment;
 import io.netbird.gomobile.android.NetworkArray;
 
 /**
@@ -30,7 +29,7 @@ import io.netbird.gomobile.android.NetworkArray;
  * through it; the engine deselects the previously active exit node, so at most
  * one is active at a time.
  */
-public class ExitNodePickerSheet extends BottomSheetDialogFragment {
+public class ExitNodePickerSheet extends AdaptiveSheetDialogFragment {
 
     private static final String TAG = "ExitNodePickerSheet";
 

@@ -8,12 +8,11 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-
 import io.netbird.client.databinding.SheetAnonymizeLevelBinding;
 import io.netbird.client.tool.Preferences;
+import io.netbird.client.ui.AdaptiveSheetDialogFragment;
 
-public class AnonymizeLevelSheet extends BottomSheetDialogFragment {
+public class AnonymizeLevelSheet extends AdaptiveSheetDialogFragment {
 
     public interface OnLevelChangedListener {
         void onAnonymizeLevelChanged(String level);

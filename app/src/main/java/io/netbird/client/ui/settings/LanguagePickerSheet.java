@@ -11,15 +11,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
 
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-
 import java.util.Locale;
 
 import io.netbird.client.R;
 import io.netbird.client.databinding.ListItemLanguageBinding;
 import io.netbird.client.databinding.SheetLanguagePickerBinding;
+import io.netbird.client.ui.AdaptiveSheetDialogFragment;
 
-public class LanguagePickerSheet extends BottomSheetDialogFragment {
+public class LanguagePickerSheet extends AdaptiveSheetDialogFragment {
 
     // Same languages as the desktop app (client/ui/i18n/locales/_index.json),
     // shown by their native names. An empty tag means "follow the OS language".

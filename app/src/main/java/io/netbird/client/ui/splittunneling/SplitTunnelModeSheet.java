@@ -8,12 +8,11 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-
 import io.netbird.client.databinding.SheetSplitTunnelModeBinding;
 import io.netbird.client.tool.SplitTunnelConfig;
+import io.netbird.client.ui.AdaptiveSheetDialogFragment;
 
-public class SplitTunnelModeSheet extends BottomSheetDialogFragment {
+public class SplitTunnelModeSheet extends AdaptiveSheetDialogFragment {
 
     public interface OnModeChangedListener {
         void onModeChanged(SplitTunnelConfig.Mode mode);
