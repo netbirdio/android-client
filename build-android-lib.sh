@@ -182,7 +182,7 @@ CGO_ENABLED=0 gomobile bind \
   -androidapi 26 \
   -o "$app_path/gomobile/netbird.aar" \
   -javapkg=io.netbird.gomobile \
-  -ldflags="-linkmode=external -extldflags=-Wl,-z,max-page-size=16384 -checklinkname=0 -X golang.zx2c4.com/wireguard/ipc.socketDirectory=/data/data/io.netbird.client/cache/wireguard -X github.com/netbirdio/netbird/version.version=$version" \
+  -ldflags="-linkmode=external -extldflags=-Wl,-z,max-page-size=16384 -checklinkname=0 -X github.com/netbirdio/wireguard-go/ipc.socketDirectory=/data/data/io.netbird.client/cache/wireguard -X github.com/netbirdio/netbird/version.version=$version" \
   "$(pwd)/client/android"
 
 cd - > /dev/null
