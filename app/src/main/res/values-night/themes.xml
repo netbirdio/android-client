@@ -25,6 +25,7 @@
         <item name="nbTabBackground">@color/nb_gray_bg</item>
 
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
+        <item name="sideSheetDialogTheme">@style/SideSheetDialogTheme</item>
     </style>
 
     <style name="Theme.NetBird.NoActionBar">
@@ -49,6 +50,11 @@
 
     <style name="Widget.NetBird.BottomSheet" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/bottom_sheet_bg</item>
+    </style>
+
+    <style name="SideSheetDialogTheme" parent="Theme.Material3.Dark.SideSheetDialog">
+        <item name="colorPrimary">@color/nb_orange</item>
+        <item name="sideSheetModalStyle">@style/Widget.NetBird.SideSheet</item>
     </style>
 
 

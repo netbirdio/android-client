@@ -10,11 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-
 import io.netbird.client.databinding.SheetThemePickerBinding;
+import io.netbird.client.ui.AdaptiveSheetDialogFragment;
 
-public class ThemePickerSheet extends BottomSheetDialogFragment {
+public class ThemePickerSheet extends AdaptiveSheetDialogFragment {
 
     public interface OnThemeChangedListener {
         void onThemeChanged(int mode);

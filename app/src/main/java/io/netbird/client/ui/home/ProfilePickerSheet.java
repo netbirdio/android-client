@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +23,11 @@ import io.netbird.client.R;
 import io.netbird.client.databinding.SheetProfilePickerBinding;
 import io.netbird.client.tool.Profile;
 import io.netbird.client.tool.ProfileManagerWrapper;
+import io.netbird.client.ui.AdaptiveSheetDialogFragment;
 import io.netbird.client.ui.profile.ProfileEditorDialog;
 import io.netbird.client.ui.profile.ProfileUsageTracker;
 
-public class ProfilePickerSheet extends BottomSheetDialogFragment {
+public class ProfilePickerSheet extends AdaptiveSheetDialogFragment {
 
     public interface OnProfileSwitchedListener {
         void onProfileSwitched(String newActiveName);
@@ -76,10 +76,10 @@ public class ProfilePickerSheet extends BottomSheetDialogFragment {
         super.onStart();
         // A long profile list would otherwise leave the sheet parked at peek height,
         // forcing the user to drag it up before they can pick anything.
-        BottomSheetDialog dialog = (BottomSheetDialog) getDialog();
-        if (dialog == null) {
+        if (!(getDialog() instanceof BottomSheetDialog)) {
             return;
         }
+        BottomSheetDialog dialog = (BottomSheetDialog) getDialog();
         View sheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (sheet == null) {
             return;

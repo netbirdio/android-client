@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="lock_portrait">true</bool>
+    <bool name="sheet_on_side">false</bool>
 </resources>
