@@ -96,6 +96,12 @@ class IFace implements TunAdapter {
         }
 
         builder.setBlocking(true);
+        // Another VPN app can reclaim the slot after the UI prepared us, and
+        // establish() returns null for a non-owner, so take it back first.
+        if (VpnService.prepare(vpnService) != null) {
+            throw new BackendException(BackendException.Reason.VPN_NOT_AUTHORIZED);
+        }
+
         try (final ParcelFileDescriptor tun = builder.establish()) {
             if (tun == null) {
                 throw new BackendException(BackendException.Reason.TUN_CREATION_ERROR);
