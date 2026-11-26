@@ -206,10 +206,13 @@ public class MainActivity extends AppCompatActivity implements ServiceAccessor, 
             Log.i(LOGTAG, "Running on Android TV - optimizing for D-pad navigation");
         } else if (getResources().getBoolean(R.bool.lock_portrait)) {
             // Phone-sized screens (sw < 600dp) are portrait-only, like the iOS
-            // app. Tablets, car head units and TV rotate freely: a portrait lock
-            // on a landscape-only display letterboxes the app into a narrow
-            // strip and clips the system keyboard with it.
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            // app. sensorPortrait adds the upside down (180) angle, which
+            // neither the default nor a plain PORTRAIT lock ever picks, and
+            // keeps landscape off until the phone layouts handle it. Tablets,
+            // car head units and TV rotate freely: a portrait lock on a
+            // landscape-only display letterboxes the app and clips the system
+            // keyboard.
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
         }
         if (useDeviceCodeFlow && !isRunningOnTV) {
             Log.i(LOGTAG, "Running on ChromeOS - using device code flow for authentication");
